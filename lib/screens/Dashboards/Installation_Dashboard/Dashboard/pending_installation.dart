@@ -6,10 +6,8 @@ import 'package:intl/intl.dart';
 import 'package:solar_project/Cubits/Installation/installation_cubit.dart';
 import 'package:solar_project/Cubits/Installation/installation_state.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
+import 'package:solar_project/core/app_colors.dart';
 import 'package:solar_project/data/Models/installation_model.dart';
-
-const _kPurple = Color(0xFF7B2FF7);
-const _kBlue = Color(0xFF0EA5E9);
 
 // ── Date helpers ──────────────────────────────────────────────────────────────
 bool _isOverdue(DateTime? dt) {
@@ -62,7 +60,7 @@ class PendingInstallationsScreen extends StatefulWidget {
   final VoidCallback? onBack;
   const PendingInstallationsScreen({
     super.key,
-    this.appBarColor = _kPurple,
+    this.appBarColor = AppColors.primary,
     this.onBack,
   });
 
@@ -239,21 +237,21 @@ class _PendingInstallationsScreenState extends State<PendingInstallationsScreen>
                       _SummaryChip(
                         label: 'All',
                         count: overdueAll,
-                        color: Colors.red.shade500,
+                        color: AppColors.primary,
                         svgAsset: AppSvgAssets.triangleAlert,
                       ),
                       const SizedBox(width: 6),
                       _SummaryChip(
                         label: 'Solar',
                         count: overdueSolar,
-                        color: _kPurple,
+                        color: AppColors.primary,
                         svgAsset: AppSvgAssets.sun,
                       ),
                       const SizedBox(width: 6),
                       _SummaryChip(
                         label: 'Sprinkler',
                         count: overdueSprinkler,
-                        color: _kBlue,
+                        color: AppColors.primary,
                         svgAsset: AppSvgAssets.droplet,
                       ),
                     ],
@@ -263,12 +261,12 @@ class _PendingInstallationsScreenState extends State<PendingInstallationsScreen>
               // ── Tabs ──────────────────────────────────────────────
               Container(
                 color: Colors.white,
-                child: TabBar(
-                  controller: _tab,
-                  labelColor: Colors.red.shade600,
-                  unselectedLabelColor: Colors.grey.shade500,
-                  indicatorColor: Colors.red.shade600,
-                  indicatorWeight: 3,
+                 child: TabBar(
+                   controller: _tab,
+                   labelColor: AppColors.primary,
+                   unselectedLabelColor: AppColors.textDark,
+                   indicatorColor: AppColors.primary,
+                   indicatorWeight: 3,
                   labelStyle: const TextStyle(
                     fontWeight: FontWeight.w700,
                     fontSize: 12,
@@ -354,7 +352,7 @@ class _PendingInstallationsScreenState extends State<PendingInstallationsScreen>
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: Colors.red.shade400),
+                        borderSide: BorderSide(color: AppColors.primary),
                       ),
                     ),
                   ),
@@ -367,7 +365,7 @@ class _PendingInstallationsScreenState extends State<PendingInstallationsScreen>
               Expanded(
                 child: loading
                     ? const Center(
-                        child: CircularProgressIndicator(color: _kPurple),
+                        child: CircularProgressIndicator(color: AppColors.primary),
                       )
                     : TabBarView(
                         controller: _tab,
@@ -542,7 +540,7 @@ class _PendingDataTable extends StatelessWidget {
   });
 
   Color _typeAccent(InstallationModel m) =>
-      m.projectType.toLowerCase() == 'solar' ? _kPurple : _kBlue;
+      m.projectType.toLowerCase() == 'solar' ? AppColors.primary : AppColors.primaryLight;
 
   Color _statusColor(InstallationModel m) {
     switch (m.status) {

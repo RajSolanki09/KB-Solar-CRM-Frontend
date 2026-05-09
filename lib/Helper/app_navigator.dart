@@ -15,6 +15,14 @@ class AppNavigator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<AppStateCubit, AppState>(
+      // ── KEY FIX: only rebuild when auth STATE TYPE changes ────────────────
+      // Without this, any AppState emit (e.g. userName update) causes full
+      // widget tree replacement → new dashboard instance → element mismatch.
+      buildWhen: (previous, current) =>
+          previous.runtimeType != current.runtimeType ||
+          (previous is Authenticated &&
+              current is Authenticated &&
+              previous.role != current.role),
       builder: (context, state) {
         if (state is SplashState) {
           return const SplashScreen();

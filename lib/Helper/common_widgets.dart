@@ -1,4 +1,4 @@
-import 'dart:math';
+﻿import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
@@ -160,6 +160,11 @@ class _DashboardCardState extends State<DashboardCard>
     final double titleSize = responsiveFont(context, 13);
     // final double cardHeight = responsivePadding(context, 130);
 
+    // Dynamic text color based on card background brightness
+    final Color textColor = widget.cardColor.computeLuminance() > 0.5
+        ? AppColors.textDark
+        : AppColors.surface;
+
     return GestureDetector(
       onTapDown: _onTapDown,
       onTapUp: _onTapUp,
@@ -230,17 +235,17 @@ class _DashboardCardState extends State<DashboardCard>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Expanded(
-                          child: Text(
-                            widget.title,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              color: AppColors.surface,
-                              fontSize: titleSize,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: 0.1,
-                            ),
-                          ),
+                           child: Text(
+                             widget.title,
+                             maxLines: 1,
+                             overflow: TextOverflow.ellipsis,
+                             style: TextStyle(
+                               color: textColor,
+                               fontSize: titleSize,
+                               fontWeight: FontWeight.w800,
+                               letterSpacing: 0.1,
+                             ),
+                           ),
                         ),
                         SizedBox(width: responsivePadding(context, 8)),
                         SizedBox(
@@ -261,17 +266,17 @@ class _DashboardCardState extends State<DashboardCard>
                             ),
                             child: Center(
                               child: widget.svgAsset != null
-                                  ? AppSvgIcon(
-                                      widget.svgAsset!,
-                                      size: iconSize,
-                                      color: AppColors.surface,
-                                    )
-                                  : widget.icon != null
-                                  ? Icon(
-                                      widget.icon!,
-                                      color: AppColors.surface,
-                                      size: iconSize,
-                                    )
+                                   ? AppSvgIcon(
+                                       widget.svgAsset!,
+                                       size: iconSize,
+                                       color: textColor,
+                                     )
+                                   : widget.icon != null
+                                   ? Icon(
+                                       widget.icon!,
+                                       color: textColor,
+                                       size: iconSize,
+                                     )
                                   : const SizedBox.shrink(),
                             ),
                           ),
@@ -282,16 +287,16 @@ class _DashboardCardState extends State<DashboardCard>
                     FittedBox(
                       fit: BoxFit.scaleDown,
                       alignment: Alignment.centerLeft,
-                      child: Text(
-                        widget.value,
-                        style: TextStyle(
-                          color: AppColors.surface,
-                          fontSize: valueSize,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: -1.5,
-                          height: 1,
-                        ),
-                      ),
+                       child: Text(
+                         widget.value,
+                         style: TextStyle(
+                           color: textColor,
+                           fontSize: valueSize,
+                           fontWeight: FontWeight.w900,
+                           letterSpacing: -1.5,
+                           height: 1,
+                         ),
+                       ),
                     ),
                   ],
                 ),
@@ -924,5 +929,26 @@ class _DropdownSheetState<T> extends State<_DropdownSheet<T>> {
         ],
       ),
     );
+  }
+}
+
+ 
+class KeepAlivePage extends StatefulWidget {
+  final Widget child;
+  const KeepAlivePage({required this.child});
+ 
+  @override
+  State<KeepAlivePage> createState() => _KeepAlivePageState();
+}
+ 
+class _KeepAlivePageState extends State<KeepAlivePage>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+ 
+  @override
+  Widget build(BuildContext context) {
+    super.build(context); // required by AutomaticKeepAliveClientMixin
+    return widget.child;
   }
 }

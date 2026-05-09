@@ -1,4 +1,4 @@
-// lib/screens/Dashboards/Installation_Dashboard/History/complete_installation.dart
+﻿// lib/screens/Dashboards/Installation_Dashboard/History/complete_installation.dart
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -304,14 +304,14 @@ class _CompletedInstallationsScreenState
                     ),
 
                     // ── Tabs ────────────────────────────────────────
-                    Container(
-                      color: AppColors.surface,
-                      child: TabBar(
-                        controller: _tab,
-                        labelColor: _kGreen,
-                        unselectedLabelColor: AppColors.background,
-                        indicatorColor: _kGreen,
-                        indicatorWeight: 3,
+                     Container(
+                       color: AppColors.surface,
+                       child: TabBar(
+                         controller: _tab,
+                         labelColor: _kGreen,
+                         unselectedLabelColor: AppColors.primaryDark,
+                         indicatorColor: _kGreen,
+                         indicatorWeight: 3,
                         labelStyle: const TextStyle(
                           fontWeight: FontWeight.w700,
                           fontSize: 12,
@@ -445,26 +445,26 @@ class _CompletedInstallationsScreenState
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  AppSvgIcon(
-                                    AppSvgAssets.calendarDays,
-                                    size: 15,
-                                    color:
-                                        (_fromDate != null || _toDate != null)
-                                        ? AppColors.surface
-                                        : AppColors.background,
-                                  ),
+                                   AppSvgIcon(
+                                     AppSvgAssets.calendarDays,
+                                     size: 15,
+                                     color:
+                                         (_fromDate != null || _toDate != null)
+                                         ? AppColors.surface
+                                         : AppColors.primaryDark,
+                                   ),
                                   const SizedBox(width: 5),
-                                  Text(
-                                    _dateRangeLabel(),
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w600,
-                                      color:
-                                          (_fromDate != null || _toDate != null)
-                                          ? AppColors.surface
-                                          : AppColors.background,
-                                    ),
-                                  ),
+                                   Text(
+                                     _dateRangeLabel(),
+                                     style: TextStyle(
+                                       fontSize: 11,
+                                       fontWeight: FontWeight.w600,
+                                       color:
+                                           (_fromDate != null || _toDate != null)
+                                           ? AppColors.surface
+                                           : AppColors.primaryDark,
+                                     ),
+                                   ),
                                   if (_fromDate != null || _toDate != null) ...[
                                     const SizedBox(width: 5),
                                     GestureDetector(

@@ -21,8 +21,6 @@ class ServiceDashboard extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (_) => ServiceNavCubit()),
-        // ✅ Do NOT call fetchAllServices here
-        // Let ServiceDashboardPage.initState handle it once
         BlocProvider(
           create: (_) => ServiceLeadCubit(repo: ServiceRepository()),
         ),
@@ -47,7 +45,7 @@ class _DashboardContent extends StatelessWidget {
             : Row(
                 children: [
                   const ServiceSidebar(),
-                  Expanded(child: const _DesktopLayout()),
+                  const Expanded(child: _DesktopLayout()),
                 ],
               ),
       ),
@@ -55,13 +53,14 @@ class _DashboardContent extends StatelessWidget {
   }
 }
 
+// ── KEY FIX: IndexedStack in both desktop and mobile ─────────────────────────
 class _DesktopLayout extends StatelessWidget {
   const _DesktopLayout();
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ServiceNavCubit, ServiceNavPage>(
-      builder: (_, page) => _buildPage(page),
+      builder: (_, page) => _buildIndexedStack(page),
     );
   }
 }
@@ -72,22 +71,22 @@ class _MobileLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ServiceNavCubit, ServiceNavPage>(
-      builder: (_, page) => _buildPage(page),
+      builder: (_, page) => _buildIndexedStack(page),
     );
   }
 }
 
-Widget _buildPage(ServiceNavPage page) {
-  switch (page) {
-    case ServiceNavPage.dashboard:
-      return const ServiceDashboardPage();
-    case ServiceNavPage.services:
-      return const MyServicesPage();
-    case ServiceNavPage.history:
-      return const ServiceHistoryPage();
-    case ServiceNavPage.profile:
-      return const ServiceProfilePage();
-  }
+// Shared IndexedStack — pages built once, never destroyed
+Widget _buildIndexedStack(ServiceNavPage page) {
+  return IndexedStack(
+    index: page.index,
+    children: const[
+      KeepAlivePage(child: ServiceDashboardPage()),
+      KeepAlivePage(child: MyServicesPage()),
+      KeepAlivePage(child: ServiceHistoryPage()),
+      KeepAlivePage(child: ServiceProfilePage()),
+    ],
+  );
 }
 
 class _BottomNavBar extends StatelessWidget {
@@ -106,46 +105,32 @@ class _BottomNavBar extends StatelessWidget {
           destinations: [
             NavigationDestination(
               icon: GlowIcon(
-                svgAsset: AppSvgAssets.dashboard,
-                isSelected: page.index == 0,
-              ),
-              selectedIcon: GlowIcon(
-                svgAsset: AppSvgAssets.dashboard,
-                isSelected: page.index == 0,
-              ),
+                  svgAsset: AppSvgAssets.dashboard,
+                  isSelected: page.index == 0),
+              selectedIcon:
+                  GlowIcon(svgAsset: AppSvgAssets.dashboard, isSelected: true),
               label: 'Dashboard',
             ),
             NavigationDestination(
               icon: GlowIcon(
-                svgAsset: AppSvgAssets.cog,
-                isSelected: page.index == 1,
-              ),
-              selectedIcon: GlowIcon(
-                svgAsset: AppSvgAssets.cog,
-                isSelected: page.index == 1,
-              ),
+                  svgAsset: AppSvgAssets.cog, isSelected: page.index == 1),
+              selectedIcon:
+                  GlowIcon(svgAsset: AppSvgAssets.cog, isSelected: true),
               label: 'My Services',
             ),
             NavigationDestination(
               icon: GlowIcon(
-                svgAsset: AppSvgAssets.history,
-                isSelected: page.index == 2,
-              ),
-              selectedIcon: GlowIcon(
-                svgAsset: AppSvgAssets.history,
-                isSelected: page.index == 2,
-              ),
+                  svgAsset: AppSvgAssets.history, isSelected: page.index == 2),
+              selectedIcon:
+                  GlowIcon(svgAsset: AppSvgAssets.history, isSelected: true),
               label: 'History',
             ),
             NavigationDestination(
               icon: GlowIcon(
-                svgAsset: AppSvgAssets.userRound,
-                isSelected: page.index == 3,
-              ),
+                  svgAsset: AppSvgAssets.userRound,
+                  isSelected: page.index == 3),
               selectedIcon: GlowIcon(
-                svgAsset: AppSvgAssets.userRound,
-                isSelected: page.index == 3,
-              ),
+                  svgAsset: AppSvgAssets.userRound, isSelected: true),
               label: 'Profile',
             ),
           ],

@@ -1,4 +1,4 @@
-// lib/screens/Dashboards/Admin_Dashboards/Installation/installation_pending_screen.dart
+﻿// lib/screens/Dashboards/Admin_Dashboards/Installation/installation_pending_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -147,7 +147,7 @@ class _State extends State<InstallationPendingScreen>
               indicatorColor: tabColor,
               indicatorWeight: 2.5,
               labelColor: tabColor,
-              unselectedLabelColor:  AppColors.textLight,
+              unselectedLabelColor:  AppColors.textDark,
               labelStyle: const TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
@@ -779,7 +779,7 @@ class _CollapsibleTableSection<T> extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color:  AppColors.divider),
+        border: Border.all(color:  AppColors.primary),
       ),
       child: Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),

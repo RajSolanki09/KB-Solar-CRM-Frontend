@@ -67,7 +67,6 @@ class _InstallationDashboardScreenState
 
   void _computeStats(List<InstallationModel> allLeads) {
     final now = DateTime.now();
-    final todayStart = DateTime(now.year, now.month, now.day);
 
     bool isToday(DateTime? dt) {
       if (dt == null) return false;
@@ -210,56 +209,61 @@ class _InstallationDashboardScreenState
             backgroundColor: AppColors.background,
             elevation: 0,
             scrolledUnderElevation: 0,
-            centerTitle: false,
+            centerTitle: true,
             automaticallyImplyLeading: false,
-            title: Row(
-              children: [
-                // ── Profile Avatar ────────────────────────────────────
-                _buildProfileAvatar(size: 40),
-
-                const SizedBox(width: 12),
-
-                // ── Name + Greeting ───────────────────────────────────
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+            // ── "Installation Dashboard" title — centered, never overflows ──
+            title: const Text(
+              'Installation Dashboard',
+              style: TextStyle(
+                fontWeight: FontWeight.w800,
+                fontSize: 17,
+                color: AppColors.primary,
+                letterSpacing: -0.4,
+              ),
+            ),
+            // ── Profile + Greeting on the left ───────────────────────────
+            leading: Padding(
+              padding: const EdgeInsets.only(left: 12),
+              child: _buildProfileAvatar(size: 34),
+            ),
+            leadingWidth: 52,
+            // ── Subtitle row (greeting + name) below title ────────────────
+            bottom: PreferredSize(
+              preferredSize: const Size.fromHeight(22),
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 6, left: 12, right: 12),
+                child: Row(
                   children: [
-                    Text(
-                      _profileUser != null
-                          ? (_profileUser!['name'] ??
-                                    _profileUser!['fullName'] ??
-                                    'Team Member')
-                                .toString()
-                          : 'Team Member',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 15,
-                        color: AppColors.textDark,
-                        letterSpacing: -0.3,
+                    Flexible(
+                      child: Text(
+                        _profileUser != null
+                            ? (_profileUser!['name'] ??
+                                      _profileUser!['fullName'] ??
+                                      'Team Member')
+                                  .toString()
+                            : 'Team Member',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 12,
+                          color: AppColors.textDark,
+                        ),
                       ),
                     ),
+                    const SizedBox(width: 4),
                     Text(
-                      _getGreeting(),
+                      '· ${_getGreeting()}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         fontSize: 11,
-                        fontWeight: FontWeight.w400,
                         color: AppColors.textGray,
                       ),
                     ),
                   ],
                 ),
-
-                // ── Center Title ──────────────────────────────────────
-                const Spacer(),
-                const Text(
-                  'Installation Dashboard',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 20,
-                    color: AppColors.primary,
-                  ),
-                ),
-                const Spacer(),
-              ],
+              ),
             ),
             actions: [
               if (state is InstallationLoading && allLeads.isNotEmpty)
@@ -300,10 +304,6 @@ class _InstallationDashboardScreenState
                   ),
                 ),
             ],
-            // bottom: PreferredSize(
-            //   preferredSize: const Size.fromHeight(1),
-            //   child: Container(height: 1, color: const AppColors.primaryTint),
-            // ),
           ),
           body: SafeArea(
             child: loading

@@ -1790,15 +1790,15 @@ class _SpkPipelineRowState extends State<_SpkPipelineRow> {
                                     color: AppColors.solar,
                                   ),
                                   const SizedBox(width: 3),
-                                  Text(
-                                    widget.installerName ?? 'Assign',
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w600,
-                                      color: AppColors.solar,
-                                    ),
-                                  ),
+                                   Text(
+                                     widget.installerName ?? 'Assign',
+                                     overflow: TextOverflow.ellipsis,
+                                     style: TextStyle(
+                                       fontSize: 10,
+                                       fontWeight: FontWeight.w600,
+                                       color: AppColors.surface,
+                                     ),
+                                   ),
                                 ],
                               ),
                             ),

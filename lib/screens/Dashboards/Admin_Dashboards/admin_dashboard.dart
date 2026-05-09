@@ -30,10 +30,11 @@ class _AdminDashboardState extends State<AdminDashboard> {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (_) => AdminNavCubit()),
-        // ✅ Single shared ServiceLeadCubit for ALL admin screens
-        // AdminDashboardScreen + ServiceRequestPage now share the same data
         BlocProvider(
           create: (_) => ServiceLeadCubit(repo: ServiceRepository()),
+        ),
+        BlocProvider(
+          create: (_) => RevenueCubit(RevenueRepository(DioClient())),
         ),
       ],
       child: Builder(
@@ -42,8 +43,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
           return WillPopScope(
             onWillPop: () async {
               final navCubit = context.read<AdminNavCubit>();
-              final currentPage = navCubit.state;
-              if (currentPage != AdminNavPage.dashboard) {
+              if (navCubit.state != AdminNavPage.dashboard) {
                 navCubit.changePage(AdminNavPage.dashboard);
                 return false;
               }
@@ -53,11 +53,11 @@ class _AdminDashboardState extends State<AdminDashboard> {
               bottomNavigationBar: compactLayout ? _bottomNav() : null,
               body: SafeArea(
                 child: compactLayout
-                    ? _mobileLayout(context)
+                    ? _mobileLayout()
                     : Row(
                         children: [
                           const Sidebar(),
-                          Expanded(child: _desktopLayout(context)),
+                          Expanded(child: _desktopLayout()),
                         ],
                       ),
               ),
@@ -68,10 +68,10 @@ class _AdminDashboardState extends State<AdminDashboard> {
     );
   }
 
-  Widget _desktopLayout(BuildContext context) {
+  Widget _desktopLayout() {
     return Container(
       decoration: BoxDecoration(
-        border: Border.all(color: const Color(0XFFCBC4CF)),
+        border: Border.all(color: const Color(0xFFCBC4CF)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -80,54 +80,33 @@ class _AdminDashboardState extends State<AdminDashboard> {
     );
   }
 
+  Widget _mobileLayout() {
+    return Column(children: [Expanded(child: _pageBody())]);
+  }
+
+  // ── KEY FIX: IndexedStack — pages are built once and kept alive ───────────
+  // Previously BlocBuilder returned a new widget instance every rebuild,
+  // which destroyed and recreated the element tree → assertion crash.
+  // IndexedStack builds all pages once and just shows/hides them.
   Widget _pageBody() {
     return BlocBuilder<AdminNavCubit, AdminNavPage>(
       builder: (context, page) {
-        switch (page) {
-          case AdminNavPage.dashboard:
-            return AdminDashboardScreen();
-          case AdminNavPage.leads:
-            return SalesLeadScreen();
-          case AdminNavPage.service:
-            return ServiceRequestPage();
-          case AdminNavPage.reports:
-            return BlocProvider(
-              // 👈 yahan replace karo
-              create: (_) => RevenueCubit(RevenueRepository(DioClient())),
-              child: const AdminRevenueSummaryPage(),
-            );
-          case AdminNavPage.profile:
-            return OwnerProfilePage();
-        }
+        return IndexedStack(
+          index: page.index,
+          children: [
+            // index 0 — dashboard
+            const KeepAlivePage(child: AdminDashboardScreen()),
+            // index 1 — leads
+            const KeepAlivePage(child: SalesLeadScreen()),
+            // index 2 — service
+            const KeepAlivePage(child: ServiceRequestPage()),
+            // index 3 — reports (needs its own RevenueCubit provided above)
+            const KeepAlivePage(child: AdminRevenueSummaryPage()),
+            // index 4 — profile
+            const KeepAlivePage(child: OwnerProfilePage()),
+          ],
+        );
       },
-    );
-  }
-
-  Widget _mobileLayout(BuildContext context) {
-    return Column(
-      children: [
-        Expanded(
-          child: BlocBuilder<AdminNavCubit, AdminNavPage>(
-            builder: (context, page) {
-              switch (page) {
-                case AdminNavPage.dashboard:
-                  return AdminDashboardScreen();
-                case AdminNavPage.leads:
-                  return SalesLeadScreen();
-                case AdminNavPage.service:
-                  return ServiceRequestPage();
-                case AdminNavPage.reports:
-                  return BlocProvider(
-                    create: (_) => RevenueCubit(RevenueRepository(DioClient())),
-                    child: const AdminRevenueSummaryPage(),
-                  );
-                case AdminNavPage.profile:
-                  return OwnerProfilePage();
-              }
-            },
-          ),
-        ),
-      ],
     );
   }
 
@@ -138,9 +117,9 @@ class _AdminDashboardState extends State<AdminDashboard> {
           indicatorColor: Colors.transparent,
           selectedIndex: page.index,
           onDestinationSelected: (index) {
-            context.read<AdminNavCubit>().changePage(
-              AdminNavPage.values[index],
-            );
+            context
+                .read<AdminNavCubit>()
+                .changePage(AdminNavPage.values[index]);
           },
           destinations: [
             NavigationDestination(
@@ -150,7 +129,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
               ),
               selectedIcon: GlowIcon(
                 svgAsset: AppSvgAssets.dashboard,
-                isSelected: page.index == 0,
+                isSelected: true,
               ),
               label: 'DashBoard',
             ),
@@ -161,7 +140,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
               ),
               selectedIcon: GlowIcon(
                 svgAsset: AppSvgAssets.sun,
-                isSelected: page.index == 1,
+                isSelected: true,
               ),
               label: 'Leads',
             ),
@@ -172,7 +151,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
               ),
               selectedIcon: GlowIcon(
                 svgAsset: AppSvgAssets.cog,
-                isSelected: page.index == 2,
+                isSelected: true,
               ),
               label: 'Services',
             ),
@@ -183,7 +162,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
               ),
               selectedIcon: GlowIcon(
                 svgAsset: AppSvgAssets.chartNoAxisCombined,
-                isSelected: page.index == 3,
+                isSelected: true,
               ),
               label: 'Reports',
             ),
@@ -194,7 +173,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
               ),
               selectedIcon: GlowIcon(
                 svgAsset: AppSvgAssets.userRound,
-                isSelected: page.index == 4,
+                isSelected: true,
               ),
               label: 'Profile',
             ),

@@ -10,7 +10,7 @@ class AppColors {
   static const Color solarLight = Color(0xFFFFF3CD);
   static const Color success = AppColors.primary;
   static const Color successLight = Color(0xFFD1FAE5);
-  static const Color error = Color(0xFFEF4444);
+  static const Color error = Color(0xFF4A3EBF);
   static const Color errorLight = Color(0xFFFEE2E2);
   static const Color warning = AppColors.primary;
   static const Color darkNavy = Color(0xFF1E1B4B);
