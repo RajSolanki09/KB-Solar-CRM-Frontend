@@ -21,32 +21,20 @@ class NotificationService {
     );
     debugPrint('FCM permission: ${settings.authorizationStatus}');
 
-    // If the user denied notifications, skip all further FCM setup.
-    if (settings.authorizationStatus == AuthorizationStatus.denied ||
-        settings.authorizationStatus == AuthorizationStatus.notDetermined) {
-      debugPrint('FCM: notifications not granted — skipping setup.');
-      return;
-    }
-
     // Listen for token refresh and re-register
     _messaging.onTokenRefresh.listen(_sendTokenToServer);
 
     // Foreground messages — just log for now
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      debugPrint('FCM foreground: \${message.notification?.title}');
+      debugPrint('FCM foreground: ${message.notification?.title}');
     });
   }
 
   /// Register the device token with the backend. Call after login.
   Future<void> registerToken() async {
     try {
-      // getToken() on web requires notification permission to be granted.
-      // Skip silently if we don't have it.
       final token = await _messaging.getToken();
-      if (token == null) {
-        debugPrint('FCM: no token available (permission likely denied).');
-        return;
-      }
+      if (token == null) return;
       await _sendTokenToServer(token);
     } catch (e) {
       debugPrint('FCM registerToken error: $e');

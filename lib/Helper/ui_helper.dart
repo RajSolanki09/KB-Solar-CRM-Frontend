@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:solar_project/Helper/app_colors.dart';
+import 'package:solar_project/core/app_colors.dart';
 
 class Responsive {
   static bool isMobile(BuildContext context) =>
@@ -16,36 +16,31 @@ class Responsive {
 
 //--------------------  Status Color Helper ---------------------------
 
-
 Color getStatusColor(String status) {
   switch (status) {
     case "New":
-      return Colors.blue;
+      return AppColors.primary;
     case "Visit":
-      return Colors.orange;
+      return AppColors.solar;
     case "Quotation Sent":
-      return Colors.purple;
+      return AppColors.primary;
     case "Followup":
       return Colors.amber;
     case "Deal Done":
-      return Colors.green;
+      return AppColors.success;
     case "Portal Update":
       return Colors.cyan;
     case "Installation":
       return Colors.teal;
     case "Meter Process":
-      return Colors.indigo;
+      return AppColors.primary;
     case "Subsidy Form":
       return Colors.deepOrange;
     case "Payment":
       return Colors.lightGreen;
     case "Completed":
-      return AppColors.textSecondary;
+      return Colors.grey;
     default:
       return Colors.black;
   }
 }
-
-
-
-

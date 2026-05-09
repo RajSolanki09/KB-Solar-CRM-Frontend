@@ -5,11 +5,10 @@ import 'package:solar_project/Cubits/SolarLeads/solar_leads_cubit.dart';
 import 'package:solar_project/Cubits/SolarLeads/solar_leads_state.dart';
 import 'package:solar_project/Helper/app_feedback.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
-import 'package:solar_project/Helper/common_widgets.dart';
 import 'package:solar_project/Helper/lead_themes.dart';
 import 'package:solar_project/Helper/lead_widgets.dart';
 import 'package:solar_project/data/Models/solar_leads_model.dart';
-import 'package:solar_project/Helper/app_colors.dart';
+import 'package:solar_project/core/app_colors.dart';
 
 class SolarSubsidyScreen extends StatefulWidget {
   final SolarLeadsModel lead;
@@ -70,7 +69,7 @@ class _State extends State<SolarSubsidyScreen> {
   Widget build(BuildContext context) {
     return BlocListener<SolarLeadCubit, SolarLeadState>(
       listener: (ctx, state) {
-        if (state is SolarLeadSaved) safePop(context);
+        if (state is SolarLeadSaved) Navigator.pop(context);
         if (state is SolarLeadError) {
           setState(() => _saving = false);
           AppFeedback.showError(context, state.message);
@@ -146,11 +145,7 @@ class _State extends State<SolarSubsidyScreen> {
                 children: [
                   const SectionTitle('Notes'),
                   const SizedBox(height: 8),
-                  _subsidyField(
-                    _notesC,
-                    'Notes...',
-                    maxLines: 3,
-                  ),
+                  _subsidyField(_notesC, 'Notes...', maxLines: 3),
                 ],
               ),
             ),
@@ -235,7 +230,7 @@ class _Chip extends StatelessWidget {
         decoration: BoxDecoration(
           color: selected ? color.withValues(alpha: 0.12) : LeadTheme.surface,
           border: Border.all(
-            color: selected ? color : AppColors.borderPrimary,
+            color: selected ? color : Colors.grey.shade300,
             width: selected ? 1.5 : 1,
           ),
           borderRadius: BorderRadius.circular(8),
@@ -262,7 +257,11 @@ Widget _infoBanner(SolarLeadsModel lead) => Container(
   ),
   child: Row(
     children: [
-      const AppSvgIcon(AppSvgAssets.userRound, size: 16, color: LeadTheme.primary),
+      const AppSvgIcon(
+        AppSvgAssets.userRound,
+        size: 16,
+        color: LeadTheme.primary,
+      ),
       const SizedBox(width: 8),
       Expanded(
         child: Column(
@@ -318,7 +317,7 @@ Widget _saveBtn(bool saving, VoidCallback onPressed, String label) => SizedBox(
     onPressed: saving ? null : onPressed,
     style: ElevatedButton.styleFrom(
       backgroundColor: LeadTheme.primary,
-      foregroundColor: Colors.white,
+      foregroundColor: AppColors.surface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
     ),
     child: saving
@@ -327,7 +326,7 @@ Widget _saveBtn(bool saving, VoidCallback onPressed, String label) => SizedBox(
             height: 20,
             child: CircularProgressIndicator(
               strokeWidth: 2,
-              color: Colors.white,
+              color: AppColors.surface,
             ),
           )
         : Text(
@@ -336,7 +335,3 @@ Widget _saveBtn(bool saving, VoidCallback onPressed, String label) => SizedBox(
           ),
   ),
 );
-
-
-
-

@@ -7,7 +7,7 @@ import 'package:solar_project/Helper/app_svg_icon.dart';
 import 'package:solar_project/Helper/lead_themes.dart';
 import 'package:solar_project/Helper/lead_widgets.dart';
 import 'package:solar_project/data/Models/solar_leads_model.dart';
-import 'package:solar_project/Helper/app_colors.dart';
+import 'package:solar_project/core/app_colors.dart';
 
 class SolarAgreementUploadScreen extends StatefulWidget {
   final SolarLeadsModel lead;
@@ -20,7 +20,8 @@ class SolarAgreementUploadScreen extends StatefulWidget {
   });
 
   @override
-  State<SolarAgreementUploadScreen> createState() => _SolarAgreementUploadState();
+  State<SolarAgreementUploadScreen> createState() =>
+      _SolarAgreementUploadState();
 }
 
 class _SolarAgreementUploadState extends State<SolarAgreementUploadScreen> {
@@ -189,7 +190,9 @@ class _SolarAgreementUploadState extends State<SolarAgreementUploadScreen> {
             _saveBtn(
               _saving,
               _save,
-              widget.isEditing ? 'Update Agreement Upload' : 'Save Agreement Upload',
+              widget.isEditing
+                  ? 'Update Agreement Upload'
+                  : 'Save Agreement Upload',
             ),
           ],
         ),
@@ -207,7 +210,11 @@ Widget _infoBanner(SolarLeadsModel lead) => Container(
   ),
   child: Row(
     children: [
-      const AppSvgIcon(AppSvgAssets.userRound, size: 16, color: LeadTheme.primary),
+      const AppSvgIcon(
+        AppSvgAssets.userRound,
+        size: 16,
+        color: LeadTheme.primary,
+      ),
       const SizedBox(width: 8),
       Expanded(
         child: Column(
@@ -244,9 +251,7 @@ Widget _checkTile(
   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
   decoration: BoxDecoration(
     color: LeadTheme.surface,
-    border: Border.all(
-      color: value ? Colors.green.shade300 : AppColors.borderLight,
-    ),
+    border: Border.all(color: value ? AppColors.success : AppColors.divider),
     borderRadius: BorderRadius.circular(8),
   ),
   child: Column(
@@ -257,7 +262,7 @@ Widget _checkTile(
           AppSvgIcon(
             svgAsset,
             size: 18,
-            color: value ? Colors.green : LeadTheme.textSecondary,
+            color: value ? AppColors.success : LeadTheme.textSecondary,
           ),
           const SizedBox(width: 10),
           Expanded(
@@ -266,7 +271,7 @@ Widget _checkTile(
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
-                color: value ? Colors.green.shade700 : LeadTheme.textPrimary,
+                color: value ? AppColors.success : LeadTheme.textPrimary,
               ),
             ),
           ),
@@ -308,10 +313,12 @@ Widget _yesNoButton({
   child: Container(
     padding: const EdgeInsets.symmetric(vertical: 8),
     decoration: BoxDecoration(
-      color: selected ? activeColor.withValues(alpha: 0.12) : Colors.white,
+      color: selected ? activeColor.withValues(alpha: 0.12) : AppColors.surface,
       borderRadius: BorderRadius.circular(8),
       border: Border.all(
-        color: selected ? activeColor.withValues(alpha: 0.65) : AppColors.borderPrimary,
+        color: selected
+            ? activeColor.withValues(alpha: 0.65)
+            : Colors.grey.shade300,
       ),
     ),
     alignment: Alignment.center,
@@ -332,7 +339,7 @@ Widget _saveBtn(bool saving, VoidCallback onPressed, String label) => SizedBox(
     onPressed: saving ? null : onPressed,
     style: ElevatedButton.styleFrom(
       backgroundColor: LeadTheme.primary,
-      foregroundColor: Colors.white,
+      foregroundColor: AppColors.surface,
       padding: const EdgeInsets.symmetric(vertical: 12),
       minimumSize: const Size.fromHeight(52),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -343,7 +350,7 @@ Widget _saveBtn(bool saving, VoidCallback onPressed, String label) => SizedBox(
             height: 20,
             child: CircularProgressIndicator(
               strokeWidth: 2,
-              color: Colors.white,
+              color: AppColors.surface,
             ),
           )
         : Text(
@@ -352,7 +359,3 @@ Widget _saveBtn(bool saving, VoidCallback onPressed, String label) => SizedBox(
           ),
   ),
 );
-
-
-
-

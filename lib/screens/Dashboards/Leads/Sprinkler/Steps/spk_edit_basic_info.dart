@@ -9,7 +9,7 @@ import 'package:solar_project/Helper/app_feedback.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
 import 'package:solar_project/Helper/lead_themes.dart';
 import 'package:solar_project/data/Models/sprinkler_lead_model.dart';
-import 'package:solar_project/Helper/app_colors.dart';
+import 'package:solar_project/core/app_colors.dart';
 
 class SpkEditBasicInfoScreen extends StatefulWidget {
   final SprinklerLeadModel lead;
@@ -41,47 +41,54 @@ class _SpkEditBasicInfoScreenState extends State<SpkEditBasicInfoScreen> {
   // ── Dropdown options ──────────────────────────────────────────────────────
   static const _waterSourceMap = {
     'Borewell': 'borewell',
-    'Canal':    'canal',
-    'Tank':     'tank',
-    'River':    'river',
-    'Other':    'other',
+    'Canal': 'canal',
+    'Tank': 'tank',
+    'River': 'river',
+    'Other': 'other',
   };
   static const _waterSourceReverseMap = {
     'borewell': 'Borewell',
-    'canal':    'Canal',
-    'tank':     'Tank',
-    'river':    'River',
-    'other':    'Other',
+    'canal': 'Canal',
+    'tank': 'Tank',
+    'river': 'River',
+    'other': 'Other',
   };
 
-  static const _sourceLabels = ['Call', 'Reference', 'Social Media', 'Epc-reference', 'Indiamart', 'Other'];
+  static const _sourceLabels = [
+    'Call',
+    'Reference',
+    'Social Media',
+    'Epc-reference',
+    'Indiamart',
+    'Other',
+  ];
   static const _sourceMap = {
-    'Call':      'call',
+    'Call': 'call',
     'Reference': 'reference',
     'Social Media': 'social_media',
     'Epc-reference': 'epc_reference',
     'Indiamart': 'indiamart',
-    'Walk-in':   'walk-in',
-    'Other':     'other',
+    'Walk-in': 'walk-in',
+    'Other': 'other',
   };
   static const _sourceReverseMap = {
-    'call':      'Call',
+    'call': 'Call',
     'reference': 'Reference',
     'social_media': 'Social Media',
     'epc_reference': 'Epc-reference',
     'indiamart': 'Indiamart',
-    'walk-in':   'Walk-in',
-    'other':     'Other',
+    'walk-in': 'Walk-in',
+    'other': 'Other',
   };
 
   @override
   void initState() {
     super.initState();
     final l = widget.lead;
-    _nameCtrl     = TextEditingController(text: l.customerName);
-    _phoneCtrl    = TextEditingController(text: l.phone);
-    _addressCtrl  = TextEditingController(text: l.address);
-    _villageCtrl  = TextEditingController(text: l.village);
+    _nameCtrl = TextEditingController(text: l.customerName);
+    _phoneCtrl = TextEditingController(text: l.phone);
+    _addressCtrl = TextEditingController(text: l.address);
+    _villageCtrl = TextEditingController(text: l.village);
     _farmSizeCtrl = TextEditingController(
       text: l.farmSize != null ? l.farmSize.toString() : '',
     );
@@ -92,9 +99,7 @@ class _SpkEditBasicInfoScreenState extends State<SpkEditBasicInfoScreen> {
     _selectedWaterSource = l.waterSource != null
         ? _waterSourceReverseMap[l.waterSource]
         : null;
-    _selectedSource = l.source != null
-        ? _sourceReverseMap[l.source]
-        : null;
+    _selectedSource = l.source != null ? _sourceReverseMap[l.source] : null;
   }
 
   @override
@@ -118,24 +123,22 @@ class _SpkEditBasicInfoScreenState extends State<SpkEditBasicInfoScreen> {
 
     context.read<SprinklerLeadCubit>().updateBasicInfo(
       widget.lead.id,
-      customerName:  _nameCtrl.text.trim(),
-      phone:         _phoneCtrl.text.trim(),
-      address:       _addressCtrl.text.trim(),
-      village:       _villageCtrl.text.trim(),
-      farmSize:      double.tryParse(_farmSizeCtrl.text.trim()),
-      waterSource:   _selectedWaterSource != null
+      customerName: _nameCtrl.text.trim(),
+      phone: _phoneCtrl.text.trim(),
+      address: _addressCtrl.text.trim(),
+      village: _villageCtrl.text.trim(),
+      farmSize: double.tryParse(_farmSizeCtrl.text.trim()),
+      waterSource: _selectedWaterSource != null
           ? _waterSourceMap[_selectedWaterSource]
           : null,
-      cropType:      _cropCtrl.text.trim().isEmpty ? null : _cropCtrl.text.trim(),
-      source:        _selectedSource != null
-          ? _sourceMap[_selectedSource]
-          : null,
-        referenceName: _selectedSourceCode == 'reference'
+      cropType: _cropCtrl.text.trim().isEmpty ? null : _cropCtrl.text.trim(),
+      source: _selectedSource != null ? _sourceMap[_selectedSource] : null,
+      referenceName: _selectedSourceCode == 'reference'
           ? (_referenceNameCtrl.text.trim().isEmpty
-            ? null
-            : _referenceNameCtrl.text.trim())
+                ? null
+                : _referenceNameCtrl.text.trim())
           : null,
-      note:          _noteCtrl.text.trim().isEmpty ? null : _noteCtrl.text.trim(),
+      note: _noteCtrl.text.trim().isEmpty ? null : _noteCtrl.text.trim(),
     );
   }
 
@@ -160,15 +163,15 @@ class _SpkEditBasicInfoScreenState extends State<SpkEditBasicInfoScreen> {
         }
       },
       child: Scaffold(
-        backgroundColor: AppColors.bgSecondary),
+        backgroundColor:   AppColors.background,
         appBar: AppBar(
           backgroundColor: LeadTheme.secondary,
-          foregroundColor: Colors.white,
+          foregroundColor: AppColors.surface,
           elevation: 0,
           leading: IconButton(
             icon: const AppSvgIcon(
               AppSvgAssets.chevronLeft,
-              color: Colors.white,
+              color: AppColors.surface,
               size: 18,
             ),
             onPressed: () => Navigator.pop(context),
@@ -198,11 +201,12 @@ class _SpkEditBasicInfoScreenState extends State<SpkEditBasicInfoScreen> {
                       prefixIcon: AppSvgIcon(
                         AppSvgAssets.userRound,
                         size: 16,
-                        color: AppColors.textSecondary,
+                        color: AppColors.background,
                       ),
                     ),
-                    validator: (v) =>
-                        (v == null || v.trim().isEmpty) ? 'Name is required' : null,
+                    validator: (v) => (v == null || v.trim().isEmpty)
+                        ? 'Name is required'
+                        : null,
                   ),
                   const SizedBox(height: 14),
 
@@ -221,14 +225,17 @@ class _SpkEditBasicInfoScreenState extends State<SpkEditBasicInfoScreen> {
                       prefixIcon: AppSvgIcon(
                         AppSvgAssets.phone,
                         size: 16,
-                        color: AppColors.textSecondary,
+                        color: AppColors.background,
                       ),
                     ),
                     validator: (v) {
-                      if (v == null || v.trim().isEmpty) return 'Phone is required';
-                      if (v.length != 10) return 'Enter a valid 10-digit number';
+                      if (v == null || v.trim().isEmpty)
+                        return 'Phone is required';
+                      if (v.length != 10)
+                        return 'Enter a valid 10-digit number';
                       final first = int.tryParse(v[0]) ?? 0;
-                      if (first < 6) return 'Enter a valid Indian mobile number';
+                      if (first < 6)
+                        return 'Enter a valid Indian mobile number';
                       return null;
                     },
                   ),
@@ -251,14 +258,14 @@ class _SpkEditBasicInfoScreenState extends State<SpkEditBasicInfoScreen> {
                       prefixIcon: AppSvgIcon(
                         AppSvgAssets.mapPin,
                         size: 16,
-                        color: AppColors.textSecondary,
+                        color: AppColors.background,
                       ),
                     ),
-                    validator: (v) =>
-                        (v == null || v.trim().isEmpty) ? 'Address is required' : null,
+                    validator: (v) => (v == null || v.trim().isEmpty)
+                        ? 'Address is required'
+                        : null,
                   ),
                   const SizedBox(height: 14),
-
                 ],
               ),
               const SizedBox(height: 14),
@@ -294,7 +301,7 @@ class _SpkEditBasicInfoScreenState extends State<SpkEditBasicInfoScreen> {
                         prefixIcon: AppSvgIcon(
                           AppSvgAssets.userRound,
                           size: 16,
-                          color: AppColors.textSecondary,
+                          color: AppColors.background,
                         ),
                       ),
                     ),
@@ -313,7 +320,9 @@ class _SpkEditBasicInfoScreenState extends State<SpkEditBasicInfoScreen> {
                   TextFormField(
                     controller: _noteCtrl,
                     maxLines: 3,
-                    decoration: _inputDecoration(hint: 'Any additional remarks…'),
+                    decoration: _inputDecoration(
+                      hint: 'Any additional remarks…',
+                    ),
                   ),
                 ],
               ),
@@ -329,10 +338,13 @@ class _SpkEditBasicInfoScreenState extends State<SpkEditBasicInfoScreen> {
   Widget _buildSaveBar() {
     return Container(
       padding: EdgeInsets.fromLTRB(
-        16, 12, 16, MediaQuery.of(context).padding.bottom + 12,
+        16,
+        12,
+        16,
+        MediaQuery.of(context).padding.bottom + 12,
       ),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.08),
@@ -348,9 +360,11 @@ class _SpkEditBasicInfoScreenState extends State<SpkEditBasicInfoScreen> {
           onPressed: _saving ? null : _submit,
           style: ElevatedButton.styleFrom(
             backgroundColor: LeadTheme.secondary,
-            foregroundColor: Colors.white,
+            foregroundColor: AppColors.surface,
             disabledBackgroundColor: LeadTheme.secondary.withValues(alpha: 0.6),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
             elevation: 0,
           ),
           child: _saving
@@ -358,7 +372,7 @@ class _SpkEditBasicInfoScreenState extends State<SpkEditBasicInfoScreen> {
                   width: 20,
                   height: 20,
                   child: CircularProgressIndicator(
-                    color: Colors.white,
+                    color: AppColors.surface,
                     strokeWidth: 2,
                   ),
                 )
@@ -379,7 +393,7 @@ class _SpkEditBasicInfoScreenState extends State<SpkEditBasicInfoScreen> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -397,8 +411,9 @@ class _SpkEditBasicInfoScreenState extends State<SpkEditBasicInfoScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
               color: LeadTheme.secondary.withValues(alpha: 0.05),
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(12)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(12),
+              ),
               border: Border(
                 bottom: BorderSide(
                   color: LeadTheme.secondary.withValues(alpha: 0.1),
@@ -433,23 +448,23 @@ class _SpkEditBasicInfoScreenState extends State<SpkEditBasicInfoScreen> {
   }
 
   Widget _buildLabel(String text, {bool required = false}) => RichText(
-        text: TextSpan(
-          text: text,
-          style: const TextStyle(
-            fontSize: 12.5,
-            fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary),
-          ),
-          children: required
-              ? const [
-                  TextSpan(
-                    text: ' *',
-                    style: TextStyle(color: AppColors.error),
-                  ),
-                ]
-              : [],
-        ),
-      );
+    text: TextSpan(
+      text: text,
+      style: const TextStyle(
+        fontSize: 12.5,
+        fontWeight: FontWeight.w600,
+        color: AppColors.textDark,
+      ),
+      children: required
+          ? const [
+              TextSpan(
+                text: ' *',
+                style: TextStyle(color: AppColors.error),
+              ),
+            ]
+          : [],
+    ),
+  );
 
   Widget _buildDropdown({
     required String hint,
@@ -462,13 +477,13 @@ class _SpkEditBasicInfoScreenState extends State<SpkEditBasicInfoScreen> {
       value: value,
       decoration: _inputDecoration(
         hint: hint,
-        prefixIcon: AppSvgIcon(icon, size: 16, color: AppColors.textSecondary),
+        prefixIcon: AppSvgIcon(icon, size: 16, color: AppColors.background),
       ),
       isExpanded: true,
       icon: AppSvgIcon(
         AppSvgAssets.chevronDown,
         size: 16,
-        color: AppColors.textSecondary,
+        color: AppColors.background,
       ),
       items: [
         DropdownMenuItem<String>(
@@ -477,7 +492,7 @@ class _SpkEditBasicInfoScreenState extends State<SpkEditBasicInfoScreen> {
             'None',
             style: TextStyle(
               fontSize: 13,
-              color: AppColors.textSecondary,
+              color: AppColors.background,
               fontStyle: FontStyle.italic,
             ),
           ),
@@ -490,7 +505,7 @@ class _SpkEditBasicInfoScreenState extends State<SpkEditBasicInfoScreen> {
               style: const TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
-                color: AppColors.textPrimary),
+                color: AppColors.textDark,
               ),
             ),
           ),
@@ -506,52 +521,45 @@ class _SpkEditBasicInfoScreenState extends State<SpkEditBasicInfoScreen> {
     Widget? suffixIcon,
     String? prefixText,
     String? suffixText,
-  }) =>
-      InputDecoration(
-        hintText: hint,
-        hintStyle: const TextStyle(fontSize: 13, color: AppColors.textTertiary)),
-        filled: true,
-        fillColor: Colors.white,
-        prefixText: prefixText,
-        prefixStyle: const TextStyle(
-          fontSize: 13.5,
-          color: AppColors.textPrimary),
-          fontWeight: FontWeight.w500,
-        ),
-        suffixText: suffixText,
-        suffixStyle: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-        prefixIcon: prefixIcon != null
-            ? Padding(padding: const EdgeInsets.all(13), child: prefixIcon)
-            : null,
-        suffixIcon: suffixIcon != null
-            ? Padding(padding: const EdgeInsets.all(13), child: suffixIcon)
-            : null,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: AppColors.borderLight)),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: AppColors.borderLight)),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: LeadTheme.secondary, width: 1.5),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: AppColors.error),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: AppColors.error, width: 1.5),
-        ),
-      );
+  }) => InputDecoration(
+    hintText: hint,
+    hintStyle: const TextStyle(fontSize: 13, color: AppColors.textLight),
+    filled: true,
+    fillColor: AppColors.surface,
+    prefixText: prefixText,
+    prefixStyle: const TextStyle(
+      fontSize: 13.5,
+      color: AppColors.textDark,
+      fontWeight: FontWeight.w500,
+    ),
+    suffixText: suffixText,
+    suffixStyle: const TextStyle(fontSize: 12, color: AppColors.textGray),
+    prefixIcon: prefixIcon != null
+        ? Padding(padding: const EdgeInsets.all(13), child: prefixIcon)
+        : null,
+    suffixIcon: suffixIcon != null
+        ? Padding(padding: const EdgeInsets.all(13), child: suffixIcon)
+        : null,
+    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(10),
+      borderSide: const BorderSide(color: AppColors.divider),
+    ),
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(10),
+      borderSide: const BorderSide(color: AppColors.divider),
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(10),
+      borderSide: BorderSide(color: LeadTheme.secondary, width: 1.5),
+    ),
+    errorBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(10),
+      borderSide: const BorderSide(color: AppColors.error),
+    ),
+    focusedErrorBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(10),
+      borderSide: const BorderSide(color: AppColors.error, width: 1.5),
+    ),
+  );
 }
-
-
-
-
-

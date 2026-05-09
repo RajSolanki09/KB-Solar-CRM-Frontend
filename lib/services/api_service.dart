@@ -68,7 +68,6 @@ class ApiService {
         ApiConstants.apiPath(ApiEndpoints.authLogin),
         data: {'email': email, 'password': password},
       );
-      print('Login response: ${resp.data}'); // Debug print
       if (resp.data['success'] == true) {
         final token = resp.data['token'] as String;
         final user = resp.data['user'] as Map<String, dynamic>;
@@ -79,7 +78,6 @@ class ApiService {
       }
       throw Exception(resp.data['message']);
     } on DioException catch (e) {
-      print('Login DioException: ${e.response?.data}'); // Debug print
       throw Exception(e.response?.data['message'] ?? 'Login failed');
     }
   }
@@ -194,10 +192,8 @@ class ApiService {
   Future<List<dynamic>> getUsers() async {
     try {
       final data = await _cachedGet(ApiConstants.apiPath(ApiEndpoints.admin));
-      print('Get users response: $data'); // Debug print
       return data['staff'] ?? [];
     } on DioException catch (e) {
-      print('Get users DioException: ${e.response?.data}'); // Debug print
       throw Exception(e.response?.data['message'] ?? 'Failed to fetch users');
     }
   }
@@ -227,12 +223,9 @@ class ApiService {
 
   Future<void> createUser(Map<String, dynamic> data) async {
     try {
-      print('Creating user with data: $data'); // Debug print
-      final resp = await _dio.post(ApiConstants.apiPath(ApiEndpoints.admin), data: data);
-      print('Create user response: ${resp.data}'); // Debug print
+      await _dio.post(ApiConstants.apiPath(ApiEndpoints.admin), data: data);
       clearCache(ApiConstants.apiPath(ApiEndpoints.admin));
     } on DioException catch (e) {
-      print('Create user DioException: ${e.response?.data}'); // Debug print
       throw Exception(e.response?.data['message'] ?? 'Failed to create user');
     }
   }

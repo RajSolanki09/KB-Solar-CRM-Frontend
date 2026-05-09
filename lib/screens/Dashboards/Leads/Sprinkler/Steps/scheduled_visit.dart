@@ -12,7 +12,7 @@ import 'package:solar_project/Helper/picked_photo.dart';
 import 'package:solar_project/core/constants/api_constants.dart';
 import 'package:solar_project/core/network/dio_client.dart';
 import 'package:solar_project/data/Models/sprinkler_lead_model.dart';
-import 'package:solar_project/Helper/app_colors.dart';
+import 'package:solar_project/core/app_colors.dart';
 
 // ── Sales person fetched from backend ────────────────────────────────────────
 class _SalesPerson {
@@ -239,10 +239,10 @@ class _SprinklerVisitScreenState extends State<SprinklerVisitScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bgSecondary),
+      backgroundColor:   AppColors.background,
       appBar: AppBar(
         backgroundColor: LeadTheme.secondary,
-        foregroundColor: Colors.white,
+        foregroundColor: AppColors.surface,
         elevation: 0,
         title: const Text(
           'Schedule Site Visit',
@@ -251,7 +251,7 @@ class _SprinklerVisitScreenState extends State<SprinklerVisitScreen> {
         leading: IconButton(
           icon: const AppSvgIcon(
             AppSvgAssets.chevronLeft,
-            color: Colors.white,
+            color: AppColors.surface,
             size: 18,
           ),
           onPressed: () => Navigator.pop(context),
@@ -277,7 +277,7 @@ class _SprinklerVisitScreenState extends State<SprinklerVisitScreen> {
                     suffixIcon: const AppSvgIcon(
                       AppSvgAssets.calendarDays,
                       size: 18,
-                      color: AppColors.textSecondary),
+                      color: AppColors.textGray,
                     ),
                     hint: 'Select visit date',
                   ),
@@ -295,7 +295,7 @@ class _SprinklerVisitScreenState extends State<SprinklerVisitScreen> {
                     suffixIcon: const AppSvgIcon(
                       AppSvgAssets.clock,
                       size: 18,
-                      color: AppColors.textSecondary),
+                      color: AppColors.textGray,
                     ),
                     hint: 'Select visit time',
                   ),
@@ -330,9 +330,9 @@ class _SprinklerVisitScreenState extends State<SprinklerVisitScreen> {
       return Container(
         height: 50,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: AppColors.borderLight)),
+          border: Border.all(color:  AppColors.divider),
         ),
         child: Row(
           children: [
@@ -348,7 +348,7 @@ class _SprinklerVisitScreenState extends State<SprinklerVisitScreen> {
             const SizedBox(width: 10),
             Text(
               'Loading sales persons…',
-              style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+              style: TextStyle(fontSize: 13, color: AppColors.background),
             ),
           ],
         ),
@@ -359,9 +359,9 @@ class _SprinklerVisitScreenState extends State<SprinklerVisitScreen> {
       return Container(
         height: 50,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: AppColors.borderLight)),
+          border: Border.all(color:  AppColors.divider),
         ),
         padding: const EdgeInsets.symmetric(horizontal: 14),
         child: Row(
@@ -369,12 +369,12 @@ class _SprinklerVisitScreenState extends State<SprinklerVisitScreen> {
             AppSvgIcon(
               AppSvgAssets.userRound,
               size: 16,
-              color: AppColors.textSecondary,
+              color: AppColors.textLight,
             ),
             const SizedBox(width: 8),
             Text(
               'No sales persons found',
-              style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+              style: TextStyle(fontSize: 13, color: AppColors.background),
             ),
           ],
         ),
@@ -388,14 +388,14 @@ class _SprinklerVisitScreenState extends State<SprinklerVisitScreen> {
         prefixIcon: AppSvgIcon(
           AppSvgAssets.userRound,
           size: 16,
-          color: AppColors.textSecondary,
+          color: AppColors.background,
         ),
       ),
       isExpanded: true,
       icon: AppSvgIcon(
         AppSvgAssets.chevronDown,
         size: 16,
-        color: AppColors.textSecondary,
+        color: AppColors.background,
       ),
       items: [
         // "None" option to clear the selection
@@ -405,7 +405,7 @@ class _SprinklerVisitScreenState extends State<SprinklerVisitScreen> {
             'None',
             style: TextStyle(
               fontSize: 13,
-              color: AppColors.textSecondary,
+              color: AppColors.background,
               fontStyle: FontStyle.italic,
             ),
           ),
@@ -422,7 +422,7 @@ class _SprinklerVisitScreenState extends State<SprinklerVisitScreen> {
                   style: const TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary),
+                    color: AppColors.textDark,
                   ),
                 ),
                 if (s.phone.isNotEmpty)
@@ -430,7 +430,7 @@ class _SprinklerVisitScreenState extends State<SprinklerVisitScreen> {
                     s.phone,
                     style: const TextStyle(
                       fontSize: 11,
-                      color: AppColors.textSecondary),
+                      color: AppColors.textGray,
                     ),
                   ),
               ],
@@ -444,7 +444,7 @@ class _SprinklerVisitScreenState extends State<SprinklerVisitScreen> {
           'None',
           style: TextStyle(
             fontSize: 13,
-            color: AppColors.textSecondary,
+            color: AppColors.background,
             fontStyle: FontStyle.italic,
           ),
         ),
@@ -454,7 +454,7 @@ class _SprinklerVisitScreenState extends State<SprinklerVisitScreen> {
             style: const TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary),
+              color: AppColors.textDark,
             ),
             overflow: TextOverflow.ellipsis,
           ),
@@ -474,7 +474,7 @@ class _SprinklerVisitScreenState extends State<SprinklerVisitScreen> {
         MediaQuery.of(context).padding.bottom + 12,
       ),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.08),
@@ -490,7 +490,7 @@ class _SprinklerVisitScreenState extends State<SprinklerVisitScreen> {
           onPressed: _saving ? null : _submit,
           style: ElevatedButton.styleFrom(
             backgroundColor: LeadTheme.secondary,
-            foregroundColor: Colors.white,
+            foregroundColor: AppColors.surface,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
@@ -501,7 +501,7 @@ class _SprinklerVisitScreenState extends State<SprinklerVisitScreen> {
                   width: 20,
                   height: 20,
                   child: CircularProgressIndicator(
-                    color: Colors.white,
+                    color: AppColors.surface,
                     strokeWidth: 2,
                   ),
                 )
@@ -522,7 +522,7 @@ class _SprinklerVisitScreenState extends State<SprinklerVisitScreen> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -581,7 +581,7 @@ class _SprinklerVisitScreenState extends State<SprinklerVisitScreen> {
       style: const TextStyle(
         fontSize: 12.5,
         fontWeight: FontWeight.w600,
-        color: AppColors.textPrimary),
+        color: AppColors.textDark,
       ),
       children: required
           ? const [
@@ -600,9 +600,9 @@ class _SprinklerVisitScreenState extends State<SprinklerVisitScreen> {
     Widget? prefixIcon,
   }) => InputDecoration(
     hintText: hint,
-    hintStyle: const TextStyle(fontSize: 13, color: AppColors.textTertiary)),
+    hintStyle: const TextStyle(fontSize: 13, color: AppColors.textLight),
     filled: true,
-    fillColor: Colors.white,
+    fillColor: AppColors.surface,
     prefixIcon: prefixIcon != null
         ? Padding(padding: const EdgeInsets.all(13), child: prefixIcon)
         : null,
@@ -612,11 +612,11 @@ class _SprinklerVisitScreenState extends State<SprinklerVisitScreen> {
     contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
     border: OutlineInputBorder(
       borderRadius: BorderRadius.circular(10),
-      borderSide: const BorderSide(color: AppColors.borderLight)),
+      borderSide: const BorderSide(color: AppColors.divider),
     ),
     enabledBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(10),
-      borderSide: const BorderSide(color: AppColors.borderLight)),
+      borderSide: const BorderSide(color: AppColors.divider),
     ),
     focusedBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(10),
@@ -632,9 +632,3 @@ class _SprinklerVisitScreenState extends State<SprinklerVisitScreen> {
     ),
   );
 }
-
-
-
-
-
-

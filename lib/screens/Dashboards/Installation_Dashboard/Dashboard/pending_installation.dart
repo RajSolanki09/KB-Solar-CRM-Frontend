@@ -1,4 +1,4 @@
-﻿// lib/screens/Dashboards/Installation_Dashboard/Dashboard/pending_installation.dart
+// lib/screens/Dashboards/Installation_Dashboard/Dashboard/pending_installation.dart
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -6,11 +6,10 @@ import 'package:intl/intl.dart';
 import 'package:solar_project/Cubits/Installation/installation_cubit.dart';
 import 'package:solar_project/Cubits/Installation/installation_state.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
-import 'package:solar_project/Helper/app_colors.dart';
 import 'package:solar_project/data/Models/installation_model.dart';
 
-const _kPurple = AppColors.lightPurple;
-const _kBlue = AppColors.lightPurple;
+const _kPurple = Color(0xFF7B2FF7);
+const _kBlue = Color(0xFF0EA5E9);
 
 // ── Date helpers ──────────────────────────────────────────────────────────────
 bool _isOverdue(DateTime? dt) {
@@ -183,7 +182,7 @@ class _PendingInstallationsScreenState extends State<PendingInstallationsScreen>
             .length;
 
         return Scaffold(
-          backgroundColor: AppColors.bgSecondary,
+          backgroundColor: const Color(0xFFF8FAFC),
           appBar: AppBar(
             backgroundColor: widget.appBarColor,
             elevation: 0,
@@ -225,7 +224,7 @@ class _PendingInstallationsScreenState extends State<PendingInstallationsScreen>
             ],
             bottom: PreferredSize(
               preferredSize: const Size.fromHeight(1),
-              child: Container(height: 1, color: AppColors.borderLight),
+              child: Container(height: 1, color: Colors.grey.shade200),
             ),
           ),
           body: Column(
@@ -240,12 +239,12 @@ class _PendingInstallationsScreenState extends State<PendingInstallationsScreen>
                       _SummaryChip(
                         label: 'All',
                         count: overdueAll,
-                        color: const Color(0xFF904EFC),
+                        color: Colors.red.shade500,
                         svgAsset: AppSvgAssets.triangleAlert,
                       ),
                       const SizedBox(width: 6),
                       _SummaryChip(
-                        label: 'Project',
+                        label: 'Solar',
                         count: overdueSolar,
                         color: _kPurple,
                         svgAsset: AppSvgAssets.sun,
@@ -266,9 +265,9 @@ class _PendingInstallationsScreenState extends State<PendingInstallationsScreen>
                 color: Colors.white,
                 child: TabBar(
                   controller: _tab,
-                  labelColor: const Color(0xFF904EFC),
-                  unselectedLabelColor: AppColors.textSecondary,
-                  indicatorColor: const Color(0xFF904EFC),
+                  labelColor: Colors.red.shade600,
+                  unselectedLabelColor: Colors.grey.shade500,
+                  indicatorColor: Colors.red.shade600,
                   indicatorWeight: 3,
                   labelStyle: const TextStyle(
                     fontWeight: FontWeight.w700,
@@ -295,7 +294,7 @@ class _PendingInstallationsScreenState extends State<PendingInstallationsScreen>
                         children: [
                           const AppSvgIcon(AppSvgAssets.sun, size: 14),
                           const SizedBox(width: 4),
-                          Text('Project ($overdueSolar)'),
+                          Text('Solar ($overdueSolar)'),
                         ],
                       ),
                     ),
@@ -326,14 +325,14 @@ class _PendingInstallationsScreenState extends State<PendingInstallationsScreen>
                       hintText: 'Search name, phone, address…',
                       hintStyle: TextStyle(
                         fontSize: 12,
-                        color: AppColors.textSecondary,
+                        color: Colors.grey.shade400,
                       ),
                       prefixIcon: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: AppSvgIcon(
                           AppSvgAssets.search,
                           size: 17,
-                          color: AppColors.textSecondary,
+                          color: Colors.grey.shade400,
                         ),
                       ),
                       suffixIcon: _searchCtrl.text.isNotEmpty
@@ -343,15 +342,15 @@ class _PendingInstallationsScreenState extends State<PendingInstallationsScreen>
                             )
                           : null,
                       filled: true,
-                      fillColor: AppColors.bgPrimary,
+                      fillColor: Colors.grey.shade50,
                       contentPadding: EdgeInsets.zero,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: AppColors.borderLight),
+                        borderSide: BorderSide(color: Colors.grey.shade200),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: AppColors.borderLight),
+                        borderSide: BorderSide(color: Colors.grey.shade200),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
@@ -362,7 +361,7 @@ class _PendingInstallationsScreenState extends State<PendingInstallationsScreen>
                 ),
               ),
 
-              Divider(height: 1, color: AppColors.borderLight),
+              Divider(height: 1, color: Colors.grey.shade200),
 
               // ── Tab views ──────────────────────────────────────────
               Expanded(
@@ -643,7 +642,7 @@ class _PendingDataTable extends StatelessWidget {
               child: LinearProgressIndicator(
                 value: value,
                 minHeight: 5,
-                backgroundColor: AppColors.textSecondary,
+                backgroundColor: Colors.grey.shade100,
                 valueColor: AlwaysStoppedAnimation(accent),
               ),
             ),
@@ -668,7 +667,7 @@ class _PendingDataTable extends StatelessWidget {
     if (dt == null) {
       return Text(
         'Date TBD',
-        style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+        style: TextStyle(fontSize: 11, color: Colors.grey.shade400),
       );
     }
 
@@ -719,7 +718,7 @@ class _PendingDataTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDesktop = MediaQuery.sizeOf(context).width >= 1000;
-    const rowStyle = TextStyle(fontSize: 12, color: AppColors.textPrimary);
+    const rowStyle = TextStyle(fontSize: 12, color: Color(0xFF111827));
 
     return SizedBox(
       width: double.infinity,
@@ -875,7 +874,7 @@ class _EmptyState extends StatelessWidget {
             AppSvgIcon(
               AppSvgAssets.circleCheckBig,
               size: 56,
-              color: AppColors.borderLight,
+              color: Colors.grey.shade200,
             ),
             const SizedBox(height: 14),
             Text(
@@ -885,7 +884,7 @@ class _EmptyState extends StatelessWidget {
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: AppColors.textSecondary,
+                color: Colors.grey.shade400,
               ),
               textAlign: TextAlign.center,
             ),
@@ -894,7 +893,7 @@ class _EmptyState extends StatelessWidget {
               hasSearch
                   ? 'Try a different search term.'
                   : 'All clear! No overdue jobs.',
-              style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+              style: TextStyle(fontSize: 11, color: Colors.grey.shade400),
               textAlign: TextAlign.center,
             ),
           ],
@@ -903,6 +902,3 @@ class _EmptyState extends StatelessWidget {
     );
   }
 }
-
-
-

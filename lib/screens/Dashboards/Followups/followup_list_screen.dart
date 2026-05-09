@@ -1,6 +1,7 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:solar_project/core/app_colors.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
 import 'package:solar_project/Cubits/SolarLeads/solar_leads_cubit.dart';
@@ -11,7 +12,6 @@ import 'package:solar_project/data/Models/solar_leads_model.dart';
 import 'package:solar_project/data/Models/sprinkler_lead_model.dart';
 import 'package:solar_project/services/api_service.dart';
 import 'add_followup_screen.dart';
-import 'package:solar_project/Helper/app_colors.dart';
 
 class _FollowupItem {
   final String id;
@@ -122,7 +122,7 @@ class FollowupListScreen extends StatefulWidget {
   final Color appBarColor;
   const FollowupListScreen({
     super.key,
-    this.appBarColor = AppColors.lightPurple,
+    this.appBarColor = AppColors.primaryLight,
   });
 
   @override
@@ -204,8 +204,8 @@ class _FollowupListScreenState extends State<FollowupListScreen>
 
             final isLoading =
                 solarState is SolarLeadLoading ||
-              spkState is SprinklerLeadLoading ||
-              _materialLoading;
+                spkState is SprinklerLeadLoading ||
+                _materialLoading;
 
             final solarItems = solarLeads
                 .where((l) => l.nextFollowupDate != null)
@@ -218,7 +218,7 @@ class _FollowupListScreenState extends State<FollowupListScreen>
                 .toList();
 
             return Scaffold(
-              backgroundColor: const Color(0xffF8FAFC),
+              backgroundColor:  AppColors.background,
               appBar: AppBar(
                 backgroundColor: widget.appBarColor,
                 elevation: 0,
@@ -226,7 +226,7 @@ class _FollowupListScreenState extends State<FollowupListScreen>
                     ? IconButton(
                         icon: const AppSvgIcon(
                           AppSvgAssets.chevronLeft,
-                          color: Colors.white,
+                          color: AppColors.surface,
                           size: 18,
                         ),
                         onPressed: () => Navigator.pop(context),
@@ -237,7 +237,7 @@ class _FollowupListScreenState extends State<FollowupListScreen>
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
-                    color: Colors.white,
+                    color: AppColors.surface,
                   ),
                 ),
                 actions: [
@@ -249,7 +249,7 @@ class _FollowupListScreenState extends State<FollowupListScreen>
                         height: 18,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: Colors.white,
+                          color: AppColors.surface,
                         ),
                       ),
                     )
@@ -257,7 +257,7 @@ class _FollowupListScreenState extends State<FollowupListScreen>
                     IconButton(
                       icon: const AppSvgIcon(
                         AppSvgAssets.refreshCw,
-                        color: Colors.white,
+                        color: AppColors.surface,
                       ),
                       onPressed: _load,
                     ),
@@ -265,18 +265,18 @@ class _FollowupListScreenState extends State<FollowupListScreen>
                 bottom: PreferredSize(
                   preferredSize: const Size.fromHeight(48),
                   child: Container(
-                    color: Colors.white,
+                    color: AppColors.surface,
                     child: TabBar(
                       controller: _moduleTab,
-                      labelColor: const Color(0xff2563EB),
-                      unselectedLabelColor: const Color(0xff94A3B8),
-                      indicatorColor: const Color(0xff2563EB),
+                      labelColor:  AppColors.primary,
+                      unselectedLabelColor:  AppColors.textLight,
+                      indicatorColor:  AppColors.primary,
                       labelStyle: const TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 13,
                       ),
                       tabs: [
-                        Tab(text: 'Project (${solarItems.length})'),
+                        Tab(text: 'Solar (${solarItems.length})'),
                         Tab(text: 'Sprinkler (${spkItems.length})'),
                         Tab(text: 'Material (${_materialItems.length})'),
                       ],
@@ -287,7 +287,7 @@ class _FollowupListScreenState extends State<FollowupListScreen>
               body: isLoading
                   ? const Center(
                       child: CircularProgressIndicator(
-                        color: Color(0xff2563EB),
+                        color: AppColors.primary,
                       ),
                     )
                   : TabBarView(
@@ -369,7 +369,7 @@ class _TabBodyState extends State<_TabBody> {
     return Column(
       children: [
         Container(
-          color: Colors.white,
+          color: AppColors.surface,
           padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
           child: Row(
             children: [
@@ -377,27 +377,27 @@ class _TabBodyState extends State<_TabBody> {
                 child: Container(
                   height: 42,
                   decoration: BoxDecoration(
-                    color: const Color(0xffF1F5F9),
+                    color:  AppColors.background,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: TextField(
                     controller: _searchC,
                     style: const TextStyle(
                       fontSize: 13,
-                      color: Color(0xff1E293B),
+                      color: AppColors.textDark,
                     ),
                     decoration: InputDecoration(
                       hintText: 'Search by name or phone',
                       hintStyle: const TextStyle(
                         fontSize: 13,
-                        color: Color(0xff94A3B8),
+                        color: AppColors.textLight,
                       ),
                       prefixIcon: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: const AppSvgIcon(
                           AppSvgAssets.search,
                           size: 18,
-                          color: Color(0xff94A3B8),
+                          color: AppColors.textLight,
                         ),
                       ),
                       suffixIcon: _searchQuery.isNotEmpty
@@ -409,7 +409,7 @@ class _TabBodyState extends State<_TabBody> {
                               child: const AppSvgIcon(
                                 AppSvgAssets.x,
                                 size: 16,
-                                color: Color(0xff94A3B8),
+                                color: AppColors.textLight,
                               ),
                             )
                           : null,
@@ -422,7 +422,7 @@ class _TabBodyState extends State<_TabBody> {
             ],
           ),
         ),
-        const Divider(height: 1, color: Color(0xffE2E8F0)),
+        const Divider(height: 1, color: AppColors.divider),
         Expanded(
           child: RefreshIndicator(
             onRefresh: () async => widget.onRefresh(),
@@ -502,7 +502,7 @@ class _TabBodyState extends State<_TabBody> {
             style: const TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w700,
-              color: Color(0xff1E293B),
+              color: AppColors.textDark,
             ),
           ),
           if (item.lastRemark != null && item.lastRemark!.isNotEmpty)
@@ -512,7 +512,7 @@ class _TabBodyState extends State<_TabBody> {
                 item.lastRemark!,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontSize: 11, color: Color(0xff64748B)),
+                style: const TextStyle(fontSize: 11, color: AppColors.textGray),
               ),
             ),
         ],
@@ -520,7 +520,7 @@ class _TabBodyState extends State<_TabBody> {
       Row(children: [_ModuleBadge(module: item.module)]),
       Text(
         item.phone,
-        style: const TextStyle(fontSize: 12, color: Color(0xff0F172A)),
+        style: const TextStyle(fontSize: 12, color: AppColors.textDark),
       ),
       SizedBox(
         width: 180,
@@ -528,7 +528,7 @@ class _TabBodyState extends State<_TabBody> {
           item.address.isEmpty ? '-' : item.address,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: const TextStyle(fontSize: 12, color: Color(0xff334155)),
+          style: const TextStyle(fontSize: 12, color: AppColors.textGray),
         ),
       ),
       Column(
@@ -540,13 +540,13 @@ class _TabBodyState extends State<_TabBody> {
             style: const TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: Color(0xff1E293B),
+              color: AppColors.textDark,
             ),
           ),
           if (item.followupTime != null)
             Text(
               item.followupTime!,
-              style: const TextStyle(fontSize: 11, color: Color(0xff64748B)),
+              style: const TextStyle(fontSize: 11, color: AppColors.textGray),
             ),
         ],
       ),
@@ -555,7 +555,7 @@ class _TabBodyState extends State<_TabBody> {
         children: [
           _ActionIcon(
             svgAsset: AppSvgAssets.circleCheckBig,
-            color: const Color(0xff16A34A),
+            color:  AppColors.success,
             tooltip: 'Mark done',
             onTap: () => _markDone(context, item, onRefresh),
           ),
@@ -569,7 +569,7 @@ class _TabBodyState extends State<_TabBody> {
           const SizedBox(width: 6),
           _ActionIcon(
             svgAsset: AppSvgAssets.messageSquarePlus,
-            color: const Color(0xff7C3AED),
+            color:  AppColors.primary,
             tooltip: 'Add follow-up',
             onTap: () => _openAddFollowup(context, item, onRefresh),
           ),
@@ -674,9 +674,9 @@ class _TableSection<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xffE2E8F0)),
+        border: Border.all(color:  AppColors.divider),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -691,7 +691,7 @@ class _TableSection<T> extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xff111827),
+                    color: AppColors.textDark,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -699,7 +699,7 @@ class _TableSection<T> extends StatelessWidget {
                   subtitle,
                   style: const TextStyle(
                     fontSize: 11,
-                    color: Color(0xff64748B),
+                    color: AppColors.textGray,
                   ),
                 ),
               ],
@@ -710,7 +710,7 @@ class _TableSection<T> extends StatelessWidget {
               padding: EdgeInsets.fromLTRB(16, 0, 16, 14),
               child: Text(
                 'No leads in this section.',
-                style: TextStyle(fontSize: 12, color: Color(0xff64748B)),
+                style: TextStyle(fontSize: 12, color: AppColors.textGray),
               ),
             )
           else if (rows.isNotEmpty)
@@ -751,9 +751,9 @@ class _CollapsibleTableSection<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xffE2E8F0)),
+        border: Border.all(color:  AppColors.divider),
       ),
       child: Column(
         children: [
@@ -773,7 +773,7 @@ class _CollapsibleTableSection<T> extends StatelessWidget {
                           style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w700,
-                            color: Color(0xff111827),
+                            color: AppColors.textDark,
                           ),
                         ),
                         const SizedBox(height: 2),
@@ -781,7 +781,7 @@ class _CollapsibleTableSection<T> extends StatelessWidget {
                           subtitle,
                           style: const TextStyle(
                             fontSize: 11,
-                            color: Color(0xff64748B),
+                            color: AppColors.textGray,
                           ),
                         ),
                       ],
@@ -792,7 +792,7 @@ class _CollapsibleTableSection<T> extends StatelessWidget {
                     duration: const Duration(milliseconds: 180),
                     child: AppSvgIcon(
                       AppSvgAssets.chevronDown,
-                      color: Color(0xff64748B),
+                      color: AppColors.textGray,
                     ),
                   ),
                 ],
@@ -800,7 +800,7 @@ class _CollapsibleTableSection<T> extends StatelessWidget {
             ),
           ),
           if (initiallyExpanded) ...[
-            const Divider(height: 1, color: Color(0xffE2E8F0)),
+            const Divider(height: 1, color: AppColors.divider),
             const SizedBox(height: 10),
             if (rows.isEmpty)
               const Padding(
@@ -809,7 +809,7 @@ class _CollapsibleTableSection<T> extends StatelessWidget {
                   alignment: Alignment.centerLeft,
                   child: Text(
                     'No leads in this section.',
-                    style: TextStyle(fontSize: 12, color: Color(0xff64748B)),
+                    style: TextStyle(fontSize: 12, color: AppColors.textGray),
                   ),
                 ),
               )
@@ -863,7 +863,7 @@ class _FollowupDataTable<T> extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xff1E293B),
+                    color: AppColors.textDark,
                   ),
                 ),
               ),
@@ -875,7 +875,7 @@ class _FollowupDataTable<T> extends StatelessWidget {
     TableRow _dataRow(List<Widget> rowCells) {
       return TableRow(
         decoration: const BoxDecoration(
-          border: Border(top: BorderSide(color: Color(0xffE2E8F0))),
+          border: Border(top: BorderSide(color: AppColors.divider)),
         ),
         children: rowCells
             .map(
@@ -900,8 +900,8 @@ class _FollowupDataTable<T> extends StatelessWidget {
           child: Container(
             decoration: BoxDecoration(
               border: Border(
-                top: BorderSide(color: Colors.blueGrey.shade100),
-                bottom: BorderSide(color: Colors.blueGrey.shade100),
+                top: BorderSide(color: AppColors.primary),
+                bottom: BorderSide(color: AppColors.primary),
               ),
             ),
             child: Table(
@@ -934,24 +934,24 @@ class _StatusPill extends StatelessWidget {
     final String text;
     final Color color;
 
-     if (days < 0) {
-        text = '${-days} day${-days == 1 ? '' : 's'} overdue';
-        color = AppColors.lightPurple;
-      } else if (days == 0) {
-        text = 'Today';
-        color = AppColors.lightPurple;
-      } else {
-        text = 'In $days day${days == 1 ? '' : 's'}';
-        color = AppColors.lightPurple;
-      }
+    if (days < 0) {
+      text = '${-days} day${-days == 1 ? '' : 's'} overdue';
+      color =  AppColors.error;
+    } else if (days == 0) {
+      text = 'Today';
+      color =  AppColors.success;
+    } else {
+      text = 'In $days day${days == 1 ? '' : 's'}';
+      color =  AppColors.primary;
+    }
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        decoration: BoxDecoration(
-         color: color.withValues(alpha: 0.1),
-         borderRadius: BorderRadius.circular(12),
-         border: Border.all(color: color.withValues(alpha: 0.3)),
-        ),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+      ),
       child: Text(
         text,
         style: TextStyle(
@@ -981,18 +981,18 @@ class _ActionIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     return Tooltip(
       message: tooltip,
-          child: InkWell(
-         borderRadius: BorderRadius.circular(8),
-         onTap: onTap,
-         child: Container(
-           padding: const EdgeInsets.all(6),
-           decoration: BoxDecoration(
-             color: color.withValues(alpha: 0.1),
-             borderRadius: BorderRadius.circular(8),
-           ),
-           child: AppSvgIcon(svgAsset, size: 15, color: color),
-         ),
-       ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(8),
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: AppSvgIcon(svgAsset, size: 15, color: color),
+        ),
+      ),
     );
   }
 }
@@ -1010,13 +1010,13 @@ class _ModuleBadge extends StatelessWidget {
         ? const Color(0xffFEF9C3)
         : isSprinkler
         ? const Color(0xffDBEAFE)
-        : const Color(0xffDCFCE7);
+        :  AppColors.successLight;
 
     final textColor = isSolar
         ? const Color(0xff854D0E)
         : isSprinkler
         ? const Color(0xff1D4ED8)
-        : const Color(0xff166534);
+        :  AppColors.success;
 
     final label = isSolar
         ? 'Solar'
@@ -1062,7 +1062,7 @@ class _EmptyState extends StatelessWidget {
           AppSvgIcon(
             AppSvgAssets.calendarCheck,
             size: 44,
-            color: Color(0xffCBD5E1),
+            color: AppColors.divider,
           ),
           const SizedBox(height: 14),
           Text(
@@ -1070,18 +1070,16 @@ class _EmptyState extends StatelessWidget {
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: Color(0xff374151),
+              color: AppColors.textDark,
             ),
           ),
           const SizedBox(height: 6),
           Text(
             sub,
-            style: const TextStyle(fontSize: 13, color: Color(0xff94A3B8)),
+            style: const TextStyle(fontSize: 13, color: AppColors.textLight),
           ),
         ],
       ),
     );
   }
 }
-
-

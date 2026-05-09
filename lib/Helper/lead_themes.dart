@@ -1,34 +1,34 @@
 import 'package:flutter/material.dart';
-import 'package:solar_project/Helper/app_colors.dart';
+import 'package:solar_project/core/app_colors.dart';
 
 class LeadTheme {
   // ─────────────────────────────────────────
-  // LIGHT CRM BACKGROUND (Compact Friendly)
+  // BACKGROUND & SURFACE
   // ─────────────────────────────────────────
-  static const Color bg = AppColors.bgSecondary;
-  static const Color surface = Colors.white;
-  static const Color surfaceDeep = Colors.white;
-  static const Color border = AppColors.borderLight;
+  static const Color bg = AppColors.background;
+  static const Color surface = AppColors.surface;
+  static const Color surfaceDeep = AppColors.surface;
+  static const Color border = AppColors.divider;
 
   // ─────────────────────────────────────────
   // BRAND COLORS
   // ─────────────────────────────────────────
-  static const Color primary = AppColors.lightPurple; // Purple
-  static const Color secondary = AppColors.lightPurple; // Use uniform brand purple
-  static const Color warning = AppColors.lightPurple;
-  static const Color danger = AppColors.lightPurple;
-  static const Color success = AppColors.lightPurple;
-  static const Color orange = AppColors.lightPurple;
+  static const Color primary = AppColors.primary;
+  static const Color secondary = AppColors.primaryLight;
+  static const Color warning = AppColors.warning;       // = primary (0xFF5B4FCF)
+  static const Color danger = AppColors.error;
+  static const Color success = AppColors.success;       // = primary (0xFF5B4FCF)
+  static const Color orange = AppColors.primaryDark;
 
   // ─────────────────────────────────────────
-  // TEXT COLORS (DARK TEXT)
+  // TEXT COLORS
   // ─────────────────────────────────────────
-  static const Color textPrimary = AppColors.textPrimary;
-  static const Color textSecondary = AppColors.textPrimary;
-  static const Color textMuted = AppColors.textSecondary;
+  static const Color textPrimary = AppColors.textDark;
+  static const Color textSecondary = AppColors.textGray;
+  static const Color textMuted = AppColors.textLight;
 
   // ─────────────────────────────────────────
-  // COMPACT SPACING (IMPORTANT)
+  // COMPACT SPACING
   // ─────────────────────────────────────────
   static const double paddingSmall = 6;
   static const double paddingMedium = 10;
@@ -43,35 +43,35 @@ class LeadTheme {
   static Color statusColor(String status) {
     switch (status) {
       case 'New Lead':
-        return secondary;
+        return AppColors.primaryLight;
       case 'Visit Scheduled':
-        return warning;
+        return AppColors.primary;
       case 'Visited':
-        return primary;
+        return AppColors.primaryDark;
       case 'Quotation Sent':
-        return warning;
+        return AppColors.primary;
       case 'Followup':
-        return warning;
+        return AppColors.primaryLight;
       case 'Deal Closed':
-        return success;
+        return AppColors.success;           // = primary
       case 'Portal Submitted':
-        return secondary;
+        return AppColors.primaryTint;
       case 'Installed':
-        return primary;
+        return AppColors.solar;             // = primary
       case 'Meter Installed':
-        return warning;
+        return AppColors.primaryDark;
       case 'Subsidy Completed':
-        return success;
+        return AppColors.success;
       case 'Payment Completed':
-        return success;
+        return AppColors.success;
       case 'Payment Remaining':
-        return warning;
+        return AppColors.warning;           // = primary
       case 'Project Completed':
-        return success;
+        return AppColors.darkNavy;
       case 'Cancelled':
-        return danger;
+        return AppColors.error;
       default:
-        return secondary;
+        return AppColors.primaryLight;
     }
   }
 
@@ -81,13 +81,13 @@ class LeadTheme {
   static Color priorityColor(String priority) {
     switch (priority) {
       case 'High':
-        return danger;
+        return AppColors.error;
       case 'Medium':
-        return warning;
+        return AppColors.primary;
       case 'Low':
-        return success;
+        return AppColors.primaryLight;
       default:
-        return secondary;
+        return AppColors.primaryLight;
     }
   }
 
@@ -100,5 +100,3 @@ class LeadTheme {
     return amount.toStringAsFixed(0);
   }
 }
-
-

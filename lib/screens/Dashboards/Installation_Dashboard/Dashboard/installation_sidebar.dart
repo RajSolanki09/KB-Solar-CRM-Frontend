@@ -6,10 +6,8 @@ import 'package:solar_project/Cubits/Auth/auth_cubit.dart';
 import 'package:solar_project/Cubits/InstallationNavigation/installation_nav_cubit.dart';
 import 'package:solar_project/Cubits/InstallationNavigation/installation_nav_state.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
-import 'package:solar_project/Helper/common_widgets.dart';
+import 'package:solar_project/core/app_colors.dart';
 import 'package:solar_project/services/api_service.dart';
-import 'package:solar_project/Helper/app_logo.dart';
-import 'package:solar_project/Helper/app_colors.dart';
 
 class InstallationSidebar extends StatelessWidget {
   const InstallationSidebar({super.key});
@@ -21,9 +19,9 @@ class InstallationSidebar extends StatelessWidget {
         return Container(
           width: 260,
           decoration: const BoxDecoration(
-            color: AppColors.primaryLightest,
+            color: AppColors.primaryTint, // ← same as admin sidebar
             border: Border(
-              right: BorderSide(color: AppColors.primaryLighter, width: 1),
+              right: BorderSide(color: AppColors.primaryTint, width: 1),
             ),
           ),
           child: Column(
@@ -130,8 +128,9 @@ class _InstallationBrandHeaderState extends State<_InstallationBrandHeader> {
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.accent2,
-                        // .withOpacity(_logoHovered ? 0.45 : 0.30),
+                        color: const Color(
+                          0xff4F52FF,
+                        ).withOpacity(_logoHovered ? 0.45 : 0.30),
                         blurRadius: _logoHovered ? 14 : 10,
                         offset: const Offset(0, 4),
                       ),
@@ -142,11 +141,10 @@ class _InstallationBrandHeaderState extends State<_InstallationBrandHeader> {
                     child: AnimatedOpacity(
                       duration: const Duration(milliseconds: 180),
                       opacity: _logoHovered ? 0.85 : 1.0,
-                      child: AppLogo(
-                        size: LogoSize.custom,
-                        customWidth: 52,
-                        customHeight: 52,
-                        borderRadius: 0,
+                      child: Image.asset(
+                        'assets/images/leaf.png',
+                        width: 52,
+                        height: 52,
                         fit: BoxFit.cover,
                       ),
                     ),
@@ -167,18 +165,17 @@ class _InstallationBrandHeaderState extends State<_InstallationBrandHeader> {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
+                  color: AppColors.darkNavy,
+                  letterSpacing: -0.4,
                 ),
-                // letterSpacing: -0.4,
               ),
-
               SizedBox(height: 1),
               Text(
-                'Install Team',
+                'Clean Energy',
                 style: TextStyle(
                   fontSize: 11.5,
                   fontWeight: FontWeight.w500,
-                  color: Color(0xff7B7EC4),
+                  color: AppColors.textLight,
                   letterSpacing: 0.1,
                 ),
               ),
@@ -206,7 +203,7 @@ class _SectionLabel extends StatelessWidget {
         style: const TextStyle(
           fontSize: 10.5,
           fontWeight: FontWeight.w700,
-          color: Color(0xff7B7EC4),
+          color: AppColors.textLight,
           letterSpacing: 1.4,
         ),
       ),
@@ -242,28 +239,28 @@ class _NavItemState extends State<_NavItem> {
     final active = widget.isActive;
 
     final bgColor = active
-        ? Colors.white
+        ? AppColors.surface
         : _hovered
-        ? const Color(0xffD8DAFF)
-        : const Color(0xffE6E8FF);
+        ? AppColors.primaryTint
+        : AppColors.primaryTint;
 
     final iconBg = active
-        ? const Color(0xffECECFF)
+        ? AppColors.primaryTint
         : _hovered
-        ? const Color(0xffC8CAFF)
-        : const Color(0xffD0D2F0);
+        ? AppColors.primaryTint
+        : AppColors.primaryTint;
 
     final iconColor = active
-        ? AppColors.accent2
+        ?  AppColors.primary
         : _hovered
-        ? const Color(0xff3B3DCC)
-        : const Color(0xff7476B8);
+        ?  AppColors.primary
+        : AppColors.textLight;
 
     final labelColor = active
-        ? const Color(0xff3B3DCC)
+        ?  AppColors.primary
         : _hovered
-        ? const Color(0xff2D2FAA)
-        : const Color(0xff6668A8);
+        ? AppColors.primaryDark
+        : AppColors.textGray;
 
     return MouseRegion(
       onEnter: (_) => setState(() => _hovered = true),
@@ -282,7 +279,7 @@ class _NavItemState extends State<_NavItem> {
             boxShadow: active
                 ? [
                     BoxShadow(
-                      color: AppColors.accent2,
+                      color:  AppColors.primary.withOpacity(0.10),
                       blurRadius: 10,
                       offset: const Offset(0, 2),
                     ),
@@ -327,7 +324,7 @@ class _NavItemState extends State<_NavItem> {
                   width: 6,
                   height: 6,
                   decoration: const BoxDecoration(
-                    color: AppColors.accent2,
+                    color: AppColors.primary,
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -352,7 +349,7 @@ class _BottomSection extends StatelessWidget {
         Container(
           height: 1,
           margin: const EdgeInsets.symmetric(horizontal: 16),
-          color: const Color(0xffC4C6F0),
+          color: AppColors.divider,
         ),
         const SizedBox(height: 6),
         _LogoutButton(onTap: () => _showLogoutDialog(context)),
@@ -367,30 +364,29 @@ class _BottomSection extends StatelessWidget {
       barrierDismissible: false,
       builder: (_) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        backgroundColor: AppColors.bgPrimary,
+        backgroundColor: AppColors.background,
         title: const Text(
           'Sign Out',
           style: TextStyle(
             fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+            color: AppColors.darkNavy,
           ),
         ),
-
         content: const Text(
           'Are you sure you want to sign out?',
-          style: TextStyle(color: Color(0xff6366D4)),
+          style: TextStyle(color: AppColors.primary),
         ),
         actions: [
           TextButton(
-            onPressed: () => safePop(context),
+            onPressed: () => Navigator.pop(context),
             child: const Text(
               'Cancel',
-              style: TextStyle(color: Color(0xff9396CC)),
+              style: TextStyle(color: AppColors.textGray),
             ),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.accent2,
+              backgroundColor:  AppColors.primary,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
@@ -398,7 +394,7 @@ class _BottomSection extends StatelessWidget {
             onPressed: () => _performLogout(context),
             child: const Text(
               'Sign Out',
-              style: TextStyle(color: Colors.white),
+              style: TextStyle(color: AppColors.surface),
             ),
           ),
         ],
@@ -410,8 +406,7 @@ class _BottomSection extends StatelessWidget {
     final apiService = ApiService();
 
     try {
-      // Close confirmation dialog safely
-      safePop(context);
+      Navigator.pop(context); // Close confirm dialog
       _showLogoutProgressDialog(context);
 
       await apiService.logout(); // Call backend logout
@@ -421,14 +416,13 @@ class _BottomSection extends StatelessWidget {
       }
 
       if (context.mounted) {
-        // Close progress dialog safely
-        safePop(context);
+        Navigator.pop(context); // Close progress dialog
       }
     } catch (e) {
       debugPrint('Logout error: $e');
       if (context.mounted) {
         context.read<AppStateCubit>().logout();
-        safePop(context);
+        Navigator.pop(context);
       }
     }
   }
@@ -438,7 +432,7 @@ class _BottomSection extends StatelessWidget {
       context: context,
       barrierDismissible: false,
       builder: (_) => const AlertDialog(
-        backgroundColor: AppColors.bgPrimary,
+        backgroundColor: AppColors.background,
         content: SizedBox(
           width: 100,
           height: 100,
@@ -451,16 +445,15 @@ class _BottomSection extends StatelessWidget {
                   height: 40,
                   child: CircularProgressIndicator(
                     valueColor: AlwaysStoppedAnimation<Color>(
-                      AppColors.accent2,
+                      AppColors.primary,
                     ),
                   ),
                 ),
-
                 SizedBox(height: 16),
                 Text(
                   'Signing out...',
                   style: TextStyle(
-                    color: Color(0xff6366D4),
+                    color: AppColors.primary,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -490,16 +483,18 @@ class _LogoutButtonState extends State<_LogoutButton> {
   @override
   Widget build(BuildContext context) {
     final bgColor = _hovered
-        ? AppColors.primary.withValues(alpha: 0.15)
-        : AppColors.primary.withValues(alpha: 0.08);
+        ? AppColors.errorLight
+        :  AppColors.primaryTint;
 
-    final iconBg = _hovered
-        ? AppColors.primary
-        : AppColors.primary.withValues(alpha: 0.2);
+    final iconBg = _hovered ? AppColors.errorLight : AppColors.errorLight;
 
-    final iconColor = _hovered ? Colors.white : AppColors.primary;
+    final iconColor = _hovered
+        ?  AppColors.error
+        : AppColors.error;
 
-    final labelColor = _hovered ? AppColors.primary : AppColors.primary;
+    final labelColor = _hovered
+        ?  AppColors.error
+        : AppColors.error;
 
     return MouseRegion(
       onEnter: (_) => setState(() => _hovered = true),

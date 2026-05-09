@@ -8,23 +8,17 @@ class DioClient {
   late final Dio dio;
 
   DioClient() {
-    // On Flutter Web, Dio's XMLHttpRequest adapter does not support
-    // sendTimeout (and warns noisily when it is non-zero). We therefore
-    // only set timeout values on native platforms.
-    final baseOptions = BaseOptions(
-      baseUrl: ApiConstants.baseUrl,
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-      },
+    dio = Dio(
+      BaseOptions(
+        baseUrl: ApiConstants.baseUrl,
+        connectTimeout: const Duration(seconds: 120),
+        receiveTimeout: const Duration(seconds: 120),
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+      ),
     );
-    if (!kIsWeb) {
-      baseOptions.connectTimeout = const Duration(seconds: 120);
-      baseOptions.receiveTimeout = const Duration(seconds: 120);
-      baseOptions.sendTimeout    = const Duration(seconds: 120);
-    }
-
-    dio = Dio(baseOptions);
 
     // Attach JWT to every request automatically
     dio.interceptors.add(InterceptorsWrapper(

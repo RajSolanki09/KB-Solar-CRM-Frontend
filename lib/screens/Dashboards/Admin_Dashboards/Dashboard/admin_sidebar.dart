@@ -4,10 +4,8 @@ import 'package:solar_project/Cubits/AdminNavigation/admin_nav_cubit.dart';
 import 'package:solar_project/Cubits/AdminNavigation/admin_nav_state.dart';
 import 'package:solar_project/Cubits/Auth/auth_cubit.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
-import 'package:solar_project/Helper/common_widgets.dart';
+import 'package:solar_project/core/app_colors.dart';
 import 'package:solar_project/services/api_service.dart';
-import 'package:solar_project/Helper/app_logo.dart';
-import 'package:solar_project/Helper/app_colors.dart';
 
 class Sidebar extends StatelessWidget {
   const Sidebar({super.key});
@@ -19,9 +17,9 @@ class Sidebar extends StatelessWidget {
         return Container(
           width: 260,
           decoration: const BoxDecoration(
-            color: Color(0xffE6E8FF),
+            color: AppColors.primaryTint,
             border: Border(
-              right: BorderSide(color: Color(0xffCFD2FF), width: 1),
+              right: BorderSide(color: AppColors.primaryTint, width: 1),
             ),
           ),
           child: Column(
@@ -143,7 +141,9 @@ class _SidebarBrandHeaderState extends State<_SidebarBrandHeader> {
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.accent2.withOpacity(_logoHovered ? 0.45 : 0.30),
+                        color: const Color(
+                          0xff4F52FF,
+                        ).withOpacity(_logoHovered ? 0.45 : 0.30),
                         blurRadius: _logoHovered ? 14 : 10,
                         offset: const Offset(0, 4),
                       ),
@@ -154,11 +154,10 @@ class _SidebarBrandHeaderState extends State<_SidebarBrandHeader> {
                     child: AnimatedOpacity(
                       duration: const Duration(milliseconds: 180),
                       opacity: _logoHovered ? 0.85 : 1.0,
-                      child: AppLogo(
-                        size: LogoSize.custom,
-                        customWidth: 52,
-                        customHeight: 52,
-                        borderRadius: 0,
+                      child: Image.asset(
+                        'assets/images/leaf.png',
+                        width: 52,
+                        height: 52,
                         fit: BoxFit.cover,
                       ),
                     ),
@@ -179,16 +178,18 @@ class _SidebarBrandHeaderState extends State<_SidebarBrandHeader> {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
+                  color: AppColors.darkNavy,
+                  letterSpacing: -0.4,
                 ),
               ),
               SizedBox(height: 1),
               Text(
-                'Project Management',
+                'Clean Energy',
                 style: TextStyle(
                   fontSize: 11.5,
                   fontWeight: FontWeight.w500,
-                  color: AppColors.textSecondary,
+                  color: AppColors.textLight,
+                  letterSpacing: 0.1,
                 ),
               ),
             ],
@@ -216,16 +217,16 @@ class _SearchBarState extends State<_SearchBar> {
       duration: const Duration(milliseconds: 180),
       height: 36,
       decoration: BoxDecoration(
-        color: _focused ? Colors.white : const Color(0xffD8DAFF),
+        color: _focused ? AppColors.surface :  AppColors.primaryTint,
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
-          color: _focused ? AppColors.accent2 : const Color(0xffBFC2F0),
+          color: _focused ?  AppColors.primary : const Color(0xffBFC2F0),
           width: _focused ? 1.5 : 1,
         ),
         boxShadow: _focused
             ? [
                 BoxShadow(
-                  color: AppColors.accent2.withOpacity(0.12),
+                  color:  AppColors.primary.withOpacity(0.12),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -235,21 +236,19 @@ class _SearchBarState extends State<_SearchBar> {
       child: Focus(
         onFocusChange: (f) => setState(() => _focused = f),
         child: TextField(
-          style: const TextStyle(fontSize: 12.5, color: AppColors.textPrimary),
+          style: const TextStyle(fontSize: 12.5, color: AppColors.darkNavy),
           decoration: InputDecoration(
             hintText: 'Search...',
             hintStyle: const TextStyle(
               fontSize: 12.5,
-              color: Color(0xff9396CC),
+              color: AppColors.textGray,
             ),
             prefixIcon: Padding(
               padding: const EdgeInsets.all(10),
               child: AppSvgIcon(
                 AppSvgAssets.search,
                 size: 14,
-                color: _focused
-                    ? AppColors.accent2
-                    : const Color(0xff9396CC),
+                color: _focused ? AppColors.primary : AppColors.textGray,
               ),
             ),
             prefixIconConstraints: const BoxConstraints(minWidth: 36),
@@ -298,8 +297,8 @@ class _QuickChipState extends State<_QuickChip> {
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
           decoration: BoxDecoration(
             color: _hovered
-                ? widget.color.withValues(alpha: 0.15)
-                : widget.color.withValues(alpha: 0.08),
+                ? widget.color.withOpacity(0.15)
+                : widget.color.withOpacity(0.08),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
               color: widget.color.withOpacity(_hovered ? 0.5 : 0.25),
@@ -342,7 +341,7 @@ class _SectionLabel extends StatelessWidget {
         style: const TextStyle(
           fontSize: 10.5,
           fontWeight: FontWeight.w700,
-          color: Color(0xff7B7EC4),
+          color: AppColors.textLight,
           letterSpacing: 1.4,
         ),
       ),
@@ -379,27 +378,27 @@ class _NavItemState extends State<_NavItem> {
 
     // ── Pre-compute colors (no inline ternaries inside AnimatedContainer) ──
     final bgColor = active
-        ? Colors.white
+        ? AppColors.surface
         : _hovered
-        ? const Color(0xffD8DAFF)
-        : const Color(0xffE6E8FF); // ← transparent ki jagah parent bg color
+        ?  AppColors.primaryTint
+        :  AppColors.primaryTint; // ← transparent ki jagah parent bg color
 
     final iconBg = active
-        ? const Color(0xffECECFF)
+        ?  Color(0xffECECFF)
         : _hovered
-        ? const Color(0xffC8CAFF)
-        : const Color(0xffD0D2F0);
+        ?  AppColors.primaryTint
+        :  AppColors.primaryTint;
 
     final iconColor = active
-        ? AppColors.accent2
+        ?  AppColors.primary
         : _hovered
-        ? const Color(0xff3B3DCC)
-        : const Color(0xff7476B8);
+        ?  AppColors.primary
+        :  Color(0xff7476B8);
 
     final labelColor = active
-        ? const Color(0xff3B3DCC)
+        ?  AppColors.primary
         : _hovered
-        ? const Color(0xff2D2FAA)
+        ?  Color(0xff2D2FAA)
         : const Color(0xff6668A8);
 
     return MouseRegion(
@@ -419,7 +418,7 @@ class _NavItemState extends State<_NavItem> {
             boxShadow: active
                 ? [
                     BoxShadow(
-                      color: AppColors.accent2.withOpacity(0.10),
+                      color:  AppColors.primary.withOpacity(0.10),
                       blurRadius: 10,
                       offset: const Offset(0, 2),
                     ),
@@ -464,7 +463,7 @@ class _NavItemState extends State<_NavItem> {
                   width: 6,
                   height: 6,
                   decoration: const BoxDecoration(
-                    color: AppColors.accent2,
+                    color: AppColors.primary,
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -504,29 +503,29 @@ class _BottomSection extends StatelessWidget {
       barrierDismissible: false, // Prevent dismissal by tapping outside
       builder: (_) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        backgroundColor: AppColors.bgPrimary,
+        backgroundColor: const Color(0xffF4F4FF),
         title: const Text(
           'Sign Out',
           style: TextStyle(
             fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+            color: AppColors.darkNavy,
           ),
         ),
         content: const Text(
           'Are you sure you want to sign out?',
-          style: TextStyle(color: Color(0xff6366D4)),
+          style: TextStyle(color: AppColors.primary),
         ),
         actions: [
           TextButton(
-            onPressed: () => safePop(context),
+            onPressed: () => Navigator.pop(context),
             child: const Text(
               'Cancel',
-              style: TextStyle(color: Color(0xff9396CC)),
+              style: TextStyle(color: AppColors.textGray),
             ),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.accent2,
+              backgroundColor:  AppColors.primary,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
@@ -534,7 +533,7 @@ class _BottomSection extends StatelessWidget {
             onPressed: () => _performLogout(context),
             child: const Text(
               'Sign Out',
-              style: TextStyle(color: Colors.white),
+              style: TextStyle(color: AppColors.surface),
             ),
           ),
         ],
@@ -548,8 +547,8 @@ class _BottomSection extends StatelessWidget {
     final apiService = ApiService();
 
     try {
-      // Close the confirmation dialog first (defensive)
-      safePop(context);
+      // Close the dialog first
+      Navigator.pop(context);
 
       // Show loading indicator while logging out
       _showLogoutProgressDialog(context);
@@ -557,21 +556,22 @@ class _BottomSection extends StatelessWidget {
       // Call backend logout endpoint (notify server of logout)
       await apiService.logout();
 
-      // Close progress dialog before emitting logout so that the UI
-      // teardown caused by logout does not remove the dialog underneath
-      // us and cause framework assertions.
+      // Emit unauthenticated state — this triggers navigation to login
       if (context.mounted) {
-        // Close progress dialog if shown
-        safePop(context);
         context.read<AppStateCubit>().logout();
+      }
+
+      // Dismiss progress dialog if still on this context
+      if (context.mounted) {
+        Navigator.pop(context);
       }
     } catch (e) {
       debugPrint('Logout error: $e');
       // Even if there's an error, still emit logout state
       // (apiService.logout() already clears TokenStorage)
       if (context.mounted) {
-        safePop(context); // Close progress dialog if shown
         context.read<AppStateCubit>().logout();
+        Navigator.pop(context); // Close progress dialog
       }
     }
   }
@@ -582,7 +582,7 @@ class _BottomSection extends StatelessWidget {
       context: context,
       barrierDismissible: false,
       builder: (_) => const AlertDialog(
-        backgroundColor: AppColors.bgPrimary,
+        backgroundColor: Color(0xffF4F4FF),
         content: SizedBox(
           width: 100,
           height: 100,
@@ -594,8 +594,8 @@ class _BottomSection extends StatelessWidget {
                   width: 40,
                   height: 40,
                   child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(  
-                      AppColors.accent2,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      AppColors.primary,
                     ),
                   ),
                 ),
@@ -603,7 +603,7 @@ class _BottomSection extends StatelessWidget {
                 Text(
                   'Signing out...',
                   style: TextStyle(
-                    color: Color(0xff6366D4),
+                    color: AppColors.primary,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -634,18 +634,18 @@ class _LogoutButtonState extends State<_LogoutButton> {
   Widget build(BuildContext context) {
     // Pre-compute colors
     final bgColor = _hovered
-        ? AppColors.primary.withValues(alpha: 0.15)
-        : AppColors.primary.withValues(alpha: 0.08);
+        ?  AppColors.errorLight
+        :  AppColors.primaryTint; // ← transparent ki jagah parent bg color
 
-    final iconBg = _hovered ? AppColors.primary : AppColors.primary.withValues(alpha: 0.2);
+    final iconBg = _hovered ?  Color(0xffFFD6D6) :  Color(0xffFFE0E0);
 
     final iconColor = _hovered
-        ? Colors.white
-        : AppColors.primary;
+        ?  AppColors.error
+        :  Color(0xffC96060);
 
     final labelColor = _hovered
-        ? AppColors.primary
-        : AppColors.primary;
+        ?  AppColors.error
+        : const Color(0xffB85555);
 
     return MouseRegion(
       onEnter: (_) => setState(() => _hovered = true),
@@ -694,8 +694,3 @@ class _LogoutButtonState extends State<_LogoutButton> {
     );
   }
 }
-
-
-
-
-

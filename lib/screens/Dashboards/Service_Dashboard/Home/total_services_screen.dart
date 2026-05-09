@@ -60,19 +60,19 @@
 //   Color get color {
 //     switch (this) {
 //       case all:
-//         return AppColors.accent2);
+//         return const AppColors.primary;
 //       case today:
-//         return const Color(0xFF2193b0);
+//         return const AppColors.primaryLight;
 //       case pending:
-//         return const Color(0xFFFF8008);
+//         return const AppColors.solar;
 //       case inProgress:
-//         return const Color(0xFF4e54c8);
+//         return const AppColors.primaryDark;
 //       case completed:
-//         return const Color(0xFF11998e);
+//         return const AppColors.success;
 //       case free:
-//         return const Color(0xFFFF416C);
+//         return const AppColors.error;
 //       case paid:
-//         return AppColors.success);
+//         return const AppColors.success;
 //     }
 //   }
 // }
@@ -177,7 +177,7 @@
 //         data: Theme.of(ctx).copyWith(
 //           colorScheme: ColorScheme.light(
 //             primary: widget.initialFilter.color,
-//             onPrimary: Colors.white,
+//             onPrimary: AppColors.surface,
 //           ),
 //         ),
 //         child: child!,
@@ -200,17 +200,17 @@
 //   Color _statusColor(String s) {
 //     switch (s) {
 //       case 'Assigned':
-//         return const Color(0xFF2193b0);
+//         return const AppColors.primaryLight;
 //       case 'In Progress':
-//         return const Color(0xFFFF8008);
+//         return const AppColors.solar;
 //       case 'Completed':
 //       case 'Resolved':
-//         return const Color(0xFF11998e);
+//         return const AppColors.success;
 //       case 'Open':
 //       case 'Pending':
-//         return Colors.orange;
+//         return AppColors.solar;
 //       default:
-//         return AppColors.textSecondary;
+//         return Colors.grey;
 //     }
 //   }
 
@@ -220,14 +220,14 @@
 //     final color = f.color;
 
 //     return Scaffold(
-//       backgroundColor: AppColors.bgSecondary),
+//       backgroundColor: const AppColors.background,
 //       appBar: AppBar(
 //         backgroundColor: color,
 //         elevation: 0,
 //         leading: IconButton(
 //           icon: const AppSvgIcon(
 //             AppSvgAssets.chevronLeft,
-//             color: Colors.white,
+//             color: AppColors.surface,
 //             size: 18,
 //           ),
 //           onPressed: () => Navigator.pop(context),
@@ -235,14 +235,14 @@
 //         title: Text(
 //           f.label,
 //           style: const TextStyle(
-//             color: Colors.white,
+//             color: AppColors.surface,
 //             fontSize: 16,
 //             fontWeight: FontWeight.w700,
 //           ),
 //         ),
 //         actions: [
 //           IconButton(
-//             icon: const AppSvgIcon(AppSvgAssets.refreshCw, color: Colors.white),
+//             icon: const AppSvgIcon(AppSvgAssets.refreshCw, color: AppColors.surface),
 //             onPressed: () =>
 //                 context.read<ServiceLeadCubit>().fetchAllServices(),
 //           ),
@@ -297,9 +297,9 @@
 //                         child: Container(
 //                           height: 42,
 //                           decoration: BoxDecoration(
-//                             color: Colors.white,
+//                             color: AppColors.surface,
 //                             borderRadius: BorderRadius.circular(10),
-//                             border: Border.all(color: AppColors.borderLight),
+//                             border: Border.all(color: AppColors.divider),
 //                           ),
 //                           child: TextField(
 //                             controller: _searchCtrl,
@@ -309,7 +309,7 @@
 //                               hintText: 'Search name / phone / ID',
 //                               hintStyle: TextStyle(
 //                                 fontSize: 12,
-//                                 color: AppColors.textSecondary,
+//                                 color: AppColors.textLight,
 //                               ),
 //                               prefixIcon: Padding(
 //                                 padding: const EdgeInsets.all(8.0),
@@ -328,7 +328,7 @@
 //                                       child: AppSvgIcon(
 //                                         AppSvgAssets.x,
 //                                         size: 16,
-//                                         color: AppColors.textSecondary,
+//                                         color: AppColors.textLight,
 //                                       ),
 //                                     )
 //                                   : null,
@@ -350,12 +350,12 @@
 //                           height: 42,
 //                           padding: const EdgeInsets.symmetric(horizontal: 14),
 //                           decoration: BoxDecoration(
-//                             color: _date != null ? color : Colors.white,
+//                             color: _date != null ? color : AppColors.surface,
 //                             borderRadius: BorderRadius.circular(10),
 //                             border: Border.all(
 //                               color: _date != null
 //                                   ? color
-//                                   : AppColors.borderLight,
+//                                   : AppColors.divider,
 //                             ),
 //                           ),
 //                           child: Row(
@@ -365,8 +365,8 @@
 //                                 AppSvgAssets.calendarDays,
 //                                 size: 17,
 //                                 color: _date != null
-//                                     ? Colors.white
-//                                     : AppColors.textSecondary,
+//                                     ? AppColors.surface
+//                                     : Colors.grey,
 //                               ),
 //                               const SizedBox(width: 8),
 //                               Text(
@@ -374,8 +374,8 @@
 //                                 style: TextStyle(
 //                                   fontSize: 13,
 //                                   color: _date != null
-//                                       ? Colors.white
-//                                       : AppColors.textSecondary),
+//                                       ? AppColors.surface
+//                                       : const AppColors.textGray,
 //                                   fontWeight: _date != null
 //                                       ? FontWeight.w600
 //                                       : FontWeight.normal,
@@ -388,7 +388,7 @@
 //                                   child: const AppSvgIcon(
 //                                     AppSvgAssets.x,
 //                                     size: 18,
-//                                     color: Colors.white,
+//                                     color: AppColors.surface,
 //                                   ),
 //                                 ),
 //                               ],
@@ -410,7 +410,7 @@
 //                         '${list.length} result${list.length != 1 ? "s" : ""}',
 //                         style: TextStyle(
 //                           fontSize: 12,
-//                           color: AppColors.textSecondary.shade600,
+//                           color: Colors.grey.shade600,
 //                         ),
 //                       ),
 //                     ),
@@ -633,9 +633,9 @@
 //     return Container(
 //       width: double.infinity,
 //       decoration: BoxDecoration(
-//         color: Colors.white,
+//         color: AppColors.surface,
 //         borderRadius: BorderRadius.circular(12),
-//         border: Border.all(color: AppColors.borderLight)),
+//         border: Border.all(color: const AppColors.divider),
 //       ),
 //       child: Column(
 //         crossAxisAlignment: CrossAxisAlignment.start,
@@ -650,13 +650,13 @@
 //                   style: const TextStyle(
 //                     fontSize: 14,
 //                     fontWeight: FontWeight.w700,
-//                     color: AppColors.textPrimary),
+//                     color: AppColors.textDark,
 //                   ),
 //                 ),
 //                 const SizedBox(height: 2),
 //                 Text(
 //                   subtitle,
-//                   style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+//                   style: TextStyle(fontSize: 11, color: AppColors.background0),
 //                 ),
 //               ],
 //             ),
@@ -666,7 +666,7 @@
 //               padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
 //               child: Text(
 //                 'No services in this section.',
-//                 style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+//                 style: TextStyle(fontSize: 12, color: AppColors.textLight),
 //               ),
 //             )
 //           else if (items.isNotEmpty)
@@ -709,9 +709,9 @@
 //     return Container(
 //       width: double.infinity,
 //       decoration: BoxDecoration(
-//         color: Colors.white,
+//         color: AppColors.surface,
 //         borderRadius: BorderRadius.circular(12),
-//         border: Border.all(color: AppColors.borderLight)),
+//         border: Border.all(color: const AppColors.divider),
 //       ),
 //       child: Theme(
 //         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
@@ -728,12 +728,12 @@
 //             style: const TextStyle(
 //               fontSize: 14,
 //               fontWeight: FontWeight.w700,
-//               color: AppColors.textPrimary),
+//               color: AppColors.textDark,
 //             ),
 //           ),
 //           subtitle: Text(
 //             subtitle,
-//             style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+//             style: TextStyle(fontSize: 11, color: AppColors.background0),
 //           ),
 //           children: [
 //             if (items.isEmpty)
@@ -743,7 +743,7 @@
 //                   alignment: Alignment.centerLeft,
 //                   child: Text(
 //                     'No older services found.',
-//                     style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+//                     style: TextStyle(fontSize: 12, color: AppColors.textLight),
 //                   ),
 //                 ),
 //               )
@@ -805,20 +805,20 @@
 //   Color _priorityColor(String p) {
 //     switch (p) {
 //       case 'Urgent':
-//         return Colors.red;
+//         return AppColors.error;
 //       case 'High':
-//         return Colors.orange;
+//         return AppColors.solar;
 //       case 'Low':
-//         return Colors.green;
+//         return AppColors.success;
 //       default:
-//         return const Color(0xFF4e54c8);
+//         return const AppColors.primaryDark;
 //     }
 //   }
 
 //   @override
 //   Widget build(BuildContext context) {
 //     final isDesktop = MediaQuery.sizeOf(context).width >= 1000;
-//     const rowStyle = TextStyle(fontSize: 12, color: AppColors.textPrimary));
+//     const rowStyle = TextStyle(fontSize: 12, color: AppColors.textDark);
 
 //     return SizedBox(
 //       width: double.infinity,
@@ -843,9 +843,9 @@
 //               return null;
 //             }),
 //             border: TableBorder(
-//               horizontalInside: BorderSide(color: Colors.blueGrey.shade50),
-//               bottom: BorderSide(color: Colors.blueGrey.shade100),
-//               top: BorderSide(color: Colors.blueGrey.shade100),
+//               horizontalInside: BorderSide(color: AppColors.primaryGrey.shade50),
+//               bottom: BorderSide(color: AppColors.primaryGrey.shade100),
+//               top: BorderSide(color: AppColors.primaryGrey.shade100),
 //             ),
 //             columns: [
 //               const DataColumn(label: Text('Customer')),
@@ -896,7 +896,7 @@
 //                         _chip(
 //                           item.chargeType,
 //                           item.chargeType == 'Paid'
-//                               ? Colors.orange
+//                               ? AppColors.solar
 //                               : Colors.teal,
 //                         ),
 //                       ),
@@ -922,13 +922,13 @@
 //                                     AppSvgIcon(
 //                                       AppSvgAssets.indianRupee,
 //                                       size: 11,
-//                                       color: AppColors.warning,
+//                                       color: AppColors.solar,
 //                                     ),
 //                                     Text(
 //                                       item.amount!.toStringAsFixed(0),
 //                                       style: rowStyle.copyWith(
 //                                         fontWeight: FontWeight.w700,
-//                                         color: AppColors.warning,
+//                                         color: AppColors.solar,
 //                                       ),
 //                                     ),
 //                                   ],
@@ -979,9 +979,9 @@
 //         mainAxisAlignment: MainAxisAlignment.spaceAround,
 //         children: [
 //           _Stat('Total', '$total', color),
-//           Container(width: 1, height: 28, color: AppColors.borderLight),
-//           _Stat('Pending', '$pending', AppColors.warning),
-//           Container(width: 1, height: 28, color: AppColors.borderLight),
+//           Container(width: 1, height: 28, color: AppColors.divider),
+//           _Stat('Pending', '$pending', AppColors.solar),
+//           Container(width: 1, height: 28, color: AppColors.divider),
 //           _Stat('Completed', '$completed', AppColors.success),
 //         ],
 //       ),
@@ -1005,7 +1005,7 @@
 //           color: color,
 //         ),
 //       ),
-//       Text(label, style: TextStyle(fontSize: 11, color: AppColors.textSecondary.shade600)),
+//       Text(label, style: TextStyle(fontSize: 11, color: Colors.grey.shade600)),
 //     ],
 //   );
 // }
@@ -1025,20 +1025,20 @@
 //     child: Column(
 //       mainAxisAlignment: MainAxisAlignment.center,
 //       children: [
-//         AppSvgIcon(filter.icon, size: 60, color: AppColors.borderLight),
+//         AppSvgIcon(filter.icon, size: 60, color: AppColors.divider),
 //         const SizedBox(height: 14),
 //         Text(
 //           'No ${filter.label}',
 //           style: TextStyle(
 //             fontSize: 15,
 //             fontWeight: FontWeight.w600,
-//             color: AppColors.textSecondary,
+//             color: AppColors.textLight,
 //           ),
 //         ),
 //         const SizedBox(height: 6),
 //         Text(
 //           hasDateFilter ? 'No data for selected date' : 'Pull down to refresh',
-//           style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+//           style: TextStyle(fontSize: 12, color: AppColors.textLight),
 //         ),
 //         if (hasDateFilter) ...[
 //           const SizedBox(height: 14),
@@ -1046,7 +1046,7 @@
 //             onPressed: onClear,
 //             icon: const AppSvgIcon(AppSvgAssets.x, size: 14),
 //             label: const Text('Clear date'),
-//             style: TextButton.styleFrom(foregroundColor: AppColors.textSecondary),
+//             style: TextButton.styleFrom(foregroundColor: AppColors.background0),
 //           ),
 //         ],
 //       ],
@@ -1069,9 +1069,9 @@
 //     child: Column(
 //       mainAxisAlignment: MainAxisAlignment.center,
 //       children: [
-//         AppSvgIcon(AppSvgAssets.triangleAlert, size: 52, color: Colors.red.shade300),
+//         AppSvgIcon(AppSvgAssets.triangleAlert, size: 52, color: AppColors.error.shade300),
 //         const SizedBox(height: 12),
-//         Text(message, style: const TextStyle(color: AppColors.textSecondary)),
+//         Text(message, style: const TextStyle(color: Colors.grey)),
 //         const SizedBox(height: 16),
 //         ElevatedButton.icon(
 //           onPressed: onRetry,
@@ -1114,7 +1114,3 @@
 //   const PaidServicesPage({super.key})
 //     : super(initialFilter: ServiceFilter.paid);
 // }
-
-
-
-

@@ -10,13 +10,13 @@ import 'package:solar_project/data/Models/solar_leads_model.dart';
 import 'package:solar_project/data/Models/sprinkler_lead_model.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
 import 'package:solar_project/Helper/lead_themes.dart';
-import 'package:solar_project/Helper/app_colors.dart';
+import 'package:solar_project/core/app_colors.dart';
 
 class InstallationPendingScreen extends StatefulWidget {
   final Color appBarColor;
   const InstallationPendingScreen({
     super.key,
-    this.appBarColor = AppColors.primary),
+    this.appBarColor = AppColors.primaryDark,
   });
   @override
   State<InstallationPendingScreen> createState() => _State();
@@ -28,20 +28,25 @@ class _State extends State<InstallationPendingScreen>
   final _searchCtrl = TextEditingController();
   String _search = '';
   bool _showOlderSolar = false;
-  bool _showOlderSpk   = false;
+  bool _showOlderSpk = false;
 
   // 7-day cutoff — same pattern as other screens
   DateTime get _recentCutoff {
-    final now   = DateTime.now();
+    final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     return today.subtract(const Duration(days: 6));
   }
+
+  late final VoidCallback _tabListener;
 
   @override
   void initState() {
     super.initState();
     _tab = TabController(length: 2, vsync: this);
-    _tab.addListener(() => setState(() {}));
+    _tabListener = () {
+      if (mounted) setState(() {});
+    };
+    _tab.addListener(_tabListener);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<SolarLeadCubit>().fetchAllLeads();
       context.read<SprinklerLeadCubit>().fetchAllLeads();
@@ -50,6 +55,7 @@ class _State extends State<InstallationPendingScreen>
 
   @override
   void dispose() {
+    _tab.removeListener(_tabListener);
     _tab.dispose();
     _searchCtrl.dispose();
     super.dispose();
@@ -68,8 +74,7 @@ class _State extends State<InstallationPendingScreen>
           l.mobile.contains(_search) ||
           l.address.toLowerCase().contains(q);
       return matchStep && matchSearch;
-    }).toList()
-      ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+    }).toList()..sort((a, b) => a.createdAt.compareTo(b.createdAt));
   }
 
   List<SprinklerLeadModel> _spkPending(List<SprinklerLeadModel> all) {
@@ -84,24 +89,22 @@ class _State extends State<InstallationPendingScreen>
           l.phone.contains(_search) ||
           l.address.toLowerCase().contains(q);
       return matchStep && matchSearch;
-    }).toList()
-      ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+    }).toList()..sort((a, b) => a.createdAt.compareTo(b.createdAt));
   }
 
   @override
   Widget build(BuildContext context) {
-    final tabColor =
-        _tab.index == 0 ? LeadTheme.primary : LeadTheme.secondary;
+    final tabColor = _tab.index == 0 ? LeadTheme.primary : LeadTheme.secondary;
 
     return Scaffold(
-      backgroundColor: AppColors.bgSecondary),
+      backgroundColor:  AppColors.background,
       appBar: AppBar(
         backgroundColor: widget.appBarColor,
         elevation: 0,
         leading: IconButton(
           icon: const AppSvgIcon(
             AppSvgAssets.chevronLeft,
-            color: Colors.white,
+            color: AppColors.surface,
             size: 18,
           ),
           onPressed: () => Navigator.pop(context),
@@ -114,18 +117,21 @@ class _State extends State<InstallationPendingScreen>
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
-                color: Colors.white,
+                color: AppColors.surface,
               ),
             ),
             Text(
               'Deal done — awaiting installation',
-              style: TextStyle(fontSize: 11, color: Colors.white70),
+              style: TextStyle(fontSize: 11, color: AppColors.surface),
             ),
           ],
         ),
         actions: [
           IconButton(
-            icon: const AppSvgIcon(AppSvgAssets.refreshCw, color: Colors.white),
+            icon: const AppSvgIcon(
+              AppSvgAssets.refreshCw,
+              color: AppColors.surface,
+            ),
             onPressed: () {
               context.read<SolarLeadCubit>().fetchAllLeads();
               context.read<SprinklerLeadCubit>().fetchAllLeads();
@@ -135,15 +141,17 @@ class _State extends State<InstallationPendingScreen>
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(44),
           child: Container(
-            color: Colors.white,
+            color: AppColors.surface,
             child: TabBar(
               controller: _tab,
               indicatorColor: tabColor,
               indicatorWeight: 2.5,
               labelColor: tabColor,
-              unselectedLabelColor: AppColors.textTertiary),
+              unselectedLabelColor:  AppColors.textLight,
               labelStyle: const TextStyle(
-                  fontSize: 13, fontWeight: FontWeight.w600),
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              ),
               tabs: [
                 Tab(
                   child: BlocBuilder<SolarLeadCubit, SolarLeadState>(
@@ -157,7 +165,7 @@ class _State extends State<InstallationPendingScreen>
                         children: [
                           const AppSvgIcon(AppSvgAssets.sun, size: 14),
                           const SizedBox(width: 5),
-                          const Text('Project'),
+                          const Text('Solar'),
                           if (count > 0) ...[
                             const SizedBox(width: 5),
                             _CountChip(count, LeadTheme.primary),
@@ -198,14 +206,14 @@ class _State extends State<InstallationPendingScreen>
         children: [
           // ── Search bar ─────────────────────────────────────────────────
           Container(
-            color: Colors.white,
+            color: AppColors.surface,
             padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
             child: Container(
               height: 38,
               decoration: BoxDecoration(
-                color: AppColors.bgSecondary),
+                color:  AppColors.background,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: AppColors.borderLight),
+                border: Border.all(color: AppColors.divider),
               ),
               child: TextField(
                 controller: _searchCtrl,
@@ -213,7 +221,9 @@ class _State extends State<InstallationPendingScreen>
                 decoration: InputDecoration(
                   hintText: 'Search name / phone / address',
                   hintStyle: const TextStyle(
-                      fontSize: 12, color: AppColors.textTertiary)),
+                    fontSize: 12,
+                    color: AppColors.textLight,
+                  ),
                   prefixIcon: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: AppSvgIcon(
@@ -232,8 +242,7 @@ class _State extends State<InstallationPendingScreen>
                         )
                       : null,
                   border: InputBorder.none,
-                  contentPadding:
-                      const EdgeInsets.symmetric(vertical: 10),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 10),
                 ),
                 style: const TextStyle(fontSize: 13),
               ),
@@ -251,7 +260,8 @@ class _State extends State<InstallationPendingScreen>
                     if (state is SolarLeadLoading) {
                       return const Center(
                         child: CircularProgressIndicator(
-                            color: LeadTheme.primary),
+                          color: LeadTheme.primary,
+                        ),
                       );
                     }
                     if (state is SolarLeadsLoaded) {
@@ -270,12 +280,10 @@ class _State extends State<InstallationPendingScreen>
 
                       // Split into recent / older
                       final recent = list
-                          .where((l) =>
-                              !l.createdAt.isBefore(_recentCutoff))
+                          .where((l) => !l.createdAt.isBefore(_recentCutoff))
                           .toList();
                       final older = list
-                          .where((l) =>
-                              l.createdAt.isBefore(_recentCutoff))
+                          .where((l) => l.createdAt.isBefore(_recentCutoff))
                           .toList();
 
                       return RefreshIndicator(
@@ -288,10 +296,8 @@ class _State extends State<InstallationPendingScreen>
                                 ? 1000.0
                                 : constraints.maxWidth;
                             return ListView(
-                              physics:
-                                  const AlwaysScrollableScrollPhysics(),
-                              padding: const EdgeInsets.fromLTRB(
-                                  12, 8, 12, 40),
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              padding: const EdgeInsets.fromLTRB(12, 8, 12, 40),
                               children: [
                                 _TableSection<SolarLeadsModel>(
                                   title: 'Last 7 Days',
@@ -301,10 +307,8 @@ class _State extends State<InstallationPendingScreen>
                                   accentColor: LeadTheme.primary,
                                   minWidth: minW,
                                   showEmptyMessage: true,
-                                  rowBuilder: (lead) =>
-                                      _solarRow(ctx, lead),
-                                  columnBuilder: () =>
-                                      _solarColumns(),
+                                  rowBuilder: (lead) => _solarRow(ctx, lead),
+                                  columnBuilder: () => _solarColumns(),
                                 ),
                                 const SizedBox(height: 12),
                                 _CollapsibleTableSection<SolarLeadsModel>(
@@ -317,11 +321,9 @@ class _State extends State<InstallationPendingScreen>
                                   initiallyExpanded: _showOlderSolar,
                                   onExpansionChanged: (v) {
                                     if (mounted)
-                                      setState(
-                                          () => _showOlderSolar = v);
+                                      setState(() => _showOlderSolar = v);
                                   },
-                                  rowBuilder: (lead) =>
-                                      _solarRow(ctx, lead),
+                                  rowBuilder: (lead) => _solarRow(ctx, lead),
                                   columnBuilder: () => _solarColumns(),
                                 ),
                               ],
@@ -340,7 +342,8 @@ class _State extends State<InstallationPendingScreen>
                     if (state is SprinklerLeadLoading) {
                       return const Center(
                         child: CircularProgressIndicator(
-                            color: LeadTheme.secondary),
+                          color: LeadTheme.secondary,
+                        ),
                       );
                     }
                     if (state is SprinklerLeadsLoaded) {
@@ -358,12 +361,10 @@ class _State extends State<InstallationPendingScreen>
                       }
 
                       final recent = list
-                          .where((l) =>
-                              !l.createdAt.isBefore(_recentCutoff))
+                          .where((l) => !l.createdAt.isBefore(_recentCutoff))
                           .toList();
                       final older = list
-                          .where((l) =>
-                              l.createdAt.isBefore(_recentCutoff))
+                          .where((l) => l.createdAt.isBefore(_recentCutoff))
                           .toList();
 
                       return RefreshIndicator(
@@ -376,10 +377,8 @@ class _State extends State<InstallationPendingScreen>
                                 ? 1000.0
                                 : constraints.maxWidth;
                             return ListView(
-                              physics:
-                                  const AlwaysScrollableScrollPhysics(),
-                              padding: const EdgeInsets.fromLTRB(
-                                  12, 8, 12, 40),
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              padding: const EdgeInsets.fromLTRB(12, 8, 12, 40),
                               children: [
                                 _TableSection<SprinklerLeadModel>(
                                   title: 'Last 7 Days',
@@ -389,8 +388,7 @@ class _State extends State<InstallationPendingScreen>
                                   accentColor: LeadTheme.secondary,
                                   minWidth: minW,
                                   showEmptyMessage: true,
-                                  rowBuilder: (lead) =>
-                                      _spkRow(ctx, lead),
+                                  rowBuilder: (lead) => _spkRow(ctx, lead),
                                   columnBuilder: () => _spkColumns(),
                                 ),
                                 const SizedBox(height: 12),
@@ -406,8 +404,7 @@ class _State extends State<InstallationPendingScreen>
                                     if (mounted)
                                       setState(() => _showOlderSpk = v);
                                   },
-                                  rowBuilder: (lead) =>
-                                      _spkRow(ctx, lead),
+                                  rowBuilder: (lead) => _spkRow(ctx, lead),
                                   columnBuilder: () => _spkColumns(),
                                 ),
                               ],
@@ -429,14 +426,14 @@ class _State extends State<InstallationPendingScreen>
 
   // ── Solar column definitions ──────────────────────────────────────────────
   List<DataColumn> _solarColumns() => const [
-        DataColumn(label: Text('Customer')),
-        DataColumn(label: Text('Phone')),
-        DataColumn(label: Text('Address')),
-        DataColumn(label: Text('Step')),
-        DataColumn(label: Text('Amount')),
-        DataColumn(label: Text('Install Date')),
-        DataColumn(label: Text('Waiting Since')),
-      ];
+    DataColumn(label: Text('Customer')),
+    DataColumn(label: Text('Phone')),
+    DataColumn(label: Text('Address')),
+    DataColumn(label: Text('Step')),
+    DataColumn(label: Text('Amount')),
+    DataColumn(label: Text('Install Date')),
+    DataColumn(label: Text('Waiting Since')),
+  ];
 
   // ── Solar row builder ─────────────────────────────────────────────────────
   DataRow _solarRow(BuildContext ctx, SolarLeadsModel lead) {
@@ -445,34 +442,47 @@ class _State extends State<InstallationPendingScreen>
 
     return DataRow(
       cells: [
-        DataCell(Text(lead.customerName,
+        DataCell(
+          Text(
+            lead.customerName,
             style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary)))),
-        DataCell(Text(lead.mobile,
-            style: const TextStyle(fontSize: 12, color: AppColors.textPrimary)))),
-        DataCell(SizedBox(
-          width: 160,
-          child: Text(
-            lead.address.isEmpty ? '—' : lead.address,
-            overflow: TextOverflow.ellipsis,
-            style:
-                const TextStyle(fontSize: 12, color: AppColors.textPrimary)),
-          ),
-        )),
-        DataCell(_stepBadge(stepLabel, stepColor)),
-        DataCell(Text(
-          lead.finalAmount != null && lead.finalAmount! > 0
-              ? 'Rs. ${LeadTheme.formatAmount(lead.finalAmount!)}'
-              : lead.totalAmount > 0
-                  ? 'Rs. ${LeadTheme.formatAmount(lead.totalAmount)}'
-                  : '—',
-          style: const TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary)),
-        )),
+              color: AppColors.textDark,
+            ),
+          ),
+        ),
+        DataCell(
+          Text(
+            lead.mobile,
+            style: const TextStyle(fontSize: 12, color: AppColors.textDark),
+          ),
+        ),
+        DataCell(
+          SizedBox(
+            width: 160,
+            child: Text(
+              lead.address.isEmpty ? '—' : lead.address,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 12, color: AppColors.textDark),
+            ),
+          ),
+        ),
+        DataCell(_stepBadge(stepLabel, stepColor)),
+        DataCell(
+          Text(
+            lead.finalAmount != null && lead.finalAmount! > 0
+                ? 'Rs. ${LeadTheme.formatAmount(lead.finalAmount!)}'
+                : lead.totalAmount > 0
+                ? 'Rs. ${LeadTheme.formatAmount(lead.totalAmount)}'
+                : '—',
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textDark,
+            ),
+          ),
+        ),
         DataCell(_installDateCell(lead.expectedInstallDate)),
         DataCell(_waitingCell(lead.dealClosedAt ?? lead.createdAt)),
       ],
@@ -481,14 +491,14 @@ class _State extends State<InstallationPendingScreen>
 
   // ── Sprinkler column definitions ──────────────────────────────────────────
   List<DataColumn> _spkColumns() => const [
-        DataColumn(label: Text('Customer')),
-        DataColumn(label: Text('Phone')),
-        DataColumn(label: Text('Address')),
-        DataColumn(label: Text('Step')),
-        DataColumn(label: Text('Amount')),
-        DataColumn(label: Text('Install Date')),
-        DataColumn(label: Text('Waiting Since')),
-      ];
+    DataColumn(label: Text('Customer')),
+    DataColumn(label: Text('Phone')),
+    DataColumn(label: Text('Address')),
+    DataColumn(label: Text('Step')),
+    DataColumn(label: Text('Amount')),
+    DataColumn(label: Text('Install Date')),
+    DataColumn(label: Text('Waiting Since')),
+  ];
 
   // ── Sprinkler row builder ─────────────────────────────────────────────────
   DataRow _spkRow(BuildContext ctx, SprinklerLeadModel lead) {
@@ -497,32 +507,45 @@ class _State extends State<InstallationPendingScreen>
 
     return DataRow(
       cells: [
-        DataCell(Text(lead.customerName,
+        DataCell(
+          Text(
+            lead.customerName,
             style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary)))),
-        DataCell(Text(lead.phone,
-            style: const TextStyle(fontSize: 12, color: AppColors.textPrimary)))),
-        DataCell(SizedBox(
-          width: 160,
-          child: Text(
-            lead.address.isEmpty ? '—' : lead.address,
-            overflow: TextOverflow.ellipsis,
-            style:
-                const TextStyle(fontSize: 12, color: AppColors.textPrimary)),
-          ),
-        )),
-        DataCell(_stepBadge(stepLabel, stepColor)),
-        DataCell(Text(
-          lead.totalAmount > 0
-              ? 'Rs. ${LeadTheme.formatAmount(lead.totalAmount)}'
-              : '—',
-          style: const TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary)),
-        )),
+              color: AppColors.textDark,
+            ),
+          ),
+        ),
+        DataCell(
+          Text(
+            lead.phone,
+            style: const TextStyle(fontSize: 12, color: AppColors.textDark),
+          ),
+        ),
+        DataCell(
+          SizedBox(
+            width: 160,
+            child: Text(
+              lead.address.isEmpty ? '—' : lead.address,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 12, color: AppColors.textDark),
+            ),
+          ),
+        ),
+        DataCell(_stepBadge(stepLabel, stepColor)),
+        DataCell(
+          Text(
+            lead.totalAmount > 0
+                ? 'Rs. ${LeadTheme.formatAmount(lead.totalAmount)}'
+                : '—',
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textDark,
+            ),
+          ),
+        ),
         DataCell(_installDateCell(lead.expectedInstallDate)),
         DataCell(_waitingCell(lead.dealData.closedAt ?? lead.createdAt)),
       ],
@@ -530,55 +553,79 @@ class _State extends State<InstallationPendingScreen>
   }
 
   Color _solarStepColor(SolarStep step) {
-    return AppColors.primary);
+    switch (step) {
+      case SolarStep.dealDone:
+        return  AppColors.success;
+      case SolarStep.installationAssigned:
+        return AppColors.primaryLight;
+      case SolarStep.installationStarted:
+        return AppColors.primary;
+      default:
+        return  AppColors.textGray;
+    }
   }
 
   Color _sprinklerStepColor(SprinklerStep step) {
-    return AppColors.primary);
+    switch (step) {
+      case SprinklerStep.dealDone:
+        return  AppColors.success;
+      case SprinklerStep.installationAssigned:
+        return AppColors.primaryLight;
+      case SprinklerStep.installationStarted:
+        return AppColors.primary;
+      default:
+        return  AppColors.textGray;
+    }
   }
-    
 
   // ── Shared cell helpers ───────────────────────────────────────────────────
   Widget _stepBadge(String label, Color color) => Container(
-        padding:
-            const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: color.withValues(alpha: 0.35)),
-        ),
-        child: Text(label,
-            style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.w700,
-                color: color)),
-      );
+    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+    decoration: BoxDecoration(
+      color: color.withValues(alpha: 0.1),
+      borderRadius: BorderRadius.circular(12),
+      border: Border.all(color: color.withValues(alpha: 0.35)),
+    ),
+    child: Text(
+      label,
+      style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: color),
+    ),
+  );
 
   Widget _installDateCell(DateTime? dt) {
     if (dt == null) {
-      return Text('Not scheduled',
-          style: TextStyle(fontSize: 11, color: AppColors.textSecondary));
+      return Text(
+        'Not scheduled',
+        style: TextStyle(fontSize: 11, color: AppColors.textLight),
+      );
     }
     final diff = dt.difference(DateTime.now()).inDays;
     final Color color;
-    if (diff < 0)       color = Colors.red;
-    else if (diff == 0) color = Colors.orange;
-    else if (diff <= 3) color = Colors.orange;
-    else                color = AppColors.primary);
+    if (diff < 0)
+      color = AppColors.error;
+    else if (diff == 0)
+      color = AppColors.solar;
+    else if (diff <= 3)
+      color = AppColors.solar;
+    else
+      color = AppColors.primaryLight;
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(DateFormat('dd MMM yyyy').format(dt),
-            style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: color)),
-        Text(DateFormat('hh:mm a').format(dt),
-            style: TextStyle(
-                fontSize: 10,
-                color: color.withValues(alpha: 0.8))),
+        Text(
+          DateFormat('dd MMM yyyy').format(dt),
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+            color: color,
+          ),
+        ),
+        Text(
+          DateFormat('hh:mm a').format(dt),
+          style: TextStyle(fontSize: 10, color: color.withValues(alpha: 0.8)),
+        ),
       ],
     );
   }
@@ -587,15 +634,18 @@ class _State extends State<InstallationPendingScreen>
     if (dealDate == null) return const Text('—');
     final days = DateTime.now().difference(dealDate).inDays;
     final Color color;
-    if (days > 14)      color = Colors.red;
-    else if (days > 7)  color = Colors.orange;
-    else                color = Colors.green;
+    if (days > 14)
+      color = AppColors.error;
+    else if (days > 7)
+      color = AppColors.solar;
+    else
+      color = AppColors.success;
 
     final label = days == 0
         ? 'Today'
         : days == 1
-            ? '1 day'
-            : '$days days';
+        ? '1 day'
+        : '$days days';
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -604,11 +654,14 @@ class _State extends State<InstallationPendingScreen>
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
-      child: Text(label,
-          style: TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w700,
-              color: color)),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w700,
+          color: color,
+        ),
+      ),
     );
   }
 }
@@ -641,9 +694,9 @@ class _TableSection<T> extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.borderLight)),
+        border: Border.all(color:  AppColors.divider),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -658,22 +711,27 @@ class _TableSection<T> extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary),
+                    color: AppColors.textDark,
                   ),
                 ),
                 const SizedBox(height: 2),
-                Text(subtitle,
-                    style: const TextStyle(
-                        fontSize: 11, color: LeadTheme.textMuted)),
+                Text(
+                  subtitle,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: LeadTheme.textMuted,
+                  ),
+                ),
               ],
             ),
           ),
           if (leads.isEmpty && showEmptyMessage)
             const Padding(
               padding: EdgeInsets.fromLTRB(16, 0, 16, 14),
-              child: Text('No leads in this section.',
-                  style: TextStyle(
-                      fontSize: 12, color: LeadTheme.textMuted)),
+              child: Text(
+                'No leads in this section.',
+                style: TextStyle(fontSize: 12, color: LeadTheme.textMuted),
+              ),
             )
           else if (leads.isNotEmpty)
             _InstallDataTable(
@@ -719,9 +777,9 @@ class _CollapsibleTableSection<T> extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.borderLight)),
+        border: Border.all(color:  AppColors.divider),
       ),
       child: Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
@@ -736,21 +794,23 @@ class _CollapsibleTableSection<T> extends StatelessWidget {
             style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary),
+              color: AppColors.textDark,
             ),
           ),
-          subtitle: Text(subtitle,
-              style: const TextStyle(
-                  fontSize: 11, color: LeadTheme.textMuted)),
+          subtitle: Text(
+            subtitle,
+            style: const TextStyle(fontSize: 11, color: LeadTheme.textMuted),
+          ),
           children: [
             if (leads.isEmpty)
               const Padding(
                 padding: EdgeInsets.fromLTRB(16, 0, 16, 4),
                 child: Align(
                   alignment: Alignment.centerLeft,
-                  child: Text('No older leads found.',
-                      style: TextStyle(
-                          fontSize: 12, color: LeadTheme.textMuted)),
+                  child: Text(
+                    'No older leads found.',
+                    style: TextStyle(fontSize: 12, color: LeadTheme.textMuted),
+                  ),
                 ),
               )
             else
@@ -813,10 +873,9 @@ class _InstallDataTable<T> extends StatelessWidget {
               return null;
             }),
             border: TableBorder(
-              horizontalInside:
-                  BorderSide(color: Colors.blueGrey.shade50),
-              bottom: BorderSide(color: Colors.blueGrey.shade100),
-              top: BorderSide(color: Colors.blueGrey.shade100),
+              horizontalInside: BorderSide(color: AppColors.divider),
+              bottom: BorderSide(color: AppColors.divider),
+              top: BorderSide(color: AppColors.divider),
             ),
             columns: columnBuilder(),
             rows: leads.map(rowBuilder).toList(),
@@ -834,8 +893,7 @@ class _EmptyState extends StatelessWidget {
   final String svgAsset;
   final String message;
   final String? sub;
-  const _EmptyState(
-      {required this.svgAsset, required this.message, this.sub});
+  const _EmptyState({required this.svgAsset, required this.message, this.sub});
 
   @override
   Widget build(BuildContext context) {
@@ -845,22 +903,24 @@ class _EmptyState extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            AppSvgIcon(svgAsset, size: 64, color: AppColors.borderLight),
+            AppSvgIcon(svgAsset, size: 64, color: AppColors.divider),
             const SizedBox(height: 16),
             Text(
               message,
               style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textSecondary),
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textLight,
+              ),
               textAlign: TextAlign.center,
             ),
             if (sub != null) ...[
               const SizedBox(height: 8),
-              Text(sub!,
-                  style: TextStyle(
-                      fontSize: 12, color: AppColors.textSecondary),
-                  textAlign: TextAlign.center),
+              Text(
+                sub!,
+                style: TextStyle(fontSize: 12, color: AppColors.textLight),
+                textAlign: TextAlign.center,
+              ),
             ],
           ],
         ),
@@ -879,24 +939,18 @@ class _CountChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        padding:
-            const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Text(
-          '$count',
-          style: const TextStyle(
-              fontSize: 10,
-              color: Colors.white,
-              fontWeight: FontWeight.w700),
-        ),
-      );
+    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+    decoration: BoxDecoration(
+      color: color,
+      borderRadius: BorderRadius.circular(10),
+    ),
+    child: Text(
+      '$count',
+      style: const TextStyle(
+        fontSize: 10,
+        color: AppColors.surface,
+        fontWeight: FontWeight.w700,
+      ),
+    ),
+  );
 }
-
-
-
-
-
-

@@ -8,11 +8,12 @@ import 'package:solar_project/Cubits/SolarLeads/solar_leads_state.dart';
 import 'package:solar_project/Cubits/SprinklerLeads/sprinkler_leads_cubit.dart';
 import 'package:solar_project/Cubits/SprinklerLeads/sprinkler_leads_state.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
+import 'package:solar_project/Helper/lead_themes.dart';
+import 'package:solar_project/core/app_colors.dart';
 import 'package:solar_project/data/Models/service_request_model.dart';
 import 'package:solar_project/data/Models/solar_leads_model.dart';
 import 'package:solar_project/data/Models/sprinkler_lead_model.dart';
 import 'package:solar_project/services/api_service.dart';
-import 'package:solar_project/Helper/app_colors.dart';
 
 class TodaysWorkScreen extends StatefulWidget {
   const TodaysWorkScreen({super.key});
@@ -91,7 +92,9 @@ class _TodaysWorkScreenState extends State<TodaysWorkScreen> {
 
                 final followupRows = <List<String>>[
                   ...solarLeads
-                      .where((l) => _isSameDay(l.nextFollowupDate, todayMid))
+                      .where((l) {
+                        return _isSameDay(l.nextFollowupDate, todayMid);
+                      })
                       .map(
                         (l) => [
                           'Solar',
@@ -103,7 +106,9 @@ class _TodaysWorkScreenState extends State<TodaysWorkScreen> {
                         ],
                       ),
                   ...sprinklerLeads
-                      .where((l) => _isSameDay(l.nextFollowupDate, todayMid))
+                      .where((l) {
+                        return _isSameDay(l.nextFollowupDate, todayMid);
+                      })
                       .map(
                         (l) => [
                           'Sprinkler',
@@ -122,7 +127,8 @@ class _TodaysWorkScreenState extends State<TodaysWorkScreen> {
                         if (followUp is! Map<String, dynamic>) return false;
                         final followUpAt = followUp['followUpAt'];
                         if (followUpAt == null ||
-                            followUpAt.toString().trim().isEmpty) return false;
+                            followUpAt.toString().trim().isEmpty)
+                          return false;
                         final date = DateTime.tryParse(followUpAt.toString());
                         return _isSameDay(date, todayMid);
                       })
@@ -218,7 +224,9 @@ class _TodaysWorkScreenState extends State<TodaysWorkScreen> {
 
                 final siteVisitRows = <List<String>>[
                   ...solarLeads
-                      .where((l) => _isSameDay(l.visitDate, todayMid))
+                      .where((l) {
+                        return _isSameDay(l.visitDate, todayMid);
+                      })
                       .map(
                         (l) => [
                           'Solar',
@@ -230,7 +238,9 @@ class _TodaysWorkScreenState extends State<TodaysWorkScreen> {
                         ],
                       ),
                   ...sprinklerLeads
-                      .where((l) => _isSameDay(l.visitDate, todayMid))
+                      .where((l) {
+                        return _isSameDay(l.visitDate, todayMid);
+                      })
                       .map(
                         (l) => [
                           'Sprinkler',
@@ -244,16 +254,16 @@ class _TodaysWorkScreenState extends State<TodaysWorkScreen> {
                 ];
 
                 return Scaffold(
-                  backgroundColor: AppColors.primaryLightest,
+                  backgroundColor: AppColors.background,
                   appBar: AppBar(
                     title: const Text('Today\'s Work'),
-                    backgroundColor: AppColors.accent1,
-                    foregroundColor: Colors.white,
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: AppColors.surface,
                     leading: Navigator.canPop(context)
                         ? IconButton(
                             icon: const AppSvgIcon(
                               AppSvgAssets.chevronLeft,
-                              color: Colors.white,
+                              color: AppColors.surface,
                               size: 18,
                             ),
                             onPressed: () => Navigator.pop(context),
@@ -261,7 +271,7 @@ class _TodaysWorkScreenState extends State<TodaysWorkScreen> {
                         : null,
                   ),
                   body: RefreshIndicator(
-                    color: AppColors.accent1,
+                    color: AppColors.primary,
                     onRefresh: () async {
                       context.read<SolarLeadCubit>().fetchAllLeads();
                       context.read<SprinklerLeadCubit>().fetchAllLeads();
@@ -319,7 +329,13 @@ class _TodayWorkTable extends StatelessWidget {
   });
 
   Widget _typeBadge(String type) {
-    const color = AppColors.accent1;
+    final colors = {
+      'Solar': LeadTheme.primary,
+      'Sprinkler': AppColors.primaryLight,
+      'Service': AppColors.success,
+      'Material': AppColors.primaryDark,
+    };
+    final color = colors[type] ?? Colors.grey;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -330,10 +346,10 @@ class _TodayWorkTable extends StatelessWidget {
       ),
       child: Text(
         type,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.w700,
-          color: AppColors.accent1,
+          color: color,
         ),
       ),
     );
@@ -345,9 +361,9 @@ class _TodayWorkTable extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.borderLight),
+        border: Border.all(color:  AppColors.divider),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -359,7 +375,7 @@ class _TodayWorkTable extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
+                color: AppColors.textDark,
               ),
             ),
           ),
@@ -369,10 +385,7 @@ class _TodayWorkTable extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
               child: Text(
                 emptyText,
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: AppColors.textSecondary,
-                ),
+                style: const TextStyle(fontSize: 12, color: AppColors.textGray),
               ),
             )
           else
@@ -390,23 +403,21 @@ class _TodayWorkTable extends StatelessWidget {
                       horizontalMargin: isDesktop ? 12 : 8,
                       columnSpacing: isDesktop ? 14 : 8,
                       headingRowColor: WidgetStateProperty.all(
-                        const Color(0XFFEDFDF9),
+                        AppColors.background,
                       ),
                       headingTextStyle: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
-                        color: const Color(0XFF0D9488).withValues(alpha: 0.8),
+                        color: AppColors.primary.withValues(alpha: 0.8),
                       ),
                       dataTextStyle: const TextStyle(
                         fontSize: 12,
-                        color: AppColors.textPrimary,
+                        color: AppColors.textDark,
                       ),
                       border: TableBorder(
-                        horizontalInside: BorderSide(
-                          color: Colors.blueGrey.shade50,
-                        ),
-                        bottom: BorderSide(color: Colors.blueGrey.shade100),
-                        top: BorderSide(color: Colors.blueGrey.shade100),
+                        horizontalInside: BorderSide(color: AppColors.primary),
+                        bottom: BorderSide(color: AppColors.primary),
+                        top: BorderSide(color: AppColors.primary),
                       ),
                       columns: const [
                         DataColumn(label: Text('Type')),
@@ -419,7 +430,10 @@ class _TodayWorkTable extends StatelessWidget {
                       rows: rows.map((r) {
                         return DataRow(
                           cells: [
+                            // ✅ Type — colored chip
                             DataCell(_typeBadge(r[0])),
+
+                            // ── Baki cells ──────────────────────────────
                             ...r
                                 .sublist(1)
                                 .map(

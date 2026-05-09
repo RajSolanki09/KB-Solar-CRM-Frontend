@@ -6,7 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:solar_project/Cubits/Auth/auth_cubit.dart';
 import 'package:solar_project/Helper/app_feedback.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
-import 'package:solar_project/Helper/app_colors.dart';
+import 'package:solar_project/core/app_colors.dart';
 
 class ServiceProfilePage extends StatefulWidget {
   const ServiceProfilePage({super.key});
@@ -72,7 +72,7 @@ class _ServiceProfilePageState extends State<ServiceProfilePage> {
   Future<void> _pickAndUploadImage() async {
     final source = await showModalBottomSheet<ImageSource>(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -86,7 +86,7 @@ class _ServiceProfilePageState extends State<ServiceProfilePage> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: AppColors.borderPrimary,
+                  color: Colors.grey.shade300,
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
@@ -100,19 +100,25 @@ class _ServiceProfilePageState extends State<ServiceProfilePage> {
               ),
             ),
             const SizedBox(height: 12),
-             ListTile(
-               leading: const CircleAvatar(
-                 backgroundColor: AppColors.primaryLighter,
-                 child: AppSvgIcon(AppSvgAssets.camera, color: AppColors.accent2),
-               ),
+            ListTile(
+              leading: const CircleAvatar(
+                backgroundColor: AppColors.primaryTint,
+                child: AppSvgIcon(
+                  AppSvgAssets.camera,
+                  color: AppColors.primary,
+                ),
+              ),
               title: const Text('Take a Photo'),
               onTap: () => Navigator.pop(ctx, ImageSource.camera),
             ),
-             ListTile(
-               leading: const CircleAvatar(
-                 backgroundColor: AppColors.primaryLighter,
-                 child: AppSvgIcon(AppSvgAssets.images, color: AppColors.accent2),
-               ),
+            ListTile(
+              leading: const CircleAvatar(
+                backgroundColor: AppColors.primaryTint,
+                child: AppSvgIcon(
+                  AppSvgAssets.images,
+                  color: AppColors.primary,
+                ),
+              ),
               title: const Text('Choose from Gallery'),
               onTap: () => Navigator.pop(ctx, ImageSource.gallery),
             ),
@@ -153,7 +159,7 @@ class _ServiceProfilePageState extends State<ServiceProfilePage> {
           _localImage = null; // clear local, use network image now
           _isUploadingImage = false;
         });
-          AppFeedback.showSuccess(context, 'Profile photo updated!');
+        AppFeedback.showSuccess(context, 'Profile photo updated!');
       }
     } catch (e) {
       if (mounted) {
@@ -161,7 +167,10 @@ class _ServiceProfilePageState extends State<ServiceProfilePage> {
           _localImage = null; // revert on failure
           _isUploadingImage = false;
         });
-          AppFeedback.showError(context, e.toString().replaceAll('Exception: ', ''));
+        AppFeedback.showError(
+          context,
+          e.toString().replaceAll('Exception: ', ''),
+        );
       }
     }
   }
@@ -182,14 +191,14 @@ class _ServiceProfilePageState extends State<ServiceProfilePage> {
         ),
         content: const Text(
           'Are you sure you want to logout from your account?',
-          style: TextStyle(fontSize: 15, color: AppColors.textPrimary),
+          style: TextStyle(fontSize: 15, color: AppColors.textDark),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
             child: const Text(
               'Cancel',
-              style: TextStyle(color: AppColors.textSecondary, fontSize: 15),
+              style: TextStyle(color: Colors.grey, fontSize: 15),
             ),
           ),
           ElevatedButton(
@@ -202,7 +211,7 @@ class _ServiceProfilePageState extends State<ServiceProfilePage> {
             ),
             child: const Text(
               'Logout',
-              style: TextStyle(color: Colors.white, fontSize: 15),
+              style: TextStyle(color: AppColors.surface, fontSize: 15),
             ),
           ),
         ],
@@ -218,35 +227,35 @@ class _ServiceProfilePageState extends State<ServiceProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bgSecondary,
+      backgroundColor:  AppColors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.bgSecondary,
+        backgroundColor:  AppColors.background,
         elevation: 0,
         centerTitle: true,
         title: const Text(
           "My Profile",
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            color: AppColors.accent2,
+            color: AppColors.primary,
           ),
         ),
         actions: [
           IconButton(
             icon: const AppSvgIcon(
               AppSvgAssets.refreshCw,
-              color: AppColors.accent2,
+              color: AppColors.primary,
             ),
             onPressed: _loadProfile,
           ),
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(height: 1, color: AppColors.borderPrimary),
+          child: Container(height: 1, color: Colors.grey.shade300),
         ),
       ),
       body: _isLoading
           ? const Center(
-              child: CircularProgressIndicator(color: AppColors.accent2),
+              child: CircularProgressIndicator(color: AppColors.primary),
             )
           : _error != null
           ? _buildError()
@@ -262,12 +271,16 @@ class _ServiceProfilePageState extends State<ServiceProfilePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const AppSvgIcon(AppSvgAssets.triangleAlert, size: 60, color: AppColors.error),
+            const AppSvgIcon(
+              AppSvgAssets.triangleAlert,
+              size: 60,
+              color: AppColors.error,
+            ),
             const SizedBox(height: 16),
             Text(
               _error ?? 'Failed to load profile',
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 15, color: AppColors.textSecondary),
+              style: const TextStyle(fontSize: 15, color: Colors.black54),
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
@@ -275,7 +288,8 @@ class _ServiceProfilePageState extends State<ServiceProfilePage> {
               icon: const AppSvgIcon(AppSvgAssets.refreshCw),
               label: const Text('Retry'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.accent2,
+                backgroundColor: AppColors.primary,
+                foregroundColor: AppColors.surface,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -312,18 +326,18 @@ class _ServiceProfilePageState extends State<ServiceProfilePage> {
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [AppColors.accent2, Color(0xFF9F44D3)],
+                colors: [AppColors.primary, Color(0xFF9F44D3)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.circular(20),
-               boxShadow: [
-                 BoxShadow(
-                   color: AppColors.accent2.withOpacity(0.35),
-                   blurRadius: 16,
-                   offset: const Offset(0, 6),
-                 ),
-               ],
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.primary.withOpacity(0.35),
+                  blurRadius: 16,
+                  offset: const Offset(0, 6),
+                ),
+              ],
             ),
             child: Row(
               children: [
@@ -333,15 +347,15 @@ class _ServiceProfilePageState extends State<ServiceProfilePage> {
                     // Profile picture
                     CircleAvatar(
                       radius: 40,
-                      backgroundColor: Colors.white,
+                      backgroundColor: AppColors.surface,
                       backgroundImage: hasImage ? imageProvider : null,
-                       child: !hasImage
-                           ? const AppSvgIcon(
-                               AppSvgAssets.userRound,
-                               size: 40,
-                               color: AppColors.accent2,
-                             )
-                           : null,
+                      child: !hasImage
+                          ? const AppSvgIcon(
+                              AppSvgAssets.userRound,
+                              size: 40,
+                              color: AppColors.primary,
+                            )
+                          : null,
                     ),
 
                     // Uploading spinner overlay
@@ -354,7 +368,7 @@ class _ServiceProfilePageState extends State<ServiceProfilePage> {
                             width: 24,
                             height: 24,
                             child: CircularProgressIndicator(
-                              color: Colors.white,
+                              color: AppColors.surface,
                               strokeWidth: 2,
                             ),
                           ),
@@ -372,25 +386,25 @@ class _ServiceProfilePageState extends State<ServiceProfilePage> {
                             width: 28,
                             height: 28,
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: AppColors.surface,
                               shape: BoxShape.circle,
-                               border: Border.all(
-                                 color: AppColors.accent2,
-                                 width: 1.5,
-                               ),
+                              border: Border.all(
+                                color: AppColors.primary,
+                                width: 1.5,
+                              ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.15),
+                                  color: Colors.black.withOpacity(0.15),
                                   blurRadius: 4,
                                   offset: const Offset(0, 2),
                                 ),
                               ],
                             ),
-                             child: const AppSvgIcon(
-                               AppSvgAssets.camera,
-                               size: 16,
-                               color: AppColors.accent2,
-                             ),
+                            child: const AppSvgIcon(
+                              AppSvgAssets.camera,
+                              size: 16,
+                              color: AppColors.primary,
+                            ),
                           ),
                         ),
                       ),
@@ -409,7 +423,7 @@ class _ServiceProfilePageState extends State<ServiceProfilePage> {
                         style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          color: AppColors.surface,
                         ),
                       ),
                       const SizedBox(height: 6),
@@ -417,7 +431,7 @@ class _ServiceProfilePageState extends State<ServiceProfilePage> {
                         roleDisplay,
                         style: const TextStyle(
                           fontSize: 14,
-                          color: Colors.white70,
+                          color: AppColors.surface,
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -428,8 +442,8 @@ class _ServiceProfilePageState extends State<ServiceProfilePage> {
                         ),
                         decoration: BoxDecoration(
                           color: isActive
-                              ? Colors.green.withValues(alpha: 0.3)
-                              : Colors.red.withValues(alpha: 0.3),
+                              ? AppColors.success.withOpacity(0.3)
+                              : AppColors.error.withOpacity(0.3),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
@@ -437,8 +451,8 @@ class _ServiceProfilePageState extends State<ServiceProfilePage> {
                           style: TextStyle(
                             fontSize: 12,
                             color: isActive
-                                ? Colors.greenAccent
-                                : Colors.redAccent,
+                                ? AppColors.success
+                                : AppColors.error,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -486,7 +500,7 @@ class _ServiceProfilePageState extends State<ServiceProfilePage> {
       margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
@@ -498,7 +512,7 @@ class _ServiceProfilePageState extends State<ServiceProfilePage> {
       ),
       child: Row(
         children: [
-          AppSvgIcon(svgAsset, color: AppColors.accent2),
+          AppSvgIcon(svgAsset, color: AppColors.primary),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
@@ -506,7 +520,7 @@ class _ServiceProfilePageState extends State<ServiceProfilePage> {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                  style: const TextStyle(fontSize: 13, color: Colors.grey),
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -524,11 +538,3 @@ class _ServiceProfilePageState extends State<ServiceProfilePage> {
     );
   }
 }
-
-
-
-
-
-
-
-

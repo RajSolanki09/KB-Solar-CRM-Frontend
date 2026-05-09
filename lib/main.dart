@@ -1,110 +1,87 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:solar_project/Helper/app_colors.dart';
 import 'package:solar_project/Helper/app_provider.dart';
 import 'package:solar_project/services/notification_service.dart';
 import 'firebase_options.dart';
 import 'package:solar_project/Helper/app_navigator.dart';
 import 'package:solar_project/Helper/app_feedback.dart';
+import 'package:solar_project/core/app_colors.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await NotificationService.instance.init();
-  runApp(const KaaryaBookRoot());
+  runApp(const SolarRoot());
 }
 
-class KaaryaBookRoot extends StatelessWidget {
-  const KaaryaBookRoot({super.key});
+class SolarRoot extends StatelessWidget {
+  const SolarRoot({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const AppProviders(child: KaaryaBookApp());
+    return const AppProviders(child: SolarAdminApp());
   }
 }
 
-class KaaryaBookApp extends StatelessWidget {
-  const KaaryaBookApp({super.key});
+class SolarAdminApp extends StatelessWidget {
+  const SolarAdminApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      
-      title: "KaaryaBook",
+      title: 'KaaryaBook Solar CRM',
       scaffoldMessengerKey: AppFeedback.scaffoldMessengerKey,
       theme: ThemeData(
         useMaterial3: true,
+        primaryColor: AppColors.primary,
+        scaffoldBackgroundColor: AppColors.background,
         colorScheme: ColorScheme.fromSeed(
-          seedColor: AppColors.lightPurple, // Lighter Logo Purple
-
-          primary: AppColors.lightPurple,
-
-          // keep secondary as-is for now (not part of brand purple replacements)
-          secondary: AppColors.primaryLight, // Secondary logo tint
-          background: AppColors.purpleBg, // Lighter background tint
+          seedColor: AppColors.primary,
+          primary: AppColors.primary,
+          secondary: AppColors.solar,
+          background: AppColors.background,
+          surface: AppColors.surface,
+          error: AppColors.error,
         ),
         appBarTheme: const AppBarTheme(
-          backgroundColor: Colors.white,
+          backgroundColor: AppColors.primary,
+          foregroundColor: AppColors.surface,
           elevation: 0,
-          titleTextStyle: TextStyle(
-            color: AppColors.lightPurple, 
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-          iconTheme: const IconThemeData(color: AppColors.deepPurple),
-        ),
-        inputDecorationTheme: InputDecorationTheme(
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-          floatingLabelBehavior: FloatingLabelBehavior.auto,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
-            borderSide: BorderSide(color: AppColors.borderPrimary),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
-            borderSide: BorderSide(color: AppColors.borderPrimary),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
-            borderSide: const BorderSide(color: AppColors.deepPurple, width: 2), 
-          ),
+          centerTitle: true,
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-             backgroundColor: AppColors.deepPurple, 
-             foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(vertical: 16),
+            backgroundColor: AppColors.primary,
+            foregroundColor: AppColors.surface,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16), // Rounded matching logo
+              borderRadius: BorderRadius.circular(10),
             ),
-            elevation: 0,
+          ),
+        ),
+        floatingActionButtonTheme: const FloatingActionButtonThemeData(
+          backgroundColor: AppColors.solar,
+          foregroundColor: AppColors.surface,
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          focusedBorder: OutlineInputBorder(
+            borderSide: const BorderSide(color: AppColors.primary),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderSide: const BorderSide(color: AppColors.divider),
+            borderRadius: BorderRadius.circular(10),
           ),
         ),
         cardTheme: CardThemeData(
-          color: Colors.white,
+          color: AppColors.surface,
           elevation: 2,
-           shadowColor: AppColors.deepPurple.withValues(alpha: 0.1),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(12),
           ),
         ),
-         toggleButtonsTheme: const ToggleButtonsThemeData(
-           selectedColor: Colors.white,
-           fillColor: AppColors.deepPurple, 
-         ),
-         chipTheme: const ChipThemeData(
-           backgroundColor: AppColors.purpleBg,
-           secondarySelectedColor: AppColors.deepPurple,
-           secondaryLabelStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
-           labelStyle: TextStyle(fontWeight: FontWeight.w600),
-         ),
       ),
       home: const AppNavigator(),
     );
   }
 }
-
-
-
-

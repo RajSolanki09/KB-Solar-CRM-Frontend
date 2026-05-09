@@ -8,7 +8,7 @@ import 'package:solar_project/Cubits/ServiceLeads/service_leads_cubit.dart';
 import 'package:solar_project/Cubits/ServiceLeads/service_leads_state.dart';
 import 'package:solar_project/data/Models/service_request_model.dart';
 import 'package:solar_project/screens/Dashboards/Admin_Dashboards/Services/service_detail_screen.dart';
-import 'package:solar_project/Helper/app_colors.dart';
+import 'package:solar_project/core/app_colors.dart';
 
 class MyServicesPage extends StatefulWidget {
   const MyServicesPage({super.key});
@@ -95,7 +95,8 @@ class _State extends State<MyServicesPage> {
     if (picked != null) setState(() => _date = picked);
   }
 
-  String _getDateLabel(DateTime? date) => DateTimeHelper.leadDateFilterLabel(date);
+  String _getDateLabel(DateTime? date) =>
+      DateTimeHelper.leadDateFilterLabel(date);
 
   Future<void> _openDetail(
     BuildContext ctx,
@@ -116,24 +117,24 @@ class _State extends State<MyServicesPage> {
   Color _statusColor(String s) {
     switch (s) {
       case 'Assigned':
-        return AppColors.accent1;
+        return AppColors.primaryLight;
       case 'In Progress':
-        return AppColors.accent1;
+        return AppColors.solar;
       case 'Completed':
       case 'Resolved':
-        return AppColors.accent1;
+        return AppColors.success;
       case 'Open':
       case 'Pending':
-        return AppColors.accent1;
+        return AppColors.solar;
       default:
-        return AppColors.accent1;
+        return Colors.grey;
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bgSecondary,
+      backgroundColor:  AppColors.background,
       body: SafeArea(
         child: BlocBuilder<ServiceLeadCubit, ServiceLeadState>(
           builder: (ctx, state) {
@@ -143,7 +144,7 @@ class _State extends State<MyServicesPage> {
 
             if (state is ServiceLeadLoading && all.isEmpty) {
               return const Center(
-                child: CircularProgressIndicator(color: AppColors.accent1),
+                child: CircularProgressIndicator(color: _color),
               );
             }
 
@@ -155,12 +156,12 @@ class _State extends State<MyServicesPage> {
                     AppSvgIcon(
                       AppSvgAssets.triangleAlert,
                       size: 48,
-                      color: AppColors.accent1,
+                      color: AppColors.error,
                     ),
                     const SizedBox(height: 12),
                     Text(
                       state.message,
-                      style: const TextStyle(color: AppColors.textSecondary),
+                      style: const TextStyle(color: Colors.grey),
                     ),
                     const SizedBox(height: 16),
                     ElevatedButton.icon(
@@ -168,7 +169,7 @@ class _State extends State<MyServicesPage> {
                           ctx.read<ServiceLeadCubit>().fetchAllServices(),
                       icon: const AppSvgIcon(AppSvgAssets.refreshCw),
                       label: const Text('Retry'),
-                      style: ElevatedButton.styleFrom(backgroundColor: AppColors.accent1),
+                      style: ElevatedButton.styleFrom(backgroundColor: _color),
                     ),
                   ],
                 ),
@@ -183,10 +184,9 @@ class _State extends State<MyServicesPage> {
 
             return Column(
               children: [
-
                 // ── Header ──────────────────────────────────────────────────
                 Container(
-                  color: Colors.white,
+                  color: AppColors.surface,
                   padding: const EdgeInsets.fromLTRB(16, 14, 8, 0),
                   child: Row(
                     children: [
@@ -198,14 +198,14 @@ class _State extends State<MyServicesPage> {
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
-                              color: AppColors.textPrimary,
+                              color: AppColors.textDark,
                             ),
                           ),
                           Text(
                             'Your assigned jobs',
                             style: TextStyle(
                               fontSize: 12,
-                              color: AppColors.textTertiary,
+                              color: AppColors.textLight,
                             ),
                           ),
                         ],
@@ -231,7 +231,7 @@ class _State extends State<MyServicesPage> {
                       IconButton(
                         icon: const AppSvgIcon(
                           AppSvgAssets.refreshCw,
-                          color: AppColors.textSecondary,
+                          color: AppColors.textGray,
                           size: 20,
                         ),
                         onPressed: () =>
@@ -251,7 +251,7 @@ class _State extends State<MyServicesPage> {
 
                 // ── Filter row ───────────────────────────────────────────────
                 Container(
-                  color: Colors.white,
+                  color: AppColors.surface,
                   padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
                   child: Row(
                     children: [
@@ -260,9 +260,9 @@ class _State extends State<MyServicesPage> {
                         child: Container(
                           height: 42,
                           decoration: BoxDecoration(
-                            color: AppColors.bgSecondary,
+                            color:  AppColors.background,
                             borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: AppColors.borderLight),
+                            border: Border.all(color: AppColors.divider),
                           ),
                           child: TextField(
                             controller: _searchCtrl,
@@ -272,17 +272,16 @@ class _State extends State<MyServicesPage> {
                               hintText: 'Search name / phone / ID',
                               hintStyle: TextStyle(
                                 fontSize: 12,
-                                color: AppColors.textSecondary,
+                                color: AppColors.textLight,
                               ),
-                               prefixIcon: Padding(
-                                 padding: const EdgeInsets.all(8.0),
-                                 child: const AppSvgIcon(
-                                   AppSvgAssets.search,
-                                   size: 18,
-                                   color: AppColors.accent1,
-                                 ),
-                               ),
-                              
+                              prefixIcon: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: const AppSvgIcon(
+                                  AppSvgAssets.search,
+                                  size: 18,
+                                  color: _color,
+                                ),
+                              ),
                               suffixIcon: _search.isNotEmpty
                                   ? GestureDetector(
                                       onTap: () {
@@ -292,7 +291,7 @@ class _State extends State<MyServicesPage> {
                                       child: AppSvgIcon(
                                         AppSvgAssets.x,
                                         size: 16,
-                                        color: AppColors.textSecondary,
+                                        color: AppColors.textLight,
                                       ),
                                     )
                                   : null,
@@ -312,14 +311,14 @@ class _State extends State<MyServicesPage> {
                         height: 42,
                         padding: const EdgeInsets.symmetric(horizontal: 10),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: AppColors.surface,
                           borderRadius: BorderRadius.circular(10),
-                           border: Border.all(
-                             color: _status != 'All'
-                                 ? AppColors.accent1.withValues(alpha: 0.5)
-                                 : AppColors.borderLight,
-                             width: _status != 'All' ? 1.5 : 1,
-                           ),
+                          border: Border.all(
+                            color: _status != 'All'
+                                ? _color.withValues(alpha: 0.5)
+                                : AppColors.divider,
+                            width: _status != 'All' ? 1.5 : 1,
+                          ),
                         ),
                         child: DropdownButtonHideUnderline(
                           child: DropdownButton<String>(
@@ -327,16 +326,17 @@ class _State extends State<MyServicesPage> {
                             icon: const AppSvgIcon(
                               AppSvgAssets.chevronDown,
                               size: 18,
-                              color: AppColors.accent1),
-                             style: TextStyle(
-                               fontSize: 13,
-                               color: _status != 'All'
-                                   ? AppColors.accent1
-                                   : AppColors.textSecondary,
-                               fontWeight: _status != 'All'
-                                   ? FontWeight.w600
-                                   : FontWeight.normal,
-                             ),
+                              color: _color,
+                            ),
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: _status != 'All'
+                                  ? _color
+                                  :  AppColors.textGray,
+                              fontWeight: _status != 'All'
+                                  ? FontWeight.w600
+                                  : FontWeight.normal,
+                            ),
                             items:
                                 ['All', 'Assigned', 'In Progress', 'Completed']
                                     .map(
@@ -364,37 +364,35 @@ class _State extends State<MyServicesPage> {
                         child: Container(
                           height: 42,
                           padding: const EdgeInsets.symmetric(horizontal: 14),
-                           decoration: BoxDecoration(
-                             color: _date != null ? _color : Colors.white,
-                             borderRadius: BorderRadius.circular(10),
-                             border: Border.all(
-                               color: _date != null
-                                   ? AppColors.accent1
-                                   : AppColors.borderLight,
-                             ),
-                           ),
+                          decoration: BoxDecoration(
+                            color: _date != null ? _color : AppColors.surface,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: _date != null ? _color : AppColors.divider,
+                            ),
+                          ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                               AppSvgIcon(
-                                 AppSvgAssets.calendarDays,
-                                 size: 17,
-                                 color: _date != null
-                                     ? Colors.white
-                                     : AppColors.textSecondary,
-                               ),
+                              AppSvgIcon(
+                                AppSvgAssets.calendarDays,
+                                size: 17,
+                                color: _date != null
+                                    ? AppColors.surface
+                                    :  AppColors.textGray,
+                              ),
                               const SizedBox(width: 8),
                               Text(
                                 _getDateLabel(_date),
-                                 style: TextStyle(
-                                   fontSize: 13,
-                                   color: _date != null
-                                       ? Colors.white
-                                       : AppColors.textSecondary,
-                                   fontWeight: _date != null
-                                       ? FontWeight.w600
-                                       : FontWeight.normal,
-                                 ),
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: _date != null
+                                      ? AppColors.surface
+                                      :  AppColors.textGray,
+                                  fontWeight: _date != null
+                                      ? FontWeight.w600
+                                      : FontWeight.normal,
+                                ),
                               ),
                               if (_date != null) ...[
                                 const SizedBox(width: 6),
@@ -403,7 +401,7 @@ class _State extends State<MyServicesPage> {
                                   child: const AppSvgIcon(
                                     AppSvgAssets.x,
                                     size: 18,
-                                    color: Colors.white,
+                                    color: AppColors.surface,
                                   ),
                                 ),
                               ],
@@ -423,10 +421,10 @@ class _State extends State<MyServicesPage> {
                       alignment: Alignment.centerLeft,
                       child: Text(
                         '${filtered.length} result${filtered.length != 1 ? "s" : ""}',
-                         style: TextStyle(
-                           fontSize: 12,
-                           color: AppColors.textSecondary,
-                         ),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey.shade600,
+                        ),
                       ),
                     ),
                   ),
@@ -446,7 +444,7 @@ class _State extends State<MyServicesPage> {
                           }),
                         )
                       : RefreshIndicator(
-                          color: AppColors.accent1,
+                          color: _color,
                           onRefresh: () =>
                               ctx.read<ServiceLeadCubit>().fetchAllServices(),
                           child: LayoutBuilder(
@@ -550,9 +548,10 @@ class _MyServiceTableSection extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.borderLight)),
+        border: Border.all(color:  AppColors.divider),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -566,12 +565,13 @@ class _MyServiceTableSection extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary),
+                    color: AppColors.textDark,
                   ),
+                ),
                 const SizedBox(height: 2),
                 Text(
                   subtitle,
-                  style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                  style: TextStyle(fontSize: 11, color: AppColors.background),
                 ),
               ],
             ),
@@ -581,7 +581,7 @@ class _MyServiceTableSection extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
               child: Text(
                 'No services in this section.',
-                style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                style: TextStyle(fontSize: 12, color: AppColors.textLight),
               ),
             )
           else if (items.isNotEmpty)
@@ -629,30 +629,31 @@ class _CollapsibleMyServiceTableSection extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.borderLight)),
+        border: Border.all(color:  AppColors.divider),
+      ),
       child: Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-          child: ExpansionTile(
-            key: const ValueKey('older_my_services'),
-            initiallyExpanded: initiallyExpanded,
-            onExpansionChanged: onExpansionChanged,
+        child: ExpansionTile(
+          key: const ValueKey('older_my_services'),
+          initiallyExpanded: initiallyExpanded,
+          onExpansionChanged: onExpansionChanged,
           tilePadding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
           childrenPadding: const EdgeInsets.only(bottom: 12),
-          iconColor: AppColors.accent1,
-          collapsedIconColor: AppColors.accent1,
+          iconColor: AppColors.success,
+          collapsedIconColor: AppColors.success,
           title: Text(
             '$title (${items.length})',
             style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
+              color: AppColors.textDark,
             ),
           ),
           subtitle: Text(
             subtitle,
-            style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+            style: TextStyle(fontSize: 11, color: AppColors.background),
           ),
           children: [
             if (items.isEmpty)
@@ -662,7 +663,7 @@ class _CollapsibleMyServiceTableSection extends StatelessWidget {
                   alignment: Alignment.centerLeft,
                   child: Text(
                     'No older services found.',
-                    style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                    style: TextStyle(fontSize: 12, color: AppColors.textLight),
                   ),
                 ),
               )
@@ -700,7 +701,7 @@ class _MyServiceDataTable extends StatelessWidget {
     required this.onDone,
   });
 
-  static const _color = AppColors.accent1;
+  static const _color = AppColors.success;
 
   Widget _badge(String label, Color color) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -720,7 +721,7 @@ class _MyServiceDataTable extends StatelessWidget {
       return _ActionBtn(
         label: 'Start',
         svgAsset: AppSvgAssets.play,
-        color: AppColors.accent1,
+        color: AppColors.solar,
         onTap: () => onStart(s),
       );
     }
@@ -728,7 +729,7 @@ class _MyServiceDataTable extends StatelessWidget {
       return _ActionBtn(
         label: 'Done',
         svgAsset: AppSvgAssets.check,
-        color: AppColors.accent1,
+        color: AppColors.success,
         onTap: () => onDone(s),
       );
     }
@@ -739,7 +740,7 @@ class _MyServiceDataTable extends StatelessWidget {
           AppSvgIcon(
             AppSvgAssets.circleCheckBig,
             size: 14,
-            color: AppColors.accent1,
+            color: AppColors.success,
           ),
           const SizedBox(width: 4),
           Text(
@@ -747,7 +748,7 @@ class _MyServiceDataTable extends StatelessWidget {
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w600,
-              color: AppColors.accent1,
+              color: AppColors.success,
             ),
           ),
         ],
@@ -770,7 +771,7 @@ class _MyServiceDataTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDesktop = MediaQuery.sizeOf(context).width >= 1000;
-    const rowStyle = TextStyle(fontSize: 12, color: AppColors.textPrimary);
+    const rowStyle = TextStyle(fontSize: 12, color: AppColors.textDark);
 
     return SizedBox(
       width: double.infinity,
@@ -795,9 +796,9 @@ class _MyServiceDataTable extends StatelessWidget {
               return null;
             }),
             border: TableBorder(
-              horizontalInside: BorderSide(color: Colors.blueGrey.shade50),
-              bottom: BorderSide(color: Colors.blueGrey.shade100),
-              top: BorderSide(color: Colors.blueGrey.shade100),
+              horizontalInside: BorderSide(color: AppColors.primary),
+              bottom: BorderSide(color: AppColors.primary),
+              top: BorderSide(color: AppColors.primary),
             ),
             columns: const [
               DataColumn(label: Text('Customer')),
@@ -846,7 +847,7 @@ class _MyServiceDataTable extends StatelessWidget {
                   DataCell(
                     _badge(
                       s.chargeType,
-                      s.chargeType == 'Paid' ? Colors.orange : Colors.teal,
+                      s.chargeType == 'Paid' ? AppColors.solar : Colors.teal,
                     ),
                   ),
                   DataCell(
@@ -863,7 +864,7 @@ class _MyServiceDataTable extends StatelessWidget {
                         : Text(
                             '-',
                             style: rowStyle.copyWith(
-                              color: AppColors.textSecondary,
+                              color: AppColors.textLight,
                             ),
                           ),
                   ),
@@ -901,22 +902,20 @@ class _SummaryBar extends StatelessWidget {
       margin: const EdgeInsets.fromLTRB(12, 12, 12, 0),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: AppColors.accent1.withOpacity(0.08),
+        color: AppColors.success.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: AppColors.accent1.withOpacity(0.2),
-        ),
+        border: Border.all(color: AppColors.success.withValues(alpha: 0.2)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _Stat('Active', '$total', AppColors.accent1),
-          Container(width: 1, height: 28, color: AppColors.borderLight),
-          _Stat('Assigned', '$assigned', AppColors.accent1),
-          Container(width: 1, height: 28, color: AppColors.borderLight),
-          _Stat('In Progress', '$inProgress', AppColors.accent1),
-          Container(width: 1, height: 28, color: AppColors.borderLight),
-          _Stat('Completed', '$completed', AppColors.accent1),
+          _Stat('Active', '$total', AppColors.success),
+          Container(width: 1, height: 28, color: AppColors.divider),
+          _Stat('Assigned', '$assigned', AppColors.primaryLight),
+          Container(width: 1, height: 28, color: AppColors.divider),
+          _Stat('In Progress', '$inProgress', AppColors.solar),
+          Container(width: 1, height: 28, color: AppColors.divider),
+          _Stat('Completed', '$completed', AppColors.success),
         ],
       ),
     );
@@ -939,7 +938,7 @@ class _Stat extends StatelessWidget {
           color: color,
         ),
       ),
-      Text(label, style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+      Text(label, style: TextStyle(fontSize: 11, color: Colors.grey.shade600)),
     ],
   );
 }
@@ -955,20 +954,20 @@ class _EmptyState extends StatelessWidget {
     child: Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        AppSvgIcon(AppSvgAssets.cog, size: 60, color: AppColors.borderLight),
+        AppSvgIcon(AppSvgAssets.cog, size: 60, color: AppColors.divider),
         const SizedBox(height: 14),
         Text(
           'No Services Found',
           style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w600,
-            color: AppColors.textSecondary,
+            color: AppColors.textLight,
           ),
         ),
         const SizedBox(height: 6),
         Text(
           hasFilter ? 'No results for current filters' : 'Pull down to refresh',
-          style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+          style: TextStyle(fontSize: 12, color: AppColors.textLight),
         ),
         if (hasFilter) ...[
           const SizedBox(height: 14),
@@ -976,7 +975,7 @@ class _EmptyState extends StatelessWidget {
             onPressed: onClear,
             icon: const AppSvgIcon(AppSvgAssets.x, size: 14),
             label: const Text('Clear filters'),
-            style: TextButton.styleFrom(foregroundColor: AppColors.textSecondary),
+            style: TextButton.styleFrom(foregroundColor: AppColors.background),
           ),
         ],
       ],
@@ -1016,14 +1015,14 @@ class _ActionBtn extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          AppSvgIcon(svgAsset, size: 13, color: Colors.white),
+          AppSvgIcon(svgAsset, size: 13, color: AppColors.surface),
           const SizedBox(width: 4),
           Text(
             label,
             style: const TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w700,
-              color: Colors.white,
+              color: AppColors.surface,
             ),
           ),
         ],
@@ -1031,10 +1030,3 @@ class _ActionBtn extends StatelessWidget {
     ),
   );
 }
-
-
-
-
-
-
-

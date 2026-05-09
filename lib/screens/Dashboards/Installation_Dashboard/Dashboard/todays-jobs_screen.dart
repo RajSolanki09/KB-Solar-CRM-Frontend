@@ -1,16 +1,11 @@
-// lib/screens/Dashboards/Installation_Dashboard/Dashboard/todays-jobs_screen.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:solar_project/Cubits/Installation/installation_cubit.dart';
 import 'package:solar_project/Cubits/Installation/installation_state.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
-import 'package:solar_project/Helper/app_colors.dart';
 import 'package:solar_project/data/Models/installation_model.dart';
-
-const _kPurple = AppColors.lightPurple;
-const _kBlue   = AppColors.lightPurple;
+import 'package:solar_project/core/app_colors.dart';
 
 bool _isToday(DateTime? dt) {
   if (dt == null) return false;
@@ -18,16 +13,13 @@ bool _isToday(DateTime? dt) {
   return dt.year == now.year && dt.month == now.month && dt.day == now.day;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  Screen
-// ─────────────────────────────────────────────────────────────────────────────
 class TodaysJobsScreen extends StatefulWidget {
   final VoidCallback onBack;
   final Color appBarColor;
   const TodaysJobsScreen({
     super.key,
     required this.onBack,
-    this.appBarColor = _kPurple,
+    this.appBarColor = AppColors.primary, // _kPurple removed
   });
 
   @override
@@ -46,10 +38,12 @@ class _TodaysJobsScreenState extends State<TodaysJobsScreen>
     _tab = TabController(length: 3, vsync: this)
       ..addListener(() {
         if (!_tab.indexIsChanging) return;
-        setState(() {
-          _search = '';
-          _searchCtrl.clear();
-        });
+        if (mounted) {
+          setState(() {
+            _search = '';
+            _searchCtrl.clear();
+          });
+        }
       });
     _searchCtrl.addListener(() {
       if (mounted) setState(() => _search = _searchCtrl.text.trim());
@@ -67,25 +61,29 @@ class _TodaysJobsScreenState extends State<TodaysJobsScreen>
     super.dispose();
   }
 
-  // ── Filtering ─────────────────────────────────────────────────────────────
-  List<InstallationModel> _todayAll(List<InstallationModel> all) => all
-      .where((m) =>
-          _isToday(m.scheduledDate) &&
-          m.status != InstallationStatus.projectCompleted)
-      .where(_matchesSearch)
-      .toList()
-    ..sort((a, b) => (a.scheduledDate ?? DateTime(2100))
-        .compareTo(b.scheduledDate ?? DateTime(2100)));
+  List<InstallationModel> _todayAll(List<InstallationModel> all) =>
+      all
+          .where(
+            (m) =>
+                _isToday(m.scheduledDate) &&
+                m.status != InstallationStatus.projectCompleted,
+          )
+          .where(_matchesSearch)
+          .toList()
+        ..sort(
+          (a, b) => (a.scheduledDate ?? DateTime(2100)).compareTo(
+            b.scheduledDate ?? DateTime(2100),
+          ),
+        );
 
-  List<InstallationModel> _todaySolar(List<InstallationModel> all) =>
-      _todayAll(all)
-          .where((m) => m.projectType.toLowerCase() == 'solar')
-          .toList();
+  List<InstallationModel> _todaySolar(List<InstallationModel> all) => _todayAll(
+    all,
+  ).where((m) => m.projectType.toLowerCase() == 'solar').toList();
 
   List<InstallationModel> _todaySprinkler(List<InstallationModel> all) =>
-      _todayAll(all)
-          .where((m) => m.projectType.toLowerCase() != 'solar')
-          .toList();
+      _todayAll(
+        all,
+      ).where((m) => m.projectType.toLowerCase() != 'solar').toList();
 
   bool _matchesSearch(InstallationModel m) {
     if (_search.isEmpty) return true;
@@ -103,16 +101,16 @@ class _TodaysJobsScreenState extends State<TodaysJobsScreen>
             ? state.installations
             : <InstallationModel>[];
 
-        final todayAll       = _todayAll(all);
-        final todaySolar     = _todaySolar(all);
+        final todayAll = _todayAll(all);
+        final todaySolar = _todaySolar(all);
         final todaySprinkler = _todaySprinkler(all);
-        final loading        = state is InstallationLoading && all.isEmpty;
-
-        final todayLabel =
-            DateFormat('EEEE, d MMM yyyy').format(DateTime.now());
+        final loading = state is InstallationLoading && all.isEmpty;
+        final todayLabel = DateFormat(
+          'EEEE, d MMM yyyy',
+        ).format(DateTime.now());
 
         return Scaffold(
-          backgroundColor: AppColors.bgSecondary,
+          backgroundColor: AppColors.background,
           appBar: AppBar(
             backgroundColor: widget.appBarColor,
             elevation: 0,
@@ -120,7 +118,7 @@ class _TodaysJobsScreenState extends State<TodaysJobsScreen>
               icon: const AppSvgIcon(
                 AppSvgAssets.chevronLeft,
                 size: 18,
-                color: Colors.white,
+                color: AppColors.surface,
               ),
               onPressed: widget.onBack,
             ),
@@ -132,12 +130,16 @@ class _TodaysJobsScreenState extends State<TodaysJobsScreen>
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
-                    color: Colors.white,
+                    color: AppColors.surface,
                   ),
                 ),
-                Text(todayLabel,
-                    style: TextStyle(
-                        fontSize: 11, color: Colors.white70)),
+                Text(
+                  todayLabel,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: AppColors.surface.withValues(alpha: 0.7),
+                  ),
+                ),
               ],
             ),
             actions: [
@@ -148,53 +150,61 @@ class _TodaysJobsScreenState extends State<TodaysJobsScreen>
                     width: 18,
                     height: 18,
                     child: CircularProgressIndicator(
-                        strokeWidth: 2, color: _kPurple),
+                      strokeWidth: 2,
+                      color: AppColors.surface,
+                    ),
                   ),
                 )
               else
                 IconButton(
-                  icon: const AppSvgIcon(AppSvgAssets.refreshCw, color: Colors.white),
+                  icon: const AppSvgIcon(
+                    AppSvgAssets.refreshCw,
+                    color: AppColors.surface,
+                  ),
                   onPressed: () =>
                       ctx.read<InstallationCubit>().fetchInstallations(),
                 ),
             ],
             bottom: PreferredSize(
               preferredSize: const Size.fromHeight(1),
-              child:
-                  Container(height: 1, color: AppColors.borderLight),
+              child: Container(height: 1, color: AppColors.divider),
             ),
           ),
           body: Column(
             children: [
-              // ── Summary banner ─────────────────────────────────────
               if (todayAll.isNotEmpty)
                 Container(
-                  color: Colors.white,
+                  color: AppColors.surface,
                   padding: const EdgeInsets.fromLTRB(14, 8, 14, 8),
                   child: Row(
                     children: [
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 5),
+                          horizontal: 10,
+                          vertical: 5,
+                        ),
                         decoration: BoxDecoration(
-                            color: AppColors.lightPurple.withValues(alpha: 0.08),
+                          color: AppColors.primary.withValues(alpha: 0.08),
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
-                          color: AppColors.lightPurple.withValues(alpha: 0.2),
+                            color: AppColors.primary.withValues(alpha: 0.2),
                           ),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const AppSvgIcon(AppSvgAssets.calendarDays,
-                                size: 13, color: AppColors.lightPurple),
+                            const AppSvgIcon(
+                              AppSvgAssets.calendarDays,
+                              size: 13,
+                              color: AppColors.primary,
+                            ),
                             const SizedBox(width: 5),
                             Text(
                               '${todayAll.length} job${todayAll.length == 1 ? '' : 's'} today',
-                                style: const TextStyle(
+                              style: const TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w700,
-                                color: AppColors.lightPurple,
+                                color: AppColors.primary,
                               ),
                             ),
                             if (todaySolar.isNotEmpty ||
@@ -202,9 +212,10 @@ class _TodaysJobsScreenState extends State<TodaysJobsScreen>
                               const SizedBox(width: 8),
                               Text(
                                 '(☀ ${todaySolar.length}  💧 ${todaySprinkler.length})',
-                                style: TextStyle(
-                                    fontSize: 11,
-                                    color: AppColors.textSecondary),
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  color: AppColors.textGray,
+                                ),
                               ),
                             ],
                           ],
@@ -214,48 +225,64 @@ class _TodaysJobsScreenState extends State<TodaysJobsScreen>
                   ),
                 ),
 
-              // ── Tabs ───────────────────────────────────────────────
+              // Tabs
               Container(
-                color: Colors.white,
+                color: AppColors.surface,
                 child: TabBar(
                   controller: _tab,
-                  labelColor: _kPurple,
-                  unselectedLabelColor: AppColors.textSecondary,
-                  indicatorColor: _kPurple,
+                  labelColor: AppColors.primary, // was _kPurple
+                  unselectedLabelColor: AppColors.textGray,
+                  indicatorColor: AppColors.primary, // was _kPurple
                   indicatorWeight: 3,
                   labelStyle: const TextStyle(
-                      fontWeight: FontWeight.w700, fontSize: 13),
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13,
+                  ),
                   unselectedLabelStyle: const TextStyle(
-                      fontWeight: FontWeight.w500, fontSize: 13),
+                    fontWeight: FontWeight.w500,
+                    fontSize: 13,
+                  ),
                   tabs: [
                     Tab(
-                      child: Row(mainAxisSize: MainAxisSize.min, children: [
-                        const AppSvgIcon(AppSvgAssets.clipboardList, size: 14),
-                        const SizedBox(width: 4),
-                        Text('All (${todayAll.length})'),
-                      ]),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const AppSvgIcon(
+                            AppSvgAssets.clipboardList,
+                            size: 14,
+                          ),
+                          const SizedBox(width: 4),
+                          Text('All (${todayAll.length})'),
+                        ],
+                      ),
                     ),
                     Tab(
-                      child: Row(mainAxisSize: MainAxisSize.min, children: [
-                        const AppSvgIcon(AppSvgAssets.sun, size: 14),
-                        const SizedBox(width: 4),
-                        Text('Project (${todaySolar.length})'),
-                      ]),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const AppSvgIcon(AppSvgAssets.sun, size: 14),
+                          const SizedBox(width: 4),
+                          Text('Solar (${todaySolar.length})'),
+                        ],
+                      ),
                     ),
                     Tab(
-                      child: Row(mainAxisSize: MainAxisSize.min, children: [
-                        const AppSvgIcon(AppSvgAssets.droplet, size: 14),
-                        const SizedBox(width: 4),
-                        Text('Sprinkler (${todaySprinkler.length})'),
-                      ]),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const AppSvgIcon(AppSvgAssets.droplet, size: 14),
+                          const SizedBox(width: 4),
+                          Text('Sprinkler (${todaySprinkler.length})'),
+                        ],
+                      ),
                     ),
                   ],
                 ),
               ),
 
-              // ── Search bar ─────────────────────────────────────────
+              // Search bar
               Container(
-                color: Colors.white,
+                color: AppColors.surface,
                 padding: const EdgeInsets.fromLTRB(14, 8, 14, 10),
                 child: SizedBox(
                   height: 38,
@@ -264,55 +291,58 @@ class _TodaysJobsScreenState extends State<TodaysJobsScreen>
                     style: const TextStyle(fontSize: 13),
                     decoration: InputDecoration(
                       hintText: 'Search name, phone, address…',
-                      hintStyle: TextStyle(
-                          fontSize: 12, color: AppColors.textSecondary),
-                        prefixIcon: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: AppSvgIcon(AppSvgAssets.search,
-                            size: 17, color: AppColors.textSecondary),
+                      hintStyle: const TextStyle(
+                        fontSize: 12,
+                        color: AppColors.textLight,
+                      ),
+                      prefixIcon: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: AppSvgIcon(
+                          AppSvgAssets.search,
+                          size: 17,
+                          color: AppColors.textGray,
                         ),
+                      ),
                       suffixIcon: _searchCtrl.text.isNotEmpty
                           ? IconButton(
-                            icon: const AppSvgIcon(AppSvgAssets.x, size: 13),
+                              icon: const AppSvgIcon(AppSvgAssets.x, size: 13),
                               onPressed: () => _searchCtrl.clear(),
                             )
                           : null,
                       filled: true,
-                      fillColor: AppColors.bgPrimary,
+                      fillColor: AppColors.background,
                       contentPadding: EdgeInsets.zero,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide:
-                            BorderSide(color: AppColors.borderLight),
+                        borderSide: const BorderSide(color: AppColors.divider),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide:
-                            BorderSide(color: AppColors.borderLight),
+                        borderSide: const BorderSide(color: AppColors.divider),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide:
-                            const BorderSide(color: _kPurple),
-                      ),
+                        borderSide: const BorderSide(color: AppColors.primary),
+                      ), // was _kPurple
                     ),
                   ),
                 ),
               ),
 
-              Divider(height: 1, color: AppColors.borderLight),
+              const Divider(height: 1, color: AppColors.divider),
 
-              // ── Tab views ──────────────────────────────────────────
               Expanded(
                 child: loading
                     ? const Center(
                         child: CircularProgressIndicator(
-                            color: _kPurple))
+                          color: AppColors.primary,
+                        ),
+                      ) // was _kPurple
                     : TabBarView(
                         controller: _tab,
                         children: [
-                          _buildTableView(todayAll,       showType: true),
-                          _buildTableView(todaySolar,     showType: false),
+                          _buildTableView(todayAll, showType: true),
+                          _buildTableView(todaySolar, showType: false),
                           _buildTableView(todaySprinkler, showType: false),
                         ],
                       ),
@@ -328,29 +358,27 @@ class _TodaysJobsScreenState extends State<TodaysJobsScreen>
     List<InstallationModel> items, {
     required bool showType,
   }) {
-    if (items.isEmpty) {
-      return _EmptyState(hasSearch: _search.isNotEmpty);
-    }
+    if (items.isEmpty) return _EmptyState(hasSearch: _search.isNotEmpty);
 
     return RefreshIndicator(
-      color: _kPurple,
+      color: AppColors.primary, // was _kPurple
       onRefresh: () async =>
           context.read<InstallationCubit>().fetchInstallations(),
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final minW =
-              constraints.maxWidth < 900 ? 900.0 : constraints.maxWidth;
-
+          final minW = constraints.maxWidth < 900
+              ? 900.0
+              : constraints.maxWidth;
           return SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.fromLTRB(12, 10, 12, 40),
             child: Container(
               width: double.infinity,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.surface,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.borderLight)),
-              
+                border: Border.all(color: AppColors.divider),
+              ),
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: SizedBox(
@@ -360,25 +388,20 @@ class _TodaysJobsScreenState extends State<TodaysJobsScreen>
                     headingRowHeight: 44,
                     dataRowMinHeight: 56,
                     dataRowMaxHeight: 72,
-                    horizontalMargin:
-                        constraints.maxWidth >= 1000 ? 18 : 12,
-                    columnSpacing:
-                        constraints.maxWidth >= 1000 ? 24 : 14,
-                    // ── Non-clickable: no dataRowColor hover ──────────
+                    horizontalMargin: constraints.maxWidth >= 1000 ? 18 : 12,
+                    columnSpacing: constraints.maxWidth >= 1000 ? 24 : 14,
                     headingRowColor: WidgetStateProperty.all(
-                      _kPurple.withValues(alpha: 0.07),
-                    ),
+                      AppColors.primaryTint,
+                    ), // was _kPurple.withValues(alpha:0.07)
                     border: TableBorder(
-                      horizontalInside:
-                          BorderSide(color: Colors.blueGrey.shade50),
-                      bottom: BorderSide(
-                          color: Colors.blueGrey.shade100),
-                      top:
-                          BorderSide(color: Colors.blueGrey.shade100),
+                      horizontalInside: const BorderSide(
+                        color: AppColors.background,
+                      ),
+                      bottom: const BorderSide(color: AppColors.divider),
+                      top: const BorderSide(color: AppColors.divider),
                     ),
                     columns: [
-                      if (showType)
-                        const DataColumn(label: Text('Type')),
+                      if (showType) const DataColumn(label: Text('Type')),
                       const DataColumn(label: Text('Customer')),
                       const DataColumn(label: Text('Phone')),
                       const DataColumn(label: Text('Address')),
@@ -387,55 +410,58 @@ class _TodaysJobsScreenState extends State<TodaysJobsScreen>
                       const DataColumn(label: Text('Sched. Time')),
                       const DataColumn(label: Text('Assigned By')),
                     ],
-                  
                     rows: items.map((m) {
-                      final isSolar =
-                          m.projectType.toLowerCase() == 'solar';
-                      final accent = isSolar ? _kPurple : _kBlue;
-
+                      final isSolar = m.projectType.toLowerCase() == 'solar';
+                      final accent = isSolar
+                          ? AppColors.primary
+                          : AppColors.primaryLight; // was _kPurple : _kBlue
                       return DataRow(
-                        // ── NO onSelectChanged — rows are non-clickable ──
                         cells: [
-                          // Type (All tab only)
-                          if (showType)
-                            DataCell(_typeBadge(m)),
-                          // Customer
-                          DataCell(Text(m.customerName,
+                          if (showType) DataCell(_typeBadge(m)),
+                          DataCell(
+                            Text(
+                              m.customerName,
                               style: const TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.textPrimary)))),
-                          // Phone
-                          DataCell(Text(m.phone,
-                              style: const TextStyle(
-                                  fontSize: 12,
-                                  color: AppColors.textPrimary)))),
-                          // Address
-                          DataCell(SizedBox(
-                            width: constraints.maxWidth >= 1000
-                                ? 200
-                                : 150,
-                            child: Text(
-                              m.address.isEmpty ? '—' : m.address,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                  fontSize: 12,
-                                  color: AppColors.textPrimary)),
-                            ),
-                          )),
-                          // Status badge
-                          DataCell(_statusBadge(m, accent)),
-                          // Progress
-                          DataCell(_progressCell(m, accent)),
-                          // Scheduled time
-                          DataCell(_timeCell(m.scheduledDate)),
-                          // Assigned by
-                          DataCell(Text(
-                            m.assignedByName ?? '—',
-                            style: const TextStyle(
                                 fontSize: 12,
-                                color: AppColors.textPrimary)),
-                          )),
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textDark,
+                              ),
+                            ),
+                          ),
+                          DataCell(
+                            Text(
+                              m.phone,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: AppColors.textDark,
+                              ),
+                            ),
+                          ),
+                          DataCell(
+                            SizedBox(
+                              width: constraints.maxWidth >= 1000 ? 200 : 150,
+                              child: Text(
+                                m.address.isEmpty ? '—' : m.address,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.textDark,
+                                ),
+                              ),
+                            ),
+                          ),
+                          DataCell(_statusBadge(m, accent)),
+                          DataCell(_progressCell(m, accent)),
+                          DataCell(_timeCell(m.scheduledDate)),
+                          DataCell(
+                            Text(
+                              m.assignedByName ?? '—',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: AppColors.textDark,
+                              ),
+                            ),
+                          ),
                         ],
                       );
                     }).toList(),
@@ -449,10 +475,11 @@ class _TodaysJobsScreenState extends State<TodaysJobsScreen>
     );
   }
 
-  // ── Cell helpers ──────────────────────────────────────────────────────────
   Widget _typeBadge(InstallationModel m) {
     final isSolar = m.projectType.toLowerCase() == 'solar';
-    final color   = isSolar ? _kPurple : _kBlue;
+    final color = isSolar
+        ? AppColors.primary
+        : AppColors.primaryLight; // was _kPurple : _kBlue
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
       decoration: BoxDecoration(
@@ -469,11 +496,14 @@ class _TodaysJobsScreenState extends State<TodaysJobsScreen>
             color: color,
           ),
           const SizedBox(width: 3),
-          Text(isSolar ? 'Solar' : 'Sprinkler',
-              style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w700,
-                  color: color)),
+          Text(
+            isSolar ? 'Solar' : 'Sprinkler',
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w700,
+              color: color,
+            ),
+          ),
         ],
       ),
     );
@@ -488,11 +518,14 @@ class _TodaysJobsScreenState extends State<TodaysJobsScreen>
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: color.withValues(alpha: 0.35)),
       ),
-      child: Text(m.statusLabel,
-          style: TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w700,
-              color: color)),
+      child: Text(
+        m.statusLabel,
+        style: TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w700,
+          color: color,
+        ),
+      ),
     );
   }
 
@@ -501,36 +534,35 @@ class _TodaysJobsScreenState extends State<TodaysJobsScreen>
       case InstallationStatus.projectCompleted:
       case InstallationStatus.installationCompleted:
       case InstallationStatus.meterInstalled:
-        return Colors.green;
+        return AppColors.success;
       case InstallationStatus.installationStarted:
       case InstallationStatus.meterApplied:
       case InstallationStatus.meterInspection:
-        return Colors.orange;
+        return AppColors.solar;
       case InstallationStatus.installationAssigned:
-        return Colors.indigo;
+        return AppColors.primary;
     }
   }
 
   Widget _progressCell(InstallationModel m, Color accent) {
     const vals = {
-      InstallationStatus.installationAssigned:  1 / 5,
+      InstallationStatus.installationAssigned: 1 / 5,
       InstallationStatus.installationCompleted: 2 / 5,
-      InstallationStatus.meterApplied:          3 / 5,
-      InstallationStatus.meterInspection:       4 / 5,
-      InstallationStatus.meterInstalled:        5 / 5,
-      InstallationStatus.projectCompleted:      1.0,
+      InstallationStatus.meterApplied: 3 / 5,
+      InstallationStatus.meterInspection: 4 / 5,
+      InstallationStatus.meterInstalled: 5 / 5,
+      InstallationStatus.projectCompleted: 1.0,
     };
     const labels = {
-      InstallationStatus.installationAssigned:  '1/5',
+      InstallationStatus.installationAssigned: '1/5',
       InstallationStatus.installationCompleted: '2/5',
-      InstallationStatus.meterApplied:          '3/5',
-      InstallationStatus.meterInspection:       '4/5',
-      InstallationStatus.meterInstalled:        '5/5',
-      InstallationStatus.projectCompleted:      'Done',
+      InstallationStatus.meterApplied: '3/5',
+      InstallationStatus.meterInspection: '4/5',
+      InstallationStatus.meterInstalled: '5/5',
+      InstallationStatus.projectCompleted: 'Done',
     };
     final value = vals[m.status] ?? 0.0;
     final label = labels[m.status] ?? '—';
-
     return SizedBox(
       width: 90,
       child: Row(
@@ -541,50 +573,57 @@ class _TodaysJobsScreenState extends State<TodaysJobsScreen>
               child: LinearProgressIndicator(
                 value: value,
                 minHeight: 5,
-                backgroundColor: AppColors.textSecondary,
+                backgroundColor: AppColors.divider,
                 valueColor: AlwaysStoppedAnimation(accent),
               ),
             ),
           ),
           const SizedBox(width: 6),
-          Text(label,
-              style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w700,
-                  color: accent)),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w700,
+              color: accent,
+            ),
+          ),
         ],
       ),
     );
   }
 
   Widget _timeCell(DateTime? dt) {
-    if (dt == null) {
-      return Text('TBD',
-          style: TextStyle(fontSize: 11, color: AppColors.textSecondary));
-    }
+    if (dt == null)
+      return const Text(
+        'TBD',
+        style: TextStyle(fontSize: 11, color: AppColors.textLight),
+      );
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          padding:
-              const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
           decoration: BoxDecoration(
-            color: _kPurple,
+            color: AppColors.primary,
             borderRadius: BorderRadius.circular(8),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const AppSvgIcon(AppSvgAssets.clock,
-                  size: 11, color: Colors.white),
+              const AppSvgIcon(
+                AppSvgAssets.clock,
+                size: 11,
+                color: AppColors.surface,
+              ),
               const SizedBox(width: 4),
               Text(
                 DateFormat('hh:mm a').format(dt),
                 style: const TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white),
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.surface,
+                ),
               ),
             ],
           ),
@@ -592,11 +631,8 @@ class _TodaysJobsScreenState extends State<TodaysJobsScreen>
       ],
     );
   }
+}
 
-
-// ─────────────────────────────────────────────────────────────────────────────
-//  Empty state
-// ─────────────────────────────────────────────────────────────────────────────
 class _EmptyState extends StatelessWidget {
   final bool hasSearch;
   const _EmptyState({required this.hasSearch});
@@ -609,17 +645,19 @@ class _EmptyState extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            AppSvgIcon(AppSvgAssets.calendarDays,
-                size: 56, color: AppColors.borderLight),
+            AppSvgIcon(
+              AppSvgAssets.calendarDays,
+              size: 56,
+              color: AppColors.divider,
+            ),
             const SizedBox(height: 14),
             Text(
-              hasSearch
-                  ? 'No results found'
-                  : 'No jobs scheduled for today',
-              style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textSecondary),
+              hasSearch ? 'No results found' : 'No jobs scheduled for today',
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textLight,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 6),
@@ -627,8 +665,7 @@ class _EmptyState extends StatelessWidget {
               hasSearch
                   ? 'Try a different search term.'
                   : "Jobs with today's install date will appear here.",
-              style: TextStyle(
-                  fontSize: 11, color: AppColors.textSecondary),
+              style: const TextStyle(fontSize: 11, color: AppColors.textLight),
               textAlign: TextAlign.center,
             ),
           ],
@@ -637,7 +674,3 @@ class _EmptyState extends StatelessWidget {
     );
   }
 }
-
-
-
-

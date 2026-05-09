@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
-import 'package:solar_project/Helper/app_colors.dart';
+import 'package:solar_project/core/app_colors.dart';
 
 class LeadSectionLabel extends StatelessWidget {
   const LeadSectionLabel({
@@ -31,7 +31,8 @@ class LeadSectionLabel extends StatelessWidget {
           style: const TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary
+            color: AppColors.textDark,
+            letterSpacing: 0.3,
           ),
         ),
       ],
@@ -83,29 +84,30 @@ class LeadTextFormField extends StatelessWidget {
         maxLines: maxLines,
         maxLength: maxLength,
         inputFormatters: inputFormatters,
-        style: const TextStyle(fontSize: 13.5, color: AppColors.textPrimary),
+        style: const TextStyle(fontSize: 13.5, color: AppColors.textDark),
         decoration: InputDecoration(
           labelText: label,
-          labelStyle: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+          labelStyle: const TextStyle(fontSize: 13, color: AppColors.textGray),
           prefixIcon: Padding(
             padding: const EdgeInsets.all(12),
-            child: AppSvgIcon(svgIcon, size: 16, color: AppColors.textTertiary)),
+            child: AppSvgIcon(svgIcon, size: 16, color: AppColors.textLight),
+          ),
           prefixText: prefixText,
           prefixStyle: prefixStyle,
           counterText: counterText,
           filled: true,
-          fillColor: Colors.white,
+          fillColor: AppColors.surface,
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 14,
             vertical: 16,
           ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(color: AppColors.borderLight),
+            borderSide: BorderSide(color: AppColors.divider),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(color: AppColors.borderLight),
+            borderSide: BorderSide(color: AppColors.divider),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
@@ -113,13 +115,13 @@ class LeadTextFormField extends StatelessWidget {
           ),
           errorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
-            borderSide: const BorderSide(color: Color(0xFFE53935)),
+            borderSide: const BorderSide(color: AppColors.error),
           ),
           focusedErrorBorder: focusedErrorBorder
               ? OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: const BorderSide(
-                    color: Color(0xFFE53935),
+                    color: AppColors.error,
                     width: 1.5,
                   ),
                 )
@@ -169,28 +171,29 @@ class LeadDropdownField extends StatelessWidget {
         icon: const AppSvgIcon(
           AppSvgAssets.chevronDown,
           size: 18,
-          color: AppColors.textSecondary),
-        style: const TextStyle(fontSize: 13.5, color: AppColors.textPrimary),
+          color: AppColors.textGray,
+        ),
+        style: const TextStyle(fontSize: 13.5, color: AppColors.textDark),
         decoration: InputDecoration(
           labelText: label,
-          labelStyle: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+          labelStyle: const TextStyle(fontSize: 13, color: AppColors.textGray),
           prefixIcon: Padding(
             padding: const EdgeInsets.all(12),
-            child: AppSvgIcon(svgIcon, size: 16, color: AppColors.textTertiary),
+            child: AppSvgIcon(svgIcon, size: 16, color: AppColors.textLight),
           ),
           filled: true,
-          fillColor: Colors.white,
+          fillColor: AppColors.surface,
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 14,
             vertical: 16,
           ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(color: AppColors.borderLight),
+            borderSide: BorderSide(color: AppColors.divider),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(color: AppColors.borderLight),
+            borderSide: BorderSide(color: AppColors.divider),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
@@ -239,7 +242,7 @@ class LeadSubmitButton extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: color,
           disabledBackgroundColor: color.withValues(alpha: 0.6),
-          foregroundColor: Colors.white,
+          foregroundColor: AppColors.surface,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
           ),
@@ -251,7 +254,7 @@ class LeadSubmitButton extends StatelessWidget {
                 width: 20,
                 height: 20,
                 child: CircularProgressIndicator(
-                  color: Colors.white,
+                  color: AppColors.surface,
                   strokeWidth: 2,
                 ),
               )
@@ -266,8 +269,3 @@ class LeadSubmitButton extends StatelessWidget {
     );
   }
 }
-
-
-
-
-

@@ -14,6 +14,7 @@ import 'package:solar_project/Helper/app_svg_icon.dart';
 import 'package:solar_project/Helper/common_widgets.dart';
 import 'package:solar_project/Helper/pipeline_dashboard_screen.dart';
 import 'package:solar_project/Helper/ui_helper.dart';
+import 'package:solar_project/core/app_colors.dart';
 import 'package:solar_project/data/Models/solar_leads_model.dart';
 import 'package:solar_project/data/Models/sprinkler_lead_model.dart';
 import 'package:solar_project/screens/Dashboards/Admin_Dashboards/Dashboard/peding_payment.dart';
@@ -23,7 +24,6 @@ import 'package:solar_project/screens/Dashboards/Leads/Solar/solar_leads_list_sc
 import 'package:solar_project/screens/Dashboards/Leads/Sprinkler/sprinkler_leads_list_screen.dart';
 import 'package:solar_project/screens/Dashboards/Material/material_list_screen.dart';
 import 'package:solar_project/services/api_service.dart';
-import 'package:solar_project/Helper/app_colors.dart';
 
 class SalesDashboardScreen extends StatefulWidget {
   const SalesDashboardScreen({super.key});
@@ -135,12 +135,12 @@ class _SalesDashboardScreenState extends State<SalesDashboardScreen> {
         children: [
           Positioned.fill(
             child: CircleAvatar(
-              backgroundColor: AppColors.primaryLighter),
+              backgroundColor:  AppColors.primaryTint,
               backgroundImage: imageUrl != null ? NetworkImage(imageUrl) : null,
               child: imageUrl == null
                   ? AppSvgIcon(
                       AppSvgAssets.userRound,
-                      color: AppColors.accent2),
+                      color:  AppColors.primary,
                       size: size * 0.52,
                     )
                   : null,
@@ -153,9 +153,9 @@ class _SalesDashboardScreenState extends State<SalesDashboardScreen> {
               width: size * 0.26,
               height: size * 0.26,
               decoration: BoxDecoration(
-                 color: AppColors.primary),
+                color:  AppColors.success,
                 shape: BoxShape.circle,
-                border: Border.all(color: Colors.white, width: 1.4),
+                border: Border.all(color: AppColors.surface, width: 1.4),
               ),
             ),
           ),
@@ -273,9 +273,9 @@ class _SalesDashboardScreenState extends State<SalesDashboardScreen> {
                 pendingSolarLeads.length + pendingSpkLeads.length;
 
             return Scaffold(
-              backgroundColor: AppColors.primaryLightest),
+              backgroundColor:  AppColors.background,
               appBar: AppBar(
-                backgroundColor: AppColors.primaryLightest),
+                backgroundColor:  AppColors.background,
                 elevation: 0,
                 scrolledUnderElevation: 0,
                 centerTitle: false,
@@ -300,7 +300,7 @@ class _SalesDashboardScreenState extends State<SalesDashboardScreen> {
                           style: const TextStyle(
                             fontWeight: FontWeight.w700,
                             fontSize: 15,
-                            color: AppColors.textPrimary),
+                            color: AppColors.darkNavy,
                             letterSpacing: -0.3,
                           ),
                         ),
@@ -309,7 +309,7 @@ class _SalesDashboardScreenState extends State<SalesDashboardScreen> {
                           style: const TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w400,
-                            color: AppColors.textSecondary),
+                            color: AppColors.textLight,
                           ),
                         ),
                       ],
@@ -322,7 +322,7 @@ class _SalesDashboardScreenState extends State<SalesDashboardScreen> {
                       style: TextStyle(
                         fontWeight: FontWeight.w800,
                         fontSize: 20,
-                        color: AppColors.accent2),
+                        color: AppColors.primary,
                       ),
                     ),
                     const Spacer(),
@@ -337,7 +337,7 @@ class _SalesDashboardScreenState extends State<SalesDashboardScreen> {
                         height: 18,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: AppColors.accent2),
+                          color: AppColors.primary,
                         ),
                       ),
                     )
@@ -349,7 +349,7 @@ class _SalesDashboardScreenState extends State<SalesDashboardScreen> {
                         bottom: 8,
                       ),
                       child: Material(
-                        color: Colors.white,
+                        color: AppColors.surface,
                         borderRadius: BorderRadius.circular(10),
                         child: InkWell(
                           borderRadius: BorderRadius.circular(10),
@@ -364,12 +364,12 @@ class _SalesDashboardScreenState extends State<SalesDashboardScreen> {
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(10),
                               border: Border.all(
-                                color: AppColors.primaryLightest),
+                                color:  AppColors.primaryTint,
                               ),
                             ),
                             child: const AppSvgIcon(
                               AppSvgAssets.refreshCw,
-                              color: AppColors.accent2),
+                              color: AppColors.primary,
                               size: 18,
                             ),
                           ),
@@ -382,11 +382,11 @@ class _SalesDashboardScreenState extends State<SalesDashboardScreen> {
                 child: isLoading
                     ? const Center(
                         child: CircularProgressIndicator(
-                          color: AppColors.accent2),
+                          color: AppColors.primary,
                         ),
                       )
                     : RefreshIndicator(
-                        color: AppColors.accent2),
+                        color:  AppColors.primary,
                         onRefresh: () async {
                           ctx.read<SolarLeadCubit>().fetchAllLeads();
                           ctx2.read<SprinklerLeadCubit>().fetchAllLeads();
@@ -426,17 +426,17 @@ class _SalesDashboardScreenState extends State<SalesDashboardScreen> {
                                 childAspectRatio: isMobile ? 1.55 : 1.65,
                                 children: [
                                   DashboardCard(
-                                    title: 'Project Leads',
+                                    title: 'Solar Leads',
                                     value: '${solarLeads.length}',
                                     svgAsset: AppSvgAssets.sun,
-                                     cardColor: AppColors.primary),
+                                    cardColor:  AppColors.primary,
                                     onTap: () => Navigator.push(
                                       context,
                                       MaterialPageRoute(
                                         builder: (_) => BlocProvider.value(
                                           value: context.read<SolarLeadCubit>(),
                                           child: const SolarLeadsListScreen(
-                                            appBarColor: AppColors.primary),
+                                            appBarColor: AppColors.primary,
                                           ),
                                         ),
                                       ),
@@ -446,7 +446,7 @@ class _SalesDashboardScreenState extends State<SalesDashboardScreen> {
                                     title: 'Sprinkler Leads',
                                     value: '${spkLeads.length}',
                                     svgAsset: AppSvgAssets.droplet,
-                                     cardColor: AppColors.primary),
+                                    cardColor:  AppColors.primaryLight,
                                     onTap: () => Navigator.push(
                                       context,
                                       MaterialPageRoute(
@@ -454,7 +454,7 @@ class _SalesDashboardScreenState extends State<SalesDashboardScreen> {
                                           value: context.read<SprinklerLeadCubit>(),
                                           child:
                                               const SprinklerLeadsListScreen(
-                                                appBarColor: AppColors.primary),
+                                                appBarColor: AppColors.primaryLight,
                                               ),
                                         ),
                                       ),
@@ -462,9 +462,9 @@ class _SalesDashboardScreenState extends State<SalesDashboardScreen> {
                                   ),
                                   DashboardCard(
                                     title: "Today's Visits",
-                                     value: '$todayVisits',
-                                     svgAsset: AppSvgAssets.handshake,
-                                     cardColor: AppColors.primary),
+                                    value: '$todayVisits',
+                                    svgAsset: AppSvgAssets.handshake,
+                                    cardColor:  AppColors.primary,
                                     onTap: () => _openFilter(
                                       context,
                                       PipelineFilter.todayVisits,
@@ -474,7 +474,7 @@ class _SalesDashboardScreenState extends State<SalesDashboardScreen> {
                                     title: 'Today Followups',
                                     value: '$todayFollowups',
                                     svgAsset: AppSvgAssets.calendarDays,
-                                    cardColor: AppColors.primary),
+                                    cardColor:  AppColors.primaryLight,
                                     onTap: () => Navigator.push(
                                       context,
                                       MaterialPageRoute(
@@ -487,7 +487,7 @@ class _SalesDashboardScreenState extends State<SalesDashboardScreen> {
                                     title: 'Service Requests',
                                     value: '$serviceCount',
                                     svgAsset: AppSvgAssets.cog,
-                                     cardColor: AppColors.primary),
+                                    cardColor:  AppColors.primary,
                                     onTap: () => Navigator.push(
                                       context,
                                       MaterialPageRoute(
@@ -495,7 +495,7 @@ class _SalesDashboardScreenState extends State<SalesDashboardScreen> {
                                           value: context
                                               .read<ServiceLeadCubit>(),
                                           child: const ServiceRequestPage(
-                                            appBarColor: AppColors.primary),
+                                            appBarColor: AppColors.primary,
                                           ),
                                         ),
                                       ),
@@ -505,16 +505,16 @@ class _SalesDashboardScreenState extends State<SalesDashboardScreen> {
                                     title: 'Add/Sell Material',
                                     value: '$_activeMaterialLeadCount',
                                     svgAsset: AppSvgAssets.packagePlus,
-                                     cardColor: AppColors.primary),
+                                    cardColor:  AppColors.primaryDark,
                                     onTap: () =>
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(
                                             builder: (_) =>
                                                 const MaterialListScreen(
-                                                   appBarColor: Color(
-                                                     AppColors.primary,
-                                                   ),
+                                                  appBarColor: Color(
+                                                    0xFF6366F1,
+                                                  ),
                                                 ),
                                           ),
                                         ).then(
@@ -525,7 +525,7 @@ class _SalesDashboardScreenState extends State<SalesDashboardScreen> {
                                     title: 'Pending Payment',
                                     value: '$pendingCount',
                                     svgAsset: AppSvgAssets.indianRupee,
-                                     cardColor: AppColors.primary),
+                                    cardColor:  AppColors.error,
                                     onTap: () => Navigator.push(
                                       context,
                                       MaterialPageRoute(
@@ -541,7 +541,7 @@ class _SalesDashboardScreenState extends State<SalesDashboardScreen> {
                                             ),
                                           ],
                                           child: const AdminPendingPaymentPage(
-                                            appBarColor: AppColors.primary),
+                                            appBarColor: AppColors.error,
                                           ),
                                         ),
                                       ),
@@ -592,7 +592,7 @@ class _SectionHeading extends StatelessWidget {
           width: 3,
           height: 15,
           decoration: BoxDecoration(
-            color: AppColors.accent2),
+            color:  AppColors.primary,
             borderRadius: BorderRadius.circular(2),
           ),
         ),
@@ -602,7 +602,7 @@ class _SectionHeading extends StatelessWidget {
           style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary),
+            color: AppColors.darkNavy,
             letterSpacing: -0.2,
           ),
         ),
@@ -630,12 +630,12 @@ class _SalesSummaryStrip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.primaryLightest), width: 1),
+        border: Border.all(color:  AppColors.primaryTint, width: 1),
         boxShadow: [
           BoxShadow(
-            color: AppColors.accent2).withValues(alpha: 0.05),
+            color:  AppColors.primary.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
@@ -646,19 +646,19 @@ class _SalesSummaryStrip extends StatelessWidget {
           _StripStat(
             label: 'Total Leads',
             value: '$totalLeads',
-            color: const Color(0xFF6366F1),
+            color:  AppColors.primaryDark,
           ),
           _StripDivider(),
           _StripStat(
-            label: 'Project',
+            label: 'Solar',
             value: '$solarLeads',
-            color: AppColors.warning),
+            color:   AppColors.primary,
           ),
           _StripDivider(),
           _StripStat(
             label: 'Sprinkler',
             value: '$sprinklerLeads',
-            color: const Color(0xFF0EA5E9),
+            color:  AppColors.primaryLight,
           ),
         ],
       ),
@@ -698,7 +698,7 @@ class _StripStat extends StatelessWidget {
             style: const TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w500,
-              color: AppColors.textTertiary),
+              color: AppColors.textGray,
             ),
           ),
         ],
@@ -710,14 +710,6 @@ class _StripStat extends StatelessWidget {
 class _StripDivider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Container(width: 1, height: 22, color: AppColors.primaryLightest));
+    return Container(width: 1, height: 22, color:  AppColors.primaryTint);
   }
 }
-
-
-
-
-
-
-
-

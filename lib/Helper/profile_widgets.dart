@@ -7,7 +7,7 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
-import 'package:solar_project/Helper/app_colors.dart';
+import 'package:solar_project/core/app_colors.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Error View
@@ -25,7 +25,7 @@ class ProfileErrorView extends StatelessWidget {
   const ProfileErrorView({
     required this.message,
     required this.onRetry,
-    this.accentColor = AppColors.accent2,
+    this.accentColor = AppColors.primary,
     super.key,
   });
 
@@ -37,21 +37,29 @@ class ProfileErrorView extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const AppSvgIcon(AppSvgAssets.triangleAlert, size: 60, color: AppColors.error),
+            const AppSvgIcon(
+              AppSvgAssets.triangleAlert,
+              size: 60,
+              color: AppColors.error,
+            ),
             const SizedBox(height: 16),
             Text(
               message ?? 'Failed to load profile',
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 15, color: AppColors.textSecondary),
+              style: const TextStyle(fontSize: 15, color: Colors.black54),
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
               onPressed: onRetry,
-              icon: const AppSvgIcon(AppSvgAssets.refreshCw, size: 20, color: Colors.white),
+              icon: const AppSvgIcon(
+                AppSvgAssets.refreshCw,
+                size: 20,
+                color: AppColors.surface,
+              ),
               label: const Text('Retry'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: accentColor,
-                foregroundColor: Colors.white,
+                foregroundColor: AppColors.surface,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -76,7 +84,7 @@ class ProfileErrorView extends StatelessWidget {
 Future<ImageSource?> showProfilePhotoSourceSheet(BuildContext context) {
   return showModalBottomSheet<ImageSource>(
     context: context,
-    backgroundColor: Colors.white,
+    backgroundColor: AppColors.surface,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
@@ -90,7 +98,7 @@ Future<ImageSource?> showProfilePhotoSourceSheet(BuildContext context) {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: AppColors.borderPrimary,
+                color: Colors.grey.shade300,
                 borderRadius: BorderRadius.circular(10),
               ),
             ),
@@ -106,18 +114,21 @@ Future<ImageSource?> showProfilePhotoSourceSheet(BuildContext context) {
           const SizedBox(height: 12),
           ListTile(
             leading: const CircleAvatar(
-              backgroundColor: AppColors.primaryLighter,
-              child: AppSvgIcon(AppSvgAssets.camera, color: AppColors.accent2),
+              backgroundColor: AppColors.primaryTint,
+              child: const AppSvgIcon(
+                AppSvgAssets.camera,
+                color: AppColors.primary,
+              ),
             ),
             title: const Text('Take a Photo'),
             onTap: () => Navigator.pop(ctx, ImageSource.camera),
           ),
           ListTile(
             leading: const CircleAvatar(
-              backgroundColor: AppColors.primaryLighter,
-              child: AppSvgIcon(
+              backgroundColor: AppColors.primaryTint,
+              child: const AppSvgIcon(
                 AppSvgAssets.images,
-                color: AppColors.accent2,
+                color: AppColors.primary,
               ),
             ),
             title: const Text('Choose from Gallery'),
@@ -157,27 +168,27 @@ Future<void> showProfileLogoutConfirmation(
       ),
       content: const Text(
         'Are you sure you want to logout from your account?',
-        style: TextStyle(fontSize: 15, color: AppColors.textPrimary),
+        style: TextStyle(fontSize: 15, color: AppColors.textDark),
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(ctx, false),
           child: const Text(
             'Cancel',
-            style: TextStyle(color: AppColors.textSecondary, fontSize: 15),
+            style: TextStyle(color: Colors.grey, fontSize: 15),
           ),
         ),
         ElevatedButton(
           onPressed: () => Navigator.pop(ctx, true),
           style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.primary,
+            backgroundColor: AppColors.error,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
             ),
           ),
           child: const Text(
             'Logout',
-            style: TextStyle(color: Colors.white, fontSize: 15),
+            style: TextStyle(color: AppColors.surface, fontSize: 15),
           ),
         ),
       ],
@@ -185,12 +196,3 @@ Future<void> showProfileLogoutConfirmation(
   );
   if (confirmed == true) await onConfirm();
 }
-
-
-
-
-
-
-
-
-

@@ -11,7 +11,7 @@ import 'package:solar_project/Helper/lead_themes.dart';
 import 'package:solar_project/Helper/picked_photo.dart';
 import 'package:solar_project/Helper/spk_photo_picker.dart';
 import 'package:solar_project/data/Models/sprinkler_lead_model.dart';
-import 'package:solar_project/Helper/app_colors.dart';
+import 'package:solar_project/core/app_colors.dart';
 
 class SpkVisitDataScreen extends StatefulWidget {
   final SprinklerLeadModel lead;
@@ -109,15 +109,15 @@ class _SpkVisitDataScreenState extends State<SpkVisitDataScreen> {
         }
       },
       child: Scaffold(
-        backgroundColor: AppColors.bgSecondary),
+        backgroundColor:   AppColors.background,
         appBar: AppBar(
           backgroundColor: LeadTheme.secondary,
-          foregroundColor: Colors.white,
+          foregroundColor: AppColors.surface,
           elevation: 0,
           leading: IconButton(
             icon: const AppSvgIcon(
               AppSvgAssets.chevronLeft,
-              color: Colors.white,
+              color: AppColors.surface,
               size: 18,
             ),
             onPressed: () => Navigator.pop(context),
@@ -148,7 +148,7 @@ class _SpkVisitDataScreenState extends State<SpkVisitDataScreen> {
                       prefixIcon: AppSvgIcon(
                         AppSvgAssets.maximize,
                         size: 16,
-                        color: AppColors.textSecondary,
+                        color: AppColors.background,
                       ),
                     ),
                   ),
@@ -163,7 +163,7 @@ class _SpkVisitDataScreenState extends State<SpkVisitDataScreen> {
                       prefixIcon: AppSvgIcon(
                         AppSvgAssets.droplet,
                         size: 16,
-                        color: AppColors.textSecondary,
+                        color: AppColors.background,
                       ),
                     ),
                   ),
@@ -205,7 +205,7 @@ class _SpkVisitDataScreenState extends State<SpkVisitDataScreen> {
                       prefixIcon: AppSvgIcon(
                         AppSvgAssets.maximize,
                         size: 16,
-                        color: AppColors.textSecondary,
+                        color: AppColors.background,
                       ),
                     ),
                   ),
@@ -222,7 +222,7 @@ class _SpkVisitDataScreenState extends State<SpkVisitDataScreen> {
                       prefixIcon: AppSvgIcon(
                         AppSvgAssets.droplet,
                         size: 16,
-                        color: AppColors.textSecondary,
+                        color: AppColors.background,
                       ),
                     ),
                   ),
@@ -246,7 +246,7 @@ class _SpkVisitDataScreenState extends State<SpkVisitDataScreen> {
                       prefixIcon: AppSvgIcon(
                         AppSvgAssets.maximize,
                         size: 16,
-                        color: AppColors.textSecondary,
+                        color: AppColors.background,
                       ),
                     ),
                   ),
@@ -273,14 +273,13 @@ class _SpkVisitDataScreenState extends State<SpkVisitDataScreen> {
               const SizedBox(height: 14),
 
               // ── Technical Photos ← YEH NAYA ADD KARO ────────────────
-              
               _buildCard(
                 title: 'Site Photos',
                 icon: AppSvgAssets.camera,
                 children: [
                   const Text(
                     'Photos of pump, sprinklers, pipes, site setup etc.',
-                    style: TextStyle(fontSize: 11, color: AppColors.textTertiary)),
+                    style: TextStyle(fontSize: 11, color: AppColors.textLight),
                   ),
                   const SizedBox(height: 10),
                   SpkPhotoPicker(
@@ -326,7 +325,7 @@ class _SpkVisitDataScreenState extends State<SpkVisitDataScreen> {
       MediaQuery.of(context).padding.bottom + 12,
     ),
     decoration: BoxDecoration(
-      color: Colors.white,
+      color: AppColors.surface,
       boxShadow: [
         BoxShadow(
           color: Colors.black.withValues(alpha: 0.08),
@@ -342,7 +341,7 @@ class _SpkVisitDataScreenState extends State<SpkVisitDataScreen> {
         onPressed: _saving ? null : _submit,
         style: ElevatedButton.styleFrom(
           backgroundColor: LeadTheme.secondary,
-          foregroundColor: Colors.white,
+          foregroundColor: AppColors.surface,
           disabledBackgroundColor: LeadTheme.secondary.withValues(alpha: 0.6),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -354,7 +353,7 @@ class _SpkVisitDataScreenState extends State<SpkVisitDataScreen> {
                 width: 20,
                 height: 20,
                 child: CircularProgressIndicator(
-                  color: Colors.white,
+                  color: AppColors.surface,
                   strokeWidth: 2,
                 ),
               )
@@ -373,7 +372,7 @@ class _SpkVisitDataScreenState extends State<SpkVisitDataScreen> {
     required List<Widget> children,
   }) => Container(
     decoration: BoxDecoration(
-      color: Colors.white,
+      color: AppColors.surface,
       borderRadius: BorderRadius.circular(12),
       boxShadow: [
         BoxShadow(
@@ -429,7 +428,7 @@ class _SpkVisitDataScreenState extends State<SpkVisitDataScreen> {
       style: const TextStyle(
         fontSize: 12.5,
         fontWeight: FontWeight.w600,
-        color: AppColors.textPrimary),
+        color: AppColors.textDark,
       ),
       children: required
           ? const [
@@ -452,13 +451,13 @@ class _SpkVisitDataScreenState extends State<SpkVisitDataScreen> {
     value: value,
     decoration: _inputDeco(
       hint: hint,
-      prefixIcon: AppSvgIcon(icon, size: 16, color: AppColors.textSecondary),
+      prefixIcon: AppSvgIcon(icon, size: 16, color: AppColors.background),
     ),
     isExpanded: true,
     icon: AppSvgIcon(
       AppSvgAssets.chevronDown,
       size: 16,
-      color: AppColors.textSecondary,
+      color: AppColors.background,
     ),
     items: [
       DropdownMenuItem<String>(
@@ -467,7 +466,7 @@ class _SpkVisitDataScreenState extends State<SpkVisitDataScreen> {
           'None',
           style: TextStyle(
             fontSize: 13,
-            color: AppColors.textSecondary,
+            color: AppColors.background,
             fontStyle: FontStyle.italic,
           ),
         ),
@@ -480,7 +479,7 @@ class _SpkVisitDataScreenState extends State<SpkVisitDataScreen> {
             style: const TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w500,
-              color: AppColors.textPrimary),
+              color: AppColors.textDark,
             ),
           ),
         ),
@@ -495,22 +494,22 @@ class _SpkVisitDataScreenState extends State<SpkVisitDataScreen> {
     String? suffixText,
   }) => InputDecoration(
     hintText: hint,
-    hintStyle: const TextStyle(fontSize: 13, color: AppColors.textTertiary)),
+    hintStyle: const TextStyle(fontSize: 13, color: AppColors.textLight),
     filled: true,
-    fillColor: Colors.white,
+    fillColor: AppColors.surface,
     suffixText: suffixText,
-    suffixStyle: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+    suffixStyle: const TextStyle(fontSize: 12, color: AppColors.textGray),
     prefixIcon: prefixIcon != null
         ? Padding(padding: const EdgeInsets.all(13), child: prefixIcon)
         : null,
     contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
     border: OutlineInputBorder(
       borderRadius: BorderRadius.circular(10),
-      borderSide: const BorderSide(color: AppColors.borderLight)),
+      borderSide: const BorderSide(color: AppColors.divider),
     ),
     enabledBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(10),
-      borderSide: const BorderSide(color: AppColors.borderLight)),
+      borderSide: const BorderSide(color: AppColors.divider),
     ),
     focusedBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(10),
@@ -526,9 +525,3 @@ class _SpkVisitDataScreenState extends State<SpkVisitDataScreen> {
     ),
   );
 }
-
-
-
-
-
-

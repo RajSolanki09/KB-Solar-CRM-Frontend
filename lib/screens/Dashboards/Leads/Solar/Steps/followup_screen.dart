@@ -4,11 +4,10 @@ import 'package:solar_project/Cubits/SolarLeads/solar_leads_cubit.dart';
 import 'package:solar_project/Cubits/SolarLeads/solar_leads_state.dart';
 import 'package:solar_project/Helper/app_feedback.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
-import 'package:solar_project/Helper/common_widgets.dart';
 import 'package:solar_project/Helper/lead_themes.dart';
 import 'package:solar_project/Helper/lead_widgets.dart';
 import 'package:solar_project/data/Models/solar_leads_model.dart';
-import 'package:solar_project/Helper/app_colors.dart';
+import 'package:solar_project/core/app_colors.dart';
 
 class SolarFollowupScreen extends StatefulWidget {
   final SolarLeadsModel lead;
@@ -35,19 +34,19 @@ class _State extends State<SolarFollowupScreen> {
     _DropOption(
       value: 'cold',
       label: 'Cold',
-      color: AppColors.info),
+      color: AppColors.primary,
       icon: AppSvgAssets.activity,
     ),
     _DropOption(
       value: 'medium',
       label: 'Medium',
-      color: Color(0xFFD97706),
+      color: AppColors.warning,
       icon: AppSvgAssets.clock,
     ),
     _DropOption(
       value: 'hot',
       label: 'Hot',
-      color: AppColors.error),
+      color: AppColors.error,
       icon: AppSvgAssets.sun,
     ),
   ];
@@ -56,13 +55,13 @@ class _State extends State<SolarFollowupScreen> {
     _DropOption(
       value: 'thinking',
       label: 'Thinking',
-      color: Color(0xFFD97706),
+      color: AppColors.warning,
       icon: AppSvgAssets.history,
     ),
     _DropOption(
       value: 'negotiation',
       label: 'Negotiation',
-      color: Color(0xFF7C3AED),
+      color: AppColors.primary,
       icon: AppSvgAssets.handshake,
     ),
     _DropOption(
@@ -74,7 +73,7 @@ class _State extends State<SolarFollowupScreen> {
     _DropOption(
       value: 'rejected',
       label: 'Rejected',
-      color: AppColors.error),
+      color: AppColors.error,
       icon: AppSvgAssets.x,
     ),
   ];
@@ -89,7 +88,7 @@ class _State extends State<SolarFollowupScreen> {
         _DropOption(
           value: initialValue,
           label: _humanize(initialValue),
-          color: AppColors.success),
+          color: AppColors.success,
           icon: AppSvgAssets.history,
         ),
       );
@@ -124,7 +123,8 @@ class _State extends State<SolarFollowupScreen> {
       }
     }
 
-    selectedOutcome = widget.lead.followupData.response ?? widget.lead.followupOutcome;
+    selectedOutcome =
+        widget.lead.followupData.response ?? widget.lead.followupOutcome;
     selectedCustomerType = widget.lead.followupData.customerType;
     _responseOptions = _buildDynamicResponseOptions(selectedOutcome);
   }
@@ -145,9 +145,9 @@ class _State extends State<SolarFollowupScreen> {
       firstDate: DateTime(2020),
       lastDate: DateTime.now().add(const Duration(days: 365)),
       builder: (ctx, child) => Theme(
-        data: Theme.of(ctx).copyWith(
-          colorScheme: ColorScheme.light(primary: LeadTheme.primary),
-        ),
+        data: Theme.of(
+          ctx,
+        ).copyWith(colorScheme: ColorScheme.light(primary: LeadTheme.primary)),
         child: child!,
       ),
     );
@@ -161,9 +161,9 @@ class _State extends State<SolarFollowupScreen> {
       context: context,
       initialTime: initial,
       builder: (ctx, child) => Theme(
-        data: Theme.of(ctx).copyWith(
-          colorScheme: ColorScheme.light(primary: LeadTheme.primary),
-        ),
+        data: Theme.of(
+          ctx,
+        ).copyWith(colorScheme: ColorScheme.light(primary: LeadTheme.primary)),
         child: child!,
       ),
     );
@@ -235,7 +235,7 @@ class _State extends State<SolarFollowupScreen> {
         if (state is SolarLeadSaved) {
           setState(() => _saving = false);
           Future.delayed(const Duration(milliseconds: 100), () {
-            if (mounted) safePop(context);
+            if (mounted) Navigator.pop(context);
           });
         }
         if (state is SolarLeadError) {
@@ -382,7 +382,11 @@ Widget _infoBanner(SolarLeadsModel lead) {
     ),
     child: Row(
       children: [
-        const AppSvgIcon(AppSvgAssets.userRound, size: 16, color: LeadTheme.primary),
+        const AppSvgIcon(
+          AppSvgAssets.userRound,
+          size: 16,
+          color: LeadTheme.primary,
+        ),
         const SizedBox(width: 8),
         Expanded(
           child: Column(
@@ -412,13 +416,13 @@ Widget _infoBanner(SolarLeadsModel lead) {
 }
 
 Widget _dateTile(String svgAsset, String label, DateTime? date) {
-  final c = date != null ? Colors.green : LeadTheme.textSecondary;
+  final c = date != null ? AppColors.success : LeadTheme.textSecondary;
   return Container(
     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
     decoration: BoxDecoration(
-      color: date != null ? Colors.green.shade50 : LeadTheme.surface,
+      color: date != null ? AppColors.success : LeadTheme.surface,
       border: Border.all(
-        color: date != null ? Colors.green.shade300 : AppColors.borderPrimary,
+        color: date != null ? AppColors.success : Colors.grey.shade300,
       ),
       borderRadius: BorderRadius.circular(8),
     ),
@@ -452,7 +456,7 @@ Widget _dateTile(String svgAsset, String label, DateTime? date) {
         AppSvgIcon(
           date != null ? AppSvgAssets.circleCheckBig : AppSvgAssets.arrowRight,
           size: 14,
-          color: date != null ? Colors.green : AppColors.textSecondary,
+          color: date != null ? AppColors.success : AppColors.textLight,
         ),
       ],
     ),
@@ -462,7 +466,7 @@ Widget _dateTile(String svgAsset, String label, DateTime? date) {
 // ── NEW: time tile ────────────────────────────────────────────────────────────
 Widget _timeTile(TimeOfDay? time) {
   final hasTime = time != null;
-  final c = hasTime ? Colors.green.shade600 : LeadTheme.textSecondary;
+  final c = hasTime ? AppColors.success : LeadTheme.textSecondary;
 
   String _fmt(TimeOfDay t) {
     final h = t.hour;
@@ -475,9 +479,9 @@ Widget _timeTile(TimeOfDay? time) {
   return Container(
     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
     decoration: BoxDecoration(
-      color: hasTime ? Colors.green.shade50 : LeadTheme.surface,
+      color: hasTime ? AppColors.success : LeadTheme.surface,
       border: Border.all(
-        color: hasTime ? Colors.green.shade300 : AppColors.borderPrimary,
+        color: hasTime ? AppColors.success : Colors.grey.shade300,
       ),
       borderRadius: BorderRadius.circular(8),
     ),
@@ -506,7 +510,7 @@ Widget _timeTile(TimeOfDay? time) {
         AppSvgIcon(
           hasTime ? AppSvgAssets.circleCheckBig : AppSvgAssets.arrowRight,
           size: 14,
-          color: hasTime ? Colors.green.shade400 : AppColors.textSecondary,
+          color: hasTime ? AppColors.success : AppColors.textLight,
         ),
       ],
     ),
@@ -554,7 +558,7 @@ Widget _buildColoredDropdown({
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
         borderSide: BorderSide(
-          color: selectedColor?.withValues(alpha: 0.45) ?? AppColors.borderPrimary,
+          color: selectedColor?.withValues(alpha: 0.45) ?? Colors.grey.shade300,
         ),
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
@@ -636,7 +640,7 @@ Widget _saveBtn(bool saving, VoidCallback onPressed, String label) {
       onPressed: saving ? null : onPressed,
       style: ElevatedButton.styleFrom(
         backgroundColor: LeadTheme.primary,
-        foregroundColor: Colors.white,
+        foregroundColor: AppColors.surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
       child: saving
@@ -645,7 +649,7 @@ Widget _saveBtn(bool saving, VoidCallback onPressed, String label) {
               height: 20,
               child: CircularProgressIndicator(
                 strokeWidth: 2,
-                color: Colors.white,
+                color: AppColors.surface,
               ),
             )
           : Text(
@@ -655,9 +659,3 @@ Widget _saveBtn(bool saving, VoidCallback onPressed, String label) {
     ),
   );
 }
-
-
-
-
-
-

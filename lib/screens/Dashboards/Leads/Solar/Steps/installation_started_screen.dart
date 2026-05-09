@@ -10,7 +10,7 @@ import 'package:solar_project/Helper/spk_photo_picker.dart';
 import 'package:solar_project/data/Models/solar_leads_model.dart';
 
 import '../../../../../Helper/picked_photo.dart';
-import 'package:solar_project/Helper/app_colors.dart';
+import 'package:solar_project/core/app_colors.dart';
 
 class SolarInstallationStartedScreen extends StatefulWidget {
   final SolarLeadsModel lead;
@@ -178,7 +178,7 @@ class _StartedState extends State<SolarInstallationStartedScreen> {
                       AppSvgAssets.play,
                       'Installation Started On',
                       _startDate,
-                      color: AppColors.warning,
+                      color: AppColors.solar,
                     ),
                   ),
                 ],
@@ -189,7 +189,7 @@ class _StartedState extends State<SolarInstallationStartedScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _photoSectionHeader(
-                    color: AppColors.warning,
+                    color: AppColors.solar,
                     title: 'Before Installation Photos',
                     subtitle:
                         'Capture before starting — roof, panels unboxed, existing wiring',
@@ -304,7 +304,11 @@ Widget _infoBanner(SolarLeadsModel lead) => Container(
   ),
   child: Row(
     children: [
-      const AppSvgIcon(AppSvgAssets.userRound, size: 16, color: LeadTheme.primary),
+      const AppSvgIcon(
+        AppSvgAssets.userRound,
+        size: 16,
+        color: LeadTheme.primary,
+      ),
       const SizedBox(width: 8),
       Expanded(
         child: Column(
@@ -346,7 +350,7 @@ Widget _dateTile(
       border: Border.all(
         color: date != null
             ? color.withValues(alpha: 0.4)
-            : AppColors.borderPrimary,
+            : Colors.grey.shade300,
       ),
       borderRadius: BorderRadius.circular(8),
     ),
@@ -380,7 +384,7 @@ Widget _dateTile(
         AppSvgIcon(
           date != null ? AppSvgAssets.circleCheckBig : AppSvgAssets.arrowRight,
           size: 14,
-          color: date != null ? color : AppColors.textSecondary,
+          color: date != null ? color : AppColors.textLight,
         ),
       ],
     ),
@@ -420,7 +424,7 @@ Widget _saveBtn(bool saving, VoidCallback onPressed, String label) => SizedBox(
     onPressed: saving ? null : onPressed,
     style: ElevatedButton.styleFrom(
       backgroundColor: LeadTheme.primary,
-      foregroundColor: Colors.white,
+      foregroundColor: AppColors.surface,
       padding: const EdgeInsets.symmetric(vertical: 12),
       minimumSize: const Size.fromHeight(52),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -431,7 +435,7 @@ Widget _saveBtn(bool saving, VoidCallback onPressed, String label) => SizedBox(
             height: 20,
             child: CircularProgressIndicator(
               strokeWidth: 2,
-              color: Colors.white,
+              color: AppColors.surface,
             ),
           )
         : Text(
@@ -440,6 +444,3 @@ Widget _saveBtn(bool saving, VoidCallback onPressed, String label) => SizedBox(
           ),
   ),
 );
-
-
-

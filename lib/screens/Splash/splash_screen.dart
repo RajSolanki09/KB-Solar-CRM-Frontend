@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:solar_project/Cubits/Auth/auth_cubit.dart';
 import 'package:solar_project/Cubits/Auth/auth_state.dart';
+import 'package:solar_project/core/app_colors.dart';
 import 'package:solar_project/services/api_service.dart';
-import 'package:solar_project/Helper/app_logo.dart';
-import 'package:solar_project/Helper/app_colors.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -15,16 +14,13 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen>
     with TickerProviderStateMixin {
-  // ── Controller A: logo + tagline reveal ───────────────────────────────────
   late AnimationController _logoCtrl;
-
-  late Animation<Offset> _logoSlide; // left → center slide
+  late Animation<Offset> _logoSlide;
   late Animation<double> _logoScale;
   late Animation<double> _logoFade;
   late Animation<double> _taglineFade;
   late Animation<double> _dotsFade;
 
-  // ── Controller B: idle glow pulse on logo ─────────────────────────────────
   late AnimationController _pulseCtrl;
   late Animation<double> _idleGlow;
 
@@ -34,20 +30,18 @@ class _SplashScreenState extends State<SplashScreen>
   void initState() {
     super.initState();
 
-    // ── Logo reveal: 4500 ms, starts immediately ───────────────────────────
     _logoCtrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 4500),
     );
 
-    // Logo slides in from left edge to center
-    _logoSlide = Tween<Offset>(begin: const Offset(-1.2, 0.0), end: Offset.zero)
-        .animate(
-          CurvedAnimation(
-            parent: _logoCtrl,
-            curve: const Interval(0.0, 0.75, curve: Curves.easeInOutSine),
-          ),
-        );
+    _logoSlide =
+        Tween<Offset>(begin: const Offset(-1.2, 0.0), end: Offset.zero).animate(
+      CurvedAnimation(
+        parent: _logoCtrl,
+        curve: const Interval(0.0, 0.75, curve: Curves.easeInOutSine),
+      ),
+    );
 
     _logoScale = Tween<double>(begin: 0.88, end: 1.0).animate(
       CurvedAnimation(
@@ -74,20 +68,16 @@ class _SplashScreenState extends State<SplashScreen>
       ),
     );
 
-    // ── Idle glow pulse ───────────────────────────────────────────────────
     _pulseCtrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 3000),
     )..repeat(reverse: true);
 
-    _idleGlow = Tween<double>(
-      begin: 0.08,
-      end: 0.22,
-    ).animate(CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeInOut));
+    _idleGlow = Tween<double>(begin: 0.08, end: 0.22).animate(
+      CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeInOut),
+    );
 
-    // ── Start logo animation immediately ─────────────────────────────────
     _logoCtrl.forward();
-
     _checkAuth();
   }
 
@@ -104,7 +94,8 @@ class _SplashScreenState extends State<SplashScreen>
     if (profile != null && profile['role'] != null) {
       final roleStr = (profile['role'] as String).toLowerCase();
       final userId = (profile['_id'] ?? profile['id'] ?? '') as String;
-      final userName = (profile['name'] ?? profile['fullName'] ?? '') as String;
+      final userName =
+          (profile['name'] ?? profile['fullName'] ?? '') as String;
       final phone = profile['phone'] as String?;
 
       UserRole? role;
@@ -120,11 +111,11 @@ class _SplashScreenState extends State<SplashScreen>
 
       if (role != null) {
         context.read<AppStateCubit>().login(
-          role: role,
-          userId: userId,
-          userName: userName,
-          phone: phone,
-        );
+              role: role,
+              userId: userId,
+              userName: userName,
+              phone: phone,
+            );
         return;
       }
     }
@@ -143,35 +134,39 @@ class _SplashScreenState extends State<SplashScreen>
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
 
+    // ── Logo size: screen ke hisaab se responsive ──────────────────────────
+    // Mobile: 0.28 * width  |  Tablet/Web: max 120px
+    final double logoSize = (size.width * 0.28).clamp(80.0, 120.0);
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.surface,
       body: Stack(
         children: [
-          // ── Soft radial background ────────────────────────────────────────
+          // ── Soft radial background ──────────────────────────────────────
           Positioned.fill(
             child: Container(
               decoration: const BoxDecoration(
                 gradient: RadialGradient(
                   center: Alignment.center,
                   radius: 1.0,
-                  colors: [Color(0xFFF8F5FF), Colors.white],
+                  colors: [Color(0xFFF3EEFF), AppColors.surface],
                   stops: [0.0, 1.0],
                 ),
               ),
             ),
           ),
 
-          // ── Corner decorative circles ─────────────────────────────────────
+          // ── Corner decorative circles ───────────────────────────────────
           Positioned(
             top: -size.width * 0.22,
             right: -size.width * 0.22,
             child: Container(
               width: size.width * 0.55,
               height: size.width * 0.55,
-               decoration: BoxDecoration(
-                 shape: BoxShape.circle,
-                 color: AppColors.primary.withOpacity(0.04),
-               ),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.primary.withValues(alpha: 0.04),
+              ),
             ),
           ),
           Positioned(
@@ -180,29 +175,28 @@ class _SplashScreenState extends State<SplashScreen>
             child: Container(
               width: size.width * 0.62,
               height: size.width * 0.62,
-               decoration: BoxDecoration(
-                 shape: BoxShape.circle,
-                 color: AppColors.primaryLight.withOpacity(0.05),
-               ),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color:  AppColors.primary.withValues(alpha: 0.05),
+              ),
             ),
           ),
 
-          // ── Top accent bar ────────────────────────────────────────────────
+          // ── Top accent bar ──────────────────────────────────────────────
           Align(
             alignment: Alignment.topCenter,
             child: Container(
               width: double.infinity,
               height: 4,
-              decoration: BoxDecoration(
-                 gradient: LinearGradient(
-                   colors: [AppColors.primary, AppColors.primaryLight],
-                 ),
-               ),
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [AppColors.primary, AppColors.primary],
+                ),
               ),
             ),
-          
+          ),
 
-          // ── Bottom accent bar ─────────────────────────────────────────────
+          // ── Bottom accent bar ───────────────────────────────────────────
           Align(
             alignment: Alignment.bottomCenter,
             child: Container(
@@ -211,15 +205,15 @@ class _SplashScreenState extends State<SplashScreen>
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    AppColors.accent2.withOpacity(0.25),
-                    AppColors.primary.withOpacity(0.25),
+                    AppColors.primary.withValues(alpha: 0.25),
+                     AppColors.primary.withValues(alpha: 0.25),
                   ],
                 ),
               ),
             ),
           ),
 
-          // ── Logo + tagline + dots ─────────────────────────────────────────
+          // ── Logo + tagline + dots ───────────────────────────────────────
           AnimatedBuilder(
             animation: Listenable.merge([_logoCtrl, _pulseCtrl]),
             builder: (_, __) {
@@ -227,19 +221,40 @@ class _SplashScreenState extends State<SplashScreen>
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Logo card: slides in from left
+                    // ── Logo card ─────────────────────────────────────────
                     SlideTransition(
                       position: _logoSlide,
                       child: FadeTransition(
                         opacity: _logoFade,
                         child: Transform.scale(
                           scale: _logoScale.value,
-                          child: AppLogo(
-                            size: LogoSize.custom,
-                            customWidth: size.width * 0.45 > 180 ? 180 : size.width * 0.45,
-                            customHeight: size.width * 0.45 > 180 ? 180 : size.width * 0.45,
-                            borderRadius: 36,
-                            withShadow: true,
+                          child: Container(
+                            // padding image ke saath proportional
+                            padding: EdgeInsets.all(logoSize * 0.18),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(24),
+                              color: AppColors.surface,
+                              boxShadow: [
+                                BoxShadow(
+                                  color:  AppColors.primary
+                                      .withValues(alpha: _idleGlow.value),
+                                  blurRadius: 32,
+                                  spreadRadius: 4,
+                                ),
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.07),
+                                  blurRadius: 20,
+                                  offset: const Offset(0, 8),
+                                ),
+                              ],
+                            ),
+                            child: Image.asset(
+                              'assets/images/splash-logo.png',
+                              // ── SIZE YAHAN CONTROL KARO ────────────────
+                              width: logoSize,
+                              height: logoSize,
+                              fit: BoxFit.contain,
+                            ),
                           ),
                         ),
                       ),
@@ -247,7 +262,7 @@ class _SplashScreenState extends State<SplashScreen>
 
                     const SizedBox(height: 28),
 
-                    // Divider pill
+                    // ── Divider pill ──────────────────────────────────────
                     Opacity(
                       opacity: _taglineFade.value,
                       child: Container(
@@ -255,8 +270,8 @@ class _SplashScreenState extends State<SplashScreen>
                         height: 2,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(999),
-                          gradient: LinearGradient(
-                            colors: [AppColors.primary, AppColors.primaryLight],
+                          gradient: const LinearGradient(
+                            colors: [AppColors.primary, AppColors.primary],
                           ),
                         ),
                       ),
@@ -264,13 +279,14 @@ class _SplashScreenState extends State<SplashScreen>
 
                     const SizedBox(height: 12),
 
-                    // Tagline
+                    // ── Tagline ───────────────────────────────────────────
                     Opacity(
                       opacity: _taglineFade.value,
                       child: Text(
-                        'KaaryaBook Project Management',
+                        'Solar Plant Management System',
                         style: TextStyle(
-                          color: AppColors.textSecondary.withOpacity(0.85),
+                          color:
+                              const Color(0xFF6B7280).withValues(alpha: 0.85),
                           fontSize: 13,
                           letterSpacing: 1.8,
                           fontWeight: FontWeight.w500,
@@ -280,7 +296,7 @@ class _SplashScreenState extends State<SplashScreen>
 
                     const SizedBox(height: 32),
 
-                    // Loading dots
+                    // ── Loading dots ──────────────────────────────────────
                     Opacity(
                       opacity: _dotsFade.value,
                       child: const _PulseDots(),
@@ -339,11 +355,12 @@ class _PulseDotsState extends State<_PulseDots> with TickerProviderStateMixin {
               height: 7 + scale * 2,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                  color: Color.lerp(
-                    AppColors.primary.withOpacity(opacity * 0.5),
-                    AppColors.primaryLight,
-                    scale,
-                  )!.withOpacity(opacity),
+                color: Color.lerp(
+                  AppColors.primary.withValues(alpha: opacity * 0.5),
+                   AppColors.primary,
+                  scale,
+                )!
+                    .withValues(alpha: opacity),
               ),
             );
           }),
@@ -352,8 +369,3 @@ class _PulseDotsState extends State<_PulseDots> with TickerProviderStateMixin {
     );
   }
 }
-
-
-
-
-

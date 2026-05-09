@@ -25,25 +25,24 @@ import 'package:solar_project/Cubits/Installation/installation_cubit.dart';
 import 'package:solar_project/Cubits/SprinklerLeads/sprinkler_leads_cubit.dart';
 import 'package:solar_project/Cubits/SprinklerLeads/sprinkler_leads_state.dart';
 import 'package:solar_project/Helper/picked_photo.dart';
-import 'package:solar_project/Helper/common_widgets.dart';
+import 'package:solar_project/core/app_colors.dart';
 import 'package:solar_project/data/Models/sprinkler_lead_model.dart';
 import 'package:solar_project/Helper/app_feedback.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
 import 'package:solar_project/screens/Dashboards/Leads/Sprinkler/Steps/spk_installation_completed_screen.dart';
 import 'package:solar_project/screens/Dashboards/Leads/Sprinkler/Steps/spk_installation_started_screen.dart';
-import 'package:solar_project/Helper/app_colors.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Palette
 // ─────────────────────────────────────────────────────────────────────────────
-const _kBlue = Color(0xFF0EA5E9);
-const _kGreen = AppColors.success);
-const _kRed = AppColors.error);
-const _kBg = AppColors.bgSecondary);
-const _kText = AppColors.textPrimary);
-const _kTextSec = AppColors.textSecondary);
-const _kTextMut = AppColors.textTertiary);
-const _kBorder = AppColors.borderLight);
+const _kBlue = AppColors.primaryLight;
+const _kGreen = AppColors.primary;
+const _kRed = AppColors.error;
+const _kBg = AppColors.background;
+const _kText = AppColors.textDark;
+const _kTextSec = AppColors.textGray;
+const _kTextMut = AppColors.textLight;
+const _kBorder = AppColors.divider;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Pipeline — 3 visible steps for installation users.
@@ -151,7 +150,10 @@ class _SprinklerInstallationDetailScreenState
   }
 
   // ── mirrors solar's _openForm exactly ─────────────────────────────────────
-  Future<void> _openForm(SprinklerStep step, {bool allowNextStep = false}) async {
+  Future<void> _openForm(
+    SprinklerStep step, {
+    bool allowNextStep = false,
+  }) async {
     final installationCubit = context.read<InstallationCubit>();
     final sprinklerCubit = context.read<SprinklerLeadCubit>();
     final targetStep = _normalizeStep(step);
@@ -203,15 +205,15 @@ class _SprinklerInstallationDetailScreenState
 
       // ✅ Show updated pipeline for 1.2 seconds, then auto-redirect back
       Future.delayed(const Duration(milliseconds: 1200), () async {
-            if (mounted) {
-            try {
-              await Future.wait([
-                installationCubit.fetchInstallations(),
-                sprinklerCubit.fetchAllLeads(),
-              ]);
-              if (mounted) safePop(context);
-            } catch (_) {}
-          }
+        if (mounted) {
+          try {
+            await Future.wait([
+              installationCubit.fetchInstallations(),
+              sprinklerCubit.fetchAllLeads(),
+            ]);
+            if (mounted) Navigator.pop(context);
+          } catch (_) {}
+        }
       });
 
       // Show completion dialog if project just completed
@@ -254,9 +256,8 @@ class _SprinklerInstallationDetailScreenState
         actions: [
           TextButton(
             onPressed: () {
-              // Close completion dialog then the detail page safely
-              safePop(context);
-              safePop(context);
+              Navigator.pop(context);
+              Navigator.pop(context);
             },
             child: const Text(
               'Done  →',
@@ -307,7 +308,7 @@ class _SprinklerInstallationDetailScreenState
                   leading: IconButton(
                     icon: const AppSvgIcon(
                       AppSvgAssets.chevronLeft,
-                      color: Colors.white,
+                      color: AppColors.surface,
                       size: 18,
                     ),
                     onPressed: () => Navigator.pop(context),
@@ -340,7 +341,8 @@ class _SprinklerInstallationDetailScreenState
                 bottom: 0,
                 child: _UpdateStatusBar(
                   currentStep: _currentStep,
-                  onTap: () => _openForm(_nextActionStep(), allowNextStep: true),
+                  onTap: () =>
+                      _openForm(_nextActionStep(), allowNextStep: true),
                 ),
               ),
           ],
@@ -353,7 +355,7 @@ class _SprinklerInstallationDetailScreenState
     padding: const EdgeInsets.all(16),
     decoration: BoxDecoration(
       gradient: const LinearGradient(
-        colors: [AppColors.success), Color(0xFF059669)],
+        colors: [AppColors.primary, AppColors.success],
       ),
       borderRadius: BorderRadius.circular(14),
       boxShadow: [
@@ -375,7 +377,7 @@ class _SprinklerInstallationDetailScreenState
               Text(
                 'Project Completed!',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: AppColors.surface,
                   fontSize: 15,
                   fontWeight: FontWeight.w800,
                 ),
@@ -383,7 +385,7 @@ class _SprinklerInstallationDetailScreenState
               SizedBox(height: 2),
               Text(
                 'All installation steps done. Completed projects are locked for editing.',
-                style: TextStyle(color: Colors.white70, fontSize: 11.5),
+                style: TextStyle(color: AppColors.surface, fontSize: 11.5),
               ),
             ],
           ),
@@ -410,7 +412,7 @@ class _SprinklerInstallationDetailScreenState
             height: 140,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: Colors.white.withValues(alpha: 0.07),
+              color: AppColors.surface.withValues(alpha: 0.07),
             ),
           ),
         ),
@@ -426,7 +428,7 @@ class _SprinklerInstallationDetailScreenState
                 Text(
                   _lead.customerName,
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: AppColors.surface,
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
                   ),
@@ -437,13 +439,13 @@ class _SprinklerInstallationDetailScreenState
                     const AppSvgIcon(
                       AppSvgAssets.phone,
                       size: 13,
-                      color: Colors.white70,
+                      color: AppColors.surface,
                     ),
                     const SizedBox(width: 4),
                     Text(
                       _lead.phone,
                       style: const TextStyle(
-                        color: Colors.white70,
+                        color: AppColors.surface,
                         fontSize: 12,
                       ),
                     ),
@@ -451,7 +453,7 @@ class _SprinklerInstallationDetailScreenState
                     const AppSvgIcon(
                       AppSvgAssets.mapPin,
                       size: 13,
-                      color: Colors.white70,
+                      color: AppColors.surface,
                     ),
                     const SizedBox(width: 4),
                     Expanded(
@@ -460,7 +462,7 @@ class _SprinklerInstallationDetailScreenState
                             ? '${_lead.address}, ${_lead.village}'
                             : _lead.address,
                         style: const TextStyle(
-                          color: Colors.white70,
+                          color: AppColors.surface,
                           fontSize: 12,
                         ),
                         overflow: TextOverflow.ellipsis,
@@ -497,16 +499,16 @@ class _SprinklerInstallationDetailScreenState
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.2),
+                    color: AppColors.surface.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.35),
+                      color: AppColors.surface.withValues(alpha: 0.35),
                     ),
                   ),
                   child: Text(
                     '${_kMeta[_currentStep]?.emoji ?? '💧'}  ${_stepLabel(_currentStep)}',
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: AppColors.surface,
                       fontSize: 11.5,
                       fontWeight: FontWeight.w700,
                     ),
@@ -523,13 +525,13 @@ class _SprinklerInstallationDetailScreenState
   Widget _heroBadge(String text) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
     decoration: BoxDecoration(
-      color: Colors.white.withValues(alpha: 0.18),
+      color: AppColors.surface.withValues(alpha: 0.18),
       borderRadius: BorderRadius.circular(20),
     ),
     child: Text(
       text,
       style: const TextStyle(
-        color: Colors.white,
+        color: AppColors.surface,
         fontSize: 10.5,
         fontWeight: FontWeight.w700,
       ),
@@ -540,9 +542,9 @@ class _SprinklerInstallationDetailScreenState
     width: double.infinity,
     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
     decoration: BoxDecoration(
-      color: Colors.white.withValues(alpha: 0.14),
+      color: AppColors.surface.withValues(alpha: 0.14),
       borderRadius: BorderRadius.circular(14),
-      border: Border.all(color: Colors.white.withValues(alpha: 0.22)),
+      border: Border.all(color: AppColors.surface.withValues(alpha: 0.22)),
     ),
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -556,7 +558,7 @@ class _SprinklerInstallationDetailScreenState
               const Text(
                 'Assignment Note',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: AppColors.surface,
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
                 ),
@@ -565,7 +567,7 @@ class _SprinklerInstallationDetailScreenState
               Text(
                 text,
                 style: const TextStyle(
-                  color: Colors.white70,
+                  color: AppColors.surface,
                   fontSize: 12,
                   height: 1.4,
                 ),
@@ -603,14 +605,14 @@ class _SprinklerInstallationDetailScreenState
   Widget _pipelineCard() {
     // Treat completion or later backend states as project completed for this dashboard.
     final effectiveStep = _projectCompleted
-      ? SprinklerStep.projectCompleted
+        ? SprinklerStep.projectCompleted
         : _normalizeStep(_currentStep);
     final currentIdx = _kAllSteps.indexOf(effectiveStep);
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -671,7 +673,7 @@ class _PipelineRow extends StatelessWidget {
         : isActive
         ? m.color
         : _kBorder;
-    final lineColor = isDone ? const Color(0xFFA7F3D0) : _kBorder;
+    final lineColor = isDone ? AppColors.successLight : _kBorder;
     final stepNum = _kAllSteps.indexOf(step) + 1;
 
     return IntrinsicHeight(
@@ -719,7 +721,7 @@ class _PipelineRow extends StatelessWidget {
                         child: isDone
                             ? const AppSvgIcon(
                                 AppSvgAssets.check,
-                                color: Colors.white,
+                                color: AppColors.surface,
                                 size: 14,
                               )
                             : isActive
@@ -768,7 +770,7 @@ class _PipelineRow extends StatelessWidget {
                   ),
                   decoration: BoxDecoration(
                     color: isDone
-                        ? AppColors.successLight).withValues(alpha: 0.55)
+                        ? AppColors.successLight.withValues(alpha: 0.55)
                         : isActive
                         ? m.color.withValues(alpha: 0.05)
                         : Colors.transparent,
@@ -799,7 +801,7 @@ class _PipelineRow extends StatelessWidget {
                                           ? FontWeight.w800
                                           : FontWeight.w600,
                                       color: isDone
-                                          ? const Color(0xFF065F46)
+                                          ?  AppColors.success
                                           : isActive
                                           ? m.color
                                           : _kTextMut,
@@ -1211,9 +1213,9 @@ class _SpkStepFormScreenState extends State<_SpkStepFormScreen> {
     final m = _kMeta[widget.step]!;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.surface,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.surface,
         elevation: 0,
         leading: IconButton(
           icon: const AppSvgIcon(
@@ -1504,7 +1506,7 @@ class _SpkStepFormScreenState extends State<_SpkStepFormScreen> {
               decoration: BoxDecoration(
                 color: picked != null
                     ? color.withValues(alpha: 0.05)
-                    : const Color(0xFFFAFCFF),
+                    :  AppColors.background,
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(
                   color: errorText != null
@@ -1616,7 +1618,7 @@ class _SpkStepFormScreenState extends State<_SpkStepFormScreen> {
               decoration: BoxDecoration(
                 color: hasTime
                     ? color.withValues(alpha: 0.05)
-                    : const Color(0xFFFAFCFF),
+                    :  AppColors.background,
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(
                   color: hasTime ? color : _kBorder,
@@ -1721,7 +1723,7 @@ class _SpkStepFormScreenState extends State<_SpkStepFormScreen> {
                 fontWeight: FontWeight.w600,
               ),
               filled: true,
-              fillColor: const Color(0xFFFAFCFF),
+              fillColor:  AppColors.background,
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 12,
                 vertical: 11,
@@ -1766,9 +1768,7 @@ class _SpkStepFormScreenState extends State<_SpkStepFormScreen> {
             margin: const EdgeInsets.only(bottom: 8),
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
             decoration: BoxDecoration(
-              color: _f(key)
-                  ? AppColors.successLight)
-                  : AppColors.bgSecondary),
+              color: _f(key) ? AppColors.successLight : AppColors.background,
               borderRadius: BorderRadius.circular(10),
               border: Border.all(
                 color: errorText != null
@@ -1786,17 +1786,17 @@ class _SpkStepFormScreenState extends State<_SpkStepFormScreen> {
                   width: 22,
                   height: 22,
                   decoration: BoxDecoration(
-                    color: _f(key) ? _kGreen : Colors.white,
+                    color: _f(key) ? _kGreen : AppColors.surface,
                     borderRadius: BorderRadius.circular(6),
                     border: Border.all(
-                      color: _f(key) ? _kGreen : AppColors.textLight),
+                      color: _f(key) ? _kGreen :  AppColors.divider,
                       width: 2,
                     ),
                   ),
                   child: _f(key)
                       ? const AppSvgIcon(
                           AppSvgAssets.check,
-                          color: Colors.white,
+                          color: AppColors.surface,
                           size: 13,
                         )
                       : null,
@@ -1809,7 +1809,7 @@ class _SpkStepFormScreenState extends State<_SpkStepFormScreen> {
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
-                        color: _f(key) ? const Color(0xFF065F46) : _kTextSec,
+                        color: _f(key) ?  AppColors.success : _kTextSec,
                       ),
                       children: [
                         if (required)
@@ -2051,7 +2051,7 @@ class _SpkStepFormScreenState extends State<_SpkStepFormScreen> {
             ),
             child: const AppSvgIcon(
               AppSvgAssets.x,
-              color: Colors.white,
+              color: AppColors.surface,
               size: 14,
             ),
           ),
@@ -2068,7 +2068,7 @@ class _SpkStepFormScreenState extends State<_SpkStepFormScreen> {
           ),
           child: const AppSvgIcon(
             AppSvgAssets.camera,
-            color: Colors.white,
+            color: AppColors.surface,
             size: 10,
           ),
         ),
@@ -2134,27 +2134,27 @@ class _SubmitBtn extends StatelessWidget {
                     width: 18,
                     height: 18,
                     child: CircularProgressIndicator(
-                      color: Colors.white,
+                      color: AppColors.surface,
                       strokeWidth: 2,
                     ),
                   )
                 else if (success)
                   const AppSvgIcon(
                     AppSvgAssets.check,
-                    color: Colors.white,
+                    color: AppColors.surface,
                     size: 20,
                   )
                 else
                   const AppSvgIcon(
                     AppSvgAssets.chevronRight,
-                    color: Colors.white,
+                    color: AppColors.surface,
                     size: 18,
                   ),
                 const SizedBox(width: 8),
                 Text(
                   success ? 'Updated!' : label,
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: AppColors.surface,
                     fontSize: 15,
                     fontWeight: FontWeight.w800,
                     letterSpacing: 0.2,
@@ -2215,7 +2215,7 @@ class _UpdateStatusBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.10),
@@ -2300,12 +2300,12 @@ class _UpdateStatusBar extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  AppSvgIcon(_icon, color: Colors.white, size: 20),
+                  AppSvgIcon(_icon, color: AppColors.surface, size: 20),
                   const SizedBox(width: 10),
                   Text(
                     _nextLabel,
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: AppColors.surface,
                       fontSize: 14,
                       fontWeight: FontWeight.w800,
                     ),
@@ -2313,7 +2313,7 @@ class _UpdateStatusBar extends StatelessWidget {
                   const SizedBox(width: 6),
                   const AppSvgIcon(
                     AppSvgAssets.chevronRight,
-                    color: Colors.white70,
+                    color: AppColors.surface,
                     size: 16,
                   ),
                 ],
@@ -2325,9 +2325,3 @@ class _UpdateStatusBar extends StatelessWidget {
     );
   }
 }
-
-
-
-
-
-

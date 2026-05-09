@@ -9,7 +9,7 @@ import 'package:solar_project/Helper/lead_widgets.dart';
 import 'package:solar_project/Helper/spk_photo_picker.dart';
 import 'package:solar_project/data/Models/sprinkler_lead_model.dart';
 import '../../../../../Helper/picked_photo.dart';
-import 'package:solar_project/Helper/app_colors.dart';
+import 'package:solar_project/core/app_colors.dart';
 
 class SpkInstallationStartedScreen extends StatefulWidget {
   final SprinklerLeadModel lead;
@@ -119,7 +119,7 @@ class _SpkInstallationStartedScreenState
           leading: IconButton(
             icon: const AppSvgIcon(
               AppSvgAssets.chevronLeft,
-              color: Colors.white,
+              color: AppColors.surface,
               size: 18,
             ),
             onPressed: () => Navigator.pop(context),
@@ -251,7 +251,7 @@ Widget _customerBanner(SprinklerLeadModel lead) => CompactCard(
             const SizedBox(height: 4),
             Text(
               lead.phone,
-              style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+              style: const TextStyle(fontSize: 13, color: Colors.black54),
             ),
           ],
         ),
@@ -273,7 +273,7 @@ Widget _field(
       hintText: hint,
       prefixIcon: AppSvgIcon(icon, size: 18, color: LeadTheme.secondary),
       filled: true,
-      fillColor: Colors.white,
+      fillColor: AppColors.surface,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide.none,
@@ -288,7 +288,7 @@ Widget _saveBtn(bool loading, VoidCallback onPressed, String label) => SizedBox(
   child: ElevatedButton(
     style: ElevatedButton.styleFrom(
       backgroundColor: LeadTheme.secondary,
-      foregroundColor: Colors.white,
+      foregroundColor: AppColors.surface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       padding: const EdgeInsets.symmetric(vertical: 14),
     ),
@@ -298,7 +298,7 @@ Widget _saveBtn(bool loading, VoidCallback onPressed, String label) => SizedBox(
             height: 18,
             width: 18,
             child: CircularProgressIndicator(
-              color: Colors.white,
+              color: AppColors.surface,
               strokeWidth: 2,
             ),
           )
@@ -313,14 +313,14 @@ Widget _dateTile(
   String icon,
   String title,
   DateTime? date, {
-  Color color = AppColors.info,
+  Color color = AppColors.primary,
 }) => Container(
   width: double.infinity,
   padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 14),
   decoration: BoxDecoration(
-    color: Colors.white,
+    color: AppColors.surface,
     borderRadius: BorderRadius.circular(12),
-    border: Border.all(color: AppColors.borderPrimary),
+    border: Border.all(color: Colors.grey.shade300),
   ),
   child: Row(
     children: [
@@ -332,7 +332,7 @@ Widget _dateTile(
           children: [
             Text(
               title,
-              style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+              style: const TextStyle(fontSize: 13, color: Colors.black54),
             ),
             const SizedBox(height: 4),
             Text(
@@ -342,7 +342,7 @@ Widget _dateTile(
               style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
-                color: date != null ? Colors.black : AppColors.textSecondary,
+                color: date != null ? Colors.black : Colors.black54,
               ),
             ),
           ],
@@ -361,13 +361,13 @@ Widget _timeTile(TimeOfDay? time) {
     width: double.infinity,
     padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 14),
     decoration: BoxDecoration(
-      color: Colors.white,
+      color: AppColors.surface,
       borderRadius: BorderRadius.circular(12),
-      border: Border.all(color: AppColors.borderPrimary),
+      border: Border.all(color: Colors.grey.shade300),
     ),
     child: Row(
       children: [
-        AppSvgIcon(AppSvgAssets.clock, size: 18, color: AppColors.info),
+        AppSvgIcon(AppSvgAssets.clock, size: 18, color: AppColors.primary),
         const SizedBox(width: 10),
         Expanded(
           child: Column(
@@ -375,7 +375,7 @@ Widget _timeTile(TimeOfDay? time) {
             children: [
               const Text(
                 'Arrival Time',
-                style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                style: TextStyle(fontSize: 13, color: Colors.black54),
               ),
               const SizedBox(height: 4),
               Text(
@@ -383,7 +383,7 @@ Widget _timeTile(TimeOfDay? time) {
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
-                  color: time != null ? Colors.black : AppColors.textSecondary,
+                  color: time != null ? Colors.black : Colors.black54,
                 ),
               ),
             ],
@@ -393,8 +393,3 @@ Widget _timeTile(TimeOfDay? time) {
     ),
   );
 }
-
-
-
-
-

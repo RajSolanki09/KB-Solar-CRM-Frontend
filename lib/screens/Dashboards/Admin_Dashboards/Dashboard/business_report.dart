@@ -5,19 +5,19 @@ import 'package:intl/intl.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
 import 'package:solar_project/Helper/download_helper.dart';
 import 'package:solar_project/Helper/lead_themes.dart';
+import 'package:solar_project/core/app_colors.dart';
 import 'package:solar_project/core/network/dio_client.dart';
 import 'package:solar_project/data/Models/solar_leads_model.dart';
 import 'package:solar_project/data/Models/sprinkler_lead_model.dart';
 import 'package:solar_project/data/Repository/solar_leads_repository.dart';
 import 'package:solar_project/data/Repository/sprinkler_leads_repository.dart';
 import 'package:solar_project/services/api_service.dart';
-import 'package:solar_project/Helper/app_colors.dart';
 
 class AdminRevenueSummaryPage extends StatefulWidget {
   final Color appBarColor;
   const AdminRevenueSummaryPage({
     super.key,
-    this.appBarColor = const Color(0xFF14532D),
+    this.appBarColor =  AppColors.primary,
   });
 
   @override
@@ -158,20 +158,20 @@ class _AdminRevenueSummaryPageState extends State<AdminRevenueSummaryPage>
         ? LeadTheme.warning
         : _tabController.index == 1
         ? LeadTheme.secondary
-        : const Color(0xFF6366F1);
+        : AppColors.primaryDark;
 
     return DefaultTabController(
       length: 3,
       child: Scaffold(
-        backgroundColor: AppColors.bgSecondary,
+        backgroundColor:  AppColors.background,
         appBar: AppBar(
           elevation: 0,
-          backgroundColor: AppColors.bgSecondary,
+          backgroundColor:  AppColors.background,
           title: const Text(
             'Business Report',
             style: TextStyle(
               fontWeight: FontWeight.w700,
-              color: AppColors.accent2,
+              color: AppColors.primary,
             ),
           ),
           actions: [
@@ -181,7 +181,7 @@ class _AdminRevenueSummaryPageState extends State<AdminRevenueSummaryPage>
               icon: AppSvgIcon(
                 AppSvgAssets.download,
                 size: 24,
-                color: AppColors.accent2,
+                color: AppColors.primary,
               ),
             ),
             IconButton(
@@ -189,7 +189,7 @@ class _AdminRevenueSummaryPageState extends State<AdminRevenueSummaryPage>
               onPressed: _isLoading ? null : _loadData,
               icon: AppSvgIcon(
                 AppSvgAssets.refreshCw,
-                color: AppColors.accent2,
+                color: AppColors.primary,
               ),
             ),
           ],
@@ -203,7 +203,7 @@ class _AdminRevenueSummaryPageState extends State<AdminRevenueSummaryPage>
                   Container(
                     margin: const EdgeInsets.fromLTRB(12, 8, 12, 0),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.surface,
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: TabBar(
@@ -211,13 +211,13 @@ class _AdminRevenueSummaryPageState extends State<AdminRevenueSummaryPage>
                       indicatorColor: activeColor,
                       indicatorWeight: 2.5,
                       labelColor: activeColor,
-                      unselectedLabelColor: AppColors.textTertiary,
+                      unselectedLabelColor:  AppColors.textLight,
                       labelStyle: const TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
                       ),
                       tabs: const [
-                        Tab(text: 'Project'),
+                        Tab(text: 'Solar'),
                         Tab(text: 'Sprinkler'),
                         Tab(text: 'Material'),
                       ],
@@ -250,7 +250,7 @@ class _AdminRevenueSummaryPageState extends State<AdminRevenueSummaryPage>
                   ),
                 ],
               ),
-      )
+      ),
     );
   }
 }
@@ -347,7 +347,7 @@ class _SprinklerReportTab extends StatelessWidget {
 
     return _ReportTabBody(
       key: tabKey,
-      theme: const Color(0xFF0E7490),
+      theme:  AppColors.primaryLight,
       rows: rows,
       currency: currency,
       dateFmt: dateFmt,
@@ -505,7 +505,7 @@ class _MaterialReportTab extends StatelessWidget {
 
     return _ReportTabBody(
       key: tabKey,
-      theme: const Color(0xFF6366F1),
+      theme: AppColors.primaryDark,
       rows: rows,
       currency: currency,
       dateFmt: dateFmt,
@@ -867,10 +867,10 @@ class _ReportTabBodyState extends State<_ReportTabBody> {
           width: double.infinity,
           padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.surface,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFFE2E8E4)),
-          ))
+            border: Border.all(color:  AppColors.divider),
+          ),
           child: Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -907,9 +907,9 @@ class _ReportTabBodyState extends State<_ReportTabBody> {
         const SizedBox(height: 12),
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.surface,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFFE2E8E4)),
+            border: Border.all(color:  AppColors.divider),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -954,22 +954,22 @@ class _ReportTabBodyState extends State<_ReportTabBody> {
                           horizontalMargin: 10,
                           columnSpacing: 20,
                           headingRowColor: WidgetStateProperty.all(
-                            const Color(0xFFFFFAF0),
+                             AppColors.primaryTint,
                           ),
                           dataRowColor: WidgetStateProperty.resolveWith((
                             states,
                           ) {
                             if (states.contains(WidgetState.selected)) {
-                              return const Color(0xFFE2EAF7);
+                              return  AppColors.primaryTint;
                             }
                             return null;
                           }),
                           border: TableBorder(
                             horizontalInside: BorderSide(
-                              color: Colors.blueGrey.shade50,
+                              color: AppColors.primary,
                             ),
-                            bottom: BorderSide(color: Colors.blueGrey.shade100),
-                            top: BorderSide(color: Colors.blueGrey.shade100),
+                            bottom: BorderSide(color: AppColors.primary),
+                            top: BorderSide(color: AppColors.primary),
                           ),
                           columns:
                               [
@@ -1052,7 +1052,7 @@ class _ReportTabBodyState extends State<_ReportTabBody> {
                                         r.customerName,
                                         style: const TextStyle(
                                           fontSize: 12,
-                                          color: AppColors.textPrimary),
+                                          color: AppColors.textDark,
                                           fontWeight: FontWeight.w600,
                                         ),
                                       ),
@@ -1062,7 +1062,7 @@ class _ReportTabBodyState extends State<_ReportTabBody> {
                                         r.mobile,
                                         style: const TextStyle(
                                           fontSize: 12,
-                                          color: AppColors.textPrimary),
+                                          color: AppColors.textDark,
                                         ),
                                       ),
                                     ),
@@ -1073,7 +1073,7 @@ class _ReportTabBodyState extends State<_ReportTabBody> {
                                           r.address,
                                           style: const TextStyle(
                                             fontSize: 12,
-                                            color: AppColors.textPrimary),
+                                            color: AppColors.textDark,
                                           ),
                                         ),
                                       ),
@@ -1084,7 +1084,7 @@ class _ReportTabBodyState extends State<_ReportTabBody> {
                                           r.sizeText,
                                           style: const TextStyle(
                                             fontSize: 12,
-                                            color: AppColors.textPrimary),
+                                            color: AppColors.textDark,
                                           ),
                                         ),
                                       ),
@@ -1093,7 +1093,7 @@ class _ReportTabBodyState extends State<_ReportTabBody> {
                                         widget.dateFmt.format(r.startDate),
                                         style: const TextStyle(
                                           fontSize: 12,
-                                          color: AppColors.textPrimary),
+                                          color: AppColors.textDark,
                                         ),
                                       ),
                                     ),
@@ -1104,7 +1104,7 @@ class _ReportTabBodyState extends State<_ReportTabBody> {
                                             : '-',
                                         style: const TextStyle(
                                           fontSize: 12,
-                                          color: AppColors.textPrimary),
+                                          color: AppColors.textDark,
                                         ),
                                       ),
                                     ),
@@ -1113,7 +1113,7 @@ class _ReportTabBodyState extends State<_ReportTabBody> {
                                         widget.currency.format(r.totalRevenue),
                                         style: const TextStyle(
                                           fontSize: 12,
-                                          color: AppColors.textPrimary),
+                                          color: AppColors.textDark,
                                           fontWeight: FontWeight.w600,
                                         ),
                                       ),
@@ -1140,14 +1140,14 @@ class _ReportTabBodyState extends State<_ReportTabBody> {
             ).withValues(alpha: 0.08), // ✅ green tint
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
-              color: const Color(0xFF16A34A).withValues(alpha: 0.25),
+              color:  AppColors.success.withValues(alpha: 0.25),
             ), // ✅ green border
           ),
           child: Row(
             children: [
               Icon(
                 Icons.account_balance_wallet_rounded,
-                color: const Color(0xFF16A34A),
+                color: AppColors.success,
                 size: 18,
               ),
               const SizedBox(width: 8),
@@ -1156,7 +1156,7 @@ class _ReportTabBodyState extends State<_ReportTabBody> {
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
-                  color: const Color(0xFF16A34A),
+                  color:  AppColors.success,
                 ),
               ),
               const Spacer(),
@@ -1165,7 +1165,7 @@ class _ReportTabBodyState extends State<_ReportTabBody> {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w800,
-                  color: Color(0xFF16A34A),
+                  color: AppColors.success,
                 ),
               ),
             ],
@@ -1182,13 +1182,13 @@ class _ReportTabBodyState extends State<_ReportTabBody> {
       onSelected: (_) => onTap(),
       selectedColor: widget.theme.withValues(alpha: 0.2),
       labelStyle: TextStyle(
-        color: selected ? widget.theme : AppColors.textPrimary,
+        color: selected ? widget.theme : AppColors.textDark,
         fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
       ),
       side: BorderSide(
-        color: selected ? widget.theme : const Color(0xFFE2E8E4),
+        color: selected ? widget.theme :  AppColors.divider,
       ),
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.surface,
     );
   }
 }
@@ -1232,8 +1232,8 @@ class _DurationPickerSheetState extends State<_DurationPickerSheet> {
       builder: (ctx, child) => Theme(
         data: Theme.of(ctx).copyWith(
           colorScheme: ColorScheme.light(
-            primary: AppColors.success),
-            onSurface: AppColors.textPrimary),
+            primary:  AppColors.success,
+            onSurface:  AppColors.textDark,
           ),
         ),
         child: child!,
@@ -1258,7 +1258,7 @@ class _DurationPickerSheetState extends State<_DurationPickerSheet> {
   Widget build(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       padding: EdgeInsets.only(
@@ -1277,7 +1277,7 @@ class _DurationPickerSheetState extends State<_DurationPickerSheet> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: AppColors.borderLight),
+                color:  AppColors.divider,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -1290,12 +1290,12 @@ class _DurationPickerSheetState extends State<_DurationPickerSheet> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: AppColors.success).withValues(alpha: 0.08),
+                  color:  AppColors.success.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Icon(
                   Icons.date_range_rounded,
-                  color: AppColors.success),
+                  color: AppColors.success,
                   size: 18,
                 ),
               ),
@@ -1305,7 +1305,7 @@ class _DurationPickerSheetState extends State<_DurationPickerSheet> {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary),
+                  color: AppColors.textDark,
                 ),
               ),
             ],
@@ -1328,13 +1328,13 @@ class _DurationPickerSheetState extends State<_DurationPickerSheet> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF3F4F6),
+                  color:  AppColors.background,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Icon(
                   Icons.arrow_forward_rounded,
                   size: 16,
-                  color: AppColors.textSecondary),
+                  color: AppColors.textGray,
                 ),
               ),
               const SizedBox(width: 12),
@@ -1357,10 +1357,10 @@ class _DurationPickerSheetState extends State<_DurationPickerSheet> {
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
-                color: AppColors.success).withValues(alpha: 0.05),
+                color:  AppColors.success.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(
-                  color: AppColors.success).withValues(alpha: 0.2),
+                  color:  AppColors.success.withValues(alpha: 0.2),
                 ),
               ),
               child: Row(
@@ -1368,7 +1368,7 @@ class _DurationPickerSheetState extends State<_DurationPickerSheet> {
                   const Icon(
                     Icons.info_outline_rounded,
                     size: 15,
-                    color: AppColors.success),
+                    color: AppColors.success,
                   ),
                   const SizedBox(width: 8),
                   Text(
@@ -1376,7 +1376,7 @@ class _DurationPickerSheetState extends State<_DurationPickerSheet> {
                     style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.success),
+                      color: AppColors.success,
                     ),
                   ),
                   const Spacer(),
@@ -1384,7 +1384,7 @@ class _DurationPickerSheetState extends State<_DurationPickerSheet> {
                     '${_dateFmt.format(_start!)}  –  ${_dateFmt.format(_end!)}',
                     style: const TextStyle(
                       fontSize: 11,
-                      color: AppColors.textSecondary),
+                      color: AppColors.textGray,
                     ),
                   ),
                 ],
@@ -1399,7 +1399,7 @@ class _DurationPickerSheetState extends State<_DurationPickerSheet> {
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: AppColors.textSecondary),
+              color: AppColors.textGray,
             ),
           ),
           const SizedBox(height: 8),
@@ -1447,14 +1447,14 @@ class _DurationPickerSheetState extends State<_DurationPickerSheet> {
                   onPressed: () => Navigator.pop(context),
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 13),
-                    side: const BorderSide(color: AppColors.borderLight)),
+                    side: const BorderSide(color: AppColors.divider),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
                   child: const Text(
                     'Cancel',
-                    style: TextStyle(color: AppColors.textSecondary)),
+                    style: TextStyle(color: AppColors.textGray),
                   ),
                 ),
               ),
@@ -1469,7 +1469,7 @@ class _DurationPickerSheetState extends State<_DurationPickerSheet> {
                         }
                       : null,
                   style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.success),
+                    backgroundColor:  AppColors.success,
                     padding: const EdgeInsets.symmetric(vertical: 13),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
@@ -1494,16 +1494,16 @@ class _DurationPickerSheetState extends State<_DurationPickerSheet> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: const Color(0xFFF3F4F6),
+          color:  AppColors.background,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: AppColors.borderLight)),
+          border: Border.all(color:  AppColors.divider),
         ),
         child: Text(
           label,
           style: const TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w500,
-            color: AppColors.textPrimary),
+            color: AppColors.textDark,
           ),
         ),
       ),
@@ -1536,15 +1536,15 @@ class _DateSelector extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         decoration: BoxDecoration(
           color: disabled
-              ? AppColors.bgSecondary)
+              ?  AppColors.background
               : hasDate
-              ? AppColors.success).withValues(alpha: 0.05)
-              : Colors.white,
+              ?  AppColors.success.withValues(alpha: 0.05)
+              : AppColors.surface,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
             color: hasDate
-                ? AppColors.success).withValues(alpha: 0.4)
-                : AppColors.borderLight),
+                ?  AppColors.success.withValues(alpha: 0.4)
+                :  AppColors.divider,
           ),
         ),
         child: Column(
@@ -1556,8 +1556,8 @@ class _DateSelector extends StatelessWidget {
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
                 color: hasDate
-                    ? AppColors.success)
-                    : AppColors.textTertiary),
+                    ?  AppColors.success
+                    :  AppColors.textLight,
               ),
             ),
             const SizedBox(height: 4),
@@ -1567,8 +1567,8 @@ class _DateSelector extends StatelessWidget {
                   Icons.calendar_today_rounded,
                   size: 13,
                   color: hasDate
-                      ? AppColors.success)
-                      : AppColors.textTertiary),
+                      ?  AppColors.success
+                      :  AppColors.textLight,
                 ),
                 const SizedBox(width: 6),
                 Text(
@@ -1577,8 +1577,8 @@ class _DateSelector extends StatelessWidget {
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                     color: hasDate
-                        ? AppColors.textPrimary)
-                        : AppColors.textTertiary),
+                        ?  AppColors.textDark
+                        :  AppColors.textLight,
                   ),
                 ),
               ],
@@ -1607,9 +1607,9 @@ class _SummaryTile extends StatelessWidget {
       width: 180,
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: const Color(0xFFE2E8E4)),
+        border: Border.all(color:  AppColors.divider),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1686,10 +1686,3 @@ class _ErrorState extends StatelessWidget {
     );
   }
 }
-
-
-
-
-
-
-

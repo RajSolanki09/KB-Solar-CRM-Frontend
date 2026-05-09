@@ -33,7 +33,7 @@ import 'Steps/subsidy_screen.dart';
 import 'Steps/payment_screen.dart';
 import 'package:solar_project/Helper/app_feedback.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
-import 'package:solar_project/Helper/app_colors.dart';
+import 'package:solar_project/core/app_colors.dart';
 
 class _TeamMember {
   final String id, name, phone;
@@ -246,12 +246,12 @@ class _SolarLeadDetailScreenState extends State<SolarLeadDetailScreen> {
 
     final q = lead.quotationData;
     final dateStr = DateFormat('dd-MMM-yyyy').format(DateTime.now());
-    final logoBytes = await rootBundle.load('assets/images/logo.jpeg');
+    final logoBytes = await rootBundle.load('assets/images/splash-logo.png');
     final logoImage = pw.MemoryImage(logoBytes.buffer.asUint8List());
 
-    const brandStrong = PdfColor.fromInt(0xFFFFE082);
-    const brandLight = PdfColor.fromInt(0xFFB0BEC5);
-    const brandTextDark = PdfColor.fromInt(0xFF5D4037);
+    final brandStrong = PdfColor.fromInt(AppColors.primary.value);
+    final brandLight = PdfColor.fromInt(AppColors.divider.value);
+    final brandTextDark = PdfColor.fromInt(AppColors.textDark.value);
 
     String txt(String? v) => (v == null || v.trim().isEmpty) ? '' : v.trim();
     String money(double? v) {
@@ -288,15 +288,15 @@ class _SolarLeadDetailScreenState extends State<SolarLeadDetailScreen> {
           padding: const pw.EdgeInsets.symmetric(horizontal: -12),
           child: pw.Container(
             width: double.infinity,
-            color: const PdfColor.fromInt(0xFFFFF9C4),
+            color: PdfColor.fromInt(AppColors.background.value),
             padding: const pw.EdgeInsets.symmetric(vertical: 5, horizontal: 8),
             child: pw.Text(
-              ' Mota varaccha , Surat -395010  |  Email: kaaryabook@gmail.com  |  Phone: +91 90999 66333 ',
+              ' Mota varaccha , Surat -395010  |  Email: contact@kaaryabook.com  |  Phone: +91 87805 03913 ',
               textAlign: pw.TextAlign.center,
               style: _pdfTextStyle(
                 fontSize: 9,
                 fontWeight: pw.FontWeight.bold,
-                color: const PdfColor.fromInt(0xFF5D4037),
+                color: PdfColor.fromInt(AppColors.textDark.value),
               ),
             ),
           ),
@@ -337,7 +337,7 @@ class _SolarLeadDetailScreenState extends State<SolarLeadDetailScreen> {
                       ),
                       pw.SizedBox(height: 4),
                       pw.Text(
-                        'Email: kaaryabook@gmail.com',
+                        'Email: contact@kaaryabook.com',
                         style: _pdfTextStyle(
                           fontSize: 8.2,
                           color: brandTextDark,
@@ -346,7 +346,7 @@ class _SolarLeadDetailScreenState extends State<SolarLeadDetailScreen> {
                       ),
                       pw.SizedBox(height: 3),
                       pw.Text(
-                        'Mobile: +91 90999 66333',
+                        'Mobile: +91 87805 03913',
                         style: _pdfTextStyle(
                           fontSize: 8.8,
                           fontWeight: pw.FontWeight.bold,
@@ -439,7 +439,7 @@ class _SolarLeadDetailScreenState extends State<SolarLeadDetailScreen> {
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
                     pw.Text(
-                      'Project Panel Arrangement',
+                      'Solar Panel Arrangement',
                       style: _pdfTextStyle(
                         fontSize: 10,
                         fontWeight: pw.FontWeight.bold,
@@ -474,7 +474,7 @@ class _SolarLeadDetailScreenState extends State<SolarLeadDetailScreen> {
           // ── Quotation Table ───────────────────────────────────────────────
           pw.Container(
             width: double.infinity,
-            color: const PdfColor.fromInt(0xFFFFF9C4),
+            color: PdfColor.fromInt(AppColors.background.value),
             padding: const pw.EdgeInsets.symmetric(horizontal: 6, vertical: 4),
             child: pw.Text(
               'Quotation :',
@@ -502,7 +502,7 @@ class _SolarLeadDetailScreenState extends State<SolarLeadDetailScreen> {
               ),
               _pdfTableRow(
                 '2',
-                'Project Rooftop System Total Cost(સોલર રૂફટોપ સિસ્ટમ નો ટોટલ ખર્ચ)',
+                'Solar Rooftop System Total Cost(સોલર રૂફટોપ સિસ્ટમ નો ટોટલ ખર્ચ)',
                 '',
                 money(rooftop),
               ),
@@ -520,7 +520,7 @@ class _SolarLeadDetailScreenState extends State<SolarLeadDetailScreen> {
               ),
               _pdfTableRow(
                 '5',
-                'Project Panel Premium Charge/Other Cost(સોલર પેનલ પ્રીમિયમ ચાર્જ / અન્ય ખર્ચ)',
+                'Solar Panel Premium Charge/Other Cost(સોલર પેનલ પ્રીમિયમ ચાર્જ / અન્ય ખર્ચ)',
                 '+',
                 money(premium),
               ),
@@ -677,7 +677,7 @@ class _SolarLeadDetailScreenState extends State<SolarLeadDetailScreen> {
           pw.SizedBox(height: 6),
           pw.Text(
             'જરૂરી ડોક્યુમેન્ટ્સ: લાઇટ બિલ, વેરા બિલ/પંચાયત વેરો, આધાર કાર્ડ, પાન કાર્ડ, કેન્સલ ચેક, પાસપોર્ટ ફોટા.',
-            style: _pdfTextStyle(fontSize: 8, color: PdfAppColors.textSecondary600),
+            style: _pdfTextStyle(fontSize: 8, color: PdfColors.grey600),
           ),
         ],
       ),
@@ -705,8 +705,8 @@ class _SolarLeadDetailScreenState extends State<SolarLeadDetailScreen> {
         ? _pdfTextStyle(fontWeight: pw.FontWeight.bold)
         : _pdfTextStyle();
     final bgColor = isHeader
-        ? const PdfColor.fromInt(0xFFFFE082)
-        : (isEmphasis ? const PdfColor.fromInt(0xFFFFF9C4) : null);
+        ? PdfColor.fromInt(AppColors.primary.value)
+        : (isEmphasis ? PdfColor.fromInt(AppColors.background.value) : null);
 
     return pw.TableRow(
       decoration: bgColor != null ? pw.BoxDecoration(color: bgColor) : null,
@@ -885,7 +885,7 @@ class _SolarLeadDetailScreenState extends State<SolarLeadDetailScreen> {
           if (!didPop) Navigator.pop(context, lead);
         },
         child: Scaffold(
-          backgroundColor: AppColors.bgSecondary),
+          backgroundColor: AppColors.background,
           body: CustomScrollView(
             slivers: [
               // ── APP BAR ───────────────────────────────────────────────────
@@ -897,7 +897,7 @@ class _SolarLeadDetailScreenState extends State<SolarLeadDetailScreen> {
                     ? IconButton(
                         icon: const AppSvgIcon(
                           AppSvgAssets.chevronLeft,
-                          color: Colors.white,
+                          color: AppColors.surface,
                           size: 18,
                         ),
                         onPressed: () => Navigator.pop(context, lead),
@@ -912,7 +912,7 @@ class _SolarLeadDetailScreenState extends State<SolarLeadDetailScreen> {
                               width: 18,
                               height: 18,
                               child: CircularProgressIndicator(
-                                color: Colors.white,
+                                color: AppColors.surface,
                                 strokeWidth: 2,
                               ),
                             ),
@@ -920,7 +920,7 @@ class _SolarLeadDetailScreenState extends State<SolarLeadDetailScreen> {
                         : IconButton(
                             icon: const AppSvgIcon(
                               AppSvgAssets.fileText,
-                              color: Colors.white,
+                              color: AppColors.surface,
                               size: 20,
                             ),
                             tooltip: 'Download Quotation PDF',
@@ -933,7 +933,7 @@ class _SolarLeadDetailScreenState extends State<SolarLeadDetailScreen> {
                         width: 18,
                         height: 18,
                         child: CircularProgressIndicator(
-                          color: Colors.white,
+                          color: AppColors.surface,
                           strokeWidth: 2,
                         ),
                       ),
@@ -942,7 +942,7 @@ class _SolarLeadDetailScreenState extends State<SolarLeadDetailScreen> {
                     IconButton(
                       icon: const AppSvgIcon(
                         AppSvgAssets.refreshCw,
-                        color: Colors.white,
+                        color: AppColors.surface,
                         size: 20,
                       ),
                       onPressed: _refresh,
@@ -954,7 +954,7 @@ class _SolarLeadDetailScreenState extends State<SolarLeadDetailScreen> {
                       gradient: LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
-                        colors: [AppColors.primary), AppColors.primaryLight)],
+                        colors: [AppColors.primary, AppColors.primaryDark],
                       ),
                     ),
                     child: SafeArea(
@@ -970,7 +970,7 @@ class _SolarLeadDetailScreenState extends State<SolarLeadDetailScreen> {
                                   child: Text(
                                     lead.customerName,
                                     style: const TextStyle(
-                                      color: Colors.white,
+                                      color: AppColors.surface,
                                       fontSize: 20,
                                       fontWeight: FontWeight.w700,
                                     ),
@@ -984,12 +984,12 @@ class _SolarLeadDetailScreenState extends State<SolarLeadDetailScreen> {
                                       vertical: 3,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: Colors.white.withValues(
+                                      color: AppColors.surface.withValues(
                                         alpha: 0.2,
                                       ),
                                       borderRadius: BorderRadius.circular(20),
                                       border: Border.all(
-                                        color: Colors.white.withValues(
+                                        color: AppColors.surface.withValues(
                                           alpha: 0.4,
                                         ),
                                       ),
@@ -997,7 +997,7 @@ class _SolarLeadDetailScreenState extends State<SolarLeadDetailScreen> {
                                     child: const Text(
                                       'Sales',
                                       style: TextStyle(
-                                        color: Colors.white,
+                                        color: AppColors.surface,
                                         fontSize: 10,
                                         fontWeight: FontWeight.w700,
                                       ),
@@ -1009,10 +1009,12 @@ class _SolarLeadDetailScreenState extends State<SolarLeadDetailScreen> {
                                     vertical: 4,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: Colors.white.withValues(alpha: 0.2),
+                                    color: AppColors.surface.withValues(
+                                      alpha: 0.2,
+                                    ),
                                     borderRadius: BorderRadius.circular(20),
                                     border: Border.all(
-                                      color: Colors.white.withValues(
+                                      color: AppColors.surface.withValues(
                                         alpha: 0.4,
                                       ),
                                     ),
@@ -1020,7 +1022,7 @@ class _SolarLeadDetailScreenState extends State<SolarLeadDetailScreen> {
                                   child: Text(
                                     lead.status,
                                     style: const TextStyle(
-                                      color: Colors.white,
+                                      color: AppColors.surface,
                                       fontSize: 11,
                                       fontWeight: FontWeight.w700,
                                     ),
@@ -1034,13 +1036,13 @@ class _SolarLeadDetailScreenState extends State<SolarLeadDetailScreen> {
                                 const AppSvgIcon(
                                   AppSvgAssets.phone,
                                   size: 12,
-                                  color: Colors.white70,
+                                  color: AppColors.surface,
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
                                   lead.mobile,
                                   style: const TextStyle(
-                                    color: Colors.white70,
+                                    color: AppColors.surface,
                                     fontSize: 12,
                                   ),
                                 ),
@@ -1048,14 +1050,14 @@ class _SolarLeadDetailScreenState extends State<SolarLeadDetailScreen> {
                                 const AppSvgIcon(
                                   AppSvgAssets.mapPin,
                                   size: 12,
-                                  color: Colors.white70,
+                                  color: AppColors.surface,
                                 ),
                                 const SizedBox(width: 4),
                                 Expanded(
                                   child: Text(
                                     '${lead.address}${lead.village.isNotEmpty ? ", ${lead.village}" : ""}',
                                     style: const TextStyle(
-                                      color: Colors.white70,
+                                      color: AppColors.surface,
                                       fontSize: 12,
                                     ),
                                     overflow: TextOverflow.ellipsis,
@@ -1141,7 +1143,7 @@ class _SolarLeadDetailScreenState extends State<SolarLeadDetailScreen> {
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -1236,12 +1238,12 @@ class _SolarLeadDetailScreenState extends State<SolarLeadDetailScreen> {
     padding: const EdgeInsets.symmetric(vertical: 5),
     child: Row(
       children: [
-        AppSvgIcon(svgAsset, size: 14, color: AppColors.textTertiary)),
+        AppSvgIcon(svgAsset, size: 14, color: AppColors.textLight),
         const SizedBox(width: 8),
         Expanded(
           child: Text(
             label,
-            style: const TextStyle(fontSize: 12.5, color: AppColors.textSecondary)),
+            style: const TextStyle(fontSize: 12.5, color: AppColors.textGray),
           ),
         ),
         Text(
@@ -1249,7 +1251,7 @@ class _SolarLeadDetailScreenState extends State<SolarLeadDetailScreen> {
           style: const TextStyle(
             fontSize: 12.5,
             fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary),
+            color: AppColors.textDark,
           ),
         ),
       ],
@@ -1264,7 +1266,7 @@ class _SolarLeadDetailScreenState extends State<SolarLeadDetailScreen> {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           gradient: const LinearGradient(
-            colors: [AppColors.primary), AppColors.primaryLight)],
+            colors: [AppColors.primary, AppColors.primaryDark],
           ),
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
@@ -1280,12 +1282,12 @@ class _SolarLeadDetailScreenState extends State<SolarLeadDetailScreen> {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.2),
+                color: AppColors.surface.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: const AppSvgIcon(
                 AppSvgAssets.arrowRight,
-                color: Colors.white,
+                color: AppColors.surface,
                 size: 16,
               ),
             ),
@@ -1297,7 +1299,7 @@ class _SolarLeadDetailScreenState extends State<SolarLeadDetailScreen> {
                   Text(
                     'Continue: ${lead.status}',
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: AppColors.surface,
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
                     ),
@@ -1305,7 +1307,7 @@ class _SolarLeadDetailScreenState extends State<SolarLeadDetailScreen> {
                   Text(
                     'Next Step → ${_nextStepLabel()}',
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.75),
+                      color: AppColors.surface.withValues(alpha: 0.75),
                       fontSize: 11,
                     ),
                   ),
@@ -1314,7 +1316,7 @@ class _SolarLeadDetailScreenState extends State<SolarLeadDetailScreen> {
             ),
             const AppSvgIcon(
               AppSvgAssets.chevronRight,
-              color: Colors.white,
+              color: AppColors.surface,
               size: 24,
             ),
           ],
@@ -1326,21 +1328,21 @@ class _SolarLeadDetailScreenState extends State<SolarLeadDetailScreen> {
   Widget _buildCompletedBanner() => Container(
     padding: const EdgeInsets.all(16),
     decoration: BoxDecoration(
-      color: AppColors.primaryLightest),
+      color: AppColors.successLight,
       borderRadius: BorderRadius.circular(12),
-      border: Border.all(color: AppColors.primaryLightest)),
+      border: Border.all(color: AppColors.successLight),
     ),
     child: Row(
       children: [
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: Colors.green.shade100,
+            color: AppColors.success,
             borderRadius: BorderRadius.circular(8),
           ),
           child: AppSvgIcon(
             AppSvgAssets.circleCheckBig,
-            color: Colors.green.shade700,
+            color: AppColors.success,
             size: 20,
           ),
         ),
@@ -1353,12 +1355,12 @@ class _SolarLeadDetailScreenState extends State<SolarLeadDetailScreen> {
               style: TextStyle(
                 fontWeight: FontWeight.w700,
                 fontSize: 14,
-                color: AppColors.primary),
+                color: AppColors.success,
               ),
             ),
             Text(
               'All $_totalSteps steps done successfully',
-              style: TextStyle(fontSize: 11, color: Colors.green.shade600),
+              style: TextStyle(fontSize: 11, color: AppColors.success),
             ),
           ],
         ),
@@ -1374,7 +1376,7 @@ class _SolarLeadDetailScreenState extends State<SolarLeadDetailScreen> {
     return Container(
       padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -1404,7 +1406,7 @@ class _SolarLeadDetailScreenState extends State<SolarLeadDetailScreen> {
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary),
+                    color: AppColors.textDark,
                   ),
                 ),
               ),
@@ -1434,9 +1436,9 @@ class _SolarLeadDetailScreenState extends State<SolarLeadDetailScreen> {
             child: LinearProgressIndicator(
               value: percent,
               minHeight: 6,
-              backgroundColor: AppColors.borderLight),
+              backgroundColor: AppColors.divider,
               valueColor: AlwaysStoppedAnimation<Color>(
-                lead.isCompleted ? Colors.green : LeadTheme.orange,
+                lead.isCompleted ? AppColors.success : LeadTheme.orange,
               ),
             ),
           ),
@@ -1447,9 +1449,7 @@ class _SolarLeadDetailScreenState extends State<SolarLeadDetailScreen> {
                 : 'Current: ${lead.status}',
             style: TextStyle(
               fontSize: 11,
-              color: lead.isCompleted
-                  ? Colors.green.shade600
-                  : AppColors.textSecondary),
+              color: lead.isCompleted ? AppColors.success : AppColors.textGray,
             ),
           ),
         ],
@@ -1716,7 +1716,7 @@ class _SolarLeadDetailScreenState extends State<SolarLeadDetailScreen> {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -1839,14 +1839,12 @@ class _PipelineRowState extends State<_PipelineRow> {
     final step = widget.step;
 
     final Color dotColor = isDone
-        ? AppColors.primary)
+        ? AppColors.success
         : isCurrent
-        ? LeadTheme.primary
-        : AppColors.textLight);
+        ? LeadTheme.orange
+        : AppColors.divider;
 
-    final Color lineColor = isDone
-        ? AppColors.primary)
-        : AppColors.borderLight);
+    final Color lineColor = isDone ? AppColors.success : AppColors.divider;
 
     final isNewLead = step.index == 0;
     final hasData =
@@ -1888,20 +1886,20 @@ class _PipelineRowState extends State<_PipelineRow> {
                         ? const AppSvgIcon(
                             AppSvgAssets.check,
                             size: 15,
-                            color: Colors.white,
+                            color: AppColors.surface,
                           )
                         : isCurrent
                         ? AppSvgIcon(
                             step.svgAsset,
                             size: 14,
-                            color: Colors.white,
+                            color: AppColors.surface,
                           )
                         : Text(
                             '${step.index + 1}',
                             style: const TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.w700,
-                              color: AppColors.textTertiary),
+                              color: AppColors.textLight,
                             ),
                           ),
                   ),
@@ -1952,10 +1950,10 @@ class _PipelineRowState extends State<_PipelineRow> {
                                   ? FontWeight.w600
                                   : FontWeight.w400,
                               color: isDone
-                                  ? const Color(0xFF15803D)
+                                  ? AppColors.success
                                   : isCurrent
                                   ? LeadTheme.orange
-                                  : AppColors.textTertiary),
+                                  : AppColors.textLight,
                             ),
                           ),
                         ),
@@ -2005,12 +2003,12 @@ class _PipelineRowState extends State<_PipelineRow> {
                         ],
                         const SizedBox(width: 4),
                         if (isDone)
-                          _Badge('Done', AppColors.primary))
+                          _Badge('Done', AppColors.success)
                         else if (isCurrent)
                           _Badge('Current', LeadTheme.orange),
                         if (widget.showAdminBadge && !isDone) ...[
                           const SizedBox(width: 4),
-                          _Badge('Admin', Colors.purple),
+                          _Badge('Admin', AppColors.primary),
                         ],
                         if (canToggle && (hasData || hasPhotos)) ...[
                           const SizedBox(width: 4),
@@ -2020,7 +2018,7 @@ class _PipelineRowState extends State<_PipelineRow> {
                             child: const AppSvgIcon(
                               AppSvgAssets.chevronDown,
                               size: 14,
-                              color: AppColors.textTertiary),
+                              color: AppColors.textLight,
                             ),
                           ),
                         ],
@@ -2116,7 +2114,7 @@ class _PipelineExpandedBody extends StatelessWidget {
                               r.label,
                               style: const TextStyle(
                                 fontSize: 11.5,
-                                color: AppColors.textSecondary),
+                                color: AppColors.textGray,
                               ),
                             ),
                           ),
@@ -2126,7 +2124,7 @@ class _PipelineExpandedBody extends StatelessWidget {
                               style: const TextStyle(
                                 fontSize: 11.5,
                                 fontWeight: FontWeight.w600,
-                                color: AppColors.textPrimary),
+                                color: AppColors.textDark,
                               ),
                             ),
                           ),
@@ -2155,8 +2153,8 @@ class _PipelineExpandedBody extends StatelessWidget {
                       margin: const EdgeInsets.only(right: 8),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(8),
-                        color: AppColors.borderLight,
-                        border: Border.all(color: AppColors.borderPrimary),
+                        color: AppColors.divider,
+                        border: Border.all(color: Colors.grey.shade300),
                       ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(8),
@@ -2178,7 +2176,7 @@ class _PipelineExpandedBody extends StatelessWidget {
                             child: AppSvgIcon(
                               AppSvgAssets.imageOff,
                               size: 24,
-                              color: AppColors.textSecondary,
+                              color: AppColors.textLight,
                             ),
                           ),
                         ),
@@ -2219,7 +2217,7 @@ class _PipelineCollapsedHint extends StatelessWidget {
       padding: const EdgeInsets.only(top: 3, bottom: 4),
       child: Text(
         hint,
-        style: const TextStyle(fontSize: 10.5, color: AppColors.textTertiary)),
+        style: const TextStyle(fontSize: 10.5, color: AppColors.textLight),
         overflow: TextOverflow.ellipsis,
         maxLines: 1,
       ),
@@ -2279,12 +2277,12 @@ class _PhotoViewerState extends State<_PhotoViewer> {
     appBar: AppBar(
       backgroundColor: Colors.black,
       leading: IconButton(
-        icon: const AppSvgIcon(AppSvgAssets.x, color: Colors.white),
+        icon: const AppSvgIcon(AppSvgAssets.x, color: AppColors.surface),
         onPressed: () => Navigator.pop(context),
       ),
       title: Text(
         '${_current + 1} / ${widget.urls.length}',
-        style: const TextStyle(color: Colors.white, fontSize: 14),
+        style: const TextStyle(color: AppColors.surface, fontSize: 14),
       ),
       centerTitle: true,
     ),
@@ -2302,16 +2300,16 @@ class _PhotoViewerState extends State<_PhotoViewer> {
             loadingBuilder: (_, child, prog) => prog == null
                 ? child
                 : const Center(
-                    child: CircularProgressIndicator(color: Colors.white),
+                    child: CircularProgressIndicator(color: AppColors.surface),
                   ),
             errorBuilder: (_, __, ___) => const Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                AppSvgIcon(AppSvgAssets.imageOff, color: AppColors.textSecondary, size: 48),
+                AppSvgIcon(AppSvgAssets.imageOff, color: Colors.grey, size: 48),
                 SizedBox(height: 8),
                 Text(
                   'Could not load image',
-                  style: TextStyle(color: AppColors.textSecondary),
+                  style: TextStyle(color: Colors.grey),
                 ),
               ],
             ),
@@ -2333,7 +2331,9 @@ class _PhotoViewerState extends State<_PhotoViewer> {
                   width: _current == i ? 18 : 6,
                   height: 6,
                   decoration: BoxDecoration(
-                    color: _current == i ? Colors.white : AppColors.textSecondary.shade600,
+                    color: _current == i
+                        ? AppColors.surface
+                        : Colors.grey.shade600,
                     borderRadius: BorderRadius.circular(3),
                   ),
                 ),
@@ -2343,10 +2343,3 @@ class _PhotoViewerState extends State<_PhotoViewer> {
         : null,
   );
 }
-
-
-
-
-
-
-

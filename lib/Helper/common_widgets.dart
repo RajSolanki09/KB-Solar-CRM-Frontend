@@ -1,8 +1,8 @@
-﻿import 'dart:math';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
-import 'package:solar_project/Helper/app_colors.dart';
+import 'package:solar_project/core/app_colors.dart';
 
 // ----------------- Responsive Font Helper -------------------------------
 
@@ -70,13 +70,12 @@ class ResponsiveLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (isDesktop(context)) {
+    if (isDesktop(context))
       return desktop ?? tablet ?? mobile;
-    } else if (isTablet(context)) {
+    else if (isTablet(context))
       return tablet ?? mobile;
-    } else {
+    else
       return mobile;
-    }
   }
 }
 
@@ -236,7 +235,7 @@ class _DashboardCardState extends State<DashboardCard>
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              color: Colors.white,
+                              color: AppColors.surface,
                               fontSize: titleSize,
                               fontWeight: FontWeight.w800,
                               letterSpacing: 0.1,
@@ -249,12 +248,14 @@ class _DashboardCardState extends State<DashboardCard>
                           height: responsivePadding(context, 32),
                           child: DecoratedBox(
                             decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.18),
+                              color: AppColors.surface.withValues(alpha: 0.18),
                               borderRadius: BorderRadius.circular(
                                 responsivePadding(context, 12),
                               ),
                               border: Border.all(
-                                color: Colors.white.withValues(alpha: 0.12),
+                                color: AppColors.surface.withValues(
+                                  alpha: 0.12,
+                                ),
                                 width: 1,
                               ),
                             ),
@@ -263,12 +264,12 @@ class _DashboardCardState extends State<DashboardCard>
                                   ? AppSvgIcon(
                                       widget.svgAsset!,
                                       size: iconSize,
-                                      color: Colors.white,
+                                      color: AppColors.surface,
                                     )
                                   : widget.icon != null
                                   ? Icon(
                                       widget.icon!,
-                                      color: Colors.white,
+                                      color: AppColors.surface,
                                       size: iconSize,
                                     )
                                   : const SizedBox.shrink(),
@@ -284,7 +285,7 @@ class _DashboardCardState extends State<DashboardCard>
                       child: Text(
                         widget.value,
                         style: TextStyle(
-                          color: Colors.white,
+                          color: AppColors.surface,
                           fontSize: valueSize,
                           fontWeight: FontWeight.w900,
                           letterSpacing: -1.5,
@@ -309,11 +310,11 @@ class _SunRaysPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.06)
+      ..color = AppColors.surface.withValues(alpha: 0.06)
       ..style = PaintingStyle.fill;
 
     final paint2 = Paint()
-      ..color = Colors.white.withValues(alpha: 0.04)
+      ..color = AppColors.surface.withValues(alpha: 0.04)
       ..style = PaintingStyle.fill;
 
     final origin = Offset(-size.width * 0.05, -size.height * 0.05);
@@ -424,7 +425,7 @@ class _RipplePainter extends CustomPainter {
     canvas.drawCircle(
       center,
       radius,
-      Paint()..color = Colors.white.withValues(alpha: opacity * 0.30),
+      Paint()..color = AppColors.surface.withValues(alpha: opacity * 0.30),
     );
   }
 
@@ -443,13 +444,13 @@ class StatusChip extends StatelessWidget {
     switch (status.toLowerCase()) {
       case 'active':
       case 'green':
-        return Colors.green.shade600;
+        return AppColors.success;
       case 'grey':
-        return AppColors.textSecondary;
+        return Colors.grey;
       case 'crash':
-        return Colors.red;
+        return AppColors.error;
       default:
-        return Colors.blueGrey;
+        return AppColors.primary;
     }
   }
 
@@ -464,7 +465,7 @@ class StatusChip extends StatelessWidget {
       child: Text(
         status,
         style: const TextStyle(
-          color: Colors.white,
+          color: AppColors.surface,
           fontSize: 12,
           fontWeight: FontWeight.w600,
         ),
@@ -495,30 +496,6 @@ Widget inputField(
       border: const OutlineInputBorder(),
     ),
   );
-}
-
-/// Safely pop the current route/drawer if possible.
-///
-/// Uses Navigator.canPop() to avoid attempting to pop when there's nothing
-/// to pop (which can trigger framework assertions). If the Scaffold has an
-/// open drawer, it will close it. This avoids crashes when code calls
-/// Navigator.pop(context) after asynchronous navigation or state changes.
-void safePop(BuildContext context, [Object? result]) {
-  try {
-    final navigator = Navigator.of(context);
-    if (navigator.canPop()) {
-      navigator.pop(result);
-      return;
-    }
-
-    final scaffoldState = Scaffold.maybeOf(context);
-    if (scaffoldState != null && scaffoldState.isDrawerOpen) {
-      Navigator.of(context).pop();
-      return;
-    }
-  } catch (_) {
-    // Swallow any errors — this helper is defensive and should not crash
-  }
 }
 
 /// ---------------- GLOW ICON ----------------
@@ -579,13 +556,13 @@ class GlowIcon extends StatelessWidget {
                 AppSvgIcon(
                   svgAsset!,
                   size: 24,
-                  color: isSelected ? Colors.white : Colors.black,
+                  color: isSelected ? AppColors.surface : Colors.black,
                 )
               else if (icon != null)
                 Icon(
                   icon!,
                   size: 24,
-                  color: isSelected ? Colors.white : Colors.black,
+                  color: isSelected ? AppColors.surface : Colors.black,
                 ),
             ],
           ),
@@ -609,7 +586,7 @@ class AppScaffold extends StatelessWidget {
       appBar: AppBar(
         title: Text(title),
         elevation: 0,
-        backgroundColor: Colors.blue.shade300,
+        backgroundColor: AppColors.primary,
       ),
       body: SafeArea(child: child),
     );
@@ -707,12 +684,12 @@ class _ModernDropdown<T> extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
         decoration: BoxDecoration(
-          color: Colors.grey.shade100,
+          color: AppColors.divider,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: hasValue
-                ? Colors.blue.withValues(alpha: 0.6)
-                : AppColors.borderPrimary,
+                ? AppColors.primary.withValues(alpha: 0.6)
+                : Colors.grey.shade300,
             width: hasValue ? 1.5 : 1,
           ),
         ),
@@ -728,8 +705,8 @@ class _ModernDropdown<T> extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 11,
                       color: hasValue
-                          ? Colors.blue.shade700
-                          : AppColors.textSecondary,
+                          ? AppColors.primary
+                          : AppColors.background,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -740,8 +717,8 @@ class _ModernDropdown<T> extends StatelessWidget {
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                       color: hasValue
-                          ? Colors.blue.shade800
-                          : AppColors.textPrimary
+                          ? AppColors.primary
+                          :  AppColors.textDark,
                     ),
                   ),
                 ],
@@ -754,20 +731,20 @@ class _ModernDropdown<T> extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
-                    color: AppColors.accent1.withValues(alpha: 0.1),
+                    color: AppColors.primary.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
                   child: AppSvgIcon(
                     AppSvgAssets.x,
                     size: 14,
-                    color: AppColors.accent1
+                    color: AppColors.primary,
                   ),
                 ),
               )
             else
               AppSvgIcon(
                 AppSvgAssets.chevronDown,
-                color: AppColors.textSecondary,
+                color: AppColors.background,
                 size: 20,
               ),
           ],
@@ -815,7 +792,7 @@ class _DropdownSheetState<T> extends State<_DropdownSheet<T>> {
     return Container(
       margin: const EdgeInsets.fromLTRB(12, 0, 12, 24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(20),
       ),
       // Cap height at 55% of screen
@@ -832,7 +809,7 @@ class _DropdownSheetState<T> extends State<_DropdownSheet<T>> {
               width: 36,
               height: 4,
               decoration: BoxDecoration(
-                color: AppColors.borderPrimary,
+                color: Colors.grey.shade300,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -848,7 +825,7 @@ class _DropdownSheetState<T> extends State<_DropdownSheet<T>> {
                   style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
+                    color: AppColors.textDark,
                   ),
                 ),
                 const Spacer(),
@@ -857,13 +834,13 @@ class _DropdownSheetState<T> extends State<_DropdownSheet<T>> {
                   child: Container(
                     padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
-                      color: AppColors.textSecondary,
+                      color: AppColors.divider,
                       shape: BoxShape.circle,
                     ),
                     child: const AppSvgIcon(
                       AppSvgAssets.x,
                       size: 16,
-                      color: AppColors.textSecondary,
+                      color: Colors.grey,
                     ),
                   ),
                 ),
@@ -871,7 +848,7 @@ class _DropdownSheetState<T> extends State<_DropdownSheet<T>> {
             ),
           ),
 
-          Divider(height: 1, color: AppColors.borderLight),
+          Divider(height: 1, color: AppColors.divider),
 
           // ── Scrollable items ─────────────────────────────────
           Flexible(
@@ -897,7 +874,7 @@ class _DropdownSheetState<T> extends State<_DropdownSheet<T>> {
                       ),
                       decoration: BoxDecoration(
                         color: isSelected
-                            ? AppColors.accent1.withValues(alpha: 0.06)
+                            ? AppColors.primary.withValues(alpha: 0.06)
                             : Colors.transparent,
                       ),
                       child: Row(
@@ -910,8 +887,8 @@ class _DropdownSheetState<T> extends State<_DropdownSheet<T>> {
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               color: isSelected
-                                  ? AppColors.accent1
-                                  : AppColors.borderLight,
+                                  ? AppColors.primary
+                                  : AppColors.divider,
                             ),
                           ),
                           Expanded(
@@ -923,8 +900,8 @@ class _DropdownSheetState<T> extends State<_DropdownSheet<T>> {
                                     ? FontWeight.w700
                                     : FontWeight.w400,
                                 color: isSelected
-                                    ? AppColors.accent1
-                                    : AppColors.textPrimary,
+                                    ? AppColors.primary
+                                    :  AppColors.textDark,
                               ),
                             ),
                           ),
@@ -932,7 +909,7 @@ class _DropdownSheetState<T> extends State<_DropdownSheet<T>> {
                             AppSvgIcon(
                               AppSvgAssets.check,
                               size: 18,
-                              color: AppColors.accent1,
+                              color: AppColors.primary,
                             ),
                         ],
                       ),
@@ -949,9 +926,3 @@ class _DropdownSheetState<T> extends State<_DropdownSheet<T>> {
     );
   }
 }
-
-
-
-
-
-

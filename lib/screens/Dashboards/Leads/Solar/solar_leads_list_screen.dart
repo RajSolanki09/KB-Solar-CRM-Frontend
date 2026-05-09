@@ -14,14 +14,14 @@ import 'package:solar_project/Helper/date_time_helper.dart';
 import 'package:solar_project/Helper/lead_themes.dart';
 import 'package:solar_project/screens/Dashboards/Leads/Solar/add_solar_lead_screen.dart';
 import 'package:solar_project/screens/Dashboards/Leads/Solar/solar_lead_detail_screen.dart';
-import 'package:solar_project/Helper/app_colors.dart';
+import 'package:solar_project/core/app_colors.dart';
 
 class SolarLeadsListScreen extends StatefulWidget {
   final Color appBarColor;
-  final bool embedded;
+  final bool embedded; // If true, shows a smaller header suitable for embedding
   const SolarLeadsListScreen({
     super.key,
-    this.appBarColor = AppColors.accent2),
+    this.appBarColor = LeadTheme.primary,
     this.embedded = false,
   });
 
@@ -44,13 +44,8 @@ class _State extends State<SolarLeadsListScreen> {
     _searchFocus.addListener(() {
       if (mounted) setState(() {});
     });
-    // FIX: added mounted check to prevent
-    // "_elements.contains(element) is not true" assertion.
-    // Without this, the postFrameCallback can fire after the widget's
-    // element has shifted during navigation transitions.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      _fetchLeads();
+      context.read<SolarLeadCubit>().fetchAllLeads();
     });
   }
 
@@ -61,20 +56,15 @@ class _State extends State<SolarLeadsListScreen> {
     super.dispose();
   }
 
-  /// Safe fetch helper � always guards with mounted + try/catch.
-  void _fetchLeads() {
-    if (!mounted) return;
-    try {
-      context.read<SolarLeadCubit>().fetchAllLeads();
-    } catch (_) {}
+  // ── Refresh helper — always uses the widget's own context ─────────────────
+  void _refresh() {
+    if (mounted) context.read<SolarLeadCubit>().fetchAllLeads();
   }
 
-  void _refresh() => _fetchLeads();
-
-  // -- Filter for active leads only ------------------------------------------
+  // ── Filter for active leads only (respect status filter) ──────────────────
   List<SolarLeadsModel> _filterActive(List<SolarLeadsModel> all) {
     return all.where((l) {
-      if (l.isCompleted) return false;
+      if (l.isCompleted) return false; // Only active leads
 
       final s = _search.toLowerCase();
       final matchSearch =
@@ -84,6 +74,7 @@ class _State extends State<SolarLeadsListScreen> {
           l.address.toLowerCase().contains(s) ||
           (l.createdBy ?? '').toLowerCase().contains(s);
 
+      // Only show if filter is 'All' or 'Active' or specific status
       final matchStatus =
           _filter == 'All' || _filter == 'Active' || l.status == _filter;
 
@@ -100,10 +91,12 @@ class _State extends State<SolarLeadsListScreen> {
     }).toList();
   }
 
-  // -- Filter for completed leads only ---------------------------------------
+  // ── Filter for completed leads only ────────────────────────────────────────
   List<SolarLeadsModel> _filterCompleted(List<SolarLeadsModel> all) {
     return all.where((l) {
-      if (!l.isCompleted) return false;
+      if (!l.isCompleted) return false; // Only completed leads
+
+      // Hide if filter is specifically 'Active'
       if (_filter == 'Active') return false;
 
       final s = _search.toLowerCase();
@@ -114,6 +107,7 @@ class _State extends State<SolarLeadsListScreen> {
           l.address.toLowerCase().contains(s) ||
           (l.createdBy ?? '').toLowerCase().contains(s);
 
+      // Show if filter is 'All' or 'Completed' or specific status
       final matchStatus =
           _filter == 'All' || _filter == 'Completed' || l.status == _filter;
 
@@ -174,7 +168,7 @@ class _State extends State<SolarLeadsListScreen> {
       return;
     }
 
-    // -- Step 1: warning dialog ----------------------------------------------
+    // ── Step 1: warning dialog ────────────────────────────────────────────
     final confirmed = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
@@ -188,13 +182,13 @@ class _State extends State<SolarLeadsListScreen> {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: AppColors.primaryLightest),
+                color:  AppColors.errorLight,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: const AppSvgIcon(
                 AppSvgAssets.trash2,
                 size: 20,
-                color: AppColors.accent2),
+                color: AppColors.error,
               ),
             ),
             const SizedBox(width: 10),
@@ -203,7 +197,7 @@ class _State extends State<SolarLeadsListScreen> {
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary),
+                color: AppColors.textDark,
               ),
             ),
           ],
@@ -217,9 +211,9 @@ class _State extends State<SolarLeadsListScreen> {
               width: double.infinity,
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppColors.bgSecondary),
+                color: AppColors.background,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: AppColors.borderLight)),
+                border: Border.all(color: AppColors.divider),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -229,7 +223,7 @@ class _State extends State<SolarLeadsListScreen> {
                     style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary),
+                      color: AppColors.textDark,
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -237,14 +231,14 @@ class _State extends State<SolarLeadsListScreen> {
                     lead.mobile,
                     style: const TextStyle(
                       fontSize: 12,
-                      color: AppColors.textSecondary),
+                      color: AppColors.textGray,
                     ),
                   ),
                   Text(
                     lead.address,
                     style: const TextStyle(
                       fontSize: 12,
-                      color: AppColors.textSecondary),
+                      color: AppColors.textGray,
                     ),
                   ),
                 ],
@@ -255,9 +249,9 @@ class _State extends State<SolarLeadsListScreen> {
               width: double.infinity,
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: AppColors.primaryLightest),
+                color: const Color(0xFFFFF7ED),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: AppColors.primaryLightest)),
+                border: Border.all(color: const Color(0xFFFED7AA)),
               ),
               child: const Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -265,7 +259,7 @@ class _State extends State<SolarLeadsListScreen> {
                   AppSvgIcon(
                     AppSvgAssets.triangleAlert,
                     size: 16,
-                    color: AppColors.accent2),
+                    color: AppColors.warning,
                   ),
                   SizedBox(width: 8),
                   Expanded(
@@ -275,7 +269,7 @@ class _State extends State<SolarLeadsListScreen> {
                       'and photos. This action cannot be undone.',
                       style: TextStyle(
                         fontSize: 12,
-                        color: AppColors.accent2),
+                        color: Color(0xFF9A3412),
                         height: 1.4,
                       ),
                     ),
@@ -290,13 +284,13 @@ class _State extends State<SolarLeadsListScreen> {
             onPressed: () => Navigator.pop(dialogContext, false),
             child: const Text(
               'Cancel',
-              style: TextStyle(color: AppColors.textSecondary)),
+              style: TextStyle(color: AppColors.textGray),
             ),
           ),
           FilledButton(
             style: FilledButton.styleFrom(
-              backgroundColor: AppColors.accent2),
-              foregroundColor: Colors.white,
+              backgroundColor:  AppColors.error,
+              foregroundColor: AppColors.surface,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
@@ -313,7 +307,7 @@ class _State extends State<SolarLeadsListScreen> {
 
     if (confirmed != true || !mounted) return;
 
-    // -- Step 2: second confirmation -----------------------------------------
+    // ── Step 2: second confirmation ───────────────────────────────────────
     final doubleConfirmed = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
@@ -327,7 +321,7 @@ class _State extends State<SolarLeadsListScreen> {
           style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w700,
-            color: AppColors.accent2),
+            color: AppColors.error,
           ),
         ),
         content: Text(
@@ -335,7 +329,7 @@ class _State extends State<SolarLeadsListScreen> {
           '"${lead.customerName}". All records will be gone forever.',
           style: const TextStyle(
             fontSize: 13,
-            color: AppColors.textPrimary),
+            color: AppColors.textDark,
             height: 1.5,
           ),
         ),
@@ -345,15 +339,15 @@ class _State extends State<SolarLeadsListScreen> {
             child: const Text(
               'No, Keep It',
               style: TextStyle(
-                color: AppColors.textPrimary),
+                color: AppColors.textDark,
                 fontWeight: FontWeight.w600,
               ),
             ),
           ),
           FilledButton(
             style: FilledButton.styleFrom(
-              backgroundColor: AppColors.accent2),
-              foregroundColor: Colors.white,
+              backgroundColor: const Color(0xFF7F1D1D),
+              foregroundColor: AppColors.surface,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
@@ -390,9 +384,10 @@ class _State extends State<SolarLeadsListScreen> {
     );
   }
 
-  // -- Navigate to detail then auto-refresh on return ------------------------
+  // ── Navigate to detail then auto-refresh on return ────────────────────────
+
   Future<void> _openDetail(SolarLeadsModel lead) async {
-    // Capture cubit BEFORE pushing so we hold a stable reference.
+    // Capture cubit BEFORE pushing so we hold a stable reference
     final cubit = context.read<SolarLeadCubit>();
 
     await Navigator.push(
@@ -405,21 +400,19 @@ class _State extends State<SolarLeadsListScreen> {
       ),
     );
 
-    // FIX: removed Future.delayed before cubit.fetchAllLeads().
-    // The delay was an async gap after which the element could be detached,
-    // causing the assertion. We check mounted first, then fetch directly.
-    if (!mounted) return;
-    setState(() {
-      _filter = 'All';
-      _selectedDate = null;
-      _search = '';
-      _searchCtrl.clear();
-      _showOlderLeads = false;
-    });
-    // Safe fetch � mounted already checked above, try/catch for safety.
-    try {
+    // Auto-refresh when returning — reset filters and refresh data
+    if (mounted) {
+      setState(() {
+        _filter = 'All'; // Reset status filter
+        _selectedDate = null; // Reset date filter
+        _search = ''; // Reset search
+        _searchCtrl.clear();
+        _showOlderLeads = false;
+      });
+      // Wait a frame to ensure setState completes, then fetch fresh data
+      await Future.delayed(const Duration(milliseconds: 100));
       cubit.fetchAllLeads();
-    } catch (_) {}
+    }
   }
 
   Future<void> _openAddLead() async {
@@ -428,22 +421,18 @@ class _State extends State<SolarLeadsListScreen> {
     final added = await Navigator.push<bool>(
       context,
       MaterialPageRoute(
-        builder: (_) => BlocProvider.value(
-          value: cubit,
-          child: const AddSolarLeadScreen(),
-        ),
+        builder: (_) =>
+            BlocProvider.value(value: cubit, child: const AddSolarLeadScreen()),
       ),
     );
 
     if (!mounted) return;
     if (added == true) {
-      try {
-        await cubit.fetchAllLeads();
-      } catch (_) {}
+      await cubit.fetchAllLeads();
     }
   }
 
-  // -- Extracted body --------------------------------------------------------
+  // ── Extracted body — reused by both embedded and full-screen modes ─────────
   Widget _buildBody() {
     return BlocBuilder<SolarLeadCubit, SolarLeadState>(
       builder: (ctx, state) {
@@ -461,18 +450,18 @@ class _State extends State<SolarLeadsListScreen> {
                 AppSvgIcon(
                   AppSvgAssets.triangleAlert,
                   size: 48,
-                  color: AppColors.accent2),
+                  color: AppColors.error,
                 ),
                 const SizedBox(height: 12),
-                Text(state.message, style: const TextStyle(color: AppColors.textSecondary)),
+                Text(state.message, style: const TextStyle(color: Colors.grey)),
                 const SizedBox(height: 16),
                 ElevatedButton.icon(
                   onPressed: _refresh,
                   icon: const AppSvgIcon(AppSvgAssets.refreshCw, size: 16),
                   label: const Text('Retry'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.accent2),
-                    foregroundColor: Colors.white,
+                    backgroundColor: LeadTheme.primary,
+                    foregroundColor: AppColors.surface,
                   ),
                 ),
               ],
@@ -489,7 +478,7 @@ class _State extends State<SolarLeadsListScreen> {
 
           return Column(
             children: [
-              // -- Summary bar -----------------------------------------------
+              // ── Summary bar ──────────────────────────────────
               if (all.isNotEmpty)
                 Container(
                   margin: const EdgeInsets.fromLTRB(12, 10, 12, 0),
@@ -498,33 +487,25 @@ class _State extends State<SolarLeadsListScreen> {
                     vertical: 10,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.accent2).withValues(alpha: 0.06),
+                    color: LeadTheme.primary.withValues(alpha: 0.06),
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
-                      color: AppColors.accent2).withValues(alpha: 0.15),
+                      color: LeadTheme.primary.withValues(alpha: 0.15),
                     ),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      _Stat('Total', '${all.length}', AppColors.accent2)),
-                      Container(
-                        width: 1,
-                        height: 24,
-                        color: AppColors.borderLight,
-                      ),
-                      _Stat('Active', '$active', AppColors.accent2)),
-                      Container(
-                        width: 1,
-                        height: 24,
-                        color: AppColors.borderLight,
-                      ),
+                      _Stat('Total', '${all.length}', LeadTheme.warning),
+                      Container(width: 1, height: 24, color: AppColors.divider),
+                      _Stat('Active', '$active', LeadTheme.primary),
+                      Container(width: 1, height: 24, color: AppColors.divider),
                       _Stat('Done', '$completed', AppColors.success),
                     ],
                   ),
                 ),
 
-              // -- Filters row -----------------------------------------------
+              // ── Filters row ──────────────────────────────────
               Padding(
                 padding: const EdgeInsets.fromLTRB(12, 10, 12, 0),
                 child: Row(
@@ -535,13 +516,12 @@ class _State extends State<SolarLeadsListScreen> {
                       child: Container(
                         height: 38,
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: AppColors.surface,
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
                             color: _searchFocus.hasFocus
-                                ? AppColors.accent2)
-                                    .withValues(alpha: 0.5)
-                                : AppColors.borderLight,
+                                ? LeadTheme.warning.withValues(alpha: 0.5)
+                                : AppColors.divider,
                             width: _searchFocus.hasFocus ? 1.5 : 1.0,
                           ),
                         ),
@@ -553,14 +533,14 @@ class _State extends State<SolarLeadsListScreen> {
                             hintText: 'Search name / phone / created by',
                             hintStyle: const TextStyle(
                               fontSize: 12,
-                              color: AppColors.textTertiary),
+                              color: AppColors.textLight,
                             ),
-                            prefixIcon: const Padding(
+                            prefixIcon: Padding(
                               padding: EdgeInsets.all(8.0),
                               child: AppSvgIcon(
                                 AppSvgAssets.search,
                                 size: 16,
-                                color: AppColors.accent2),
+                                color: LeadTheme.warning,
                               ),
                             ),
                             border: InputBorder.none,
@@ -582,13 +562,12 @@ class _State extends State<SolarLeadsListScreen> {
                         height: 38,
                         padding: const EdgeInsets.symmetric(horizontal: 10),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: AppColors.surface,
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
                             color: _filter == 'All'
-                                ? AppColors.borderLight
-                                : AppColors.accent2)
-                                    .withValues(alpha: 0.5),
+                                ? AppColors.divider
+                                : LeadTheme.orange.withValues(alpha: 0.5),
                             width: _filter == 'All' ? 1 : 1.5,
                           ),
                         ),
@@ -598,47 +577,51 @@ class _State extends State<SolarLeadsListScreen> {
                               child: DropdownButton2<String>(
                                 value: _filter,
                                 isExpanded: true,
+
                                 buttonStyleData: const ButtonStyleData(
-                                  padding:
-                                      EdgeInsets.symmetric(horizontal: 10),
+                                  padding: EdgeInsets.symmetric(horizontal: 10),
                                   height: 38,
                                 ),
+
                                 iconStyleData: const IconStyleData(
                                   icon: AppSvgIcon(
                                     AppSvgAssets.chevronDown,
                                     size: 16,
-                                    color: AppColors.accent2),
+                                    color: LeadTheme.warning,
                                   ),
                                 ),
+
                                 dropdownStyleData: DropdownStyleData(
-                                  width: constraints.maxWidth,
+                                  width: constraints.maxWidth, // 👈 width fix
                                   maxHeight: 320,
                                   decoration: BoxDecoration(
-                                    color: Colors.white,
+                                    color: AppColors.surface,
                                     borderRadius: BorderRadius.circular(10),
                                   ),
                                 ),
-                                items: [
-                                  'All',
-                                  'Active',
-                                  'Completed',
-                                  ...SolarLeadsModel.workflowSteps,
-                                ].map((s) {
-                                  return DropdownMenuItem<String>(
-                                    value: s,
-                                    child: Text(
-                                      s,
-                                      style: const TextStyle(
-                                        fontSize: 12,
-                                        color: AppColors.textPrimary),
-                                      ),
-                                    ),
-                                  );
-                                }).toList(),
+
+                                items:
+                                    [
+                                      'All',
+                                      'Active',
+                                      'Completed',
+                                      ...SolarLeadsModel
+                                          .workflowSteps, // 👈 solar values same rahega
+                                    ].map((s) {
+                                      return DropdownMenuItem<String>(
+                                        value: s,
+                                        child: Text(
+                                          s,
+                                          style: const TextStyle(
+                                            fontSize: 12,
+                                            color: AppColors.textDark,
+                                          ),
+                                        ),
+                                      );
+                                    }).toList(),
+
                                 onChanged: (v) {
-                                  if (v != null) {
-                                    setState(() => _filter = v);
-                                  }
+                                  if (v != null) setState(() => _filter = v);
                                 },
                               ),
                             );
@@ -657,14 +640,13 @@ class _State extends State<SolarLeadsListScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: 12),
                         decoration: BoxDecoration(
                           color: _selectedDate == null
-                              ? Colors.white
-                              : AppColors.accent2),
+                              ? AppColors.surface
+                              : LeadTheme.warning,
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
                             color: _selectedDate == null
-                                ? AppColors.borderLight
-                                : AppColors.accent2)
-                                    .withValues(alpha: 0.5),
+                                ? AppColors.divider
+                                : LeadTheme.warning.withValues(alpha: 0.5),
                           ),
                         ),
                         child: Row(
@@ -674,8 +656,8 @@ class _State extends State<SolarLeadsListScreen> {
                               AppSvgAssets.calendarDays,
                               size: 16,
                               color: _selectedDate == null
-                                  ? AppColors.textSecondary)
-                                  : Colors.white,
+                                  ? AppColors.textGray
+                                  : AppColors.surface,
                             ),
                             const SizedBox(width: 6),
                             Text(
@@ -683,8 +665,8 @@ class _State extends State<SolarLeadsListScreen> {
                               style: TextStyle(
                                 fontSize: 12,
                                 color: _selectedDate == null
-                                    ? AppColors.textSecondary)
-                                    : Colors.white,
+                                    ? AppColors.textGray
+                                    : AppColors.surface,
                                 fontWeight: _selectedDate == null
                                     ? FontWeight.normal
                                     : FontWeight.w600,
@@ -697,7 +679,7 @@ class _State extends State<SolarLeadsListScreen> {
                                 child: const AppSvgIcon(
                                   AppSvgAssets.x,
                                   size: 16,
-                                  color: Colors.white,
+                                  color: AppColors.surface,
                                 ),
                               ),
                             ],
@@ -709,7 +691,7 @@ class _State extends State<SolarLeadsListScreen> {
                 ),
               ),
 
-              // -- Result count ----------------------------------------------
+              // ── Result count ─────────────────────────────────
               if (filteredActive.isNotEmpty || filteredCompleted.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(14, 6, 14, 0),
@@ -725,7 +707,7 @@ class _State extends State<SolarLeadsListScreen> {
                   ),
                 ),
 
-              // -- List / empty state ----------------------------------------
+              // ── List / empty state ───────────────────────────
               Expanded(
                 child: (filteredActive.isEmpty && filteredCompleted.isEmpty)
                     ? Center(
@@ -735,7 +717,7 @@ class _State extends State<SolarLeadsListScreen> {
                             AppSvgIcon(
                               AppSvgAssets.sun,
                               size: 52,
-                              color: AppColors.borderLight,
+                              color: AppColors.divider,
                             ),
                             const SizedBox(height: 10),
                             Text(
@@ -746,7 +728,7 @@ class _State extends State<SolarLeadsListScreen> {
                                   : 'No leads match filter',
                               style: TextStyle(
                                 fontSize: 14,
-                                color: AppColors.textSecondary,
+                                color: AppColors.textLight,
                                 fontWeight: FontWeight.w500,
                               ),
                               textAlign: TextAlign.center,
@@ -755,19 +737,19 @@ class _State extends State<SolarLeadsListScreen> {
                         ),
                       )
                     : RefreshIndicator(
-                        color: AppColors.accent2),
+                        color: LeadTheme.primary,
                         onRefresh: () async => _refresh(),
                         child: LayoutBuilder(
                           builder: (context, constraints) {
+                            // ── ACTIVE LEADS ──────────────────────
                             final sortedActive = [...filteredActive]
                               ..sort(
-                                (a, b) =>
-                                    b.createdAt.compareTo(a.createdAt),
+                                (a, b) => b.createdAt.compareTo(a.createdAt),
                               );
                             final recentActive = sortedActive
                                 .where(
-                                  (lead) => !lead.createdAt
-                                      .isBefore(_recentCutoff),
+                                  (lead) =>
+                                      !lead.createdAt.isBefore(_recentCutoff),
                                 )
                                 .toList();
                             final olderActive = sortedActive
@@ -777,22 +759,19 @@ class _State extends State<SolarLeadsListScreen> {
                                 )
                                 .toList();
 
+                            // ── COMPLETED LEADS - All in one list ──
                             final sortedCompleted = [...filteredCompleted]
                               ..sort(
-                                (a, b) =>
-                                    b.createdAt.compareTo(a.createdAt),
+                                (a, b) => b.createdAt.compareTo(a.createdAt),
                               );
 
                             return ListView(
-                              physics:
-                                  const AlwaysScrollableScrollPhysics(),
-                              padding: const EdgeInsets.fromLTRB(
-                                12,
-                                8,
-                                12,
-                                36,
-                              ),
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              padding: const EdgeInsets.fromLTRB(12, 8, 12, 36),
                               children: [
+                                // ────────────────────────────────────
+                                // ACTIVE PROJECTS
+                                // ────────────────────────────────────
                                 _TableSection(
                                   title: 'Active Leads - Last 7 Days',
                                   subtitle:
@@ -831,6 +810,9 @@ class _State extends State<SolarLeadsListScreen> {
                                 ),
                                 const SizedBox(height: 20),
 
+                                // ────────────────────────────────────
+                                // COMPLETED PROJECTS - SINGLE TABLE
+                                // ────────────────────────────────────
                                 if (sortedCompleted.isNotEmpty) ...[
                                   _CollapsibleTableSection(
                                     title: 'Completed Projects',
@@ -841,8 +823,7 @@ class _State extends State<SolarLeadsListScreen> {
                                     onExpansionChanged: (expanded) {
                                       if (mounted) {
                                         setState(
-                                          () =>
-                                              _showCompletedLeads = expanded,
+                                          () => _showCompletedLeads = expanded,
                                         );
                                       }
                                     },
@@ -872,12 +853,14 @@ class _State extends State<SolarLeadsListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // ── Embedded mode: no Scaffold / AppBar / FAB ─────────────────────────
     if (widget.embedded) {
       return _buildBody();
     }
 
+    // ── Full-screen mode ──────────────────────────────────────────────────
     return Scaffold(
-      backgroundColor: AppColors.bgSecondary),
+      backgroundColor:  AppColors.background,
       appBar: AppBar(
         backgroundColor: widget.appBarColor,
         elevation: 0,
@@ -885,7 +868,7 @@ class _State extends State<SolarLeadsListScreen> {
             ? IconButton(
                 icon: const AppSvgIcon(
                   AppSvgAssets.chevronLeft,
-                  color: Colors.white,
+                  color: AppColors.surface,
                   size: 18,
                 ),
                 onPressed: () => Navigator.maybePop(context),
@@ -893,14 +876,14 @@ class _State extends State<SolarLeadsListScreen> {
             : null,
         title: const Row(
           children: [
-            AppSvgIcon(AppSvgAssets.sun, color: Colors.white, size: 18),
+            AppSvgIcon(AppSvgAssets.sun, color: AppColors.surface, size: 18),
             SizedBox(width: 8),
             Text(
-              'Project Leads',
+              'Solar Leads',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
-                color: Colors.white,
+                color: AppColors.surface,
               ),
             ),
           ],
@@ -909,7 +892,7 @@ class _State extends State<SolarLeadsListScreen> {
           IconButton(
             icon: const AppSvgIcon(
               AppSvgAssets.refreshCw,
-              color: Colors.white,
+              color: AppColors.surface,
             ),
             onPressed: _refresh,
           ),
@@ -917,15 +900,15 @@ class _State extends State<SolarLeadsListScreen> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _openAddLead,
-        backgroundColor: AppColors.accent2),
-        foregroundColor: Colors.white,
+        backgroundColor: LeadTheme.primary,
+        foregroundColor: AppColors.surface,
         icon: const AppSvgIcon(
           AppSvgAssets.plus,
-          color: Colors.white,
+          color: AppColors.surface,
           size: 18,
         ),
         label: const Text(
-          'Project Lead',
+          'Solar Lead',
           style: TextStyle(fontWeight: FontWeight.w700),
         ),
       ),
@@ -934,9 +917,9 @@ class _State extends State<SolarLeadsListScreen> {
   }
 }
 
-// -----------------------------------------------------------------------------
+// ─────────────────────────────────────────────────────────────
 //  Leads Table Sections
-// -----------------------------------------------------------------------------
+// ─────────────────────────────────────────────────────────────
 class _TableSection extends StatelessWidget {
   final String title;
   final String subtitle;
@@ -965,9 +948,9 @@ class _TableSection extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.borderLight)),
+        border: Border.all(color: AppColors.divider),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -982,7 +965,7 @@ class _TableSection extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary),
+                    color: AppColors.textDark,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -1049,13 +1032,15 @@ class _CollapsibleTableSection extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.borderLight)),
+        border: Border.all(color: AppColors.divider),
       ),
       child: Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
         child: ExpansionTile(
+          // ── Unique key per section title to avoid Flutter confusing
+          //    "Active Leads - Older" with "Completed Projects" ──────
           key: ValueKey('solar_section_$title'),
           initiallyExpanded: initiallyExpanded,
           onExpansionChanged: onExpansionChanged,
@@ -1066,15 +1051,12 @@ class _CollapsibleTableSection extends StatelessWidget {
             style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary),
+              color: AppColors.textDark,
             ),
           ),
           subtitle: Text(
             subtitle,
-            style: const TextStyle(
-              fontSize: 11,
-              color: LeadTheme.textMuted,
-            ),
+            style: const TextStyle(fontSize: 11, color: LeadTheme.textMuted),
           ),
           children: [
             if (leads.isEmpty)
@@ -1084,10 +1066,7 @@ class _CollapsibleTableSection extends StatelessWidget {
                   alignment: Alignment.centerLeft,
                   child: Text(
                     'No older leads found.',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: LeadTheme.textMuted,
-                    ),
+                    style: TextStyle(fontSize: 12, color: LeadTheme.textMuted),
                   ),
                 ),
               )
@@ -1108,14 +1087,14 @@ class _CollapsibleTableSection extends StatelessWidget {
 }
 
 DataColumn _buildColumn(String title) => DataColumn(
-      label: Text(
-        title,
-        style: const TextStyle(
-          fontWeight: FontWeight.bold,
-          color: AppColors.accent2),
-        ),
-      ),
-    );
+  label: Text(
+    title,
+    style: const TextStyle(
+      fontWeight: FontWeight.bold,
+      color: LeadTheme.primary,
+    ),
+  ),
+);
 
 class _LeadsDataTable extends StatelessWidget {
   final List<SolarLeadsModel> leads;
@@ -1175,7 +1154,7 @@ class _LeadsDataTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDesktop = MediaQuery.sizeOf(context).width >= 1000;
-    const rowTextStyle = TextStyle(fontSize: 12, color: AppColors.textPrimary));
+    const rowTextStyle = TextStyle(fontSize: 12, color: AppColors.textDark);
 
     return SizedBox(
       width: double.infinity,
@@ -1190,19 +1169,19 @@ class _LeadsDataTable extends StatelessWidget {
             dataRowMaxHeight: 56,
             horizontalMargin: isDesktop ? 12 : 8,
             columnSpacing: isDesktop ? 14 : 8,
-            headingRowColor:
-                WidgetStateProperty.all(AppColors.primaryLightest)),
+            headingRowColor: WidgetStateProperty.all(AppColors.primaryTint),
             dataRowColor: WidgetStateProperty.resolveWith((states) {
               if (states.contains(WidgetState.selected)) {
-                return AppColors.primaryLightest);
+                return AppColors.primaryTint;
               }
               return null;
             }),
             border: TableBorder(
-              horizontalInside: BorderSide(color: Colors.blueGrey.shade50),
-              bottom: BorderSide(color: Colors.blueGrey.shade100),
-              top: BorderSide(color: Colors.blueGrey.shade100),
+              horizontalInside: BorderSide(color: AppColors.primary),
+              bottom: BorderSide(color: AppColors.primary),
+              top: BorderSide(color: AppColors.primary),
             ),
+
             columns: [
               _buildColumn('Customer'),
               _buildColumn('Mobile'),
@@ -1220,9 +1199,7 @@ class _LeadsDataTable extends StatelessWidget {
                   DataCell(
                     Text(
                       lead.customerName,
-                      style: rowTextStyle.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: rowTextStyle.copyWith(fontWeight: FontWeight.w600),
                     ),
                   ),
                   DataCell(Text(lead.mobile, style: rowTextStyle)),
@@ -1242,7 +1219,7 @@ class _LeadsDataTable extends StatelessWidget {
                       _amountLabel(lead),
                       style: rowTextStyle.copyWith(
                         fontWeight: FontWeight.w600,
-                        color: AppColors.accent2),
+                        color: LeadTheme.primary,
                       ),
                     ),
                   ),
@@ -1264,20 +1241,17 @@ class _LeadsDataTable extends StatelessWidget {
                     ),
                   ),
                   DataCell(
-                    Text(
-                      _formatCreatedAt(lead.createdAt),
-                      style: rowTextStyle,
-                    ),
+                    Text(_formatCreatedAt(lead.createdAt), style: rowTextStyle),
                   ),
                   if (isAdmin)
                     DataCell(
                       IconButton(
                         tooltip: 'Delete Lead',
                         onPressed: () => onDeleteTap(lead),
-                        icon: const AppSvgIcon(
+                        icon: AppSvgIcon(
                           AppSvgAssets.trash2,
                           size: 18,
-                          color: AppColors.accent2),
+                          color:  AppColors.error,
                         ),
                       ),
                     ),
@@ -1291,9 +1265,9 @@ class _LeadsDataTable extends StatelessWidget {
   }
 }
 
-// -----------------------------------------------------------------------------
+// ─────────────────────────────────────────────────────────────
 //  Stat Widget
-// -----------------------------------------------------------------------------
+// ─────────────────────────────────────────────────────────────
 class _Stat extends StatelessWidget {
   final String label;
   final String value;
@@ -1321,8 +1295,3 @@ class _Stat extends StatelessWidget {
     );
   }
 }
-
-
-
-
-

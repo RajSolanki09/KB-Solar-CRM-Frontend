@@ -6,11 +6,10 @@ import 'package:solar_project/Cubits/SprinklerLeads/sprinkler_leads_cubit.dart';
 import 'package:solar_project/Cubits/SprinklerLeads/sprinkler_leads_state.dart';
 import 'package:solar_project/Helper/app_feedback.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
-import 'package:solar_project/Helper/common_widgets.dart';
 import 'package:solar_project/Helper/lead_themes.dart';
 import 'package:solar_project/Helper/lead_widgets.dart';
 import 'package:solar_project/data/Models/sprinkler_lead_model.dart';
-import 'package:solar_project/Helper/app_colors.dart';
+import 'package:solar_project/core/app_colors.dart';
 
 class SprinklerFollowupScreen extends StatefulWidget {
   final SprinklerLeadModel lead;
@@ -39,19 +38,19 @@ class _State extends State<SprinklerFollowupScreen> {
     _DropOption(
       value: 'cold',
       label: 'Cold',
-      color: AppColors.info),
+      color: AppColors.primary,
       icon: AppSvgAssets.thermometer,
     ),
     _DropOption(
       value: 'medium',
       label: 'Medium',
-      color: Color(0xFFD97706),
+      color: AppColors.warning,
       icon: AppSvgAssets.activity,
     ),
     _DropOption(
       value: 'hot',
       label: 'Hot',
-      color: AppColors.error),
+      color: AppColors.error,
       icon: AppSvgAssets.sunMedium,
     ),
   ];
@@ -61,25 +60,25 @@ class _State extends State<SprinklerFollowupScreen> {
     _DropOption(
       value: 'thinking',
       label: 'Thinking',
-      color: Color(0xFFD97706),
+      color: AppColors.warning,
       icon: AppSvgAssets.clock,
     ),
     _DropOption(
       value: 'negotiation',
       label: 'Negotiation',
-      color: Color(0xFF7C3AED),
+      color: AppColors.primary,
       icon: AppSvgAssets.handshake,
     ),
     _DropOption(
       value: 'revisionNeeded',
       label: 'Revision Needed',
-      color: Color(0xFF0891B2),
+      color: LeadTheme.secondary,
       icon: AppSvgAssets.pencil,
     ),
     _DropOption(
       value: 'rejected',
       label: 'Rejected',
-      color: AppColors.error),
+      color: AppColors.error,
       icon: AppSvgAssets.x,
     ),
   ];
@@ -210,7 +209,7 @@ class _State extends State<SprinklerFollowupScreen> {
   Widget build(BuildContext context) {
     return BlocListener<SprinklerLeadCubit, SprinklerLeadState>(
       listener: (ctx, state) {
-        if (state is SprinklerLeadSaved) safePop(context);
+        if (state is SprinklerLeadSaved) Navigator.pop(context);
         if (state is SprinklerLeadError) {
           setState(() => _saving = false);
           AppFeedback.showError(context, state.message);
@@ -224,7 +223,7 @@ class _State extends State<SprinklerFollowupScreen> {
           leading: IconButton(
             icon: const AppSvgIcon(
               AppSvgAssets.chevronLeft,
-              color: Colors.white,
+              color: AppColors.surface,
               size: 18,
             ),
             onPressed: () => Navigator.pop(context),
@@ -234,7 +233,7 @@ class _State extends State<SprinklerFollowupScreen> {
             style: const TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w600,
-              color: Colors.white,
+              color: AppColors.surface,
             ),
           ),
           actions: [
@@ -352,7 +351,7 @@ class _State extends State<SprinklerFollowupScreen> {
       value: value,
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: const TextStyle(fontSize: 13, color: AppColors.textTertiary)),
+        hintStyle: const TextStyle(fontSize: 13, color: AppColors.textLight),
         filled: true,
         fillColor: sel != null
             ? selColor!.withValues(alpha: 0.07)
@@ -367,7 +366,7 @@ class _State extends State<SprinklerFollowupScreen> {
           borderSide: BorderSide(
             color: sel != null
                 ? selColor!.withValues(alpha: 0.5)
-                : AppColors.borderPrimary,
+                : Colors.grey.shade300,
             width: sel != null ? 1.5 : 1,
           ),
         ),
@@ -376,7 +375,7 @@ class _State extends State<SprinklerFollowupScreen> {
           borderSide: BorderSide(
             color: sel != null
                 ? selColor!.withValues(alpha: 0.5)
-                : AppColors.borderPrimary,
+                : Colors.grey.shade300,
             width: sel != null ? 1.5 : 1,
           ),
         ),
@@ -389,7 +388,7 @@ class _State extends State<SprinklerFollowupScreen> {
       icon: AppSvgIcon(
         AppSvgAssets.chevronDown,
         size: 16,
-        color: AppColors.textSecondary,
+        color: AppColors.background,
       ),
       // ── Items list ────────────────────────────────────────────────────────
       items: [
@@ -399,7 +398,7 @@ class _State extends State<SprinklerFollowupScreen> {
             'None',
             style: TextStyle(
               fontSize: 13,
-              color: AppColors.textSecondary,
+              color: AppColors.background,
               fontStyle: FontStyle.italic,
             ),
           ),
@@ -440,7 +439,7 @@ class _State extends State<SprinklerFollowupScreen> {
           'None',
           style: TextStyle(
             fontSize: 13,
-            color: AppColors.textSecondary,
+            color: AppColors.background,
             fontStyle: FontStyle.italic,
           ),
         ),
@@ -554,7 +553,7 @@ class _State extends State<SprinklerFollowupScreen> {
         decoration: BoxDecoration(
           color: has ? Colors.teal.shade50 : LeadTheme.surface,
           border: Border.all(
-            color: has ? Colors.teal.shade300 : AppColors.borderPrimary,
+            color: has ? Colors.teal.shade300 : Colors.grey.shade300,
           ),
           borderRadius: BorderRadius.circular(8),
         ),
@@ -588,7 +587,7 @@ class _State extends State<SprinklerFollowupScreen> {
             AppSvgIcon(
               has ? AppSvgAssets.circleCheckBig : AppSvgAssets.chevronRight,
               size: 14,
-              color: has ? Colors.teal : AppColors.textSecondary,
+              color: has ? Colors.teal : AppColors.textLight,
             ),
           ],
         ),
@@ -607,7 +606,7 @@ class _State extends State<SprinklerFollowupScreen> {
         decoration: BoxDecoration(
           color: has ? Colors.teal.shade50 : LeadTheme.surface,
           border: Border.all(
-            color: has ? Colors.teal.shade300 : AppColors.borderPrimary,
+            color: has ? Colors.teal.shade300 : Colors.grey.shade300,
           ),
           borderRadius: BorderRadius.circular(8),
         ),
@@ -639,7 +638,7 @@ class _State extends State<SprinklerFollowupScreen> {
             AppSvgIcon(
               has ? AppSvgAssets.circleCheckBig : AppSvgAssets.chevronRight,
               size: 14,
-              color: has ? Colors.teal : AppColors.textSecondary,
+              color: has ? Colors.teal : AppColors.textLight,
             ),
           ],
         ),
@@ -681,7 +680,7 @@ class _State extends State<SprinklerFollowupScreen> {
     style: const TextStyle(
       fontSize: 12.5,
       fontWeight: FontWeight.w600,
-      color: AppColors.textPrimary),
+      color: AppColors.textDark,
     ),
   );
 
@@ -693,7 +692,7 @@ class _State extends State<SprinklerFollowupScreen> {
       onPressed: _saving ? null : _save,
       style: ElevatedButton.styleFrom(
         backgroundColor: LeadTheme.secondary,
-        foregroundColor: Colors.white,
+        foregroundColor: AppColors.surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
       child: _saving
@@ -702,7 +701,7 @@ class _State extends State<SprinklerFollowupScreen> {
               height: 20,
               child: CircularProgressIndicator(
                 strokeWidth: 2,
-                color: Colors.white,
+                color: AppColors.surface,
               ),
             )
           : const Text(
@@ -724,9 +723,3 @@ class _DropOption {
     required this.icon,
   });
 }
-
-
-
-
-
-

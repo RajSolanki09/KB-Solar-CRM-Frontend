@@ -10,7 +10,7 @@ import 'package:solar_project/data/Models/service_request_model.dart';
 import 'package:solar_project/screens/Dashboards/Admin_Dashboards/Services/assign_technician_screen.dart';
 import 'package:solar_project/screens/Dashboards/Admin_Dashboards/Services/service_visit_screen.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
-import 'package:solar_project/Helper/app_colors.dart';
+import 'package:solar_project/core/app_colors.dart';
 
 class ServiceDetailScreen extends StatefulWidget {
   final ServiceRequestModel service;
@@ -45,16 +45,16 @@ class _State extends State<ServiceDetailScreen> {
   Color _statusColor(String s) {
     switch (s) {
       case 'Open':
-        return AppColors.textSecondary;
+        return Colors.grey;
       case 'Assigned':
-        return Colors.blue;
+        return AppColors.primary;
       case 'In Progress':
-        return Colors.orange;
+        return AppColors.solar;
       case 'Completed':
       case 'Resolved':
-        return Colors.green;
+        return AppColors.success;
       default:
-        return AppColors.textSecondary;
+        return Colors.grey;
     }
   }
 
@@ -136,14 +136,14 @@ class _State extends State<ServiceDetailScreen> {
         }
       },
       child: Scaffold(
-        backgroundColor: AppColors.bgSecondary),
+        backgroundColor:  AppColors.background,
         appBar: AppBar(
-          backgroundColor: Colors.white,
+          backgroundColor: AppColors.surface,
           elevation: 0,
           leading: IconButton(
             icon: const AppSvgIcon(
               AppSvgAssets.chevronLeft,
-              color: AppColors.textPrimary),
+              color: AppColors.textDark,
             ),
             onPressed: () => Navigator.pop(context),
           ),
@@ -157,12 +157,12 @@ class _State extends State<ServiceDetailScreen> {
                 style: const TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary),
+                  color: AppColors.textDark,
                 ),
               ),
               Text(
                 _service.customerName,
-                style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                style: const TextStyle(fontSize: 11, color: AppColors.textGray),
               ),
             ],
           ),
@@ -360,8 +360,8 @@ class _State extends State<ServiceDetailScreen> {
                             : 'Assign Technician',
                       ),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.success),
-                        side: const BorderSide(color: AppColors.success)),
+                        foregroundColor: AppColors.success,
+                        side: const BorderSide(color: AppColors.success),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
@@ -395,17 +395,17 @@ class _State extends State<ServiceDetailScreen> {
                       icon: const AppSvgIcon(
                         AppSvgAssets.cog,
                         size: 18,
-                        color: Colors.white,
+                        color: AppColors.surface,
                       ),
                       label: const Text(
                         'Open Service Visit',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: AppColors.surface,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.info,
+                        backgroundColor: AppColors.primary,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
@@ -419,7 +419,7 @@ class _State extends State<ServiceDetailScreen> {
                 if (_service.status == 'Assigned')
                   _ActionBtn(
                     'Start Service',
-                    AppColors.warning,
+                    AppColors.solar,
                     AppSvgAssets.play,
                     _saving,
                     () => _updateStatus('In Progress'),
@@ -437,10 +437,10 @@ class _State extends State<ServiceDetailScreen> {
                   width: double.infinity,
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: Colors.green.withValues(alpha: 0.1),
+                    color: AppColors.success.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: Colors.green.withValues(alpha: 0.3),
+                      color: AppColors.success.withValues(alpha: 0.3),
                     ),
                   ),
                   child: const Row(
@@ -474,7 +474,7 @@ class _State extends State<ServiceDetailScreen> {
     showModalBottomSheet(
       context: ctx,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -494,7 +494,7 @@ class _State extends State<ServiceDetailScreen> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: AppColors.borderPrimary,
+                  color: Colors.grey.shade300,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -518,7 +518,7 @@ class _State extends State<ServiceDetailScreen> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 filled: true,
-                fillColor: AppColors.bgPrimary,
+                fillColor: AppColors.background,
               ),
             ),
             const SizedBox(height: 10),
@@ -531,7 +531,7 @@ class _State extends State<ServiceDetailScreen> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 filled: true,
-                fillColor: AppColors.bgPrimary,
+                fillColor: AppColors.background,
               ),
               items: [
                 'Cash',
@@ -557,7 +557,7 @@ class _State extends State<ServiceDetailScreen> {
                 ),
                 child: _saving
                     ? const CircularProgressIndicator(
-                        color: Colors.white,
+                        color: AppColors.surface,
                         strokeWidth: 2,
                       )
                     : const Text(
@@ -565,7 +565,7 @@ class _State extends State<ServiceDetailScreen> {
                         style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w700,
-                          color: Colors.white,
+                          color: AppColors.surface,
                         ),
                       ),
               ),
@@ -595,17 +595,17 @@ class _ActionBtn extends StatelessWidget {
               width: 16,
               height: 16,
               child: CircularProgressIndicator(
-                color: Colors.white,
+                color: AppColors.surface,
                 strokeWidth: 2,
               ),
             )
-          : AppSvgIcon(icon, size: 18, color: Colors.white),
+          : AppSvgIcon(icon, size: 18, color: AppColors.surface),
       label: Text(
         label,
         style: const TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w700,
-          color: Colors.white,
+          color: AppColors.surface,
         ),
       ),
       style: ElevatedButton.styleFrom(
@@ -631,7 +631,7 @@ class _Card extends StatelessWidget {
     margin: const EdgeInsets.only(bottom: 10),
     padding: const EdgeInsets.all(14),
     decoration: BoxDecoration(
-      color: Colors.white,
+      color: AppColors.surface,
       borderRadius: BorderRadius.circular(12),
       boxShadow: [
         BoxShadow(
@@ -646,14 +646,14 @@ class _Card extends StatelessWidget {
       children: [
         Row(
           children: [
-            AppSvgIcon(icon, size: 14, color: AppColors.success)),
+            AppSvgIcon(icon, size: 14, color: AppColors.success),
             const SizedBox(width: 6),
             Text(
               title,
               style: const TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary),
+                color: AppColors.textDark,
               ),
             ),
           ],
@@ -675,11 +675,11 @@ class _Row extends StatelessWidget {
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        AppSvgIcon(icon, size: 12, color: AppColors.textSecondary),
+        AppSvgIcon(icon, size: 12, color: AppColors.background),
         const SizedBox(width: 6),
         Text(
           '$label: ',
-          style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+          style: const TextStyle(fontSize: 12, color: AppColors.textGray),
         ),
         Expanded(
           child: Text(
@@ -687,7 +687,7 @@ class _Row extends StatelessWidget {
             style: const TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary),
+              color: AppColors.textDark,
             ),
           ),
         ),
@@ -705,11 +705,9 @@ class _NotePanel extends StatelessWidget {
     width: double.infinity,
     padding: const EdgeInsets.all(12),
     decoration: BoxDecoration(
-      color: AppColors.success).withValues(alpha: 0.08),
+      color: AppColors.success.withValues(alpha: 0.08),
       borderRadius: BorderRadius.circular(10),
-      border: Border.all(
-        color: AppColors.success).withValues(alpha: 0.25),
-      ),
+      border: Border.all(color: AppColors.success.withValues(alpha: 0.25)),
     ),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -719,7 +717,7 @@ class _NotePanel extends StatelessWidget {
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary),
+            color: AppColors.textDark,
           ),
         ),
         const SizedBox(height: 6),
@@ -728,7 +726,7 @@ class _NotePanel extends StatelessWidget {
           style: const TextStyle(
             fontSize: 12,
             height: 1.4,
-            color: AppColors.textPrimary),
+            color: AppColors.textDark,
           ),
         ),
       ],
@@ -774,13 +772,13 @@ class _PhotoStrip extends StatelessWidget {
             child: Container(
               width: 96,
               height: 96,
-              color: AppColors.textSecondary.shade100,
+              color: AppColors.divider,
               child: Image.network(
                 imageUrl,
                 fit: BoxFit.cover,
                 errorBuilder: (_, __, ___) => AppSvgIcon(
                   AppSvgAssets.imageOff,
-                  color: AppColors.textSecondary,
+                  color: AppColors.textLight,
                 ),
                 loadingBuilder: (context, child, loadingProgress) {
                   if (loadingProgress == null) return child;
@@ -800,9 +798,3 @@ class _PhotoStrip extends StatelessWidget {
     ),
   );
 }
-
-
-
-
-
-

@@ -1,13 +1,13 @@
-﻿// lib/screens/Dashboards/Leads/Solar/Steps/solar_quotation_screen.dart
+// lib/screens/Dashboards/Leads/Solar/Steps/solar_quotation_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:solar_project/Cubits/SolarLeads/solar_leads_cubit.dart';
 import 'package:solar_project/Cubits/SolarLeads/solar_leads_state.dart';
 import 'package:solar_project/Helper/app_feedback.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
-import 'package:solar_project/Helper/common_widgets.dart';
 import 'package:solar_project/Helper/lead_themes.dart';
 import 'package:solar_project/Helper/lead_widgets.dart';
+import 'package:solar_project/core/app_colors.dart';
 import 'package:solar_project/data/Models/solar_leads_model.dart';
 
 class SolarQuotationScreen extends StatefulWidget {
@@ -23,7 +23,7 @@ class SolarQuotationScreen extends StatefulWidget {
 }
 
 class _State extends State<SolarQuotationScreen> {
-  // â”€â”€ Cost fields â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Cost fields ────────────────────────────────────────────────────────────
   final rooftopSystemCostC = TextEditingController();
   final elevatedStructureCostC = TextEditingController();
   final netMeterCostC = TextEditingController();
@@ -31,13 +31,13 @@ class _State extends State<SolarQuotationScreen> {
   final totalC = TextEditingController();
   final subsidyC = TextEditingController();
   final systemAfterSubsidyC = TextEditingController();
-  // â”€â”€ Payment terms â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Payment terms ──────────────────────────────────────────────────────────
   final advancePercentC = TextEditingController(text: '60');
   final balancePercentC = TextEditingController(text: '40');
   final warrantyNoteC = TextEditingController(
     text: '5 year panel warranty, 1 year service warranty',
   );
-  // â”€â”€ Notes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Notes ──────────────────────────────────────────────────────────────────
   final notesC = TextEditingController();
 
   bool _saving = false;
@@ -159,16 +159,16 @@ class _State extends State<SolarQuotationScreen> {
     }
   }
 
-  // â”€â”€ BUILD UI â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── BUILD UI ───────────────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
     return BlocListener<SolarLeadCubit, SolarLeadState>(
       listener: (ctx, state) {
         if (state is SolarLeadSaved) {
           setState(() => _saving = false);
-            Future.delayed(const Duration(milliseconds: 100), () {
-             if (mounted) safePop(context);
-           });
+          Future.delayed(const Duration(milliseconds: 100), () {
+            if (mounted) Navigator.pop(context);
+          });
         }
         if (state is SolarLeadError) {
           setState(() => _saving = false);
@@ -224,43 +224,43 @@ class _State extends State<SolarQuotationScreen> {
                   const SizedBox(height: 14),
                   _numField(
                     rooftopSystemCostC,
-                    'Project Rooftop System Total Cost (àª¸à«‹àª²àª° àª°à«‚àª«àªŸà«‹àªª àª¸àª¿àª¸à«àªŸàª® àª¨à«‹ àªŸà«‹àªŸàª² àª–àª°à«àªš)',
+                    'Solar Rooftop System Total Cost (સોલર રૂફટોપ સિસ્ટમ નો ટોટલ ખર્ચ)',
                     onChange: (_) => _autoCalc(),
                   ),
                   const SizedBox(height: 12),
                   _numField(
                     elevatedStructureCostC,
-                    'Heighted/Elevated Structure Cost (àªàª²àª¿àªµà«‡àªŸà«‡àª¡ àª«à«àª°à«‡àª¬àª¿àª•à«‡àª¶àª¨ àª¨à«‹ àª–àª°à«àªš)',
+                    'Heighted/Elevated Structure Cost (એલિવેટેડ ફ્રેબિકેશન નો ખર્ચ)',
                     onChange: (_) => _autoCalc(),
                   ),
                   const SizedBox(height: 12),
                   _numField(
                     netMeterCostC,
-                    'GEB/Torrent Net Meter Cost (àª®à«€àªŸàª° àª–àª°à«àªš)',
+                    'GEB/Torrent Net Meter Cost (મીટર ખર્ચ)',
                     onChange: (_) => _autoCalc(),
                   ),
                   const SizedBox(height: 12),
                   _numField(
                     premiumOtherCostC,
-                    'Project Panel Premium Charge / Other Cost (àª¸à«‹àª²àª° àªªà«‡àª¨àª² àªªà«àª°à«€àª®àª¿àª¯àª® àªšàª¾àª°à«àªœ/àª…àª¨à«àª¯ àª–àª°à«àªš)',
+                    'Solar Panel Premium Charge / Other Cost (સોલર પેનલ પ્રીમિયમ ચાર્જ/અન્ય ખર્ચ)',
                     onChange: (_) => _autoCalc(),
                   ),
                   const SizedBox(height: 12),
                   _numField(
                     totalC,
-                    'Total Net Payable (àªŸà«‹àªŸàª² àª­àª°àªµàª¾ àªªàª¾àª¤à«àª° àª°àª•àª®)',
+                    'Total Net Payable (ટોટલ ભરવા પાત્ર રકમ)',
                     readOnly: true,
                   ),
                   const SizedBox(height: 12),
                   _numField(
                     subsidyC,
-                    'Subsidy (àª¸àª¬àª¸àª¿àª¡à«€ â€“ àª®à«€àªŸàª° àª²àª¾àª—à«àª¯àª¾ àªªàª›à«€ à«©à«¦ àª¦àª¿àªµàª¸àª®àª¾àª‚ àª—à«àª°àª¾àª¹àª•àª¨àª¾ àª¬à«‡àª‚àª• àª–àª¾àª¤àª¾àª®àª¾àª‚ àªœàª®àª¾ àª¥àª¶à«‡)',
+                    'Subsidy (સબસિડી – મીટર લાગ્યા પછી ૩૦ દિવસમાં ગ્રાહકના બેંક ખાતામાં જમા થશે)',
                     onChange: (_) => _autoCalc(),
                   ),
                   const SizedBox(height: 12),
                   _numField(
                     systemAfterSubsidyC,
-                    'System Cost After Subsidy (àª¸àª¿àª¸à«àªŸàª® àª¨à«‹ àª¸àª¬àª¸àª¿àª¡à«€ àª¬àª¾àª¦ àª•àª°à«àª¯àª¾ àªªàª›à«€ àª¨à«‹ àª–àª°à«àªš)',
+                    'System Cost After Subsidy (સિસ્ટમ નો સબસિડી બાદ કર્યા પછી નો ખર્ચ)',
                     readOnly: true,
                   ),
                   // const SizedBox(height: 4),
@@ -270,38 +270,38 @@ class _State extends State<SolarQuotationScreen> {
                   // ),
                   // const SizedBox(height: 3),
                   // const Text(
-                  //   'System Cost After Subsidy = Total Cost âˆ’ Subsidy',
+                  //   'System Cost After Subsidy = Total Cost − Subsidy',
                   //   style: TextStyle(fontSize: 11, color: LeadTheme.textMuted),
                   // ),
                 ],
               ),
             ),
-            // â”€â”€ Gujarati Terms & Conditions (replaces English version) â”€â”€â”€â”€â”€â”€â”€â”€
+            // ── Gujarati Terms & Conditions (replaces English version) ────────
             CompactCard(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SectionTitle('àª¨àª¿àª¯àª®à«‹ àª…àª¨à«‡ àª¶àª°àª¤à«‹'),
+                  const SectionTitle('નિયમો અને શરતો'),
                   const SizedBox(height: 12),
                   _gujaratiPaymentRow(
-                    'àªªà«‡àª®à«‡àª¨à«àªŸ à«¦à«§',
-                    '10% àªàª¡àªµàª¾àª¨à«àª¸ àª°àªœà«€àª¸à«àªŸà«àª°à«‡àª¶àª¨, àª®à«€àªŸàª° àªšàª¾àª°à«àªœ àª®àª¾àªŸà«‡ â€“ Non Refundable.',
+                    'પેમેન્ટ ૦૧',
+                    '10% એડવાન્સ રજીસ્ટ્રેશન, મીટર ચાર્જ માટે – Non Refundable.',
                   ),
                   const SizedBox(height: 6),
                   _gujaratiPaymentRow(
-                    'àªªà«‡àª®à«‡àª¨à«àªŸ à«¦à«¨',
-                    '80% àª¸à«àªŸà«àª°àª•à«àªšàª° àª¬àª¨à«€ àªœàª¾àª¯ àªªàª›à«€ àª…àª¨à«‡ àªªà«‡àª¨àª² àªªàª¹à«‹àª‚àªš àª àªªàª¹à«‡àª²àª¾.',
+                    'પેમેન્ટ ૦૨',
+                    '80% સ્ટ્રક્ચર બની જાય પછી અને પેનલ પહોંચ એ પહેલા.',
                   ),
                   const SizedBox(height: 6),
                   _gujaratiPaymentRow(
-                    'àªªà«‡àª®à«‡àª¨à«àªŸ à«¦à«©',
-                    '10% àª¸àª¿àª¸à«àªŸàª® àª‡àª¨à«àª¸à«àªŸà«‹àª² àª¥àªˆ àªœàª¾àª¯ àªªàª›à«€.',
+                    'પેમેન્ટ ૦૩',
+                    '10% સિસ્ટમ ઇન્સ્ટોલ થઈ જાય પછી.',
                   ),
                   const SizedBox(height: 10),
                   const Divider(height: 1),
                   const SizedBox(height: 10),
                   const Text(
-                    'àª•à«‹àªŸà«‡àª¶àª¨ àªªà«àª°àª®àª¾àª£à«‡ àªµàª¸à«àª¤à«, àª¸àª°à«àªµàª¿àª¸ àª•à«‡ àª…àª¨à«àª¯ àª•àª¾àª®àª®àª¾àª‚ àªªàª¾àª›àª³ àª¥à«€ àª•àª°à«‡àª²à«‹ àª«à«‡àª°àª«àª¾àª° àª àªµàª§àª¾àª°àª¾àª¨àª¾ àª–àª°à«àªš àª¸àª¾àª¥à«‡ àª°àª¹à«‡àª¶à«‡.',
+                    'કોટેશન પ્રમાણે વસ્તુ, સર્વિસ કે અન્ય કામમાં પાછળ થી કરેલો ફેરફાર એ વધારાના ખર્ચ સાથે રહેશે.',
                     style: TextStyle(
                       fontSize: 12,
                       color: LeadTheme.textPrimary,
@@ -310,7 +310,7 @@ class _State extends State<SolarQuotationScreen> {
                   ),
                   const SizedBox(height: 8),
                   const Text(
-                    'àªœà«€àªˆàª¬à«€ àª…àª¥àªµàª¾ àªŸà«‹àª°àª¨à«àªŸ àª˜àª°àª¨à«€ àª¸à«àª°àª•à«àª·àª¾ àª®àª¾àªŸà«‡ àª‡àªàª¬/àª«à«àª¯à«‚àª àª²àª—àª¾àª¡àªµàª¾ àª¨à«àª‚ àª•àª¹à«‡ àª…àª¥àªµàª¾ àª²à«‹àª¡ àªµàª§àª¾àª°àª¾àª¨à«àª‚ àª•àª¹à«‡ àª¤à«‹ àª àª—à«àª°àª¾àª¹àª•àª¨à«€ àªœàªµàª¾àª¬àª¦àª¾àª°à«€ àª®àª¾àª‚ àª°àª¹à«‡àª¶à«‡. àªœà«€àªˆàª¬à«€ àª®àª¾àª‚ àª¨àªµàª¾ àª®à«€àªŸàª° àª®àª¾àªŸà«‡ à«§.à«« àª«à«‚àªŸ àªŸ à«§.à«« àª«à«‚àªŸ àª¨à«àª‚ àª²àª¾àª•àª¡àª¾/àª«àª¾àª‡àª¬àª° àª¨à«àª‚ àªªàª¾àªŸàª¿àª¯à«àª‚ àª²àª—àª¾àª¡àªµàª¾àª¨à«àª‚ àª°àª¹à«‡àª¶à«‡.',
+                    'જીઈબી અથવા ટોરન્ટ ઘરની સુરક્ષા માટે ઇઝબ/ફ્યૂઝ લગાડવા નું કહે અથવા લોડ વધારાનું કહે તો એ ગ્રાહકની જવાબદારી માં રહેશે. જીઈબી માં નવા મીટર માટે ૧.૫ ફૂટ ટ ૧.૫ ફૂટ નું લાકડા/ફાઇબર નું પાટિયું લગાડવાનું રહેશે.',
                     style: TextStyle(
                       fontSize: 12,
                       color: LeadTheme.textPrimary,
@@ -351,7 +351,7 @@ class _State extends State<SolarQuotationScreen> {
                 onPressed: _saving ? null : _save,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: LeadTheme.primary,
-                  foregroundColor: Colors.white,
+                  foregroundColor: AppColors.surface,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
@@ -362,7 +362,7 @@ class _State extends State<SolarQuotationScreen> {
                         height: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: Colors.white,
+                          color: AppColors.surface,
                         ),
                       )
                     : Text(
@@ -384,7 +384,7 @@ class _State extends State<SolarQuotationScreen> {
   }
 }
 
-// â”€â”€ Gujarati payment row helper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Gujarati payment row helper ────────────────────────────────────────────────
 Widget _gujaratiPaymentRow(String label, String description) => Row(
   crossAxisAlignment: CrossAxisAlignment.start,
   children: [
@@ -417,7 +417,7 @@ Widget _gujaratiPaymentRow(String label, String description) => Row(
   ],
 );
 
-// â”€â”€ Shared helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Shared helpers ─────────────────────────────────────────────────────────────
 Widget _infoBanner(SolarLeadsModel lead) => Container(
   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
   decoration: BoxDecoration(
@@ -446,7 +446,7 @@ Widget _infoBanner(SolarLeadsModel lead) => Container(
               ),
             ),
             Text(
-              '${lead.mobile}  Â·  ${lead.address}',
+              '${lead.mobile}  ·  ${lead.address}',
               style: const TextStyle(
                 fontSize: 11,
                 color: LeadTheme.textSecondary,
@@ -520,4 +520,3 @@ Widget _numField(
     ),
   ],
 );
-

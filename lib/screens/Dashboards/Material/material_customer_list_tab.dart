@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:solar_project/Helper/app_colors.dart';
+import 'package:solar_project/core/app_colors.dart';
 
 class MaterialCustomerListTab extends StatelessWidget {
   final bool loading;
@@ -61,48 +61,48 @@ class MaterialCustomerListTab extends StatelessWidget {
   Color _statusBackgroundColor(String status) {
     switch (status.toLowerCase()) {
       case 'new':
-        return AppColors.primaryLightest);
+        return const Color(0xFFE0F2FE);
       case 'follow up':
       case 'follow-up':
-        return AppColors.primaryLightest);
+        return const Color(0xFFFEF3C7);
       case 'quoted':
       case 'quotation sent':
-        return AppColors.primaryLightest);
+        return  AppColors.primaryTint;
       case 'won':
       case 'completed':
       case 'project completed':
       case 'payment':
       case 'payment completed':
-        return AppColors.primaryLightest);
+        return  AppColors.successLight;
       case 'lost':
       case 'cancelled':
-        return AppColors.primaryLightest);
+        return  AppColors.errorLight;
       default:
-        return AppColors.primaryLightest);
+        return  AppColors.divider;
     }
   }
 
   Color _statusTextColor(String status) {
     switch (status.toLowerCase()) {
       case 'new':
-        return AppColors.primary);
+        return const Color(0xFF0369A1);
       case 'follow up':
       case 'follow-up':
-        return AppColors.primary);
+        return  Color(0xFFB45309);
       case 'quoted':
       case 'quotation sent':
-        return AppColors.primary);
+        return  AppColors.primary;
       case 'won':
       case 'completed':
       case 'project completed':
       case 'payment':
       case 'payment completed':
-        return AppColors.primary);
+        return  AppColors.success;
       case 'lost':
       case 'cancelled':
-        return AppColors.primary);
+        return  AppColors.error;
       default:
-        return AppColors.primary);
+        return  AppColors.textGray;
     }
   }
 
@@ -127,7 +127,7 @@ class MaterialCustomerListTab extends StatelessWidget {
           style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: AppColors.textSecondary),
+            color: AppColors.textGray,
           ),
         ),
       ),
@@ -204,7 +204,7 @@ class MaterialCustomerListTab extends StatelessWidget {
                             onPressed: () => onDeleteCustomer(item),
                             icon: const Icon(
                               Icons.delete_outline,
-                               color: AppColors.primary),
+                              color: AppColors.error,
                               size: 20,
                             ),
                           ),
@@ -227,9 +227,9 @@ class MaterialCustomerListTab extends StatelessWidget {
       width: double.infinity,
       clipBehavior: Clip.antiAlias, // 👈 rounded corners ke liye
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(12), // 👈 rounded
-        border: Border.all(color: AppColors.bgPrimary)),
+        border: Border.all(color:  AppColors.divider),
       ),
       child: child,
     );
@@ -260,7 +260,7 @@ class MaterialCustomerListTab extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF0F172A),
+                    color: AppColors.textDark,
                   ),
                 ),
               ),
@@ -315,7 +315,7 @@ class MaterialCustomerListTab extends StatelessWidget {
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: AppColors.textSecondary),
+                color: AppColors.textGray,
               ),
             ),
           ),
@@ -330,8 +330,8 @@ class MaterialCustomerListTab extends StatelessWidget {
             context: context,
             title: 'Active Leads',
             count: activeCustomers.length,
-            badgeColor: AppColors.primaryLightest),
-            badgeTextColor: AppColors.primary),
+            badgeColor: const Color(0xFFE0E7FF),
+            badgeTextColor: const Color(0xFF4338CA),
             initiallyExpanded: true, // 👈 default open
             items: activeCustomers,
             emptyMessage: 'No active leads found',
@@ -342,8 +342,8 @@ class MaterialCustomerListTab extends StatelessWidget {
             context: context,
             title: 'Completed Leads',
             count: completedCustomers.length,
-            badgeColor: AppColors.primaryLightest),
-            badgeTextColor: AppColors.primary),
+            badgeColor:  AppColors.successLight,
+            badgeTextColor:  AppColors.success,
             initiallyExpanded: false,
             items: completedCustomers,
             emptyMessage: 'No completed leads found',
@@ -355,8 +355,3 @@ class MaterialCustomerListTab extends StatelessWidget {
     return RefreshIndicator(color: color, onRefresh: onRefresh, child: content);
   }
 }
-
-
-
-
-

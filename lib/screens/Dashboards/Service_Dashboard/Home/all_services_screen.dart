@@ -9,7 +9,7 @@ import 'package:solar_project/Cubits/ServiceLeads/service_leads_cubit.dart';
 import 'package:solar_project/Cubits/ServiceLeads/service_leads_state.dart';
 import 'package:solar_project/data/Models/service_request_model.dart';
 import 'package:solar_project/screens/Dashboards/Admin_Dashboards/Services/service_detail_screen.dart';
-import 'package:solar_project/Helper/app_colors.dart';
+import 'package:solar_project/core/app_colors.dart';
 
 enum ServiceFilter {
   all,
@@ -61,19 +61,19 @@ enum ServiceFilter {
   Color get color {
     switch (this) {
       case all:
-        return AppColors.primary);
+        return AppColors.primary;
       case today:
-        return AppColors.primary);
+        return AppColors.primaryLight;
       case pending:
-        return AppColors.primary);
+        return AppColors.solar;
       case inProgress:
-        return AppColors.primary);
+        return AppColors.primaryDark;
       case completed:
-        return AppColors.primary);
+        return AppColors.success;
       case free:
-        return AppColors.primary);
+        return AppColors.error;
       case paid:
-        return AppColors.primary);
+        return AppColors.success;
     }
   }
 }
@@ -173,22 +173,23 @@ class _State extends State<AllServicesScreen> {
     if (picked != null) setState(() => _date = picked);
   }
 
-  String _getDateLabel(DateTime? date) => DateTimeHelper.leadDateFilterLabel(date);
+  String _getDateLabel(DateTime? date) =>
+      DateTimeHelper.leadDateFilterLabel(date);
 
   Color _statusColor(String s) {
     switch (s) {
       case 'Assigned':
-        return const Color(0xFF2193b0);
+        return AppColors.primaryLight;
       case 'In Progress':
-        return const Color(0xFFFF8008);
+        return AppColors.solar;
       case 'Completed':
       case 'Resolved':
-        return const Color(0xFF11998e);
+        return AppColors.success;
       case 'Open':
       case 'Pending':
-        return Colors.orange;
+        return AppColors.solar;
       default:
-        return AppColors.textSecondary;
+        return Colors.grey;
     }
   }
 
@@ -198,14 +199,14 @@ class _State extends State<AllServicesScreen> {
     final color = f.color;
 
     return Scaffold(
-      backgroundColor: AppColors.bgSecondary),
+      backgroundColor:  AppColors.background,
       appBar: AppBar(
         backgroundColor: color,
         elevation: 0,
         leading: IconButton(
           icon: const AppSvgIcon(
             AppSvgAssets.chevronLeft,
-            color: Colors.white,
+            color: AppColors.surface,
             size: 18,
           ),
           onPressed: () => Navigator.pop(context),
@@ -213,14 +214,17 @@ class _State extends State<AllServicesScreen> {
         title: Text(
           f.label,
           style: const TextStyle(
-            color: Colors.white,
+            color: AppColors.surface,
             fontSize: 16,
             fontWeight: FontWeight.w700,
           ),
         ),
         actions: [
           IconButton(
-            icon: const AppSvgIcon(AppSvgAssets.refreshCw, color: Colors.white),
+            icon: const AppSvgIcon(
+              AppSvgAssets.refreshCw,
+              color: AppColors.surface,
+            ),
             onPressed: () =>
                 context.read<ServiceLeadCubit>().fetchAllServices(),
           ),
@@ -275,9 +279,9 @@ class _State extends State<AllServicesScreen> {
                         child: Container(
                           height: 42,
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: AppColors.surface,
                             borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: AppColors.borderLight),
+                            border: Border.all(color: AppColors.divider),
                           ),
                           child: TextField(
                             controller: _searchCtrl,
@@ -287,7 +291,7 @@ class _State extends State<AllServicesScreen> {
                               hintText: 'Search name / phone / ID',
                               hintStyle: TextStyle(
                                 fontSize: 12,
-                                color: AppColors.textSecondary,
+                                color: AppColors.textLight,
                               ),
                               prefixIcon: Expanded(
                                 child: AppSvgIcon(
@@ -305,7 +309,7 @@ class _State extends State<AllServicesScreen> {
                                       child: AppSvgIcon(
                                         AppSvgAssets.x,
                                         size: 16,
-                                        color: AppColors.textSecondary,
+                                        color: AppColors.textLight,
                                       ),
                                     )
                                   : null,
@@ -327,12 +331,10 @@ class _State extends State<AllServicesScreen> {
                           height: 42,
                           padding: const EdgeInsets.symmetric(horizontal: 14),
                           decoration: BoxDecoration(
-                            color: _date != null ? color : Colors.white,
+                            color: _date != null ? color : AppColors.surface,
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(
-                              color: _date != null
-                                  ? color
-                                  : AppColors.borderLight,
+                              color: _date != null ? color : AppColors.divider,
                             ),
                           ),
                           child: Row(
@@ -342,8 +344,8 @@ class _State extends State<AllServicesScreen> {
                                 AppSvgAssets.calendarDays,
                                 size: 17,
                                 color: _date != null
-                                    ? Colors.white
-                                    : AppColors.textSecondary,
+                                    ? AppColors.surface
+                                    : Colors.grey,
                               ),
                               const SizedBox(width: 8),
                               Text(
@@ -351,8 +353,8 @@ class _State extends State<AllServicesScreen> {
                                 style: TextStyle(
                                   fontSize: 13,
                                   color: _date != null
-                                      ? Colors.white
-                                      : AppColors.textSecondary),
+                                      ? AppColors.surface
+                                      : AppColors.textGray,
                                   fontWeight: _date != null
                                       ? FontWeight.w600
                                       : FontWeight.normal,
@@ -365,7 +367,7 @@ class _State extends State<AllServicesScreen> {
                                   child: const AppSvgIcon(
                                     AppSvgAssets.x,
                                     size: 18,
-                                    color: Colors.white,
+                                    color: AppColors.surface,
                                   ),
                                 ),
                               ],
@@ -387,7 +389,7 @@ class _State extends State<AllServicesScreen> {
                         '${list.length} result${list.length != 1 ? "s" : ""}',
                         style: TextStyle(
                           fontSize: 12,
-                          color: AppColors.textSecondary.shade600,
+                          color: Colors.grey.shade600,
                         ),
                       ),
                     ),
@@ -409,9 +411,11 @@ class _State extends State<AllServicesScreen> {
                               ctx.read<ServiceLeadCubit>().fetchAllServices(),
                           child: LayoutBuilder(
                             builder: (context, constraints) {
-                              final minWidth = math.max(constraints.maxWidth, 1020.0);
-                              final showAmountColumn =
-                                  f != ServiceFilter.free;
+                              final minWidth = math.max(
+                                constraints.maxWidth,
+                                1020.0,
+                              );
+                              final showAmountColumn = f != ServiceFilter.free;
                               return ListView(
                                 physics: const AlwaysScrollableScrollPhysics(),
                                 padding: const EdgeInsets.fromLTRB(
@@ -610,9 +614,9 @@ class _ServiceTableSection extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.borderLight)),
+        border: Border.all(color:  AppColors.divider),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -627,13 +631,13 @@ class _ServiceTableSection extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary),
+                    color: AppColors.textDark,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   subtitle,
-                  style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                  style: TextStyle(fontSize: 11, color: AppColors.background),
                 ),
               ],
             ),
@@ -643,7 +647,7 @@ class _ServiceTableSection extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
               child: Text(
                 'No services in this section.',
-                style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                style: TextStyle(fontSize: 12, color: AppColors.textLight),
               ),
             )
           else if (items.isNotEmpty)
@@ -686,9 +690,9 @@ class _CollapsibleServiceTableSection extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.borderLight)),
+        border: Border.all(color:  AppColors.divider),
       ),
       child: Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
@@ -705,12 +709,12 @@ class _CollapsibleServiceTableSection extends StatelessWidget {
             style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary),
+              color: AppColors.textDark,
             ),
           ),
           subtitle: Text(
             subtitle,
-            style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+            style: TextStyle(fontSize: 11, color: AppColors.background),
           ),
           children: [
             if (items.isEmpty)
@@ -720,7 +724,7 @@ class _CollapsibleServiceTableSection extends StatelessWidget {
                   alignment: Alignment.centerLeft,
                   child: Text(
                     'No older services found.',
-                    style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                    style: TextStyle(fontSize: 12, color: AppColors.textLight),
                   ),
                 ),
               )
@@ -782,20 +786,20 @@ class _ServiceDataTable extends StatelessWidget {
   Color _priorityColor(String p) {
     switch (p) {
       case 'Urgent':
-        return Colors.red;
+        return AppColors.error;
       case 'High':
-        return Colors.orange;
+        return AppColors.solar;
       case 'Low':
-        return Colors.green;
+        return AppColors.success;
       default:
-        return const Color(0xFF4e54c8);
+        return AppColors.primaryDark;
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final isDesktop = MediaQuery.sizeOf(context).width >= 1000;
-    const rowStyle = TextStyle(fontSize: 12, color: AppColors.textPrimary));
+    const rowStyle = TextStyle(fontSize: 12, color: AppColors.textDark);
 
     return SizedBox(
       width: double.infinity,
@@ -820,9 +824,9 @@ class _ServiceDataTable extends StatelessWidget {
               return null;
             }),
             border: TableBorder(
-              horizontalInside: BorderSide(color: Colors.blueGrey.shade50),
-              bottom: BorderSide(color: Colors.blueGrey.shade100),
-              top: BorderSide(color: Colors.blueGrey.shade100),
+              horizontalInside: BorderSide(color: AppColors.primary),
+              bottom: BorderSide(color: AppColors.primary),
+              top: BorderSide(color: AppColors.primary),
             ),
             columns: [
               const DataColumn(label: Text('Customer')),
@@ -873,7 +877,7 @@ class _ServiceDataTable extends StatelessWidget {
                         _chip(
                           item.chargeType,
                           item.chargeType == 'Paid'
-                              ? Colors.orange
+                              ? AppColors.solar
                               : Colors.teal,
                         ),
                       ),
@@ -899,13 +903,13 @@ class _ServiceDataTable extends StatelessWidget {
                                     AppSvgIcon(
                                       AppSvgAssets.indianRupee,
                                       size: 11,
-                                      color: AppColors.warning,
+                                      color: AppColors.solar,
                                     ),
                                     Text(
                                       item.amount!.toStringAsFixed(0),
                                       style: rowStyle.copyWith(
                                         fontWeight: FontWeight.w700,
-                                        color: AppColors.warning,
+                                        color: AppColors.solar,
                                       ),
                                     ),
                                   ],
@@ -927,7 +931,7 @@ class _ServiceDataTable extends StatelessWidget {
                                 '-',
                                 style: rowStyle.copyWith(
                                   fontSize: 11,
-                                  color: AppColors.textSecondary,
+                                  color: AppColors.textLight,
                                 ),
                               ),
                       ),
@@ -968,9 +972,9 @@ class _SummaryBar extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           _Stat('Total', '$total', color),
-          Container(width: 1, height: 28, color: AppColors.borderLight),
-          _Stat('Pending', '$pending', AppColors.warning),
-          Container(width: 1, height: 28, color: AppColors.borderLight),
+          Container(width: 1, height: 28, color: AppColors.divider),
+          _Stat('Pending', '$pending', AppColors.solar),
+          Container(width: 1, height: 28, color: AppColors.divider),
           _Stat('Completed', '$completed', AppColors.success),
         ],
       ),
@@ -994,7 +998,7 @@ class _Stat extends StatelessWidget {
           color: color,
         ),
       ),
-      Text(label, style: TextStyle(fontSize: 11, color: AppColors.textSecondary.shade600)),
+      Text(label, style: TextStyle(fontSize: 11, color: Colors.grey.shade600)),
     ],
   );
 }
@@ -1014,20 +1018,20 @@ class _EmptyState extends StatelessWidget {
     child: Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        AppSvgIcon(filter.icon, size: 60, color: AppColors.borderLight),
+        AppSvgIcon(filter.icon, size: 60, color: AppColors.divider),
         const SizedBox(height: 14),
         Text(
           'No ${filter.label}',
           style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w600,
-            color: AppColors.textSecondary,
+            color: AppColors.textLight,
           ),
         ),
         const SizedBox(height: 6),
         Text(
           hasDateFilter ? 'No data for selected date' : 'Pull down to refresh',
-          style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+          style: TextStyle(fontSize: 12, color: AppColors.textLight),
         ),
         if (hasDateFilter) ...[
           const SizedBox(height: 14),
@@ -1035,7 +1039,7 @@ class _EmptyState extends StatelessWidget {
             onPressed: onClear,
             icon: const AppSvgIcon(AppSvgAssets.x, size: 14),
             label: const Text('Clear date'),
-            style: TextButton.styleFrom(foregroundColor: AppColors.textSecondary),
+            style: TextButton.styleFrom(foregroundColor: AppColors.primary),
           ),
         ],
       ],
@@ -1058,9 +1062,13 @@ class _ErrorView extends StatelessWidget {
     child: Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        AppSvgIcon(AppSvgAssets.triangleAlert, size: 52, color: Colors.red.shade300),
+        AppSvgIcon(
+          AppSvgAssets.triangleAlert,
+          size: 52,
+          color: AppColors.error,
+        ),
         const SizedBox(height: 12),
-        Text(message, style: const TextStyle(color: AppColors.textSecondary)),
+        Text(message, style: const TextStyle(color: Colors.grey)),
         const SizedBox(height: 16),
         ElevatedButton.icon(
           onPressed: onRetry,
@@ -1103,10 +1111,3 @@ class PaidServicesPage extends AllServicesScreen {
   const PaidServicesPage({super.key})
     : super(initialFilter: ServiceFilter.paid);
 }
-
-
-
-
-
-
-

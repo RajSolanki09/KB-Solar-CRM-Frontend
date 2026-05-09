@@ -6,10 +6,8 @@ import 'package:solar_project/Cubits/Auth/auth_cubit.dart';
 import 'package:solar_project/Cubits/SalesNavigation/sales_nav_cubit.dart';
 import 'package:solar_project/Cubits/SalesNavigation/sales_nav_state.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
-import 'package:solar_project/Helper/common_widgets.dart';
+import 'package:solar_project/core/app_colors.dart';
 import 'package:solar_project/services/api_service.dart';
-import 'package:solar_project/Helper/app_logo.dart';
-import 'package:solar_project/Helper/app_colors.dart';
 
 class Sidebar extends StatelessWidget {
   const Sidebar({super.key});
@@ -21,9 +19,9 @@ class Sidebar extends StatelessWidget {
         return Container(
           width: 260,
           decoration: const BoxDecoration(
-            color: AppColors.primaryLightest),
+            color: AppColors.primaryTint,
             border: Border(
-              right: BorderSide(color: AppColors.primaryLighter), width: 1),
+              right: BorderSide(color: AppColors.primaryTint, width: 1),
             ),
           ),
           child: Column(
@@ -47,24 +45,24 @@ class Sidebar extends StatelessWidget {
                       label: 'Dashboard',
                       isActive: state == SalesNavPage.dashboard,
                       onTap: () => context.read<SalesNavCubit>().changePage(
-                            SalesNavPage.dashboard,
-                          ),
+                        SalesNavPage.dashboard,
+                      ),
                     ),
                     _NavItem(
                       svgAsset: AppSvgAssets.sun,
                       label: 'Leads',
                       isActive: state == SalesNavPage.leads,
                       onTap: () => context.read<SalesNavCubit>().changePage(
-                            SalesNavPage.leads,
-                          ),
+                        SalesNavPage.leads,
+                      ),
                     ),
                     _NavItem(
                       svgAsset: AppSvgAssets.calendarDays,
                       label: 'Follow-ups',
                       isActive: state == SalesNavPage.followups,
                       onTap: () => context.read<SalesNavCubit>().changePage(
-                            SalesNavPage.followups,
-                          ),
+                        SalesNavPage.followups,
+                      ),
                     ),
 
                     const SizedBox(height: 20),
@@ -76,8 +74,8 @@ class Sidebar extends StatelessWidget {
                       label: 'Profile',
                       isActive: state == SalesNavPage.profile,
                       onTap: () => context.read<SalesNavCubit>().changePage(
-                            SalesNavPage.profile,
-                          ),
+                        SalesNavPage.profile,
+                      ),
                     ),
                   ],
                 ),
@@ -116,8 +114,8 @@ class _SalesBrandHeaderState extends State<_SalesBrandHeader> {
             cursor: SystemMouseCursors.click,
             child: GestureDetector(
               onTap: () => context.read<SalesNavCubit>().changePage(
-                    SalesNavPage.dashboard,
-                  ),
+                SalesNavPage.dashboard,
+              ),
               child: Tooltip(
                 message: 'Go to Dashboard',
                 preferBelow: true,
@@ -129,8 +127,9 @@ class _SalesBrandHeaderState extends State<_SalesBrandHeader> {
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.accent2)
-                            .withOpacity(_logoHovered ? 0.45 : 0.30),
+                        color: const Color(
+                          0xff4F52FF,
+                        ).withOpacity(_logoHovered ? 0.45 : 0.30),
                         blurRadius: _logoHovered ? 14 : 10,
                         offset: const Offset(0, 4),
                       ),
@@ -141,11 +140,10 @@ class _SalesBrandHeaderState extends State<_SalesBrandHeader> {
                     child: AnimatedOpacity(
                       duration: const Duration(milliseconds: 180),
                       opacity: _logoHovered ? 0.85 : 1.0,
-                      child: AppLogo(
-                        size: LogoSize.custom,
-                        customWidth: 52,
-                        customHeight: 52,
-                        borderRadius: 0,
+                      child: Image.asset(
+                        'assets/images/leaf.png',
+                        width: 52,
+                        height: 52,
                         fit: BoxFit.cover,
                       ),
                     ),
@@ -166,17 +164,17 @@ class _SalesBrandHeaderState extends State<_SalesBrandHeader> {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary),
+                  color: AppColors.darkNavy,
                   letterSpacing: -0.4,
                 ),
               ),
               SizedBox(height: 1),
               Text(
-                'Sales Team',
+                'Clean Energy',
                 style: TextStyle(
                   fontSize: 11.5,
                   fontWeight: FontWeight.w500,
-                  color: Color(0xff7B7EC4),
+                  color: AppColors.textLight,
                   letterSpacing: 0.1,
                 ),
               ),
@@ -204,7 +202,7 @@ class _SectionLabel extends StatelessWidget {
         style: const TextStyle(
           fontSize: 10.5,
           fontWeight: FontWeight.w700,
-          color: Color(0xff7B7EC4),
+          color: AppColors.textLight,
           letterSpacing: 1.4,
         ),
       ),
@@ -240,28 +238,28 @@ class _NavItemState extends State<_NavItem> {
     final active = widget.isActive;
 
     final bgColor = active
-        ? Colors.white
+        ? AppColors.surface
         : _hovered
-            ? const Color(0xffD8DAFF)
-            : const Color(0xffE6E8FF);
+        ?  AppColors.primaryTint
+        :  AppColors.primaryTint;
 
     final iconBg = active
         ? const Color(0xffECECFF)
         : _hovered
-            ? const Color(0xffC8CAFF)
-            : const Color(0xffD0D2F0);
+        ?  AppColors.primaryTint
+        :  AppColors.primaryTint;
 
     final iconColor = active
-        ? AppColors.accent2)
+        ?  AppColors.primary
         : _hovered
-            ? const Color(0xff3B3DCC)
-            : const Color(0xff7476B8);
+        ?  AppColors.primary
+        :  Color(0xff7476B8);
 
     final labelColor = active
-        ? const Color(0xff3B3DCC)
+        ?  AppColors.primary
         : _hovered
-            ? const Color(0xff2D2FAA)
-            : const Color(0xff6668A8);
+        ?  Color(0xff2D2FAA)
+        : const Color(0xff6668A8);
 
     return MouseRegion(
       onEnter: (_) => setState(() => _hovered = true),
@@ -280,7 +278,7 @@ class _NavItemState extends State<_NavItem> {
             boxShadow: active
                 ? [
                     BoxShadow(
-                      color: AppColors.accent2).withOpacity(0.10),
+                      color:  AppColors.primary.withOpacity(0.10),
                       blurRadius: 10,
                       offset: const Offset(0, 2),
                     ),
@@ -313,8 +311,7 @@ class _NavItemState extends State<_NavItem> {
                   curve: Curves.easeInOut,
                   style: TextStyle(
                     fontSize: 13.5,
-                    fontWeight:
-                        active ? FontWeight.w600 : FontWeight.w500,
+                    fontWeight: active ? FontWeight.w600 : FontWeight.w500,
                     color: labelColor,
                     letterSpacing: -0.1,
                   ),
@@ -326,7 +323,7 @@ class _NavItemState extends State<_NavItem> {
                   width: 6,
                   height: 6,
                   decoration: const BoxDecoration(
-                    color: AppColors.accent2),
+                    color: AppColors.primary,
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -365,31 +362,30 @@ class _BottomSection extends StatelessWidget {
       context: context,
       barrierDismissible: false,
       builder: (_) => AlertDialog(
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        backgroundColor: AppColors.bgPrimary),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        backgroundColor: const Color(0xffF4F4FF),
         title: const Text(
           'Sign Out',
           style: TextStyle(
             fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary),
+            color: AppColors.darkNavy,
           ),
         ),
         content: const Text(
           'Are you sure you want to sign out?',
-          style: TextStyle(color: Color(0xff6366D4)),
+          style: TextStyle(color: AppColors.primary),
         ),
         actions: [
           TextButton(
-            onPressed: () => safePop(context),
+            onPressed: () => Navigator.pop(context),
             child: const Text(
               'Cancel',
-              style: TextStyle(color: Color(0xff9396CC)),
+              style: TextStyle(color: AppColors.textGray),
             ),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.accent2),
+              backgroundColor:  AppColors.primary,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
@@ -397,7 +393,7 @@ class _BottomSection extends StatelessWidget {
             onPressed: () => _performLogout(context),
             child: const Text(
               'Sign Out',
-              style: TextStyle(color: Colors.white),
+              style: TextStyle(color: AppColors.surface),
             ),
           ),
         ],
@@ -408,23 +404,24 @@ class _BottomSection extends StatelessWidget {
   Future<void> _performLogout(BuildContext context) async {
     final apiService = ApiService();
 
-      try {
-      // Close the confirmation dialog safely
-      safePop(context);
+    try {
+      Navigator.pop(context);
       _showLogoutProgressDialog(context);
 
       await apiService.logout();
 
       if (context.mounted) {
-        // Close progress dialog if shown
-        safePop(context);
         context.read<AppStateCubit>().logout();
+      }
+
+      if (context.mounted) {
+        Navigator.pop(context);
       }
     } catch (e) {
       debugPrint('Logout error: $e');
       if (context.mounted) {
-        safePop(context);
         context.read<AppStateCubit>().logout();
+        Navigator.pop(context);
       }
     }
   }
@@ -434,7 +431,7 @@ class _BottomSection extends StatelessWidget {
       context: context,
       barrierDismissible: false,
       builder: (_) => const AlertDialog(
-        backgroundColor: AppColors.bgPrimary),
+        backgroundColor: Color(0xffF4F4FF),
         content: SizedBox(
           width: 100,
           height: 100,
@@ -447,7 +444,7 @@ class _BottomSection extends StatelessWidget {
                   height: 40,
                   child: CircularProgressIndicator(
                     valueColor: AlwaysStoppedAnimation<Color>(
-                      AppColors.accent2),
+                      AppColors.primary,
                     ),
                   ),
                 ),
@@ -455,7 +452,7 @@ class _BottomSection extends StatelessWidget {
                 Text(
                   'Signing out...',
                   style: TextStyle(
-                    color: Color(0xff6366D4),
+                    color: AppColors.primary,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -484,17 +481,19 @@ class _LogoutButtonState extends State<_LogoutButton> {
 
   @override
   Widget build(BuildContext context) {
-    final bgColor =
-        _hovered ? AppColors.primary).withValues(alpha: 0.15) : AppColors.primary).withValues(alpha: 0.08);
+    final bgColor = _hovered
+        ?  AppColors.errorLight
+        :  AppColors.primaryTint;
 
-    final iconBg =
-        _hovered ? AppColors.primary) : AppColors.primary).withValues(alpha: 0.2);
+    final iconBg = _hovered ?  Color(0xffFFD6D6) :  Color(0xffFFE0E0);
 
-    final iconColor =
-        _hovered ? Colors.white : AppColors.primary);
+    final iconColor = _hovered
+        ?  AppColors.error
+        : const Color(0xffC96060);
 
-    final labelColor =
-        _hovered ? AppColors.primary) : AppColors.primary);
+    final labelColor = _hovered
+        ?  AppColors.error
+        : const Color(0xffB85555);
 
     return MouseRegion(
       onEnter: (_) => setState(() => _hovered = true),
@@ -522,8 +521,7 @@ class _LogoutButtonState extends State<_LogoutButton> {
                   color: iconBg,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child:
-                    Icon(Icons.logout_rounded, size: 16, color: iconColor),
+                child: Icon(Icons.logout_rounded, size: 16, color: iconColor),
               ),
               const SizedBox(width: 12),
               AnimatedDefaultTextStyle(
@@ -543,11 +541,4 @@ class _LogoutButtonState extends State<_LogoutButton> {
       ),
     );
   }
-} 
-
-
-
-
-
-
-
+}

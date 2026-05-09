@@ -30,7 +30,7 @@ import 'package:solar_project/screens/Dashboards/Leads/Sprinkler/Steps/spk_insta
 import 'package:solar_project/screens/Dashboards/Leads/Sprinkler/Steps/spk_installation_started_screen.dart';
 import 'package:solar_project/screens/Dashboards/Leads/Sprinkler/Steps/spk_installation_completed_screen.dart';
 import 'package:solar_project/screens/Dashboards/Leads/Sprinkler/Steps/visit_data.dart';
-import 'package:solar_project/Helper/app_colors.dart';
+import 'package:solar_project/core/app_colors.dart';
 
 class _TeamMember {
   final String id, name, phone;
@@ -54,8 +54,7 @@ class SprinklerLeadDetailScreen extends StatefulWidget {
       _SprinklerLeadDetailScreenState();
 }
 
-class _SprinklerLeadDetailScreenState
-    extends State<SprinklerLeadDetailScreen> {
+class _SprinklerLeadDetailScreenState extends State<SprinklerLeadDetailScreen> {
   late SprinklerLeadModel lead;
   bool _fetching = false;
   bool _downloadingPdf = false;
@@ -78,23 +77,19 @@ class _SprinklerLeadDetailScreenState
   void initState() {
     super.initState();
     lead = widget.lead;
-    // FIX: use addPostFrameCallback so context is fully attached
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      _refresh();
-      if (_isAdmin) _fetchInstallTeam();
-    });
+    _refresh();
+    if (_isAdmin) {
+      _fetchInstallTeam();
+    }
   }
 
   Future<void> _fetchInstallTeam() async {
-    if (!mounted) return;
     setState(() => _teamLoading = true);
     try {
       final res = await DioClient().dio.get<Map<String, dynamic>>(
         ApiEndpoints.adminStaff,
         queryParameters: {'role': 'installation', 'limit': 100},
       );
-      if (!mounted) return;
       final body = res.data ?? {};
       List<dynamic> raw = [];
       for (final key in ['staff', 'data', 'users', 'members', 'results']) {
@@ -117,29 +112,15 @@ class _SprinklerLeadDetailScreenState
     }
   }
 
-  // FIX: _refresh now safely captures cubit before async gap,
-  // guards all setState calls with mounted checks, and does NOT
-  // call fetchAllLeads() here (that causes race conditions with
-  // BlocListener and can trigger the assertion when context detaches).
   Future<void> _refresh() async {
     if (!mounted) return;
     setState(() => _fetching = true);
-    try {
-      context.read<SprinklerLeadCubit>().refreshLead(lead.id);
-    } catch (_) {
-      // context left the tree — ignore
-      if (mounted) setState(() => _fetching = false);
-    }
+    context.read<SprinklerLeadCubit>().refreshLead(lead.id);
+    context.read<SprinklerLeadCubit>().fetchAllLeads();
   }
 
-  // FIX: mounted check added before context usage
   void _popWithRefresh() {
-    if (!mounted) return;
-    try {
-      // Trigger list refresh on the way out instead of inside _refresh()
-      // to avoid the race condition with BlocListener.
-      context.read<SprinklerLeadCubit>().fetchAllLeads();
-    } catch (_) {}
+    context.read<SprinklerLeadCubit>().fetchAllLeads();
     Navigator.pop(context, lead);
   }
 
@@ -156,7 +137,6 @@ class _SprinklerLeadDetailScreenState
 
   Future<void> _downloadQuotationPdf() async {
     if (_downloadingPdf) return;
-    if (!mounted) return;
     setState(() => _downloadingPdf = true);
     try {
       final fileName =
@@ -195,16 +175,18 @@ class _SprinklerLeadDetailScreenState
     final pdf = pw.Document();
     final q = lead.quotationData;
     final dateStr = DateFormat('dd-MMM-yyyy').format(DateTime.now());
-    final logoBytes = await rootBundle.load('assets/images/logo.jpeg');
+    final logoBytes = await rootBundle.load('assets/images/splash-logo.png');
     final logoImage = pw.MemoryImage(logoBytes.buffer.asUint8List());
     final signatureImage = await _loadFirstAvailablePdfImage([
       'assets/images/final-sign.jpg',
     ]);
 
-    const brandDark = PdfColor.fromInt(0xFF0D3B82);
-    const brandBlue = PdfColor.fromInt(0xFF42A5F5);
-    const softRow = PdfColor.fromInt(0xFFF1F6FF);
-    const border = PdfColor.fromInt(0xFFB0BEC5);
+    final brandDark = PdfColor.fromInt(AppColors.primary.value);
+    final brandBlue = PdfColor.fromInt(AppColors.primaryLight.value);
+    final softRow = PdfColor.fromInt(
+      AppColors.primary.withValues(alpha: 0.05).value,
+    );
+    final border = PdfColor.fromInt(AppColors.divider.value);
 
     String txt(String? value) => value == null ? '' : value.trim();
     String money(double value) =>
@@ -270,12 +252,14 @@ class _SprinklerLeadDetailScreenState
           marginBottom: 0,
         ),
         footer: (_) => pw.Container(
-          margin: const pw.EdgeInsets.symmetric(horizontal: -34),
+          margin: const pw.EdgeInsets.symmetric(
+            horizontal: -34,
+          ), // -34 = left/right margin cancel
           width: double.infinity,
           color: brandBlue,
           padding: const pw.EdgeInsets.symmetric(vertical: 7, horizontal: 10),
           child: pw.Text(
-            ' Mota varaccha , Surat -395010  |  Email: kaaryabook@gmail.com  |  Phone: +91 90999 66333 ',
+            ' Mota varaccha , Surat -395010  |  Email: contact@kaaryabook.com  |  Phone: +91 87805 03913 ',
             style: const pw.TextStyle(color: PdfColors.white, fontSize: 8),
             textAlign: pw.TextAlign.center,
           ),
@@ -354,7 +338,7 @@ class _SprinklerLeadDetailScreenState
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
                     pw.Text(
-                      'KaaryaBook Solar Solutions',
+                      'KaaryaBook Clean Energy',
                       style: pw.TextStyle(
                         color: brandBlue,
                         fontWeight: pw.FontWeight.bold,
@@ -364,8 +348,8 @@ class _SprinklerLeadDetailScreenState
                     pw.Text('Mota varachha,'),
                     pw.Text('Surat - 395010'),
                     pw.SizedBox(height: 6),
-                    pw.Text('Email: kaaryabook@gmail.com'),
-                    pw.Text('Phone: 90999 66333'),
+                    pw.Text('Email: contact@kaaryabook.com'),
+                    pw.Text('Phone: +91 87805 03913'),
                   ],
                 ),
               ),
@@ -375,7 +359,7 @@ class _SprinklerLeadDetailScreenState
           pw.TableHelper.fromTextArray(
             headers: const ['DESCRIPTION', 'QUANTITY', 'UNIT PRICE', 'TOTAL'],
             data: tableData,
-            headerDecoration: const pw.BoxDecoration(color: brandBlue),
+            headerDecoration: pw.BoxDecoration(color: brandBlue),
             headerStyle: pw.TextStyle(
               color: PdfColors.white,
               fontSize: 9,
@@ -388,7 +372,7 @@ class _SprinklerLeadDetailScreenState
               2: pw.Alignment.centerRight,
               3: pw.Alignment.centerRight,
             },
-            oddRowDecoration: const pw.BoxDecoration(color: softRow),
+            oddRowDecoration: pw.BoxDecoration(color: softRow),
             border: pw.TableBorder.all(color: border, width: 0.6),
             columnWidths: {
               0: const pw.FlexColumnWidth(3.6),
@@ -410,7 +394,7 @@ class _SprinklerLeadDetailScreenState
                 horizontal: 10,
                 vertical: 6,
               ),
-              decoration: const pw.BoxDecoration(
+              decoration: pw.BoxDecoration(
                 border: pw.Border(
                   top: pw.BorderSide(color: border),
                   bottom: pw.BorderSide(color: border),
@@ -478,7 +462,7 @@ class _SprinklerLeadDetailScreenState
                 pw.Container(width: 180, height: 1, color: border),
                 pw.SizedBox(height: 6),
                 pw.Text(
-                  'For KaaryaBook Solar Solutions',
+                  'For KaaryaBook Clean Energy',
                   style: const pw.TextStyle(fontSize: 10),
                 ),
                 pw.SizedBox(height: 3),
@@ -505,7 +489,9 @@ class _SprinklerLeadDetailScreenState
         if (data.lengthInBytes > 0) {
           return pw.MemoryImage(data.buffer.asUint8List());
         }
-      } catch (_) {}
+      } catch (_) {
+        // Ignore and try next candidate path.
+      }
     }
     return null;
   }
@@ -537,13 +523,12 @@ class _SprinklerLeadDetailScreenState
     }
   }
 
-  // FIX: cubit captured BEFORE Navigator.push to avoid stale context
   Future<void> _openSlot(int slot, {bool isEditing = false}) async {
     final screen = _screenForSlot(slot, isEditing: isEditing);
     if (screen == null) return;
-    if (!mounted) return;
 
     final cubit = context.read<SprinklerLeadCubit>();
+    final beforeState = cubit.state;
 
     await Navigator.push(
       context,
@@ -552,16 +537,20 @@ class _SprinklerLeadDetailScreenState
       ),
     );
 
-    // FIX: mounted check after await
     if (!mounted) return;
+
+    final afterState = cubit.state;
     await _refresh();
+
+    if (!mounted) return;
+    if (afterState is SprinklerLeadSaved &&
+        !identical(afterState, beforeState)) {
+      // no-op
+    }
   }
 
-  // FIX: cubit captured BEFORE Navigator.push
   Future<void> _openEditBasicInfo() async {
-    if (!mounted) return;
     final cubit = context.read<SprinklerLeadCubit>();
-
     await Navigator.push(
       context,
       MaterialPageRoute(
@@ -571,7 +560,6 @@ class _SprinklerLeadDetailScreenState
         ),
       ),
     );
-
     if (!mounted) return;
     await _refresh();
   }
@@ -609,7 +597,6 @@ class _SprinklerLeadDetailScreenState
   Widget build(BuildContext context) {
     return BlocListener<SprinklerLeadCubit, SprinklerLeadState>(
       listener: (ctx, state) {
-        // FIX: always check mounted before setState in listener
         if (!mounted) return;
         if (state is SprinklerLeadSaved) {
           setState(() {
@@ -621,10 +608,6 @@ class _SprinklerLeadDetailScreenState
           setState(() => _fetching = false);
           AppFeedback.showError(context, state.message);
         }
-        // FIX: also reset _fetching on loading completion via Loaded state
-        if (state is SprinklerLeadsLoaded) {
-          if (_fetching) setState(() => _fetching = false);
-        }
       },
       child: PopScope(
         canPop: false,
@@ -632,7 +615,7 @@ class _SprinklerLeadDetailScreenState
           if (!didPop) _popWithRefresh();
         },
         child: Scaffold(
-          backgroundColor: const Color(0xFFF8F5FF),
+          backgroundColor: AppColors.background,
           body: CustomScrollView(
             slivers: [
               SliverAppBar(
@@ -643,7 +626,7 @@ class _SprinklerLeadDetailScreenState
                     ? IconButton(
                         icon: const AppSvgIcon(
                           AppSvgAssets.chevronLeft,
-                          color: Colors.white,
+                          color: AppColors.surface,
                           size: 18,
                         ),
                         onPressed: _popWithRefresh,
@@ -658,7 +641,7 @@ class _SprinklerLeadDetailScreenState
                               width: 18,
                               height: 18,
                               child: CircularProgressIndicator(
-                                color: Colors.white,
+                                color: AppColors.surface,
                                 strokeWidth: 2,
                               ),
                             ),
@@ -666,7 +649,7 @@ class _SprinklerLeadDetailScreenState
                         : IconButton(
                             icon: const AppSvgIcon(
                               AppSvgAssets.fileText,
-                              color: Colors.white,
+                              color: AppColors.surface,
                               size: 20,
                             ),
                             tooltip: 'Download Quotation PDF',
@@ -679,7 +662,7 @@ class _SprinklerLeadDetailScreenState
                         width: 18,
                         height: 18,
                         child: CircularProgressIndicator(
-                          color: Colors.white,
+                          color: AppColors.surface,
                           strokeWidth: 2,
                         ),
                       ),
@@ -688,7 +671,7 @@ class _SprinklerLeadDetailScreenState
                     IconButton(
                       icon: const AppSvgIcon(
                         AppSvgAssets.refreshCw,
-                        color: Colors.white,
+                        color: AppColors.surface,
                         size: 20,
                       ),
                       onPressed: _refresh,
@@ -700,7 +683,7 @@ class _SprinklerLeadDetailScreenState
                       gradient: LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
-                        colors: [AppColors.primary), AppColors.primaryLight)],
+                        colors: [LeadTheme.secondary, LeadTheme.secondary],
                       ),
                     ),
                     child: SafeArea(
@@ -716,7 +699,7 @@ class _SprinklerLeadDetailScreenState
                                   child: Text(
                                     lead.customerName,
                                     style: const TextStyle(
-                                      color: Colors.white,
+                                      color: AppColors.surface,
                                       fontSize: 20,
                                       fontWeight: FontWeight.w700,
                                     ),
@@ -730,20 +713,20 @@ class _SprinklerLeadDetailScreenState
                                       vertical: 3,
                                     ),
                                     decoration: BoxDecoration(
-                                      color:
-                                          Colors.white.withValues(alpha: 0.2),
+                                      color: AppColors.surface.withValues(
+                                        alpha: 0.2,
+                                      ),
                                       borderRadius: BorderRadius.circular(20),
                                       border: Border.all(
-                                        color: Colors.white
-                                            .withValues(alpha: 0.4),
+                                        color: AppColors.surface.withValues(
+                                          alpha: 0.4,
+                                        ),
                                       ),
                                     ),
                                     child: Text(
-                                      _isInstallationRole
-                                          ? 'Install'
-                                          : 'Sales',
+                                      _isInstallationRole ? 'Install' : 'Sales',
                                       style: const TextStyle(
-                                        color: Colors.white,
+                                        color: AppColors.surface,
                                         fontSize: 10,
                                         fontWeight: FontWeight.w700,
                                       ),
@@ -755,18 +738,20 @@ class _SprinklerLeadDetailScreenState
                                     vertical: 4,
                                   ),
                                   decoration: BoxDecoration(
-                                    color:
-                                        Colors.white.withValues(alpha: 0.2),
+                                    color: AppColors.surface.withValues(
+                                      alpha: 0.2,
+                                    ),
                                     borderRadius: BorderRadius.circular(20),
                                     border: Border.all(
-                                      color:
-                                          Colors.white.withValues(alpha: 0.4),
+                                      color: AppColors.surface.withValues(
+                                        alpha: 0.4,
+                                      ),
                                     ),
                                   ),
                                   child: Text(
                                     lead.status,
                                     style: const TextStyle(
-                                      color: Colors.white,
+                                      color: AppColors.surface,
                                       fontSize: 11,
                                       fontWeight: FontWeight.w700,
                                     ),
@@ -780,13 +765,13 @@ class _SprinklerLeadDetailScreenState
                                 const AppSvgIcon(
                                   AppSvgAssets.phone,
                                   size: 12,
-                                  color: Colors.white70,
+                                  color: AppColors.surface,
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
                                   lead.phone,
                                   style: const TextStyle(
-                                    color: Colors.white70,
+                                    color: AppColors.surface,
                                     fontSize: 12,
                                   ),
                                 ),
@@ -794,14 +779,14 @@ class _SprinklerLeadDetailScreenState
                                 const AppSvgIcon(
                                   AppSvgAssets.mapPin,
                                   size: 12,
-                                  color: Colors.white70,
+                                  color: AppColors.surface,
                                 ),
                                 const SizedBox(width: 4),
                                 Expanded(
                                   child: Text(
                                     '${lead.address}${lead.village.isNotEmpty ? ", ${lead.village}" : ""}',
                                     style: const TextStyle(
-                                      color: Colors.white70,
+                                      color: AppColors.surface,
                                       fontSize: 12,
                                     ),
                                     overflow: TextOverflow.ellipsis,
@@ -848,11 +833,7 @@ class _SprinklerLeadDetailScreenState
     final rows = <Widget>[];
     if (lead.farmSize != null)
       rows.add(
-        _infoRow(
-          AppSvgAssets.maximize,
-          'Farm Size',
-          '${lead.farmSize} acres',
-        ),
+        _infoRow(AppSvgAssets.maximize, 'Farm Size', '${lead.farmSize} acres'),
       );
     if (lead.waterSource != null)
       rows.add(
@@ -885,7 +866,7 @@ class _SprinklerLeadDetailScreenState
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -902,8 +883,9 @@ class _SprinklerLeadDetailScreenState
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
               color: LeadTheme.secondary.withValues(alpha: 0.05),
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(12)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(12),
+              ),
               border: Border(
                 bottom: BorderSide(
                   color: LeadTheme.secondary.withValues(alpha: 0.1),
@@ -979,12 +961,12 @@ class _SprinklerLeadDetailScreenState
     padding: const EdgeInsets.symmetric(vertical: 5),
     child: Row(
       children: [
-        AppSvgIcon(svgAsset, size: 14, color: AppColors.textTertiary)),
+        AppSvgIcon(svgAsset, size: 14, color: AppColors.textLight),
         const SizedBox(width: 8),
         Expanded(
           child: Text(
             label,
-            style: const TextStyle(fontSize: 12.5, color: AppColors.textSecondary)),
+            style: const TextStyle(fontSize: 12.5, color: AppColors.textGray),
           ),
         ),
         Text(
@@ -992,7 +974,7 @@ class _SprinklerLeadDetailScreenState
           style: const TextStyle(
             fontSize: 12.5,
             fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary),
+            color: AppColors.textDark,
           ),
         ),
       ],
@@ -1008,21 +990,21 @@ class _SprinklerLeadDetailScreenState
         width: double.infinity,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.orange.shade50,
+          color: AppColors.solar,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.orange.shade200),
+          border: Border.all(color: AppColors.solar),
         ),
         child: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: Colors.orange.shade100,
+                color: AppColors.solar,
                 borderRadius: BorderRadius.circular(10),
               ),
               child: AppSvgIcon(
                 AppSvgAssets.lock,
-                color: Colors.orange.shade600,
+                color: AppColors.solar,
                 size: 20,
               ),
             ),
@@ -1036,15 +1018,12 @@ class _SprinklerLeadDetailScreenState
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
-                      color: Colors.orange.shade800,
+                      color: AppColors.solar,
                     ),
                   ),
                   Text(
                     'Current: ${lead.status}',
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: Colors.orange.shade600,
-                    ),
+                    style: TextStyle(fontSize: 11, color: AppColors.solar),
                   ),
                 ],
               ),
@@ -1061,7 +1040,7 @@ class _SprinklerLeadDetailScreenState
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           gradient: const LinearGradient(
-            colors: [AppColors.primary), AppColors.primaryLight)],
+            colors: [LeadTheme.secondary, LeadTheme.secondary],
           ),
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
@@ -1077,12 +1056,12 @@ class _SprinklerLeadDetailScreenState
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.2),
+                color: AppColors.surface.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: const AppSvgIcon(
                 AppSvgAssets.arrowRight,
-                color: Colors.white,
+                color: AppColors.surface,
                 size: 16,
               ),
             ),
@@ -1094,7 +1073,7 @@ class _SprinklerLeadDetailScreenState
                   Text(
                     'Continue: ${lead.status}',
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: AppColors.surface,
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
                     ),
@@ -1102,7 +1081,7 @@ class _SprinklerLeadDetailScreenState
                   Text(
                     'Next Step → ${_nextStepLabel()}',
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.75),
+                      color: AppColors.surface.withValues(alpha: 0.75),
                       fontSize: 11,
                     ),
                   ),
@@ -1111,7 +1090,7 @@ class _SprinklerLeadDetailScreenState
             ),
             const AppSvgIcon(
               AppSvgAssets.chevronRight,
-              color: Colors.white,
+              color: AppColors.surface,
               size: 24,
             ),
           ],
@@ -1123,21 +1102,21 @@ class _SprinklerLeadDetailScreenState
   Widget _buildCompletedBanner() => Container(
     padding: const EdgeInsets.all(16),
     decoration: BoxDecoration(
-      color: AppColors.primaryLightest),
+      color: AppColors.successLight,
       borderRadius: BorderRadius.circular(12),
-      border: Border.all(color: AppColors.primaryLightest)),
+      border: Border.all(color: AppColors.success),
     ),
     child: Row(
       children: [
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: Colors.green.shade100,
+            color: AppColors.success,
             borderRadius: BorderRadius.circular(8),
           ),
           child: AppSvgIcon(
             AppSvgAssets.circleCheckBig,
-            color: Colors.green.shade700,
+            color: AppColors.success,
             size: 20,
           ),
         ),
@@ -1150,12 +1129,12 @@ class _SprinklerLeadDetailScreenState
               style: TextStyle(
                 fontWeight: FontWeight.w700,
                 fontSize: 14,
-                color: AppColors.primary),
+                color: AppColors.success,
               ),
             ),
             Text(
               'All $_totalSteps steps done successfully',
-              style: TextStyle(fontSize: 11, color: Colors.green.shade600),
+              style: TextStyle(fontSize: 11, color: AppColors.success),
             ),
           ],
         ),
@@ -1171,7 +1150,7 @@ class _SprinklerLeadDetailScreenState
     return Container(
       padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -1201,13 +1180,15 @@ class _SprinklerLeadDetailScreenState
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary),
+                    color: AppColors.textDark,
                   ),
                 ),
               ),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: LeadTheme.secondary.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(20),
@@ -1229,9 +1210,9 @@ class _SprinklerLeadDetailScreenState
             child: LinearProgressIndicator(
               value: percent,
               minHeight: 6,
-              backgroundColor: AppColors.borderLight),
+              backgroundColor: AppColors.divider,
               valueColor: AlwaysStoppedAnimation<Color>(
-                lead.isCompleted ? Colors.green : LeadTheme.secondary,
+                lead.isCompleted ? AppColors.success : LeadTheme.secondary,
               ),
             ),
           ),
@@ -1242,9 +1223,7 @@ class _SprinklerLeadDetailScreenState
                 : 'Current: ${lead.status}',
             style: TextStyle(
               fontSize: 11,
-              color: lead.isCompleted
-                  ? Colors.green.shade600
-                  : AppColors.textSecondary),
+              color: lead.isCompleted ? AppColors.success : AppColors.textGray,
             ),
           ),
         ],
@@ -1274,8 +1253,10 @@ class _SprinklerLeadDetailScreenState
     String fmtVisitClock(String? raw) {
       final value = raw?.trim() ?? '';
       if (value.isEmpty) return '';
-      final already12h =
-          RegExp(r'\b(am|pm)\b', caseSensitive: false).hasMatch(value);
+      final already12h = RegExp(
+        r'\b(am|pm)\b',
+        caseSensitive: false,
+      ).hasMatch(value);
       if (already12h) return value.toUpperCase();
       final m = RegExp(r'^(\d{1,2}):(\d{2})$').firstMatch(value);
       if (m == null) return value;
@@ -1327,10 +1308,7 @@ class _SprinklerLeadDetailScreenState
           if (lead.visitData.typeOfPump != null)
             _Row('Type of Pump', lead.visitData.typeOfPump!),
           if (lead.visitData.deliveryPipeLength != null)
-            _Row(
-              'Delivery Pipe',
-              '${lead.visitData.deliveryPipeLength} feet',
-            ),
+            _Row('Delivery Pipe', '${lead.visitData.deliveryPipeLength} feet'),
           if (lead.visitData.noOfSprinklers != null)
             _Row('No of Sprinklers', '${lead.visitData.noOfSprinklers}'),
           if (lead.visitData.cableLength != null)
@@ -1408,10 +1386,7 @@ class _SprinklerLeadDetailScreenState
               fmtTimeOnly(lead.installationAssignData.scheduledDate),
             ),
           if (lead.installationAssignData.assignedAt != null)
-            _Row(
-              'Assigned On',
-              fmt(lead.installationAssignData.assignedAt),
-            ),
+            _Row('Assigned On', fmt(lead.installationAssignData.assignedAt)),
           if (lead.installationAssignData.notes?.trim().isNotEmpty ?? false)
             _Row('Notes', lead.installationAssignData.notes!.trim()),
         ],
@@ -1451,10 +1426,7 @@ class _SprinklerLeadDetailScreenState
           if (lead.installationData.pendingWork &&
               (lead.installationData.pendingWorkNote?.trim().isNotEmpty ??
                   false))
-            _Row(
-              'Pending Note',
-              lead.installationData.pendingWorkNote!.trim(),
-            ),
+            _Row('Pending Note', lead.installationData.pendingWorkNote!.trim()),
           _Row('Testing', lead.installationData.systemTested ? 'Yes' : 'No'),
           if (lead.installationData.paymentReceived != null)
             _Row(
@@ -1481,32 +1453,20 @@ class _SprinklerLeadDetailScreenState
         adminOnly: true,
         photos: lead.installPhotoPaths,
       ),
-      _StepData(
-        10,
-        'Payment Remaining',
-        AppSvgAssets.indianRupee,
-        [
-          _Row('Total', amt(lead.paymentSummary.totalAmount)),
-          _Row('Paid', amt(lead.paymentSummary.amountReceived)),
-          _Row('Remaining', amt(lead.paymentSummary.remainingBalance)),
-          if (lead.paymentHistory.isNotEmpty)
-            _Row('Transactions', '${lead.paymentHistory.length}'),
-        ],
-        adminOnly: true,
-      ),
-      _StepData(
-        11,
-        'Project Completed',
-        AppSvgAssets.trophy,
-        [
-          _Row(
-            'Payment Status',
-            lead.pendingAmount <= 0 ? 'Fully Paid' : 'Pending',
-          ),
-          _Row('Paid Amount', amt(lead.paymentSummary.amountReceived)),
-        ],
-        adminOnly: true,
-      ),
+      _StepData(10, 'Payment Remaining', AppSvgAssets.indianRupee, [
+        _Row('Total', amt(lead.paymentSummary.totalAmount)),
+        _Row('Paid', amt(lead.paymentSummary.amountReceived)),
+        _Row('Remaining', amt(lead.paymentSummary.remainingBalance)),
+        if (lead.paymentHistory.isNotEmpty)
+          _Row('Transactions', '${lead.paymentHistory.length}'),
+      ], adminOnly: true),
+      _StepData(11, 'Project Completed', AppSvgAssets.trophy, [
+        _Row(
+          'Payment Status',
+          lead.pendingAmount <= 0 ? 'Fully Paid' : 'Pending',
+        ),
+        _Row('Paid Amount', amt(lead.paymentSummary.amountReceived)),
+      ], adminOnly: true),
     ];
 
     final visibleSteps = steps
@@ -1516,7 +1476,7 @@ class _SprinklerLeadDetailScreenState
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -1578,7 +1538,7 @@ class _StepData {
   });
 }
 
-// ── Pipeline Row ──────────────────────────────────────────────────────────────
+// ── Pipeline Row (Collapsible — Solar style) ──────────────────────────────────
 class _SpkPipelineRow extends StatefulWidget {
   final _StepData step;
   final bool isDone, isCurrent, isLast, showAdminBadge, canEdit;
@@ -1648,10 +1608,14 @@ class _SpkPipelineRowState extends State<_SpkPipelineRow> {
     final isLast = widget.isLast;
     final step = widget.step;
 
-    final Color dotColor =
-        isDone ? AppColors.primary) : AppColors.textLight);
-    final Color lineColor =
-        isDone ? AppColors.primaryLightest) : AppColors.borderLight);
+    final Color dotColor = isDone
+        ? AppColors.success
+        : isCurrent
+        ? LeadTheme.secondary
+        : AppColors.divider;
+
+    final Color lineColor = isDone ? AppColors.success : AppColors.divider;
+
     final isNewLead = step.index == 0;
     final hasData =
         (isDone || isCurrent || isNewLead) &&
@@ -1664,6 +1628,7 @@ class _SpkPipelineRowState extends State<_SpkPipelineRow> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // ── Left: dot + connecting line ────────────────────────────────
           SizedBox(
             width: 38,
             child: Column(
@@ -1691,14 +1656,14 @@ class _SpkPipelineRowState extends State<_SpkPipelineRow> {
                         ? const AppSvgIcon(
                             AppSvgAssets.check,
                             size: 15,
-                            color: Colors.white,
+                            color: AppColors.surface,
                           )
                         : AppSvgIcon(
                             step.svgAsset,
                             size: isCurrent ? 14 : 13,
                             color: isCurrent
-                                ? Colors.white
-                                : AppColors.textTertiary),
+                                ? AppColors.surface
+                                : AppColors.textLight,
                           ),
                   ),
                 ),
@@ -1717,12 +1682,16 @@ class _SpkPipelineRowState extends State<_SpkPipelineRow> {
               ],
             ),
           ),
+
           const SizedBox(width: 10),
+
+          // ── Right: title + collapsible body ────────────────────────────
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
+                // Title row
                 GestureDetector(
                   onTap: canToggle && (hasData || hasPhotos)
                       ? () => setState(() => _expanded = !_expanded)
@@ -1745,8 +1714,10 @@ class _SpkPipelineRowState extends State<_SpkPipelineRow> {
                                   ? FontWeight.w600
                                   : FontWeight.w400,
                               color: isDone
-                                  ? AppColors.primary)
-                                  : AppColors.textTertiary),
+                                  ? AppColors.success
+                                  : isCurrent
+                                  ? LeadTheme.secondary
+                                  : AppColors.textLight,
                             ),
                           ),
                         ),
@@ -1764,12 +1735,14 @@ class _SpkPipelineRowState extends State<_SpkPipelineRow> {
                                 vertical: 3,
                               ),
                               decoration: BoxDecoration(
-                                color: LeadTheme.secondary
-                                    .withValues(alpha: 0.08),
+                                color: LeadTheme.secondary.withValues(
+                                  alpha: 0.08,
+                                ),
                                 borderRadius: BorderRadius.circular(6),
                                 border: Border.all(
-                                  color: LeadTheme.secondary
-                                      .withValues(alpha: 0.3),
+                                  color: LeadTheme.secondary.withValues(
+                                    alpha: 0.3,
+                                  ),
                                 ),
                               ),
                               child: Row(
@@ -1804,11 +1777,9 @@ class _SpkPipelineRowState extends State<_SpkPipelineRow> {
                                 vertical: 3,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.orange.shade50,
+                                color: AppColors.solar,
                                 borderRadius: BorderRadius.circular(6),
-                                border: Border.all(
-                                  color: Colors.orange.shade300,
-                                ),
+                                border: Border.all(color: AppColors.solar),
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
@@ -1816,7 +1787,7 @@ class _SpkPipelineRowState extends State<_SpkPipelineRow> {
                                   AppSvgIcon(
                                     AppSvgAssets.cog,
                                     size: 11,
-                                    color: Colors.orange.shade700,
+                                    color: AppColors.solar,
                                   ),
                                   const SizedBox(width: 3),
                                   Text(
@@ -1825,7 +1796,7 @@ class _SpkPipelineRowState extends State<_SpkPipelineRow> {
                                     style: TextStyle(
                                       fontSize: 10,
                                       fontWeight: FontWeight.w600,
-                                      color: Colors.orange.shade700,
+                                      color: AppColors.solar,
                                     ),
                                   ),
                                 ],
@@ -1835,12 +1806,12 @@ class _SpkPipelineRowState extends State<_SpkPipelineRow> {
                         ],
                         const SizedBox(width: 4),
                         if (isDone)
-                          _Badge('Done', AppColors.primary))
+                          _Badge('Done', AppColors.success)
                         else if (isCurrent)
                           _Badge('Current', LeadTheme.secondary),
                         if (widget.showAdminBadge && !isDone) ...[
                           const SizedBox(width: 4),
-                          _Badge('Admin', Colors.purple),
+                          _Badge('Admin', AppColors.primary),
                         ],
                         if (canToggle && (hasData || hasPhotos)) ...[
                           const SizedBox(width: 4),
@@ -1850,7 +1821,7 @@ class _SpkPipelineRowState extends State<_SpkPipelineRow> {
                             child: const AppSvgIcon(
                               AppSvgAssets.chevronDown,
                               size: 14,
-                              color: AppColors.textTertiary),
+                              color: AppColors.textLight,
                             ),
                           ),
                         ],
@@ -1858,6 +1829,8 @@ class _SpkPipelineRowState extends State<_SpkPipelineRow> {
                     ),
                   ),
                 ),
+
+                // ── Collapsible body ──────────────────────────────────────
                 ClipRect(
                   child: AnimatedSize(
                     duration: const Duration(milliseconds: 220),
@@ -1893,11 +1866,12 @@ class _SpkPipelineRowState extends State<_SpkPipelineRow> {
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
             decoration: BoxDecoration(
               color: isDone
-                  ? AppColors.primaryLightest)
-                  : AppColors.primaryLightest).withValues(alpha: 0.5),
+                  ? AppColors.successLight
+                  : AppColors.successLight.withValues(alpha: 0.5),
+              borderRadius: BorderRadius.circular(8),
               border: Border.all(
                 color: isDone
-                    ? AppColors.primaryLightest)
+                    ? AppColors.success
                     : LeadTheme.secondary.withValues(alpha: 0.15),
               ),
             ),
@@ -1918,7 +1892,7 @@ class _SpkPipelineRowState extends State<_SpkPipelineRow> {
                               r.label,
                               style: const TextStyle(
                                 fontSize: 11.5,
-                                color: AppColors.textSecondary),
+                                color: AppColors.textGray,
                               ),
                             ),
                           ),
@@ -1928,7 +1902,7 @@ class _SpkPipelineRowState extends State<_SpkPipelineRow> {
                               style: const TextStyle(
                                 fontSize: 11.5,
                                 fontWeight: FontWeight.w600,
-                                color: AppColors.textPrimary),
+                                color: AppColors.textDark,
                               ),
                             ),
                           ),
@@ -1950,16 +1924,15 @@ class _SpkPipelineRowState extends State<_SpkPipelineRow> {
                 children: List.generate(step.photos.length, (i) {
                   final url = _imgUrl(step.photos[i]);
                   return GestureDetector(
-                    onTap: () =>
-                        _showFullImage(context, url, step.photos, i),
+                    onTap: () => _showFullImage(context, url, step.photos, i),
                     child: Container(
                       width: 88,
                       height: 88,
                       margin: const EdgeInsets.only(right: 8),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(8),
-                        color: AppColors.borderLight,
-                        border: Border.all(color: AppColors.borderPrimary),
+                        color: AppColors.divider,
+                        border: Border.all(color: Colors.grey.shade300),
                       ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(8),
@@ -1981,7 +1954,7 @@ class _SpkPipelineRowState extends State<_SpkPipelineRow> {
                             child: AppSvgIcon(
                               AppSvgAssets.imageOff,
                               size: 24,
-                              color: AppColors.textSecondary,
+                              color: AppColors.textLight,
                             ),
                           ),
                         ),
@@ -2013,7 +1986,7 @@ class _SpkPipelineRowState extends State<_SpkPipelineRow> {
       padding: const EdgeInsets.only(top: 3, bottom: 4),
       child: Text(
         hint,
-        style: const TextStyle(fontSize: 10.5, color: AppColors.textTertiary)),
+        style: const TextStyle(fontSize: 10.5, color: AppColors.textLight),
         overflow: TextOverflow.ellipsis,
         maxLines: 1,
       ),
@@ -2036,11 +2009,7 @@ class _Badge extends StatelessWidget {
     ),
     child: Text(
       text,
-      style: TextStyle(
-        fontSize: 10,
-        fontWeight: FontWeight.w700,
-        color: color,
-      ),
+      style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: color),
     ),
   );
 }
@@ -2077,12 +2046,12 @@ class _PhotoViewerState extends State<_PhotoViewer> {
     appBar: AppBar(
       backgroundColor: Colors.black,
       leading: IconButton(
-        icon: const AppSvgIcon(AppSvgAssets.x, color: Colors.white),
+        icon: const AppSvgIcon(AppSvgAssets.x, color: AppColors.surface),
         onPressed: () => Navigator.pop(context),
       ),
       title: Text(
         '${_current + 1} / ${widget.urls.length}',
-        style: const TextStyle(color: Colors.white, fontSize: 14),
+        style: const TextStyle(color: AppColors.surface, fontSize: 14),
       ),
       centerTitle: true,
     ),
@@ -2100,20 +2069,16 @@ class _PhotoViewerState extends State<_PhotoViewer> {
             loadingBuilder: (_, child, prog) => prog == null
                 ? child
                 : const Center(
-                    child: CircularProgressIndicator(color: Colors.white),
+                    child: CircularProgressIndicator(color: AppColors.surface),
                   ),
             errorBuilder: (_, __, ___) => const Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                AppSvgIcon(
-                  AppSvgAssets.imageOff,
-                  color: AppColors.textSecondary,
-                  size: 48,
-                ),
+                AppSvgIcon(AppSvgAssets.imageOff, color: Colors.grey, size: 48),
                 SizedBox(height: 8),
                 Text(
                   'Could not load image',
-                  style: TextStyle(color: AppColors.textSecondary),
+                  style: TextStyle(color: Colors.grey),
                 ),
               ],
             ),
@@ -2136,8 +2101,8 @@ class _PhotoViewerState extends State<_PhotoViewer> {
                   height: 6,
                   decoration: BoxDecoration(
                     color: _current == i
-                        ? Colors.white
-                        : AppColors.textSecondary.shade600,
+                        ? AppColors.surface
+                        : Colors.grey.shade600,
                     borderRadius: BorderRadius.circular(3),
                   ),
                 ),
@@ -2147,8 +2112,3 @@ class _PhotoViewerState extends State<_PhotoViewer> {
         : null,
   );
 }
-
-
-
-
-

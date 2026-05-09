@@ -8,12 +8,12 @@ import 'package:solar_project/Cubits/InstallationNavigation/installation_nav_cub
 import 'package:solar_project/Cubits/InstallationNavigation/installation_nav_state.dart';
 import 'package:solar_project/data/Models/installation_model.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
-import 'package:solar_project/Helper/app_colors.dart';
 import 'package:solar_project/Helper/common_widgets.dart';
 import 'package:solar_project/Helper/ui_helper.dart';
 import 'package:solar_project/screens/Dashboards/Installation_Dashboard/Dashboard/todays-jobs_screen.dart';
 import 'package:solar_project/screens/Dashboards/Installation_Dashboard/Dashboard/pending_installation.dart';
 import 'package:solar_project/services/api_service.dart';
+import 'package:solar_project/core/app_colors.dart';
 
 class InstallationDashboardScreen extends StatefulWidget {
   const InstallationDashboardScreen({super.key});
@@ -132,30 +132,30 @@ class _InstallationDashboardScreenState
         clipBehavior: Clip.none,
         children: [
           Positioned.fill(
-                child: CircleAvatar(
-               backgroundColor: AppColors.purpleBg,
-               backgroundImage: imageUrl != null ? NetworkImage(imageUrl) : null,
-               child: imageUrl == null
-                   ? AppSvgIcon(
+            child: CircleAvatar(
+              backgroundColor: AppColors.primaryTint,
+              backgroundImage: imageUrl != null ? NetworkImage(imageUrl) : null,
+              child: imageUrl == null
+                  ? AppSvgIcon(
                       AppSvgAssets.userRound,
-                      color: AppColors.lightPurple,
+                      color: AppColors.primary,
                       size: size * 0.52,
                     )
-                    : null,
+                  : null,
             ),
           ),
           Positioned(
             right: -1,
             bottom: -1,
-                child: Container(
-               width: size * 0.26,
-               height: size * 0.26,
-               decoration: BoxDecoration(
-                  color: AppColors.lightPurple,
-                 shape: BoxShape.circle,
-                 border: Border.all(color: Colors.white, width: 1.4),
-               ),
-                ),
+            child: Container(
+              width: size * 0.26,
+              height: size * 0.26,
+              decoration: BoxDecoration(
+                color: AppColors.success,
+                shape: BoxShape.circle,
+                border: Border.all(color: AppColors.surface, width: 1.4),
+              ),
+            ),
           ),
         ],
       ),
@@ -165,15 +165,15 @@ class _InstallationDashboardScreenState
   @override
   Widget build(BuildContext context) {
     if (_showPendingJobs) {
-        return PendingInstallationsScreen(
-         appBarColor: AppColors.lightPurple,
-         onBack: () => setState(() => _showPendingJobs = false),
-        );
+      return PendingInstallationsScreen(
+        appBarColor: AppColors.error,
+        onBack: () => setState(() => _showPendingJobs = false),
+      );
     }
 
     if (_showTodaysJobs) {
-       return TodaysJobsScreen(
-         appBarColor: AppColors.lightPurple,
+      return TodaysJobsScreen(
+        appBarColor: AppColors.primary,
         onBack: () => setState(() => _showTodaysJobs = false),
       );
     }
@@ -205,9 +205,9 @@ class _InstallationDashboardScreenState
         }
 
         return Scaffold(
-          backgroundColor: AppColors.primaryLightest,
+          backgroundColor: AppColors.background,
           appBar: AppBar(
-            backgroundColor: AppColors.primaryLightest,
+            backgroundColor: AppColors.background,
             elevation: 0,
             scrolledUnderElevation: 0,
             centerTitle: false,
@@ -233,16 +233,16 @@ class _InstallationDashboardScreenState
                       style: const TextStyle(
                         fontWeight: FontWeight.w700,
                         fontSize: 15,
-                        color: AppColors.textPrimary),
-                        // letterSpacing: -0.3,
+                        color: AppColors.textDark,
+                        letterSpacing: -0.3,
                       ),
-                    
+                    ),
                     Text(
                       _getGreeting(),
                       style: const TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w400,
-                    color: AppColors.lightPurple,
+                        color: AppColors.textGray,
                       ),
                     ),
                   ],
@@ -250,35 +250,35 @@ class _InstallationDashboardScreenState
 
                 // ── Center Title ──────────────────────────────────────
                 const Spacer(),
-                   const Text(
-                   'Installation Dashboard',
-                   style: TextStyle(
-                     fontWeight: FontWeight.w800,
-                     fontSize: 20,
-                     color: AppColors.lightPurple,
-                   ),
-                 ),
+                const Text(
+                  'Installation Dashboard',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 20,
+                    color: AppColors.primary,
+                  ),
+                ),
                 const Spacer(),
-            ],
+              ],
             ),
             actions: [
               if (state is InstallationLoading && allLeads.isNotEmpty)
                 const Padding(
                   padding: EdgeInsets.all(14),
-                       child: SizedBox(
-                     width: 18,
-                     height: 18,
-                     child: CircularProgressIndicator(
-                       strokeWidth: 2,
-                       color: AppColors.lightPurple,
-                     ),
-                   ),
+                  child: SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: AppColors.primary,
+                    ),
+                  ),
                 )
               else
                 Container(
                   margin: const EdgeInsets.only(right: 12, top: 8, bottom: 8),
                   child: Material(
-                    color: Colors.white,
+                    color: AppColors.surface,
                     borderRadius: BorderRadius.circular(10),
                     child: InkWell(
                       borderRadius: BorderRadius.circular(10),
@@ -288,12 +288,13 @@ class _InstallationDashboardScreenState
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: AppColors.primaryLightest)),
-                         child: const AppSvgIcon(
-                           AppSvgAssets.refreshCw,
-                           color: AppColors.lightPurple,
-                           size: 18,
-                         ),
+                          border: Border.all(color: AppColors.primaryTint),
+                        ),
+                        child: const AppSvgIcon(
+                          AppSvgAssets.refreshCw,
+                          color: AppColors.primary,
+                          size: 18,
+                        ),
                       ),
                     ),
                   ),
@@ -301,14 +302,14 @@ class _InstallationDashboardScreenState
             ],
             // bottom: PreferredSize(
             //   preferredSize: const Size.fromHeight(1),
-            //   child: Container(height: 1, color: AppColors.primaryLightest)),
+            //   child: Container(height: 1, color: const AppColors.primaryTint),
             // ),
           ),
           body: SafeArea(
             child: loading
-                 ? const Center(
-                     child: CircularProgressIndicator(color: AppColors.lightPurple),
-                   )
+                ? const Center(
+                    child: CircularProgressIndicator(color: AppColors.primary),
+                  )
                 : state is InstallationError
                 ? Center(
                     child: Column(
@@ -317,32 +318,32 @@ class _InstallationDashboardScreenState
                         AppSvgIcon(
                           AppSvgAssets.triangleAlert,
                           size: 48,
-                          color: Colors.red.shade300,
+                          color: AppColors.errorLight,
                         ),
                         const SizedBox(height: 12),
                         Text(
                           state.message,
-                          style: const TextStyle(color: AppColors.textSecondary),
+                          style: const TextStyle(color: AppColors.textGray),
                         ),
                         const SizedBox(height: 16),
-                    ElevatedButton.icon(
+                        ElevatedButton.icon(
                           onPressed: () => ctx
                               .read<InstallationCubit>()
                               .fetchInstallations(),
                           icon: const AppSvgIcon(AppSvgAssets.refreshCw),
                           label: const Text('Retry'),
                           style: ElevatedButton.styleFrom(
-                           backgroundColor: AppColors.lightPurple,
-                           foregroundColor: Colors.white,
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: AppColors.surface,
                           ),
                         ),
                       ],
                     ),
-                    )
-                 : RefreshIndicator(
-                     color: AppColors.lightPurple,
-                     onRefresh: () async =>
-                         ctx.read<InstallationCubit>().fetchInstallations(),
+                  )
+                : RefreshIndicator(
+                    color: AppColors.primary,
+                    onRefresh: () async =>
+                        ctx.read<InstallationCubit>().fetchInstallations(),
                     child: SingleChildScrollView(
                       physics: const AlwaysScrollableScrollPhysics(),
                       padding: EdgeInsets.fromLTRB(
@@ -364,17 +365,19 @@ class _InstallationDashboardScreenState
                                 vertical: 7,
                               ),
                               decoration: BoxDecoration(
-                                color: AppColors.bgPrimary,
+                                color: AppColors.primaryTint,
                                 borderRadius: BorderRadius.circular(8),
                                 border: Border.all(
-                                  color:  AppColors.accent2.withValues(alpha: 0.20),
+                                  color: AppColors.primary.withValues(
+                                    alpha: 0.20,
+                                  ),
                                 ),
                               ),
                               child: Row(
                                 children: [
                                   const AppSvgIcon(
                                     AppSvgAssets.idCard,
-                                    color: AppColors.accent2,
+                                    color: AppColors.primary,
                                     size: 14,
                                   ),
                                   const SizedBox(width: 6),
@@ -382,7 +385,7 @@ class _InstallationDashboardScreenState
                                     '$_totalAssigned job${_totalAssigned == 1 ? '' : 's'} assigned',
                                     style: const TextStyle(
                                       fontWeight: FontWeight.w800,
-                                      color: AppColors.accent2,
+                                      color: AppColors.primary,
                                       fontSize: 12,
                                     ),
                                   ),
@@ -390,7 +393,7 @@ class _InstallationDashboardScreenState
                                   Text(
                                     '☀ $_solarLeads  💧 $_sprinklerLeads',
                                     style: TextStyle(
-                                      color: AppColors.textSecondary,
+                                      color: AppColors.textGray,
                                       fontSize: 11,
                                     ),
                                   ),
@@ -412,10 +415,10 @@ class _InstallationDashboardScreenState
                             childAspectRatio: isMobile ? 1.55 : 1.65,
                             children: [
                               DashboardCard(
-                                title: 'Project Installation',
+                                title: 'Solar Installation',
                                 value: '$_solarLeads',
                                 svgAsset: AppSvgAssets.hammer,
-                                 cardColor: AppColors.primary,
+                                cardColor: AppColors.solar,
                                 onTap: () => ctx
                                     .read<InstallationNavCubit>()
                                     .openMyInstallations(projectType: 'solar'),
@@ -424,7 +427,7 @@ class _InstallationDashboardScreenState
                                 title: 'Sprinkler Installation',
                                 value: '$_sprinklerLeads',
                                 svgAsset: AppSvgAssets.idCard,
-                                 cardColor: AppColors.primary,
+                                cardColor: AppColors.primary,
                                 onTap: () => ctx
                                     .read<InstallationNavCubit>()
                                     .openMyInstallations(
@@ -445,14 +448,14 @@ class _InstallationDashboardScreenState
                                 title: 'Pending',
                                 value: '$_pendingCount',
                                 svgAsset: AppSvgAssets.triangleAlert,
-                                 cardColor: AppColors.primary,
+                                cardColor: AppColors.error,
                                 onTap: _openPending,
                               ),
                               DashboardCard(
                                 title: 'Completed',
                                 value: '$_completedCount',
                                 svgAsset: AppSvgAssets.circleCheckBig,
-                                 cardColor: AppColors.primary,
+                                cardColor: AppColors.success,
                                 onTap: () => ctx
                                     .read<InstallationNavCubit>()
                                     .changePage(InstallationNavPage.history),
@@ -485,7 +488,7 @@ class _SectionHeading extends StatelessWidget {
           width: 3,
           height: 15,
           decoration: BoxDecoration(
-            color: AppColors.accent2,
+            color: AppColors.primary,
             borderRadius: BorderRadius.circular(2),
           ),
         ),
@@ -495,17 +498,11 @@ class _SectionHeading extends StatelessWidget {
           style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+            color: AppColors.textDark,
+            letterSpacing: -0.2,
           ),
-          // letterSpacing: -0.2,
-          ),
-      
+        ),
       ],
     );
   }
 }
-
-
-
-
-

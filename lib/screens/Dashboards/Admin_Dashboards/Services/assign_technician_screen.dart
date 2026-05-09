@@ -9,7 +9,7 @@ import 'package:solar_project/data/Models/admin_user_model.dart';
 import 'package:solar_project/services/api_service.dart';
 import 'package:solar_project/Helper/app_feedback.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
-import 'package:solar_project/Helper/app_colors.dart';
+import 'package:solar_project/core/app_colors.dart';
 
 class AssignTechnicianScreen extends StatefulWidget {
   final ServiceRequestModel service;
@@ -72,7 +72,7 @@ class _State extends State<AssignTechnicianScreen> {
       lastDate: DateTime(2027),
       builder: (ctx, child) => Theme(
         data: Theme.of(ctx).copyWith(
-          colorScheme: const ColorScheme.light(primary: AppColors.success)),
+          colorScheme: const ColorScheme.light(primary: AppColors.success),
         ),
         child: child!,
       ),
@@ -86,7 +86,7 @@ class _State extends State<AssignTechnicianScreen> {
       initialTime: _visitTime ?? TimeOfDay.now(),
       builder: (ctx, child) => Theme(
         data: Theme.of(ctx).copyWith(
-          colorScheme: const ColorScheme.light(primary: AppColors.success)),
+          colorScheme: const ColorScheme.light(primary: AppColors.success),
         ),
         child: child!,
       ),
@@ -164,12 +164,12 @@ class _State extends State<AssignTechnicianScreen> {
         }
       },
       child: Scaffold(
-        backgroundColor: AppColors.bgSecondary),
+        backgroundColor:  AppColors.background,
         appBar: AppBar(
           leading: IconButton(
             icon: const AppSvgIcon(
               AppSvgAssets.chevronLeft,
-              color: AppColors.textPrimary),
+              color: AppColors.textDark,
             ),
             onPressed: () => Navigator.pop(context),
           ),
@@ -181,12 +181,12 @@ class _State extends State<AssignTechnicianScreen> {
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary),
+                  color: AppColors.textDark,
                 ),
               ),
               Text(
                 widget.service.customerName,
-                style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                style: const TextStyle(fontSize: 11, color: AppColors.textGray),
               ),
             ],
           ),
@@ -199,10 +199,10 @@ class _State extends State<AssignTechnicianScreen> {
               Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: AppColors.success).withValues(alpha: 0.08),
+                  color: AppColors.success.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: AppColors.success).withValues(alpha: 0.3),
+                    color: AppColors.success.withValues(alpha: 0.3),
                   ),
                 ),
                 child: Column(
@@ -213,7 +213,7 @@ class _State extends State<AssignTechnicianScreen> {
                         const AppSvgIcon(
                           AppSvgAssets.cog,
                           size: 14,
-                          color: AppColors.success),
+                          color: AppColors.success,
                         ),
                         const SizedBox(width: 6),
                         const Text(
@@ -221,7 +221,7 @@ class _State extends State<AssignTechnicianScreen> {
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
-                            color: AppColors.textPrimary),
+                            color: AppColors.textDark,
                           ),
                         ),
                         const Spacer(),
@@ -256,7 +256,7 @@ class _State extends State<AssignTechnicianScreen> {
                         child: Padding(
                           padding: EdgeInsets.all(16),
                           child: CircularProgressIndicator(
-                            color: AppColors.success),
+                            color: AppColors.success,
                           ),
                         ),
                       )
@@ -264,7 +264,7 @@ class _State extends State<AssignTechnicianScreen> {
                     ? const Text(
                         'No service technicians found.\n'
                         'Add technicians from Manage Users.',
-                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                        style: TextStyle(fontSize: 13, color: Colors.grey),
                       )
                     : Column(
                         children: [
@@ -282,14 +282,14 @@ class _State extends State<AssignTechnicianScreen> {
                                 decoration: BoxDecoration(
                                   color: selected
                                       ? const Color(
-                                          AppColors.success,
+                                          0xFF43E97B,
                                         ).withValues(alpha: 0.08)
-                                      : AppColors.bgPrimary,
+                                      : AppColors.background,
                                   borderRadius: BorderRadius.circular(10),
                                   border: Border.all(
                                     color: selected
-                                        ? AppColors.success)
-                                        : AppColors.borderLight,
+                                        ?  AppColors.success
+                                        : AppColors.divider,
                                     width: selected ? 1.5 : 1,
                                   ),
                                 ),
@@ -299,9 +299,9 @@ class _State extends State<AssignTechnicianScreen> {
                                       radius: 18,
                                       backgroundColor: selected
                                           ? const Color(
-                                              AppColors.success,
+                                              0xFF43E97B,
                                             ).withValues(alpha: 0.2)
-                                          : AppColors.borderLight,
+                                          : AppColors.divider,
                                       child: Text(
                                         tech.name.isNotEmpty
                                             ? tech.name[0].toUpperCase()
@@ -310,8 +310,8 @@ class _State extends State<AssignTechnicianScreen> {
                                           fontSize: 14,
                                           fontWeight: FontWeight.w700,
                                           color: selected
-                                              ? AppColors.success)
-                                              : AppColors.textSecondary.shade600,
+                                              ?  AppColors.success
+                                              : Colors.grey.shade600,
                                         ),
                                       ),
                                     ),
@@ -327,8 +327,8 @@ class _State extends State<AssignTechnicianScreen> {
                                               fontSize: 13,
                                               fontWeight: FontWeight.w700,
                                               color: selected
-                                                  ? AppColors.success)
-                                                  : AppColors.textPrimary),
+                                                  ?  AppColors.success
+                                                  :  AppColors.textDark,
                                             ),
                                           ),
                                           if (tech.phone.isNotEmpty)
@@ -336,7 +336,7 @@ class _State extends State<AssignTechnicianScreen> {
                                               tech.phone,
                                               style: TextStyle(
                                                 fontSize: 11,
-                                                color: AppColors.textSecondary.shade600,
+                                                color: Colors.grey.shade600,
                                               ),
                                             ),
                                         ],
@@ -345,7 +345,7 @@ class _State extends State<AssignTechnicianScreen> {
                                     if (selected)
                                       const AppSvgIcon(
                                         AppSvgAssets.circleCheckBig,
-                                        color: AppColors.success),
+                                        color: AppColors.success,
                                         size: 20,
                                       ),
                                   ],
@@ -375,13 +375,13 @@ class _State extends State<AssignTechnicianScreen> {
                         ),
                         decoration: BoxDecoration(
                           color: _visitDate != null
-                              ? AppColors.success).withValues(alpha: 0.08)
-                              : AppColors.bgPrimary,
+                              ?  AppColors.success.withValues(alpha: 0.08)
+                              : AppColors.background,
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
                             color: _visitDate != null
-                                ? AppColors.success)
-                                : AppColors.borderPrimary,
+                                ?  AppColors.success
+                                : Colors.grey.shade300,
                           ),
                         ),
                         child: Row(
@@ -390,8 +390,8 @@ class _State extends State<AssignTechnicianScreen> {
                               AppSvgAssets.calendarDays,
                               size: 18,
                               color: _visitDate != null
-                                  ? AppColors.success)
-                                  : AppColors.textSecondary,
+                                  ?  AppColors.success
+                                  : Colors.grey,
                             ),
                             const SizedBox(width: 10),
                             Text(
@@ -401,8 +401,8 @@ class _State extends State<AssignTechnicianScreen> {
                               style: TextStyle(
                                 fontSize: 13,
                                 color: _visitDate != null
-                                    ? AppColors.textPrimary)
-                                    : AppColors.textSecondary,
+                                    ?  AppColors.textDark
+                                    : Colors.grey,
                                 fontWeight: _visitDate != null
                                     ? FontWeight.w600
                                     : FontWeight.normal,
@@ -412,7 +412,7 @@ class _State extends State<AssignTechnicianScreen> {
                             AppSvgIcon(
                               AppSvgAssets.chevronRight,
                               size: 12,
-                              color: AppColors.textSecondary,
+                              color: AppColors.textLight,
                             ),
                           ],
                         ),
@@ -431,13 +431,13 @@ class _State extends State<AssignTechnicianScreen> {
                         ),
                         decoration: BoxDecoration(
                           color: _visitTime != null
-                              ? AppColors.success).withValues(alpha: 0.08)
-                              : AppColors.bgPrimary,
+                              ?  AppColors.success.withValues(alpha: 0.08)
+                              : AppColors.background,
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
                             color: _visitTime != null
-                                ? AppColors.success)
-                                : AppColors.borderPrimary,
+                                ?  AppColors.success
+                                : Colors.grey.shade300,
                           ),
                         ),
                         child: Row(
@@ -446,8 +446,8 @@ class _State extends State<AssignTechnicianScreen> {
                               AppSvgAssets.clock,
                               size: 18,
                               color: _visitTime != null
-                                  ? AppColors.success)
-                                  : AppColors.textSecondary,
+                                  ?  AppColors.success
+                                  : Colors.grey,
                             ),
                             const SizedBox(width: 10),
                             Text(
@@ -457,8 +457,8 @@ class _State extends State<AssignTechnicianScreen> {
                               style: TextStyle(
                                 fontSize: 13,
                                 color: _visitTime != null
-                                    ? AppColors.textPrimary)
-                                    : AppColors.textSecondary,
+                                    ?  AppColors.textDark
+                                    : Colors.grey,
                                 fontWeight: _visitTime != null
                                     ? FontWeight.w600
                                     : FontWeight.normal,
@@ -468,7 +468,7 @@ class _State extends State<AssignTechnicianScreen> {
                             AppSvgIcon(
                               AppSvgAssets.chevronRight,
                               size: 12,
-                              color: AppColors.textSecondary,
+                              color: AppColors.textLight,
                             ),
                           ],
                         ),
@@ -488,12 +488,12 @@ class _State extends State<AssignTechnicianScreen> {
                   children: [
                     ...['Low', 'Medium', 'High', 'Urgent'].map((p) {
                       final col = p == 'Urgent'
-                          ? Colors.red
+                          ? AppColors.error
                           : p == 'High'
-                          ? Colors.orange
+                          ? AppColors.solar
                           : p == 'Low'
-                          ? Colors.green
-                          : Colors.blue;
+                          ? AppColors.success
+                          : AppColors.primary;
                       final sel = _priority == p;
                       return Padding(
                         padding: const EdgeInsets.only(right: 8),
@@ -507,10 +507,10 @@ class _State extends State<AssignTechnicianScreen> {
                             decoration: BoxDecoration(
                               color: sel
                                   ? col.withValues(alpha: 0.15)
-                                  : AppColors.textSecondary.shade100,
+                                  : AppColors.divider,
                               borderRadius: BorderRadius.circular(20),
                               border: Border.all(
-                                color: sel ? col : AppColors.borderPrimary,
+                                color: sel ? col : Colors.grey.shade300,
                                 width: sel ? 1.5 : 1,
                               ),
                             ),
@@ -519,7 +519,7 @@ class _State extends State<AssignTechnicianScreen> {
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
-                                color: sel ? col : AppColors.textSecondary.shade600,
+                                color: sel ? col : Colors.grey.shade600,
                               ),
                             ),
                           ),
@@ -544,21 +544,21 @@ class _State extends State<AssignTechnicianScreen> {
                     hintText: 'Any special instructions...',
                     hintStyle: const TextStyle(
                       fontSize: 12,
-                      color: AppColors.textTertiary),
+                      color: AppColors.textLight,
                     ),
                     filled: true,
-                    fillColor: AppColors.bgPrimary,
+                    fillColor: AppColors.background,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: AppColors.borderPrimary),
+                      borderSide: BorderSide(color: Colors.grey.shade300),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: AppColors.borderPrimary),
+                      borderSide: BorderSide(color: Colors.grey.shade300),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: AppColors.success)),
+                      borderSide: const BorderSide(color: AppColors.success),
                     ),
                   ),
                 ),
@@ -577,25 +577,25 @@ class _State extends State<AssignTechnicianScreen> {
                           width: 18,
                           height: 18,
                           child: CircularProgressIndicator(
-                            color: Colors.white,
+                            color: AppColors.surface,
                             strokeWidth: 2,
                           ),
                         )
                       : const AppSvgIcon(
                           AppSvgAssets.userRound,
                           size: 20,
-                          color: Colors.white,
+                          color: AppColors.surface,
                         ),
                   label: Text(
                     _saving ? 'Assigning...' : 'Assign Job',
                     style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
-                      color: Colors.white,
+                      color: AppColors.surface,
                     ),
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.success),
+                    backgroundColor:  AppColors.success,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -626,7 +626,7 @@ class _Card extends StatelessWidget {
     margin: const EdgeInsets.only(bottom: 4),
     padding: const EdgeInsets.all(14),
     decoration: BoxDecoration(
-      color: Colors.white,
+      color: AppColors.surface,
       borderRadius: BorderRadius.circular(12),
       boxShadow: [
         BoxShadow(
@@ -641,14 +641,14 @@ class _Card extends StatelessWidget {
       children: [
         Row(
           children: [
-            AppSvgIcon(svgAsset, size: 14, color: AppColors.success)),
+            AppSvgIcon(svgAsset, size: 14, color:  AppColors.success),
             const SizedBox(width: 6),
             Text(
               title,
               style: const TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary),
+                color: AppColors.textDark,
               ),
             ),
           ],
@@ -669,12 +669,12 @@ class _SRow extends StatelessWidget {
     padding: const EdgeInsets.only(bottom: 5),
     child: Row(
       children: [
-        AppSvgIcon(svgAsset, size: 12, color: AppColors.textSecondary),
+        AppSvgIcon(svgAsset, size: 12, color: AppColors.background),
         const SizedBox(width: 6),
         Expanded(
           child: Text(
             value,
-            style: const TextStyle(fontSize: 12, color: AppColors.textPrimary)),
+            style: const TextStyle(fontSize: 12, color: AppColors.textDark),
           ),
         ),
       ],
@@ -688,12 +688,12 @@ class _PriorityBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = priority == 'Urgent'
-        ? Colors.red
+        ? AppColors.error
         : priority == 'High'
-        ? Colors.orange
+        ? AppColors.solar
         : priority == 'Low'
-        ? Colors.green
-        : Colors.blue;
+        ? AppColors.success
+        : AppColors.primary;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
@@ -712,8 +712,3 @@ class _PriorityBadge extends StatelessWidget {
     );
   }
 }
-
-
-
-
-

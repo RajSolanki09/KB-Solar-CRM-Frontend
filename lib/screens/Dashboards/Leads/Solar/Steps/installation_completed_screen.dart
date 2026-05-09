@@ -9,9 +9,9 @@ import 'package:solar_project/Helper/lead_themes.dart';
 import 'package:solar_project/Helper/lead_widgets.dart';
 import 'package:solar_project/Helper/spk_photo_picker.dart';
 import 'package:solar_project/data/Models/solar_leads_model.dart';
+import 'package:solar_project/core/app_colors.dart';
 
 import '../../../../../Helper/picked_photo.dart';
-import 'package:solar_project/Helper/app_colors.dart';
 
 // ── Installation Completed Screen ─────────────────────────────────────────────
 class SolarInstallationScreen extends StatefulWidget {
@@ -88,7 +88,9 @@ class _CompletedState extends State<SolarInstallationScreen> {
   }
 
   Future<void> _pickVendorCompletedDate({required bool isStructure}) async {
-    final current = isStructure ? _structureCompletedDate : _wiringCompletedDate;
+    final current = isStructure
+        ? _structureCompletedDate
+        : _wiringCompletedDate;
     final d = await showDatePicker(
       context: context,
       initialDate: current ?? DateTime.now(),
@@ -293,7 +295,7 @@ class _CompletedState extends State<SolarInstallationScreen> {
                       AppSvgAssets.calendarCheck,
                       'Structure Completed Date',
                       _structureCompletedDate,
-                      color: AppColors.info,
+                      color: AppColors.primary,
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -309,7 +311,7 @@ class _CompletedState extends State<SolarInstallationScreen> {
                       AppSvgAssets.calendarCheck,
                       'Wiring Completed Date',
                       _wiringCompletedDate,
-                      color: AppColors.info,
+                      color: AppColors.primary,
                     ),
                   ),
                 ],
@@ -438,7 +440,11 @@ Widget _infoBanner(SolarLeadsModel lead) => Container(
   ),
   child: Row(
     children: [
-      const AppSvgIcon(AppSvgAssets.userRound, size: 16, color: LeadTheme.primary),
+      const AppSvgIcon(
+        AppSvgAssets.userRound,
+        size: 16,
+        color: LeadTheme.primary,
+      ),
       const SizedBox(width: 8),
       Expanded(
         child: Column(
@@ -480,7 +486,7 @@ Widget _dateTile(
       border: Border.all(
         color: date != null
             ? color.withValues(alpha: 0.4)
-            : AppColors.borderPrimary,
+            : Colors.grey.shade300,
       ),
       borderRadius: BorderRadius.circular(8),
     ),
@@ -514,7 +520,7 @@ Widget _dateTile(
         AppSvgIcon(
           date != null ? AppSvgAssets.circleCheckBig : AppSvgAssets.arrowRight,
           size: 14,
-          color: date != null ? color : AppColors.textSecondary,
+          color: date != null ? color : AppColors.textLight,
         ),
       ],
     ),
@@ -530,9 +536,7 @@ Widget _checkTile(
   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
   decoration: BoxDecoration(
     color: LeadTheme.surface,
-    border: Border.all(
-      color: value ? Colors.green.shade300 : AppColors.borderLight,
-    ),
+    border: Border.all(color: value ? AppColors.success : AppColors.divider),
     borderRadius: BorderRadius.circular(8),
   ),
   child: Column(
@@ -543,7 +547,7 @@ Widget _checkTile(
           AppSvgIcon(
             svgAsset,
             size: 18,
-            color: value ? Colors.green : LeadTheme.textSecondary,
+            color: value ? AppColors.success : LeadTheme.textSecondary,
           ),
           const SizedBox(width: 10),
           Expanded(
@@ -552,7 +556,7 @@ Widget _checkTile(
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
-                color: value ? Colors.green.shade700 : LeadTheme.textPrimary,
+                color: value ? AppColors.success : LeadTheme.textPrimary,
               ),
             ),
           ),
@@ -594,10 +598,12 @@ Widget _yesNoButton({
   child: Container(
     padding: const EdgeInsets.symmetric(vertical: 8),
     decoration: BoxDecoration(
-      color: selected ? activeColor.withValues(alpha: 0.12) : Colors.white,
+      color: selected ? activeColor.withValues(alpha: 0.12) : AppColors.surface,
       borderRadius: BorderRadius.circular(8),
       border: Border.all(
-        color: selected ? activeColor.withValues(alpha: 0.65) : AppColors.borderPrimary,
+        color: selected
+            ? activeColor.withValues(alpha: 0.65)
+            : Colors.grey.shade300,
       ),
     ),
     alignment: Alignment.center,
@@ -645,7 +651,7 @@ Widget _saveBtn(bool saving, VoidCallback onPressed, String label) => SizedBox(
     onPressed: saving ? null : onPressed,
     style: ElevatedButton.styleFrom(
       backgroundColor: LeadTheme.primary,
-      foregroundColor: Colors.white,
+      foregroundColor: AppColors.surface,
       padding: const EdgeInsets.symmetric(vertical: 12),
       minimumSize: const Size.fromHeight(52),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -656,7 +662,7 @@ Widget _saveBtn(bool saving, VoidCallback onPressed, String label) => SizedBox(
             height: 20,
             child: CircularProgressIndicator(
               strokeWidth: 2,
-              color: Colors.white,
+              color: AppColors.surface,
             ),
           )
         : Text(
@@ -665,7 +671,3 @@ Widget _saveBtn(bool saving, VoidCallback onPressed, String label) => SizedBox(
           ),
   ),
 );
-
-
-
-

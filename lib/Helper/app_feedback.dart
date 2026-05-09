@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:solar_project/core/app_colors.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
 
 class AppFeedback {
@@ -6,12 +7,7 @@ class AppFeedback {
       GlobalKey<ScaffoldMessengerState>();
 
   static void showInfo(BuildContext context, String message) {
-    _show(
-      context,
-      message: message,
-      backgroundColor: null,
-      floating: false,
-    );
+    _show(context, message: message, backgroundColor: null, floating: false);
   }
 
   static void showSuccess(
@@ -23,7 +19,7 @@ class AppFeedback {
     _show(
       context,
       message: message,
-      backgroundColor: Colors.green.shade600,
+      backgroundColor: AppColors.success,
       floating: floating,
       svgAsset: svgAsset,
     );
@@ -37,7 +33,7 @@ class AppFeedback {
     _show(
       context,
       message: message,
-      backgroundColor: Colors.red.shade600,
+      backgroundColor: AppColors.error,
       floating: floating,
     );
   }
@@ -58,7 +54,7 @@ class AppFeedback {
         ? Text(message)
         : Row(
             children: [
-              AppSvgIcon(svgAsset, color: Colors.white, size: 16),
+              AppSvgIcon(svgAsset, color: AppColors.surface, size: 16),
               const SizedBox(width: 8),
               Text(message),
             ],

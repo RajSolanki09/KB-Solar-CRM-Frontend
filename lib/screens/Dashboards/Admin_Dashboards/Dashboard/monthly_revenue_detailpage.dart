@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
-import 'package:solar_project/Helper/app_colors.dart';
+import 'package:solar_project/core/app_colors.dart';
 
 class MonthlyRevenueDetailPage extends StatelessWidget {
   final String monthName;
@@ -37,13 +37,13 @@ class MonthlyRevenueDetailPage extends StatelessWidget {
       _Category(
         'Solar',
         solarRevenue,
-        AppColors.warning,
+         AppColors.primary,
         AppSvgAssets.sun,
       ),
       _Category(
         'Sprinkler',
         sprinklerRevenue,
-        const Color(0xFF0EA5E9),
+         AppColors.primaryLight,
         AppSvgAssets.droplet,
       ),
       _Category(
@@ -55,28 +55,28 @@ class MonthlyRevenueDetailPage extends StatelessWidget {
     ];
 
     return Scaffold(
-      backgroundColor: AppColors.bgSecondary,
+      backgroundColor:  AppColors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.bgSecondary,
+        backgroundColor:  AppColors.background,
         elevation: 0,
         centerTitle: true,
         title: Text(
           '$monthName $year',
           style: const TextStyle(
             fontWeight: FontWeight.bold,
-            color: Color(0xFF1E293B),
+            color: AppColors.textDark,
           ),
         ),
         leading: IconButton(
           icon: const AppSvgIcon(
             AppSvgAssets.chevronLeft,
-            color: Color(0xFF1E293B),
+            color: AppColors.textDark,
           ),
           onPressed: () => Navigator.pop(context),
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(height: 1, color: AppColors.borderPrimary),
+          child: Container(height: 1, color: Colors.grey.shade300),
         ),
       ),
       body: SingleChildScrollView(
@@ -90,14 +90,14 @@ class MonthlyRevenueDetailPage extends StatelessWidget {
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [AppColors.success, Color(0xFF34D399)],
+                  colors: [AppColors.primary, Color(0xFF34D399)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.success.withValues(alpha: 0.3),
+                    color:  AppColors.primary.withValues(alpha: 0.3),
                     blurRadius: 20,
                     offset: const Offset(0, 8),
                   ),
@@ -111,20 +111,20 @@ class MonthlyRevenueDetailPage extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.2),
+                          color: AppColors.surface.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: const AppSvgIcon(
                           AppSvgAssets.calendarDays,
-                          color: Colors.white,
+                          color: AppColors.surface,
                           size: 22,
                         ),
                       ),
                       const SizedBox(width: 12),
                       Text(
                         '$monthName Total Revenue',
-                        style: const TextStyle(
-                          color: Colors.white70,
+                        style:  TextStyle(
+                          color: AppColors.surface,
                           fontSize: 15,
                           fontWeight: FontWeight.w500,
                         ),
@@ -137,7 +137,7 @@ class MonthlyRevenueDetailPage extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 30,
                       fontWeight: FontWeight.w800,
-                      color: Colors.white,
+                      color: AppColors.surface,
                       letterSpacing: -0.5,
                     ),
                   ),
@@ -148,13 +148,13 @@ class MonthlyRevenueDetailPage extends StatelessWidget {
                       vertical: 5,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.15),
+                      color: AppColors.surface.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
                       '$totalLeads total entries this month',
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: AppColors.surface,
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
                       ),
@@ -172,7 +172,7 @@ class MonthlyRevenueDetailPage extends StatelessWidget {
               style: TextStyle(
                 fontSize: 17,
                 fontWeight: FontWeight.w700,
-                color: Color(0xFF1E293B),
+                color: AppColors.textDark,
               ),
             ),
             const SizedBox(height: 14),
@@ -219,7 +219,7 @@ class MonthlyRevenueDetailPage extends StatelessWidget {
               style: TextStyle(
                 fontSize: 17,
                 fontWeight: FontWeight.w700,
-                color: Color(0xFF1E293B),
+                color: AppColors.textDark,
               ),
             ),
             const SizedBox(height: 14),
@@ -228,7 +228,7 @@ class MonthlyRevenueDetailPage extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.surface,
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
@@ -309,7 +309,7 @@ class _CategoryCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
@@ -343,7 +343,7 @@ class _CategoryCard extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF1E293B),
+                    color: AppColors.textDark,
                   ),
                 ),
                 const SizedBox(height: 6),
@@ -375,7 +375,7 @@ class _CategoryCard extends StatelessWidget {
               ),
               Text(
                 '${pct.toStringAsFixed(1)}%',
-                style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                style: TextStyle(fontSize: 12, color: AppColors.background),
               ),
             ],
           ),
@@ -405,7 +405,7 @@ class _SummaryRow extends StatelessWidget {
           label,
           style: TextStyle(
             fontSize: 14,
-            color: AppColors.textSecondary,
+            color: Colors.grey.shade600,
             fontWeight: isBold ? FontWeight.w600 : FontWeight.normal,
           ),
         ),
@@ -414,16 +414,10 @@ class _SummaryRow extends StatelessWidget {
           style: TextStyle(
             fontSize: 15,
             fontWeight: isBold ? FontWeight.w700 : FontWeight.w600,
-            color: const Color(0xFF1E293B),
+            color:  AppColors.textDark,
           ),
         ),
       ],
     );
   }
 }
-
-
-
-
-
-

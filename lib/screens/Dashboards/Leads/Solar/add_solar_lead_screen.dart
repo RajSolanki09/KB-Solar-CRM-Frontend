@@ -9,8 +9,8 @@ import 'package:solar_project/Helper/app_svg_icon.dart';
 import 'package:solar_project/Helper/form_validation.dart';
 import 'package:solar_project/Helper/lead_form_widgets.dart';
 import 'package:solar_project/Helper/lead_themes.dart';
+import 'package:solar_project/core/app_colors.dart';
 import 'package:solar_project/data/Models/solar_leads_model.dart';
-import 'package:solar_project/Helper/app_colors.dart';
 
 class AddSolarLeadScreen extends StatefulWidget {
   const AddSolarLeadScreen({super.key});
@@ -71,8 +71,8 @@ class _AddSolarLeadScreenState extends State<AddSolarLeadScreen> {
       source: _source,
       referenceName: _source == 'reference'
           ? _referenceNameC.text.trim().isEmpty
-              ? null
-              : _referenceNameC.text.trim()
+                ? null
+                : _referenceNameC.text.trim()
           : null,
       note: _noteC.text.trim().isEmpty ? null : _noteC.text.trim(),
       createdAt: DateTime.now(),
@@ -109,14 +109,14 @@ class _AddSolarLeadScreenState extends State<AddSolarLeadScreen> {
         }
       },
       child: Scaffold(
-        backgroundColor: AppColors.bgSecondary),
+        backgroundColor:  AppColors.background,
         appBar: AppBar(
           backgroundColor: LeadTheme.primary,
           elevation: 0,
           leading: IconButton(
             icon: const AppSvgIcon(
               AppSvgAssets.chevronLeft,
-              color: Colors.white,
+              color: AppColors.surface,
               size: 18,
             ),
             onPressed: () => Navigator.pop(context),
@@ -124,7 +124,7 @@ class _AddSolarLeadScreenState extends State<AddSolarLeadScreen> {
           title: const Text(
             'New Solar Lead',
             style: TextStyle(
-              color: Colors.white,
+              color: AppColors.surface,
               fontSize: 16,
               fontWeight: FontWeight.w700,
             ),
@@ -266,6 +266,3 @@ class _AddSolarLeadScreenState extends State<AddSolarLeadScreen> {
     );
   }
 }
-
-
-

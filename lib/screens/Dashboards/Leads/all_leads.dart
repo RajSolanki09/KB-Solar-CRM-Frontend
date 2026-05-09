@@ -8,11 +8,11 @@ import 'package:solar_project/Cubits/SprinklerLeads/sprinkler_leads_state.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
 import 'package:solar_project/Helper/lead_themes.dart';
 import 'package:solar_project/Helper/role_helper.dart';
+import 'package:solar_project/core/app_colors.dart';
 import 'package:solar_project/screens/Dashboards/Leads/Solar/add_solar_lead_screen.dart';
 import 'package:solar_project/screens/Dashboards/Leads/Solar/solar_leads_list_screen.dart';
 import 'package:solar_project/screens/Dashboards/Leads/Sprinkler/add_sprinkler_lead_screen.dart';
 import 'package:solar_project/screens/Dashboards/Leads/Sprinkler/sprinkler_leads_list_screen.dart';
-import 'package:solar_project/Helper/app_colors.dart';
 
 class SalesLeadScreen extends StatefulWidget {
   final int initialTabIndex;
@@ -94,16 +94,16 @@ class _SalesLeadScreenState extends State<SalesLeadScreen>
         : LeadTheme.secondary;
 
     return Scaffold(
-      backgroundColor: AppColors.primaryLightest),
+      backgroundColor:  AppColors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.primaryLightest),
+        backgroundColor:  AppColors.background,
         elevation: 0,
         titleSpacing: 16,
         leading: Navigator.canPop(context)
             ? IconButton(
                 icon: const AppSvgIcon(
                   AppSvgAssets.chevronLeft,
-                  color: Colors.white,
+                  color: AppColors.surface,
                   size: 18,
                 ),
                 onPressed: () => Navigator.pop(context),
@@ -113,7 +113,7 @@ class _SalesLeadScreenState extends State<SalesLeadScreen>
           children: [
             AppSvgIcon(
               AppSvgAssets.layoutList,
-              color: AppColors.accent2),
+              color: AppColors.primary,
               size: 18,
             ),
             SizedBox(width: 8),
@@ -122,7 +122,7 @@ class _SalesLeadScreenState extends State<SalesLeadScreen>
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
-                color: AppColors.accent2),
+                color: AppColors.primary,
               ),
             ),
           ],
@@ -131,7 +131,7 @@ class _SalesLeadScreenState extends State<SalesLeadScreen>
           IconButton(
             icon: const AppSvgIcon(
               AppSvgAssets.refreshCw,
-              color: AppColors.accent2),
+              color: AppColors.primary,
             ),
             onPressed: _refreshCurrentTab,
           ),
@@ -139,13 +139,13 @@ class _SalesLeadScreenState extends State<SalesLeadScreen>
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(44),
           child: Container(
-            color: Colors.white,
+            color: AppColors.surface,
             child: TabBar(
               controller: _tabController,
               indicatorColor: activeColor,
               indicatorWeight: 2.5,
               labelColor: activeColor,
-              unselectedLabelColor: AppColors.textTertiary),
+              unselectedLabelColor:  AppColors.textLight,
               labelStyle: const TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
@@ -162,7 +162,7 @@ class _SalesLeadScreenState extends State<SalesLeadScreen>
                         children: [
                           const AppSvgIcon(AppSvgAssets.sun, size: 14),
                           const SizedBox(width: 5),
-                          const Text('Project'),
+                          const Text('Solar'),
                           if (count > 0) ...[
                             const SizedBox(width: 5),
                             _CountChip(count, LeadTheme.warning),
@@ -208,13 +208,13 @@ class _SalesLeadScreenState extends State<SalesLeadScreen>
             onPressed: _addLead,
             icon: const AppSvgIcon(
               AppSvgAssets.plus,
-              color: Colors.white,
+              color: AppColors.surface,
               size: 18,
             ),
             label: Text(
-              _tabController.index == 0 ? 'Project Lead' : 'Sprinkler Lead',
+              _tabController.index == 0 ? 'Solar Lead' : 'Sprinkler Lead',
               style: const TextStyle(
-                color: Colors.white,
+                color: AppColors.surface,
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
               ),
@@ -251,15 +251,10 @@ class _CountChip extends StatelessWidget {
         '$count',
         style: const TextStyle(
           fontSize: 10,
-          color: Colors.white,
+          color: AppColors.surface,
           fontWeight: FontWeight.w700,
         ),
       ),
     );
   }
 }
-
-
-
-
-

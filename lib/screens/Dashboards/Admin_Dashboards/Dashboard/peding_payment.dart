@@ -11,7 +11,7 @@ import 'package:solar_project/data/Models/solar_leads_model.dart';
 import 'package:solar_project/data/Models/sprinkler_lead_model.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
 import 'package:solar_project/Helper/lead_themes.dart';
-import 'package:solar_project/Helper/app_colors.dart';
+import 'package:solar_project/core/app_colors.dart';
 
 // ─── Unified pending payment entry ───────────────────────────────────────────
 class _PayEntry {
@@ -103,6 +103,10 @@ class _State extends State<AdminPendingPaymentPage>
   String _search = '';
   String _sort = 'Highest';
 
+  // ✅ FIX: Named callbacks so we can properly remove them in dispose
+  late final VoidCallback _tabListener;
+  late final VoidCallback _searchListener;
+
   static final _currency = NumberFormat.currency(
     locale: 'en_IN',
     symbol: '₹',
@@ -113,18 +117,30 @@ class _State extends State<AdminPendingPaymentPage>
   void initState() {
     super.initState();
     _tab = TabController(length: 3, vsync: this);
-    _tab.addListener(() => setState(() {}));
-    _searchCtrl.addListener(() => setState(() => _search = _searchCtrl.text));
-    // NOTE: Removed redundant fetchAllLeads() postFrameCallback here.
-    // The parent dashboard already fetches leads before pushing this screen
-    // via MultiBlocProvider + BlocProvider.value. Calling fetchAllLeads()
-    // again from a postFrameCallback on a BlocProvider.value context causes
-    // the "_elements.contains(element) is not true" assertion because the
-    // element may have shifted in the tree by the time the callback fires.
+
+    // ✅ FIX: mounted check in listeners to prevent setState after dispose
+    _tabListener = () {
+      if (mounted) setState(() {});
+    };
+    _searchListener = () {
+      if (mounted) setState(() => _search = _searchCtrl.text);
+    };
+
+    _tab.addListener(_tabListener);
+    _searchCtrl.addListener(_searchListener);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.read<SolarLeadCubit>().fetchAllLeads();
+      context.read<SprinklerLeadCubit>().fetchAllLeads();
+    });
   }
 
   @override
   void dispose() {
+    // ✅ FIX: Remove named listeners before dispose
+    _tab.removeListener(_tabListener);
+    _searchCtrl.removeListener(_searchListener);
     _tab.dispose();
     _searchCtrl.dispose();
     super.dispose();
@@ -208,20 +224,9 @@ class _State extends State<AdminPendingPaymentPage>
       case 1:
         return LeadTheme.primary;
       case 2:
-        return AppColors.primary;
+        return AppColors.primaryLight;
       default:
-        return AppColors.accent2;
-    }
-  }
-
-  /// Safe refresh — guards against context being detached after async gaps.
-  void _refreshLeads() {
-    if (!mounted) return;
-    try {
-      context.read<SolarLeadCubit>().fetchAllLeads();
-      context.read<SprinklerLeadCubit>().fetchAllLeads();
-    } catch (_) {
-      // Swallow ProviderNotFoundException if context has left the tree.
+        return AppColors.primary;
     }
   }
 
@@ -252,9 +257,9 @@ class _State extends State<AdminPendingPaymentPage>
             final totalPending = _totalPending(allEntries);
             final solarPending = _totalPending(solarEntries);
             final spkPending = _totalPending(spkEntries);
-          
+
             return Scaffold(
-              backgroundColor: AppColors.bgSecondary,
+              backgroundColor: AppColors.background,
               appBar: AppBar(
                 backgroundColor: widget.appBarColor,
                 elevation: 0,
@@ -262,10 +267,10 @@ class _State extends State<AdminPendingPaymentPage>
                     ? IconButton(
                         icon: const AppSvgIcon(
                           AppSvgAssets.chevronLeft,
-                          color: Colors.white,
+                          color: AppColors.surface,
                           size: 18,
                         ),
-                        onPressed: () => Navigator.maybePop(context),
+                        onPressed: () => Navigator.pop(context),
                       )
                     : null,
                 title: const Column(
@@ -276,12 +281,12 @@ class _State extends State<AdminPendingPaymentPage>
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
-                        color: Colors.white,
+                        color: AppColors.surface,
                       ),
                     ),
                     Text(
                       'Deal closed — balance outstanding',
-                      style: TextStyle(fontSize: 11, color: Colors.white70),
+                      style: TextStyle(fontSize: 11, color: AppColors.surface),
                     ),
                   ],
                 ),
@@ -289,19 +294,21 @@ class _State extends State<AdminPendingPaymentPage>
                   IconButton(
                     icon: const AppSvgIcon(
                       AppSvgAssets.refreshCw,
-                      color: Colors.white,
+                      color: AppColors.surface,
                     ),
-                    // Use the safe refresh helper instead of calling
-                    // context.read<>() directly in the onPressed callback.
-                    onPressed: _refreshLeads,
+                    onPressed: () {
+                      if (!mounted) return;
+                      context.read<SolarLeadCubit>().fetchAllLeads();
+                      context.read<SprinklerLeadCubit>().fetchAllLeads();
+                    },
                   ),
                 ],
               ),
               body: loading
                   ? const Center(
                       child: CircularProgressIndicator(
-                        color: AppColors.accent2,
-                      ),  
+                        color: AppColors.primary,
+                      ),
                     )
                   : Column(
                       children: [
@@ -310,16 +317,19 @@ class _State extends State<AdminPendingPaymentPage>
                           padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
                           child: Container(
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: AppColors.surface,
                               borderRadius: BorderRadius.circular(12),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.05),
+                                  color: AppColors.primary.withValues(
+                                    alpha: 0.05,
+                                  ),
                                   blurRadius: 8,
                                   offset: const Offset(0, 2),
                                 ),
                               ],
-                            ),child: TabBar(
+                            ),
+                            child: TabBar(
                               controller: _tab,
                               indicatorSize: TabBarIndicatorSize.tab,
                               indicator: BoxDecoration(
@@ -327,102 +337,28 @@ class _State extends State<AdminPendingPaymentPage>
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               dividerColor: Colors.transparent,
-                              labelColor: Colors.white,
-                              unselectedLabelColor: AppColors.textSecondary,
+                              labelColor: AppColors.surface,
+                              unselectedLabelColor: AppColors.textGray,
                               labelStyle: const TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
                               ),
                               padding: const EdgeInsets.all(4),
                               tabs: [
-                                Tab(
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children:[
-                                      const Text('All'),
-                                      if (allEntries.isNotEmpty) ...[
-                                        const SizedBox(width: 5),
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 6,
-                                            vertical: 1,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: AppColors.accent2,
-                                            borderRadius:BorderRadius.circular(10),
-                                          ),
-                                          child: Text(
-                                            '${allEntries.length}',
-                                            style: const TextStyle(
-                                              fontSize: 10,
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.w700,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ],
-                                  ),
+                                _TabItem(
+                                  'All',
+                                  allEntries.length,
+                                  AppColors.primary,
                                 ),
-                                Tab(
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      const Text('Solar'),
-                                      if (solarEntries.isNotEmpty) ...[
-                                        const SizedBox(width: 5),
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 6,
-                                            vertical: 1,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: LeadTheme.primary,
-                                            borderRadius:
-                                                BorderRadius.circular(10),
-                                          ),
-                                          child: Text(
-                                            '${solarEntries.length}',
-                                            style: const TextStyle(
-                                              fontSize: 10,
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.w700,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ],
-                                  ),
+                                _TabItem(
+                                  'Solar',
+                                  solarEntries.length,
+                                  LeadTheme.primary,
                                 ),
-                                Tab(
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      const Text('Sprinkler'),
-                                      if (spkEntries.isNotEmpty) ...[
-                                        const SizedBox(width: 5),
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 6,
-                                            vertical: 1,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: const Color(0xFF0EA5E9),
-                                            borderRadius:
-                                                BorderRadius.circular(10),
-                                          ),
-                                          child: Text(
-                                            '${spkEntries.length}',
-                                            style: const TextStyle(
-                                              fontSize: 10,
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.w700,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ],
-                                  ),
+                                _TabItem(
+                                  'Sprinkler',
+                                  spkEntries.length,
+                                  AppColors.primaryLight,
                                 ),
                               ],
                             ),
@@ -455,14 +391,14 @@ class _State extends State<AdminPendingPaymentPage>
                             ][_tab.index];
                             if (shown.isEmpty) return const SizedBox.shrink();
                             return Padding(
-                              padding: const EdgeInsets.fromLTRB(14, 6, 14, 0),
+                              padding: const EdgeInsets.all(8.0),
                               child: Align(
                                 alignment: Alignment.centerLeft,
                                 child: Text(
                                   '${shown.length} record${shown.length != 1 ? "s" : ""}',
                                   style: const TextStyle(
                                     fontSize: 11,
-                                    color: AppColors.textTertiary,
+                                    color: AppColors.textLight,
                                   ),
                                 ),
                               ),
@@ -478,10 +414,9 @@ class _State extends State<AdminPendingPaymentPage>
                               _PayTable(
                                 entries: allEntries,
                                 currency: _currency,
-                                accentColor: widget.appBarColor,
+                                accentColor: AppColors.primary,
                                 emptyMessage: 'No pending payments',
                                 emptyIcon: AppSvgAssets.indianRupee,
-                                onRefresh: _refreshLeads,
                               ),
                               _PayTable(
                                 entries: solarEntries,
@@ -489,15 +424,13 @@ class _State extends State<AdminPendingPaymentPage>
                                 accentColor: LeadTheme.primary,
                                 emptyMessage: 'No pending solar payments',
                                 emptyIcon: AppSvgAssets.sun,
-                                onRefresh: _refreshLeads,
                               ),
                               _PayTable(
                                 entries: spkEntries,
                                 currency: _currency,
-                                accentColor: const Color(0xFF0EA5E9),
+                                accentColor: AppColors.primaryLight,
                                 emptyMessage: 'No pending sprinkler payments',
                                 emptyIcon: AppSvgAssets.droplet,
-                                onRefresh: _refreshLeads,
                               ),
                             ],
                           ),
@@ -521,10 +454,6 @@ class _PayTable extends StatelessWidget {
   final Color accentColor;
   final String emptyMessage;
   final String emptyIcon;
-  // Refresh callback passed in from the parent StatefulWidget so we never
-  // call context.read<>() directly inside a StatelessWidget's onRefresh,
-  // which can crash if the element has left the tree.
-  final VoidCallback onRefresh;
 
   const _PayTable({
     required this.entries,
@@ -532,11 +461,10 @@ class _PayTable extends StatelessWidget {
     required this.accentColor,
     required this.emptyMessage,
     required this.emptyIcon,
-    required this.onRefresh,
   });
 
   static const _solar = LeadTheme.primary;
-  static const _spk = AppColors.primary;
+  static const _spk = AppColors.primaryLight;
 
   Color _typeColor(String type) => type == 'Solar' ? _solar : _spk;
 
@@ -589,13 +517,13 @@ class _PayTable extends StatelessWidget {
   }
 
   Widget _amtCell(String value, Color color, {bool bold = false}) => Text(
-        value,
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: bold ? FontWeight.w800 : FontWeight.w600,
-          color: color,
-        ),
-      );
+    value,
+    style: TextStyle(
+      fontSize: 12,
+      fontWeight: bold ? FontWeight.w800 : FontWeight.w600,
+      color: color,
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -604,20 +532,20 @@ class _PayTable extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            AppSvgIcon(emptyIcon, size: 56, color: AppColors.borderLight),
+            AppSvgIcon(emptyIcon, size: 56, color: AppColors.divider),
             const SizedBox(height: 12),
             Text(
               emptyMessage,
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: AppColors.textSecondary,
+                color: AppColors.textLight,
               ),
             ),
             const SizedBox(height: 6),
             Text(
               'All payments are settled!',
-              style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+              style: TextStyle(fontSize: 12, color: AppColors.textLight),
             ),
           ],
         ),
@@ -626,24 +554,24 @@ class _PayTable extends StatelessWidget {
 
     final isDesktop = MediaQuery.sizeOf(context).width >= 1000;
     const minWidth = 980.0;
-    const rowStyle = TextStyle(fontSize: 12, color: AppColors.textPrimary);
+    const rowStyle = TextStyle(fontSize: 12, color: AppColors.textDark);
 
     return RefreshIndicator(
       color: accentColor,
-      // Use the parent-supplied callback — never call context.read<>() here
-      // directly, because this is a StatelessWidget and its context may be
-      // detached from the BLoC provider subtree after navigation transitions.
-      onRefresh: () async => onRefresh(),
+      onRefresh: () async {
+        context.read<SolarLeadCubit>().fetchAllLeads();
+        context.read<SprinklerLeadCubit>().fetchAllLeads();
+      },
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(12, 8, 12, 40),
         child: Container(
           width: double.infinity,
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.surface,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppColors.borderLight)),
-          
+            border: Border.all(color: AppColors.divider),
+          ),
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: SizedBox(
@@ -661,9 +589,9 @@ class _PayTable extends StatelessWidget {
                   accentColor.withValues(alpha: 0.07),
                 ),
                 border: TableBorder(
-                  horizontalInside: BorderSide(color: Colors.blueGrey.shade50),
-                  bottom: BorderSide(color: Colors.blueGrey.shade100),
-                  top: BorderSide(color: Colors.blueGrey.shade100),
+                  horizontalInside: BorderSide(color: AppColors.divider),
+                  bottom: BorderSide(color: AppColors.divider),
+                  top: BorderSide(color: AppColors.divider),
                 ),
                 columns: const [
                   DataColumn(label: Text('Type')),
@@ -702,19 +630,19 @@ class _PayTable extends StatelessWidget {
                       DataCell(
                         _amtCell(
                           currency.format(e.totalAmount),
-                          AppColors.textSecondary,
+                          AppColors.textDark,
                         ),
                       ),
                       DataCell(
                         _amtCell(
                           currency.format(e.paidAmount),
-                          Colors.green.shade600,
+                          AppColors.success,
                         ),
                       ),
                       DataCell(
                         _amtCell(
                           currency.format(e.pendingAmount),
-                          Colors.red.shade500,
+                          AppColors.primaryDark,
                           bold: true,
                         ),
                       ),
@@ -765,14 +693,14 @@ class _SummaryBanner extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [AppColors.primary, AppColors.primaryLight],
+          colors: [AppColors.primaryLight, AppColors.primaryDark],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.3),
+            color: AppColors.primaryLight.withValues(alpha: 0.3),
             blurRadius: 8,
             offset: const Offset(0, 3),
           ),
@@ -783,7 +711,7 @@ class _SummaryBanner extends StatelessWidget {
         children: [
           const Text(
             'Total Outstanding',
-            style: TextStyle(fontSize: 11, color: Colors.white70),
+            style: TextStyle(fontSize: 11, color: AppColors.surface),
           ),
           const SizedBox(height: 2),
           Text(
@@ -791,19 +719,16 @@ class _SummaryBanner extends StatelessWidget {
             style: const TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.w800,
-              color: Colors.white,
+              color: AppColors.surface,
             ),
           ),
           const SizedBox(height: 10),
           Row(
             children: [
               Expanded(child: _BannerStat('☀ Solar', currency.format(solar))),
-              Container(width: 1, height: 28, color: Colors.white24),
+              Container(width: 1, height: 28, color: AppColors.surface),
               Expanded(
-                child: _BannerStat(
-                  '💧 Sprinkler',
-                  currency.format(sprinkler),
-                ),
+                child: _BannerStat('💧 Sprinkler', currency.format(sprinkler)),
               ),
             ],
           ),
@@ -818,22 +743,22 @@ class _BannerStat extends StatelessWidget {
   const _BannerStat(this.label, this.value);
   @override
   Widget build(BuildContext context) => Column(
-        children: [
-          Text(
-            label,
-            style: const TextStyle(fontSize: 10, color: Colors.white70),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w700,
-              color: Colors.white,
-            ),
-          ),
-        ],
-      );
+    children: [
+      Text(
+        label,
+        style: const TextStyle(fontSize: 10, color: AppColors.surface),
+      ),
+      const SizedBox(height: 2),
+      Text(
+        value,
+        style: const TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w700,
+          color: AppColors.surface,
+        ),
+      ),
+    ],
+  );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -862,9 +787,9 @@ class _SearchSortBar extends StatelessWidget {
             child: Container(
               height: 38,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.surface,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: AppColors.borderLight),
+                border: Border.all(color: AppColors.divider),
               ),
               child: TextField(
                 controller: ctrl,
@@ -873,7 +798,7 @@ class _SearchSortBar extends StatelessWidget {
                   hintText: 'Search name / phone / address',
                   hintStyle: const TextStyle(
                     fontSize: 12,
-                    color: AppColors.textTertiary,
+                    color: AppColors.textLight,
                   ),
                   prefixIcon: Padding(
                     padding: const EdgeInsets.all(8.0),
@@ -902,9 +827,9 @@ class _SearchSortBar extends StatelessWidget {
               height: 38,
               padding: const EdgeInsets.symmetric(horizontal: 10),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.surface,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: AppColors.borderLight),
+                border: Border.all(color: AppColors.divider),
               ),
               child: DropdownButtonHideUnderline(
                 child: DropdownButton<String>(
@@ -918,7 +843,7 @@ class _SearchSortBar extends StatelessWidget {
                   ),
                   style: const TextStyle(
                     fontSize: 12,
-                    color: AppColors.textPrimary,
+                    color: AppColors.textDark,
                   ),
                   items: ['Highest', 'Lowest', 'Newest', 'Oldest']
                       .map((s) => DropdownMenuItem(value: s, child: Text(s)))
@@ -936,7 +861,40 @@ class _SearchSortBar extends StatelessWidget {
   }
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+//  Tab item helper
+// ─────────────────────────────────────────────────────────────────────────────
+class _TabItem extends StatelessWidget {
+  final String label;
+  final int count;
+  final Color color;
+  const _TabItem(this.label, this.count, this.color);
 
-
-
-
+  @override
+  Widget build(BuildContext context) => Tab(
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(label),
+        if (count > 0) ...[
+          const SizedBox(width: 5),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Text(
+              '$count',
+              style: const TextStyle(
+                fontSize: 10,
+                color: AppColors.surface,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
+      ],
+    ),
+  );
+}

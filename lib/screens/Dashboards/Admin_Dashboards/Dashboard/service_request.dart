@@ -14,12 +14,11 @@ import 'package:solar_project/data/Models/admin_user_model.dart';
 import 'package:solar_project/services/api_service.dart';
 import 'package:solar_project/Helper/app_feedback.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
-import 'package:solar_project/Helper/common_widgets.dart';
 import 'package:solar_project/screens/Dashboards/Admin_Dashboards/Services/service_detail_screen.dart';
-import 'package:solar_project/Helper/app_colors.dart';
+import 'package:solar_project/core/app_colors.dart';
 
 // ── Brand colour for service ──────────────────────────────────────────────────
-const _kGreen = AppColors.primary;
+const _kGreen = AppColors.success;
 
 class ServiceRequestPage extends StatefulWidget {
   final Color appBarColor;
@@ -118,6 +117,7 @@ class _State extends State<ServiceRequestPage> {
       return;
     }
 
+    // ── Step 1: warning dialog ────────────────────────────────────────────
     final confirmed = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
@@ -131,13 +131,13 @@ class _State extends State<ServiceRequestPage> {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: AppColors.primaryLightest,
+                color: AppColors.errorLight,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: const AppSvgIcon(
                 AppSvgAssets.trash2,
                 size: 20,
-                color: AppColors.primary,
+                color: AppColors.error,
               ),
             ),
             const SizedBox(width: 10),
@@ -146,7 +146,8 @@ class _State extends State<ServiceRequestPage> {
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary),
+                color: AppColors.textDark,
+              ),
             ),
           ],
         ),
@@ -159,9 +160,9 @@ class _State extends State<ServiceRequestPage> {
               width: double.infinity,
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppColors.bgSecondary,
+                color: AppColors.background,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: AppColors.borderLight),
+                border: Border.all(color:  AppColors.divider),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -171,20 +172,23 @@ class _State extends State<ServiceRequestPage> {
                     style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary),
+                      color: AppColors.textDark,
+                    ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     service.phone,
                     style: const TextStyle(
                       fontSize: 12,
-                      color: AppColors.textSecondary),
+                      color: AppColors.textGray,
+                    ),
                   ),
                   Text(
                     service.serviceId,
                     style: const TextStyle(
                       fontSize: 12,
-                      color: AppColors.textSecondary),
+                      color: AppColors.textGray,
+                    ),
                   ),
                 ],
               ),
@@ -194,22 +198,30 @@ class _State extends State<ServiceRequestPage> {
               width: double.infinity,
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: AppColors.primaryLightest,
+                color: const Color(0xFFFFF7ED),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: AppColors.primaryLightest),
+                border: Border.all(color: const Color(0xFFFED7AA)),
               ),
               child: const Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   AppSvgIcon(
-                    AppSvgAssets.chevronDown,
+                    AppSvgAssets.triangleAlert,
                     size: 16,
-                    color: AppColors.accent2,
+                    color: AppColors.warning,
                   ),
-                  SizedBox(width: 12),
-                  Text(
-                    'This action cannot be undone.',
-                    style: TextStyle(color: AppColors.textSecondary),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'This will permanently remove ALL data including '
+                      'service details, assignments, and records. '
+                      'This action cannot be undone.',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Color(0xFF9A3412),
+                        height: 1.4,
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -218,30 +230,224 @@ class _State extends State<ServiceRequestPage> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Cancel'),
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: AppColors.textGray),
+            ),
           ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('Delete'),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor:  AppColors.error,
+              foregroundColor: AppColors.surface,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text(
+              'Yes, Delete Permanently',
+              style: TextStyle(fontWeight: FontWeight.w600),
+            ),
           ),
         ],
       ),
     );
 
-    if (confirmed == true) {
-      try {
-        await context.read<ServiceLeadCubit>().deleteService(service.id);
-        if (mounted) {
-          AppFeedback.showSuccess(context, 'Service request deleted successfully');
-        }
-      } catch (e) {
-        if (mounted) {
-          AppFeedback.showError(context, 'Failed to delete: $e');
-        }
-      }
+    if (confirmed != true || !mounted) return;
+
+    // ── Step 2: second confirmation ───────────────────────────────────────
+    final doubleConfirmed = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+        contentPadding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
+        actionsPadding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
+        title: const Text(
+          'Are you absolutely sure?',
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w700,
+            color: AppColors.error,
+          ),
+        ),
+        content: Text(
+          'You are about to permanently delete the service request for '
+          '"${service.customerName}". All records will be gone forever.',
+          style: const TextStyle(
+            fontSize: 13,
+            color: AppColors.textDark,
+            height: 1.5,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text(
+              'No, Keep It',
+              style: TextStyle(
+                color: AppColors.textDark,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFF7F1D1D),
+              foregroundColor: AppColors.surface,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text(
+              'Delete Forever',
+              style: TextStyle(fontWeight: FontWeight.w700),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (doubleConfirmed != true || !mounted) return;
+
+    // deleteService() internally calls fetchAllServices() on success
+    // and emits ServiceLeadError on failure — the BlocConsumer listener
+    // already shows the error snackbar, so we only need to handle success.
+    await context.read<ServiceLeadCubit>().deleteService(service.id);
+
+    if (!mounted) return;
+    final latestState = context.read<ServiceLeadCubit>().state;
+    if (latestState is! ServiceLeadError) {
+      AppFeedback.showSuccess(
+        context,
+        '${service.customerName}\'s service request permanently deleted.',
+      );
     }
   }
+
+  // ── Open detail ───────────────────────────────────────────────────────────
+  Future<void> _openDetail(
+    BuildContext ctx,
+    ServiceRequestModel service,
+  ) async {
+    final cubit = ctx.read<ServiceLeadCubit>();
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => BlocProvider.value(
+          value: cubit,
+          child: ServiceDetailScreen(service: service, isAdmin: true),
+        ),
+      ),
+    );
+    cubit.fetchAllServices();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor:  AppColors.background,
+      appBar: AppBar(
+        backgroundColor: widget.appBarColor,
+        elevation: 0,
+        leading: Navigator.canPop(context)
+            ? IconButton(
+                icon: const AppSvgIcon(
+                  AppSvgAssets.chevronLeft,
+                  color: AppColors.surface,
+                  size: 18,
+                ),
+                onPressed: () => Navigator.pop(context),
+              )
+            : null,
+        title: const Row(
+          children: [
+            AppSvgIcon(AppSvgAssets.cog, color: AppColors.surface, size: 18),
+            SizedBox(width: 8),
+            Text(
+              'Service Requests',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: AppColors.surface,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          IconButton(
+            icon: const AppSvgIcon(AppSvgAssets.refreshCw, color: AppColors.surface),
+            onPressed: _refresh,
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => _openAddServicePage(context),
+        backgroundColor: _kGreen,
+        icon: const AppSvgIcon(AppSvgAssets.plus, color: AppColors.surface),
+        label: const Text(
+          'New Request',
+          style: TextStyle(color: AppColors.surface, fontWeight: FontWeight.w600),
+        ),
+      ),
+      body: BlocConsumer<ServiceLeadCubit, ServiceLeadState>(
+        listener: (ctx, state) {
+          if (state is ServiceLeadError) {
+            ScaffoldMessenger.of(ctx).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: AppColors.error,
+              ),
+            );
+          }
+          if (state is ServiceLeadSaved) {
+            ScaffoldMessenger.of(ctx).showSnackBar(
+              const SnackBar(
+                content: Text('Service saved successfully'),
+                backgroundColor: AppColors.success,
+              ),
+            );
+          }
+        },
+        builder: (ctx, state) {
+          if (state is ServiceLeadLoading) {
+            return const Center(
+              child: CircularProgressIndicator(color: _kGreen),
+            );
+          }
+
+          if (state is ServiceLeadError) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  AppSvgIcon(
+                    AppSvgAssets.triangleAlert,
+                    size: 48,
+                    color: AppColors.error,
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    state.message,
+                    style: const TextStyle(color: Colors.grey),
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton.icon(
+                    onPressed: _refresh,
+                    icon: const AppSvgIcon(AppSvgAssets.refreshCw, size: 16),
+                    label: const Text('Retry'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _kGreen,
+                      foregroundColor: AppColors.surface,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
 
           if (state is ServiceLeadsLoaded) {
             final all = state.services;
@@ -260,26 +466,26 @@ class _State extends State<ServiceRequestPage> {
                       vertical: 10,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.accent2.withValues(alpha: 0.07),
+                      color: _kGreen.withValues(alpha: 0.07),
                       borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: AppColors.accent2.withValues(alpha: 0.2)),
+                      border: Border.all(color: _kGreen.withValues(alpha: 0.2)),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        _Stat('Total', '${all.length}', AppColors.accent2),
+                        _Stat('Total', '${all.length}', _kGreen),
                         Container(
                           width: 1,
                           height: 24,
-                          color: AppColors.borderLight,
+                          color: AppColors.divider,
                         ),
-                        _Stat('Open', '$open', AppColors.accent2),
+                        _Stat('Open', '$open', AppColors.solar),
                         Container(
                           width: 1,
                           height: 24,
-                          color: AppColors.borderLight,
+                          color: AppColors.divider,
                         ),
-                        _Stat('Done', '$done', AppColors.accent2),
+                        _Stat('Done', '$done', AppColors.primary),
                       ],
                     ),
                   ),
@@ -294,10 +500,10 @@ class _State extends State<ServiceRequestPage> {
                         child: Container(
                           height: 38,
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: AppColors.surface,
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: AppColors.borderLight,
-                          )
+                            border: Border.all(color: AppColors.divider),
+                          ),
                           child: TextField(
                             controller: _searchCtrl,
                             onChanged: (v) => setState(() => _searchText = v),
@@ -305,16 +511,16 @@ class _State extends State<ServiceRequestPage> {
                               hintText: 'Search name / phone / ID / tech',
                               hintStyle: TextStyle(
                                 fontSize: 12,
-                                color: AppColors.textTertiary,
+                                color: AppColors.textLight,
                               ),
-                          prefixIcon: Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: AppSvgIcon(
-                              AppSvgAssets.search,
-                              size: 16,
-                              color: AppColors.accent2,
-                            ),
-                          ),
+                              prefixIcon: Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: AppSvgIcon(
+                                  AppSvgAssets.search,
+                                  size: 16,
+                                  color: _kGreen,
+                                ),
+                              ),
                               border: InputBorder.none,
                               contentPadding: EdgeInsets.symmetric(
                                 vertical: 10,
@@ -323,7 +529,7 @@ class _State extends State<ServiceRequestPage> {
                             style: const TextStyle(fontSize: 13),
                           ),
                         ),
-                      ),),
+                      ),
                       const SizedBox(width: 8),
                       Expanded(
                         flex: 2,
@@ -331,12 +537,12 @@ class _State extends State<ServiceRequestPage> {
                           height: 38,
                           padding: const EdgeInsets.symmetric(horizontal: 10),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: AppColors.surface,
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
                               color: _filter == 'All'
-                                  ? AppColors.borderLight
-                                  : AppColors.accent2.withValues(alpha: 0.5),
+                                  ? AppColors.divider
+                                  : _kGreen.withValues(alpha: 0.5),
                               width: _filter == 'All' ? 1 : 1.5,
                             ),
                           ),
@@ -345,40 +551,43 @@ class _State extends State<ServiceRequestPage> {
                               value: _filter,
                               isExpanded: true,
                               isDense: true,
-                             icon: const AppSvgIcon(
-                               AppSvgAssets.chevronDown,
-                               size: 16,
-                               color: AppColors.accent2,
-                             ),
-                             style: TextStyle(
-                 fontSize: 13,
-                 color: _filter == 'All'
-                     ? AppColors.textSecondary
-                     : AppColors.accent2,
-                 fontWeight: _filter == 'All'
-                     ? FontWeight.normal
-                     : FontWeight.w600,
-               ),
-                              items: [
-                                      'All',
-                                      'Open',
-                                      'Assigned',
-                                      'In Progress',
-                                      'Completed',
-                                      'Free',
-                                      'Paid',
-                                    ]
-                                        .map(
-                                          (s) => DropdownMenuItem(
-                                            value: s,
-                                            child: Text(
-                                              s,
-                                 fontSize: 12,
-                                 color: AppColors.textPrimary),
+                              icon: const AppSvgIcon(
+                                AppSvgAssets.chevronDown,
+                                size: 16,
+                                color: _kGreen,
+                              ),
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: _filter == 'All'
+                                    ?  AppColors.textGray
+                                    : _kGreen,
+                                fontWeight: _filter == 'All'
+                                    ? FontWeight.normal
+                                    : FontWeight.w600,
+                              ),
+                              items:
+                                  [
+                                        'All',
+                                        'Open',
+                                        'Assigned',
+                                        'In Progress',
+                                        'Completed',
+                                        'Free',
+                                        'Paid',
+                                      ]
+                                      .map(
+                                        (s) => DropdownMenuItem(
+                                          value: s,
+                                          child: Text(
+                                            s,
+                                            style: const TextStyle(
+                                              fontSize: 12,
+                                              color: AppColors.textDark,
                                             ),
                                           ),
-                                        )
-                                        .toList(),
+                                        ),
+                                      )
+                                      .toList(),
                               onChanged: (v) {
                                 if (v != null) setState(() => _filter = v);
                               },
@@ -400,36 +609,24 @@ class _State extends State<ServiceRequestPage> {
                         '${filtered.length} request${filtered.length != 1 ? "s" : ""}',
                         style: const TextStyle(
                           fontSize: 11,
-                          color: AppColors.textTertiary),
+                          color: AppColors.textLight,
                         ),
                       ),
                     ),
-          ),
+                  ),
 
                 // ── Table sections / empty state ─────────────────────────
                 Expanded(
                   child: filtered.isEmpty
                       ? Center(
-                 child: Column(
-                   crossAxisAlignment: CrossAxisAlignment.start,
-                   children: [
-                     const SizedBox(height: 4),
-                     Container(
-                       width: double.infinity,
-                       padding: const EdgeInsets.all(12),
-                       decoration: BoxDecoration(
-                         color: AppColors.bgSecondary,
-                         borderRadius: BorderRadius.circular(8),
-                         border: Border.all(color: AppColors.borderLight,
-                       ),
-                       child: Column(
-                         crossAxisAlignment: CrossAxisAlignment.start,
-                         children: [
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
                               AppSvgIcon(
                                 AppSvgAssets.cog,
                                 size: 52,
-                                color: AppColors.borderLight,
-                             ),
+                                color: AppColors.divider,
+                              ),
                               const SizedBox(height: 10),
                               Text(
                                 all.isEmpty
@@ -437,17 +634,17 @@ class _State extends State<ServiceRequestPage> {
                                     : 'No requests match filter',
                                 style: TextStyle(
                                   fontSize: 14,
-                                  color: AppColors.textSecondary,
+                                  color: AppColors.textLight,
                                 ),
                               ),
                             ],
                           ),
                         )
-                        : RefreshIndicator(
-                            color: AppColors.accent2,
-                            onRefresh: () async => _refresh(),
-                            child: LayoutBuilder(
-                              builder: (context, constraints) {
+                      : RefreshIndicator(
+                          color: _kGreen,
+                          onRefresh: () async => _refresh(),
+                          child: LayoutBuilder(
+                            builder: (context, constraints) {
                               final sorted = [...filtered]
                                 ..sort(
                                   (a, b) => b.createdAt.compareTo(a.createdAt),
@@ -467,8 +664,7 @@ class _State extends State<ServiceRequestPage> {
                                   : constraints.maxWidth;
 
                               // Filter completed services
-                              final completed =
-                                  _filterCompleted(all);
+                              final completed = _filterCompleted(all);
                               final sortedCompleted = [...completed]
                                 ..sort(
                                   (a, b) => b.createdAt.compareTo(a.createdAt),
@@ -538,28 +734,14 @@ class _State extends State<ServiceRequestPage> {
                             },
                           ),
                         ),
-                ),  
+                ),
               ],
             );
           }
-          
           return const SizedBox.shrink();
         },
       ),
     );
-  }
-
-  Future<void> _openDetail(BuildContext context, ServiceRequestModel service) async {
-    await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => BlocProvider.value(
-          value: context.read<ServiceLeadCubit>(),
-          child: ServiceDetailScreen(service: service),
-        ),
-      ),
-    );
-    if (mounted) _refresh();
   }
 
   // ── Open Add Service as Full Page ──────────────────────────────────────────
@@ -569,27 +751,27 @@ class _State extends State<ServiceRequestPage> {
       MaterialPageRoute(
         builder: (_) => BlocProvider.value(
           value: ctx.read<ServiceLeadCubit>(),
-               child: Scaffold(
-                 backgroundColor: AppColors.bgSecondary,
-                 appBar: AppBar(
-                   backgroundColor: AppColors.accent2,
-                   elevation: 0,
+          child: Scaffold(
+            backgroundColor:  AppColors.background,
+            appBar: AppBar(
+              backgroundColor: _kGreen,
+              elevation: 0,
               leading: IconButton(
                 icon: const AppSvgIcon(
                   AppSvgAssets.chevronLeft,
-                  color: Colors.white,
+                  color: AppColors.surface,
                 ),
                 onPressed: () => Navigator.pop(context),
               ),
               title: const Text(
                 'New Service Request',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: AppColors.surface,
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                 ),
               ),
-              iconTheme: const IconThemeData(color: Colors.white),
+              iconTheme: const IconThemeData(color: AppColors.surface),
             ),
             body: const SafeArea(child: _AddServiceSheet()),
           ),
@@ -624,16 +806,16 @@ class _TableSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-      return Container(
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.borderLight),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color:  AppColors.divider),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
             child: Column(
@@ -644,26 +826,28 @@ class _TableSection extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary),
+                    color: AppColors.textDark,
                   ),
+                ),
                 const SizedBox(height: 2),
                 Text(
                   subtitle,
                   style: const TextStyle(
                     fontSize: 11,
-                    color: AppColors.textTertiary),
+                    color: AppColors.textLight,
                   ),
                 ),
               ],
             ),
           ),
-         if (services.isEmpty && showEmptyMessage)
-                          const Padding(
-                            padding: EdgeInsets.fromLTRB(16, 0, 16, 14),
-                            child: Text(
-                              'No requests in the last 7 days.',
-                              style: TextStyle(fontSize: 12, color: AppColors.textTertiary)),
-                          )
+          if (services.isEmpty && showEmptyMessage)
+            const Padding(
+              padding: EdgeInsets.fromLTRB(16, 0, 16, 14),
+              child: Text(
+                'No requests in the last 7 days.',
+                style: TextStyle(fontSize: 12, color: AppColors.textLight),
+              ),
+            )
           else if (services.isNotEmpty)
             _ServiceDataTable(
               services: services,
@@ -707,9 +891,9 @@ class _CollapsibleTableSection extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.borderLight),
+        border: Border.all(color:  AppColors.divider),
       ),
       child: Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
@@ -724,12 +908,12 @@ class _CollapsibleTableSection extends StatelessWidget {
             style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary),
+              color: AppColors.textDark,
             ),
           ),
           subtitle: Text(
             subtitle,
-            style: const TextStyle(fontSize: 11, color: AppColors.textTertiary)),
+            style: const TextStyle(fontSize: 11, color: AppColors.textLight),
           ),
           children: [
             if (services.isEmpty)
@@ -739,7 +923,7 @@ class _CollapsibleTableSection extends StatelessWidget {
                   alignment: Alignment.centerLeft,
                   child: Text(
                     'No older requests found.',
-                    style: TextStyle(fontSize: 12, color: AppColors.textTertiary)),
+                    style: TextStyle(fontSize: 12, color: AppColors.textLight),
                   ),
                 ),
               )
@@ -779,17 +963,17 @@ class _ServiceDataTable extends StatelessWidget {
   Color _statusColor(String s) {
     switch (s) {
       case 'Open':
-        return AppColors.accent2;
+        return Colors.grey;
       case 'Assigned':
-        return AppColors.accent2;
+        return AppColors.primary;
       case 'In Progress':
-        return AppColors.accent2;
+        return AppColors.solar;
       case 'Completed':
-        return AppColors.accent2;
+        return AppColors.success;
       case 'Resolved':
-        return AppColors.accent2;
+        return Colors.teal;
       default:
-        return AppColors.accent2;
+        return Colors.grey;
     }
   }
 
@@ -815,7 +999,7 @@ class _ServiceDataTable extends StatelessWidget {
 
   Widget _chargeBadge(ServiceRequestModel s) {
     final isPaid = s.chargeType == 'Paid';
-    final color = isPaid ? AppColors.accent2 : AppColors.accent2;
+    final color = isPaid ? AppColors.solar : AppColors.success;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
       decoration: BoxDecoration(
@@ -843,7 +1027,7 @@ class _ServiceDataTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDesktop = MediaQuery.sizeOf(context).width >= 1000;
-    const rowStyle = TextStyle(fontSize: 12, color: AppColors.textPrimary);
+    const rowStyle = TextStyle(fontSize: 12, color: AppColors.textDark);
 
     return SizedBox(
       width: double.infinity,
@@ -859,18 +1043,18 @@ class _ServiceDataTable extends StatelessWidget {
             horizontalMargin: isDesktop ? 18 : 12,
             columnSpacing: isDesktop ? 24 : 14,
             headingRowColor: WidgetStateProperty.all(
-              AppColors.accent2.withValues(alpha: 0.08),
+              _kGreen.withValues(alpha: 0.08),
             ),
             dataRowColor: WidgetStateProperty.resolveWith((states) {
-                if (states.contains(WidgetState.selected)) {
-                  return AppColors.accent2.withValues(alpha: 0.05);
-                }
+              if (states.contains(WidgetState.selected)) {
+                return _kGreen.withValues(alpha: 0.05);
+              }
               return null;
             }),
             border: TableBorder(
-              horizontalInside: BorderSide(color: Colors.blueGrey.shade50),
-              bottom: BorderSide(color: Colors.blueGrey.shade100),
-              top: BorderSide(color: Colors.blueGrey.shade100),
+              horizontalInside: BorderSide(color: AppColors.primary),
+              bottom: BorderSide(color: AppColors.primary),
+              top: BorderSide(color: AppColors.primary),
             ),
             columns: [
               _buildColumn('Customer'),
@@ -924,16 +1108,17 @@ class _ServiceDataTable extends StatelessWidget {
                             style: rowStyle.copyWith(
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
-                              color: AppColors.accent2),
+                              color: _kGreen,
                             ),
                           )
                         : Text(
                             '-',
                             style: rowStyle.copyWith(
                               fontSize: 11,
-                              color: AppColors.textSecondary,
+                              color: AppColors.textLight,
                             ),
                           ),
+                  ),
                   // Actions (admin only)
                   if (isAdmin)
                     DataCell(
@@ -945,8 +1130,8 @@ class _ServiceDataTable extends StatelessWidget {
                             AppSvgAssets.trash2,
                             size: 18,
                             color: canDelete
-                                ? AppColors.accent2
-                                : AppColors.borderPrimary,
+                                ?  AppColors.error
+                                : Colors.grey.shade300,
                           ),
                         ),
                       ),
@@ -961,16 +1146,16 @@ class _ServiceDataTable extends StatelessWidget {
   }
 }
 
-
 DataColumn _buildColumn(String title) => DataColumn(
   label: Text(
     title,
     style: const TextStyle(
       fontWeight: FontWeight.bold,
-      color: AppColors.accent2,
+      color: AppColors.success,
     ),
   ),
 );
+
 // ─────────────────────────────────────────────────────────────
 //  Add Service Bottom Sheet (unchanged)
 // ─────────────────────────────────────────────────────────────
@@ -1067,7 +1252,7 @@ class _AddState extends State<_AddServiceSheet> {
         'assignedTo': _techId,
         'serviceDate': scheduledAt.toIso8601String(),
       });
-      if (mounted) safePop(context);
+      if (mounted) Navigator.pop(context);
     } catch (_) {
       if (mounted) setState(() => _saving = false);
     }
@@ -1082,7 +1267,7 @@ class _AddState extends State<_AddServiceSheet> {
       builder: (ctx, child) => Theme(
         data: Theme.of(
           ctx,
-        ).copyWith(colorScheme: const ColorScheme.light(primary: AppColors.accent2)),
+        ).copyWith(colorScheme: const ColorScheme.light(primary: _kGreen)),
         child: child!,
       ),
     );
@@ -1096,7 +1281,7 @@ class _AddState extends State<_AddServiceSheet> {
       builder: (ctx, child) => Theme(
         data: Theme.of(
           ctx,
-        ).copyWith(colorScheme: const ColorScheme.light(primary: AppColors.accent2)),
+        ).copyWith(colorScheme: const ColorScheme.light(primary: _kGreen)),
         child: child!,
       ),
     );
@@ -1116,7 +1301,7 @@ class _AddState extends State<_AddServiceSheet> {
   Widget build(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       padding: EdgeInsets.only(
@@ -1137,7 +1322,7 @@ class _AddState extends State<_AddServiceSheet> {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: AppColors.borderPrimary,
+                    color: Colors.grey.shade300,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -1148,8 +1333,9 @@ class _AddState extends State<_AddServiceSheet> {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary),
+                  color: AppColors.textDark,
                 ),
+              ),
               const SizedBox(height: 16),
               _field(
                 _name,
@@ -1183,8 +1369,9 @@ class _AddState extends State<_AddServiceSheet> {
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary),
+                  color: AppColors.textDark,
                 ),
+              ),
               const SizedBox(height: 6),
               Row(
                 children: [
@@ -1198,13 +1385,13 @@ class _AddState extends State<_AddServiceSheet> {
                         ),
                         decoration: BoxDecoration(
                           color: _serviceDate != null
-                              ? AppColors.accent2.withValues(alpha: 0.08)
-                              : AppColors.bgPrimary,
+                              ? _kGreen.withValues(alpha: 0.08)
+                              : AppColors.background,
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
                             color: _serviceDate != null
-                                ? AppColors.accent2
-                                : AppColors.borderPrimary,
+                                ? _kGreen
+                                : Colors.grey.shade300,
                           ),
                         ),
                         child: Row(
@@ -1212,9 +1399,9 @@ class _AddState extends State<_AddServiceSheet> {
                             AppSvgIcon(
                               AppSvgAssets.calendarDays,
                               size: 16,
-                               color: _serviceDate != null
-                                   ? AppColors.accent2
-                                   : AppColors.textSecondary,
+                              color: _serviceDate != null
+                                  ? _kGreen
+                                  : Colors.grey,
                             ),
                             const SizedBox(width: 8),
                             Expanded(
@@ -1224,12 +1411,12 @@ class _AddState extends State<_AddServiceSheet> {
                                     : 'Select date *',
                                 style: TextStyle(
                                   fontSize: 13,
-                                   color: _serviceDate != null
-                                       ? AppColors.textPrimary
-                                       : AppColors.textTertiary,
-                                   fontWeight: _serviceDate != null
-                                       ? FontWeight.w600
-                                       : FontWeight.normal,
+                                  color: _serviceDate != null
+                                      ?  AppColors.textDark
+                                      :  AppColors.textLight,
+                                  fontWeight: _serviceDate != null
+                                      ? FontWeight.w600
+                                      : FontWeight.normal,
                                 ),
                               ),
                             ),
@@ -1249,13 +1436,13 @@ class _AddState extends State<_AddServiceSheet> {
                         ),
                         decoration: BoxDecoration(
                           color: _serviceTime != null
-                              ? AppColors.accent2.withValues(alpha: 0.08)
-                              : AppColors.bgPrimary,
+                              ? _kGreen.withValues(alpha: 0.08)
+                              : AppColors.background,
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
                             color: _serviceTime != null
-                                ? AppColors.accent2
-                                : AppColors.borderPrimary,
+                                ? _kGreen
+                                : Colors.grey.shade300,
                           ),
                         ),
                         child: Row(
@@ -1263,9 +1450,9 @@ class _AddState extends State<_AddServiceSheet> {
                             AppSvgIcon(
                               AppSvgAssets.clock,
                               size: 16,
-                               color: _serviceTime != null
-                                   ? AppColors.accent2
-                                   : AppColors.textSecondary,
+                              color: _serviceTime != null
+                                  ? _kGreen
+                                  : Colors.grey,
                             ),
                             const SizedBox(width: 8),
                             Expanded(
@@ -1275,12 +1462,12 @@ class _AddState extends State<_AddServiceSheet> {
                                     : 'Select time *',
                                 style: TextStyle(
                                   fontSize: 13,
-                                   color: _serviceTime != null
-                                       ? AppColors.textPrimary
-                                       : AppColors.textTertiary,
-                                   fontWeight: _serviceTime != null
-                                       ? FontWeight.w600
-                                       : FontWeight.normal,
+                                  color: _serviceTime != null
+                                      ?  AppColors.textDark
+                                      :  AppColors.textLight,
+                                  fontWeight: _serviceTime != null
+                                      ? FontWeight.w600
+                                      : FontWeight.normal,
                                 ),
                               ),
                             ),
@@ -1301,25 +1488,26 @@ class _AddState extends State<_AddServiceSheet> {
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary),
+                      color: AppColors.textDark,
                     ),
                   ),
                   const SizedBox(width: 16),
                   _chip(
                     'Free',
                     _chargeType == 'Free',
-                    AppColors.accent2,
+                    AppColors.success,
                     () => setState(() => _chargeType = 'Free'),
                   ),
                   const SizedBox(width: 8),
                   _chip(
                     'Paid',
                     _chargeType == 'Paid',
-                    AppColors.accent2,
+                    AppColors.solar,
                     () => setState(() => _chargeType = 'Paid'),
                   ),
                 ],
               ),
+
               if (_chargeType == 'Paid') ...[
                 const SizedBox(height: 10),
                 _field(
@@ -1337,22 +1525,23 @@ class _AddState extends State<_AddServiceSheet> {
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary),
+                  color: AppColors.textDark,
                 ),
+              ),
               const SizedBox(height: 6),
               _loadingTech
                   ? const Center(child: CircularProgressIndicator())
                   : _techList.isEmpty
                   ? const Text(
                       'No service technicians found',
-                      style: TextStyle(color: AppColors.textSecondary),
+                      style: TextStyle(color: Colors.grey),
                     )
                   : Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       decoration: BoxDecoration(
-                        color: AppColors.bgPrimary,
+                        color: AppColors.background,
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: AppColors.borderPrimary),
+                        border: Border.all(color: Colors.grey.shade300),
                       ),
                       child: DropdownButtonHideUnderline(
                         child: DropdownButton<String>(
@@ -1390,14 +1579,14 @@ class _AddState extends State<_AddServiceSheet> {
                 child: ElevatedButton(
                   onPressed: _saving ? null : _save,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.accent2,
+                    backgroundColor: _kGreen,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
                   child: _saving
                       ? const CircularProgressIndicator(
-                          color: Colors.white,
+                          color: AppColors.surface,
                           strokeWidth: 2,
                         )
                       : const Text(
@@ -1405,7 +1594,7 @@ class _AddState extends State<_AddServiceSheet> {
                           style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w700,
-                            color: Colors.white,
+                            color: AppColors.surface,
                           ),
                         ),
                 ),
@@ -1413,6 +1602,7 @@ class _AddState extends State<_AddServiceSheet> {
             ],
           ),
         ),
+      ),
     );
   }
 
@@ -1447,17 +1637,17 @@ class _AddState extends State<_AddServiceSheet> {
           child: AppSvgIcon(svgAsset, size: 16, color: _kGreen),
         ),
         counterStyle: isPhone
-            ? const TextStyle(fontSize: 11, color: AppColors.textTertiary)
+            ? const TextStyle(fontSize: 11, color: AppColors.textLight)
             : const TextStyle(fontSize: 0, height: 0),
         filled: true,
-        fillColor: AppColors.bgPrimary,
+        fillColor: AppColors.background,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: AppColors.borderPrimary),
+          borderSide: BorderSide(color: Colors.grey.shade300),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: AppColors.borderPrimary),
+          borderSide: BorderSide(color: Colors.grey.shade300),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
@@ -1486,12 +1676,10 @@ class _AddState extends State<_AddServiceSheet> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
         decoration: BoxDecoration(
-          color: selected
-              ? color.withValues(alpha: 0.15)
-              : AppColors.textSecondary,
+          color: selected ? color.withValues(alpha: 0.15) : AppColors.divider,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: selected ? color : AppColors.borderPrimary,
+            color: selected ? color : Colors.grey.shade300,
             width: selected ? 1.5 : 1,
           ),
         ),
@@ -1500,9 +1688,10 @@ class _AddState extends State<_AddServiceSheet> {
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w600,
-            color: selected ? color : AppColors.textSecondary),
+            color: selected ? color :  AppColors.textGray,
           ),
         ),
+      ),
     );
   }
 }
@@ -1528,14 +1717,8 @@ class _Stat extends StatelessWidget {
       ),
       Text(
         label,
-        style: const TextStyle(fontSize: 10, color: AppColors.textTertiary),
+        style: const TextStyle(fontSize: 10, color: AppColors.textLight),
       ),
     ],
   );
 }
-
-
-
-
-
-

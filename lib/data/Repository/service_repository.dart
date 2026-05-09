@@ -1,22 +1,36 @@
-// lib/data/Repository/service_repository.dart
+// lib/data/Repositories/service_repository.dart
 
 import 'package:dio/dio.dart';
 import 'package:solar_project/Helper/picked_photo.dart';
 import 'package:solar_project/core/constants/api_constants.dart';
-import 'package:solar_project/core/network/dio_client.dart';
+import 'package:solar_project/core/network/dio_client.dart'; // ← same TokenStorage as ApiService
 import 'package:solar_project/data/Models/service_request_model.dart';
 
-// NOTE: DioClient.baseUrl already includes /api, so paths here are relative
-// to that — e.g. ApiEndpoints.service = '/service' → resolves to /api/service.
-
 class ServiceRepository {
-  // ✅ Use shared DioClient — gets the web-safe timeout guard, JWT interceptor,
-  //    and correct baseUrl automatically. No duplicate Dio setup needed.
-  final DioClient _client;
+  late final Dio _dio;
 
-  ServiceRepository({DioClient? client}) : _client = client ?? DioClient();
+  ServiceRepository() {
+    _dio = Dio(
+      BaseOptions(
+        baseUrl: ApiConstants.serverUrl,
+        connectTimeout: const Duration(seconds: 30),
+        receiveTimeout: const Duration(seconds: 30),
+      ),
+    );
 
-  Dio get _dio => _client.dio;
+    // ✅ Use the same TokenStorage as ApiService — guarantees same key + same store
+    _dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) async {
+          final token = await TokenStorage.read();
+          if (token != null && token.isNotEmpty) {
+            options.headers['Authorization'] = 'Bearer $token';
+          }
+          handler.next(options);
+        },
+      ),
+    );
+  }
 
   Exception _error(dynamic e) {
     if (e is DioException) {
@@ -59,7 +73,7 @@ class ServiceRepository {
   // ── GET ALL ────────────────────────────────────────────────────────────────
   Future<List<ServiceRequestModel>> getAllServices() async {
     try {
-      final res = await _dio.get(ApiEndpoints.service);
+      final res = await _dio.get(ApiConstants.apiPath(ApiEndpoints.service));
       final list = res.data['services'] as List? ?? [];
       return list
           .map((e) => ServiceRequestModel.fromJson(e as Map<String, dynamic>))
@@ -72,7 +86,9 @@ class ServiceRepository {
   // ── GET SINGLE ─────────────────────────────────────────────────────────────
   Future<ServiceRequestModel> getSingleService(String id) async {
     try {
-      final res = await _dio.get(ApiEndpoints.serviceById(id));
+      final res = await _dio.get(
+        ApiConstants.apiPath('${ApiEndpoints.service}/$id'),
+      );
       return ServiceRequestModel.fromJson(
         res.data['service'] as Map<String, dynamic>,
       );
@@ -84,7 +100,10 @@ class ServiceRepository {
   // ── CREATE ─────────────────────────────────────────────────────────────────
   Future<ServiceRequestModel> createService(Map<String, dynamic> data) async {
     try {
-      final res = await _dio.post(ApiEndpoints.service, data: data);
+      final res = await _dio.post(
+        ApiConstants.apiPath(ApiEndpoints.service),
+        data: data,
+      );
       return ServiceRequestModel.fromJson(
         res.data['service'] as Map<String, dynamic>,
       );
@@ -99,7 +118,10 @@ class ServiceRepository {
     Map<String, dynamic> data,
   ) async {
     try {
-      final res = await _dio.put(ApiEndpoints.serviceById(id), data: data);
+      final res = await _dio.put(
+        ApiConstants.apiPath('${ApiEndpoints.service}/$id'),
+        data: data,
+      );
       return ServiceRequestModel.fromJson(
         res.data['service'] as Map<String, dynamic>,
       );
@@ -116,7 +138,7 @@ class ServiceRepository {
   ) async {
     try {
       final res = await _dio.post(
-        ApiEndpoints.servicePayment(id),
+        ApiConstants.apiPath('${ApiEndpoints.service}/$id/payment'),
         data: {'amount': amount, 'paymentMode': mode},
       );
       return ServiceRequestModel.fromJson(
@@ -139,7 +161,7 @@ class ServiceRepository {
         afterPhotos: afterPhotos,
       );
       final res = await _dio.post(
-        ApiEndpoints.servicePhotos(id),
+        ApiConstants.apiPath('${ApiEndpoints.service}/$id/photos'),
         data: form,
         options: Options(contentType: 'multipart/form-data'),
       );
@@ -154,7 +176,7 @@ class ServiceRepository {
   // ── DELETE ─────────────────────────────────────────────────────────────────
   Future<void> deleteService(String id) async {
     try {
-      await _dio.delete(ApiEndpoints.serviceById(id));
+      await _dio.delete(ApiConstants.apiPath('${ApiEndpoints.service}/$id'));
     } catch (e) {
       throw _error(e);
     }

@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:solar_project/Helper/app_feedback.dart';
 import 'package:solar_project/Helper/lead_themes.dart';
+import 'package:solar_project/core/app_colors.dart';
 import 'package:solar_project/services/api_service.dart';
-import 'package:solar_project/Helper/app_colors.dart';
 
 class MaterialCustomerPipelineScreen extends StatefulWidget {
   final String customerId;
@@ -341,9 +341,9 @@ class _MaterialCustomerPipelineScreenState
   }
 
   Color _dotColor(int index) {
-    if (_doneFor(index)) return AppColors.primary);
+    if (_doneFor(index)) return AppColors.success;
     if (_activeStep == index) return LeadTheme.primary;
-    return AppColors.primaryLightest);
+    return  AppColors.divider;
   }
 
   String _materialNameById(String? id) {
@@ -440,7 +440,7 @@ class _MaterialCustomerPipelineScreenState
           Expanded(
             child: Text(
               label,
-              style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+              style: const TextStyle(fontSize: 12, color: AppColors.textGray),
             ),
           ),
           Text(
@@ -448,7 +448,7 @@ class _MaterialCustomerPipelineScreenState
             style: const TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF0F172A),
+              color: AppColors.textDark,
             ),
           ),
         ],
@@ -461,20 +461,20 @@ class _MaterialCustomerPipelineScreenState
       width: double.infinity,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.bgSecondary),
+        color:  AppColors.background,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.bgPrimary)),
+        border: Border.all(color:  AppColors.divider),
       ),
       child: const Row(
         children: [
-          Icon(Icons.lock_outline_rounded, size: 18, color: AppColors.textSecondary)),
+          Icon(Icons.lock_outline_rounded, size: 18, color: AppColors.textGray),
           SizedBox(width: 8),
           Expanded(
             child: Text(
               'Is step ko unlock karne ke liye previous step complete karein.',
               style: TextStyle(
                 fontSize: 12,
-                color: Color(0xFF475569),
+                color: AppColors.textGray,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -491,11 +491,11 @@ class _MaterialCustomerPipelineScreenState
     final summary = _stepSummary(index);
     final showSummary = done && !isActive && summary.isNotEmpty;
 
-     final titleColor = done
-         ? AppColors.accent1)
-         : isActive
-         ? AppColors.accent1)
-         : AppColors.textTertiary);
+    final titleColor = done
+        ?  AppColors.success
+        : isActive
+        ? LeadTheme.primary
+        :  AppColors.textLight;
 
     return IntrinsicHeight(
       child: Row(
@@ -527,7 +527,7 @@ class _MaterialCustomerPipelineScreenState
                         ? const Icon(
                             Icons.check_rounded,
                             size: 14,
-                            color: Colors.white,
+                            color: AppColors.surface,
                           )
                         : Text(
                             '${index + 1}',
@@ -535,8 +535,8 @@ class _MaterialCustomerPipelineScreenState
                               fontSize: 11,
                               fontWeight: FontWeight.w700,
                               color: isActive
-                                  ? Colors.white
-                                  : const Color(0xFF334155),
+                                  ? AppColors.surface
+                                  :  AppColors.textGray,
                             ),
                           ),
                   ),
@@ -547,9 +547,9 @@ class _MaterialCustomerPipelineScreenState
                       width: 2,
                       margin: const EdgeInsets.symmetric(vertical: 4),
                       decoration: BoxDecoration(
-                         color: done
-                             ? AppColors.primaryLightest)
-                             : AppColors.bgPrimary),
+                        color: done
+                            ? const Color(0xFFBBF7D0)
+                            :  AppColors.divider,
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -589,10 +589,10 @@ class _MaterialCustomerPipelineScreenState
                               vertical: 3,
                             ),
                             decoration: BoxDecoration(
-                              color: AppColors.accent1).withValues(alpha: 0.08),
+                              color: LeadTheme.primary.withValues(alpha: 0.08),
                               borderRadius: BorderRadius.circular(6),
                               border: Border.all(
-                                color: AppColors.accent1).withValues(
+                                color: LeadTheme.primary.withValues(
                                   alpha: 0.25,
                                 ),
                               ),
@@ -602,7 +602,7 @@ class _MaterialCustomerPipelineScreenState
                               style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w600,
-                                color: AppColors.accent1),
+                                color: LeadTheme.primary,
                               ),
                             ),
                           ),
@@ -615,9 +615,9 @@ class _MaterialCustomerPipelineScreenState
                       width: double.infinity,
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: AppColors.bgSecondary),
+                        color:  AppColors.background,
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: AppColors.bgPrimary)),
+                        border: Border.all(color:  AppColors.divider),
                       ),
                       child: Column(
                         children: summary
@@ -632,9 +632,9 @@ class _MaterialCustomerPipelineScreenState
                       width: double.infinity,
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: AppColors.surface,
                         borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: AppColors.bgPrimary)),
+                        border: Border.all(color:  AppColors.divider),
                       ),
                       child: content,
                     ),
@@ -665,10 +665,10 @@ class _MaterialCustomerPipelineScreenState
     final progress = doneCount / totalSteps;
 
     return Scaffold(
-      backgroundColor: AppColors.bgSecondary),
+      backgroundColor:  AppColors.background,
       appBar: AppBar(
         backgroundColor: color,
-        foregroundColor: Colors.white,
+        foregroundColor: AppColors.surface,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
@@ -716,7 +716,7 @@ class _MaterialCustomerPipelineScreenState
                                   const Text(
                                     'Material Customer',
                                     style: TextStyle(
-                                      color: Colors.white70,
+                                      color: AppColors.surface,
                                       fontSize: 12,
                                       fontWeight: FontWeight.w600,
                                     ),
@@ -725,7 +725,7 @@ class _MaterialCustomerPipelineScreenState
                                   Text(
                                     customerName,
                                     style: const TextStyle(
-                                      color: Colors.white,
+                                      color: AppColors.surface,
                                       fontSize: 18,
                                       fontWeight: FontWeight.w800,
                                     ),
@@ -734,7 +734,7 @@ class _MaterialCustomerPipelineScreenState
                                   Text(
                                     mobile,
                                     style: const TextStyle(
-                                      color: Colors.white70,
+                                      color: AppColors.surface,
                                       fontSize: 13,
                                       fontWeight: FontWeight.w500,
                                     ),
@@ -748,16 +748,20 @@ class _MaterialCustomerPipelineScreenState
                                 vertical: 5,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.18),
+                                color: AppColors.surface.withValues(
+                                  alpha: 0.18,
+                                ),
                                 borderRadius: BorderRadius.circular(999),
                                 border: Border.all(
-                                  color: Colors.white.withValues(alpha: 0.24),
+                                  color: AppColors.surface.withValues(
+                                    alpha: 0.24,
+                                  ),
                                 ),
                               ),
                               child: Text(
                                 status,
                                 style: const TextStyle(
-                                  color: Colors.white,
+                                  color: AppColors.surface,
                                   fontWeight: FontWeight.w700,
                                   fontSize: 12,
                                 ),
@@ -771,11 +775,11 @@ class _MaterialCustomerPipelineScreenState
                           child: LinearProgressIndicator(
                             value: progress,
                             minHeight: 7,
-                            backgroundColor: Colors.white.withValues(
+                            backgroundColor: AppColors.surface.withValues(
                               alpha: 0.25,
                             ),
                             valueColor: const AlwaysStoppedAnimation<Color>(
-                              Colors.white,
+                              AppColors.surface,
                             ),
                           ),
                         ),
@@ -783,7 +787,7 @@ class _MaterialCustomerPipelineScreenState
                         Text(
                           '$doneCount / $totalSteps steps completed',
                           style: const TextStyle(
-                            color: Colors.white,
+                            color: AppColors.surface,
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                           ),
@@ -801,7 +805,7 @@ class _MaterialCustomerPipelineScreenState
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
-                          color: AppColors.textPrimary),
+                          color: AppColors.textDark,
                         ),
                       ),
                     ),
@@ -810,7 +814,7 @@ class _MaterialCustomerPipelineScreenState
                     width: double.infinity,
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.surface,
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: [
                         BoxShadow(
@@ -1034,10 +1038,10 @@ class _MaterialCustomerPipelineScreenState
                               vertical: 10,
                             ),
                             decoration: BoxDecoration(
-                              color: AppColors.bgSecondary),
+                              color:  AppColors.background,
                               borderRadius: BorderRadius.circular(8),
                               border: Border.all(
-                                color: AppColors.bgPrimary),
+                                color:  AppColors.divider,
                               ),
                             ),
                             child: Text(
@@ -1046,7 +1050,7 @@ class _MaterialCustomerPipelineScreenState
                                   : 'Project completion pending.',
                               style: const TextStyle(
                                 fontSize: 12,
-                                color: Color(0xFF475569),
+                                color: AppColors.textGray,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -1067,10 +1071,10 @@ class _MaterialCustomerPipelineScreenState
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
           elevation: 0,
-          backgroundColor: AppColors.primary),
-          foregroundColor: Colors.white,
-          disabledBackgroundColor: AppColors.bgPrimary),
-          disabledForegroundColor: AppColors.textTertiary),
+          backgroundColor:  AppColors.primary,
+          foregroundColor: AppColors.surface,
+          disabledBackgroundColor:  AppColors.divider,
+          disabledForegroundColor: AppColors.textLight,
           padding: const EdgeInsets.symmetric(vertical: 12),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
@@ -1083,7 +1087,7 @@ class _MaterialCustomerPipelineScreenState
                 height: 18,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.surface),
                 ),
               )
             : const Text('Save Step'),
@@ -1091,8 +1095,3 @@ class _MaterialCustomerPipelineScreenState
     );
   }
 }
-
-
-
-
-

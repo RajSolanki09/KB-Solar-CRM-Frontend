@@ -7,8 +7,8 @@ import 'package:solar_project/Helper/app_feedback.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
 import 'package:solar_project/Helper/lead_form_widgets.dart';
 import 'package:solar_project/Helper/lead_themes.dart';
+import 'package:solar_project/core/app_colors.dart';
 import 'package:solar_project/data/Models/sprinkler_lead_model.dart';
-import 'package:solar_project/Helper/app_colors.dart';
 
 class AddSprinklerLeadScreen extends StatefulWidget {
   const AddSprinklerLeadScreen({super.key});
@@ -87,10 +87,12 @@ class _State extends State<AddSprinklerLeadScreen> {
           : waterSourceMap[selectedWaterSource],
       cropType: cropC.text.trim().isEmpty ? null : cropC.text.trim(),
       source: selectedSource == null ? null : sourceMap[selectedSource],
-        referenceName: sourceMap[selectedSource] == 'reference'
-          ? (referenceNameC.text.trim().isEmpty ? null : referenceNameC.text.trim())
+      referenceName: sourceMap[selectedSource] == 'reference'
+          ? (referenceNameC.text.trim().isEmpty
+                ? null
+                : referenceNameC.text.trim())
           : null,
-        note: noteC.text.trim().isEmpty ? null : noteC.text.trim(),
+      note: noteC.text.trim().isEmpty ? null : noteC.text.trim(),
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
     );
@@ -116,14 +118,14 @@ class _State extends State<AddSprinklerLeadScreen> {
         }
       },
       child: Scaffold(
-        backgroundColor: AppColors.bgSecondary),
+        backgroundColor:  AppColors.background,
         appBar: AppBar(
           backgroundColor: LeadTheme.secondary,
           elevation: 0,
           leading: IconButton(
             icon: const AppSvgIcon(
               AppSvgAssets.chevronLeft,
-              color: Colors.white,
+              color: AppColors.surface,
               size: 18,
             ),
             onPressed: () => Navigator.pop(context),
@@ -131,7 +133,7 @@ class _State extends State<AddSprinklerLeadScreen> {
           title: const Text(
             'New Sprinkler Lead',
             style: TextStyle(
-              color: Colors.white,
+              color: AppColors.surface,
               fontSize: 16,
               fontWeight: FontWeight.w700,
             ),
@@ -169,7 +171,7 @@ class _State extends State<AddSprinklerLeadScreen> {
                 prefixText: '+91  ',
                 prefixStyle: const TextStyle(
                   fontSize: 13.5,
-                  color: AppColors.textPrimary),
+                  color: AppColors.textDark,
                   fontWeight: FontWeight.w500,
                 ),
                 counterText: '',
@@ -269,7 +271,3 @@ class _State extends State<AddSprinklerLeadScreen> {
     );
   }
 }
-
-
-
-

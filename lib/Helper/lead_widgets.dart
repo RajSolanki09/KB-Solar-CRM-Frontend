@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
-import 'package:solar_project/Helper/app_colors.dart';
+import 'package:solar_project/core/app_colors.dart';
 
 // ─────────────────────────────────────────────
 //  COMPACT CARD
@@ -42,7 +42,7 @@ class CompactRow extends StatelessWidget {
             child: Text(
               value,
               textAlign: TextAlign.end,
-              style: const TextStyle(fontSize: 13, color: AppColors.textPrimary),
+              style: const TextStyle(fontSize: 13, color: AppColors.textDark),
             ),
           ),
         ],
@@ -65,7 +65,7 @@ class SectionTitle extends StatelessWidget {
       style: const TextStyle(
         fontSize: 13,
         fontWeight: FontWeight.w600,
-        color: AppColors.textPrimary,
+        color: AppColors.textDark,
       ),
     );
   }
@@ -82,7 +82,7 @@ class StatusBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     return Chip(
       label: Text(status, style: const TextStyle(fontSize: 11)),
-      backgroundColor: Colors.blue.shade50,
+      backgroundColor: AppColors.primary,
       padding: EdgeInsets.zero,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
     );
@@ -155,19 +155,25 @@ class CompactStepper extends StatelessWidget {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: isDone
-                        ? Colors.green
+                        ? AppColors.success
                         : isCurrent
-                        ? Colors.blue
-                        : AppColors.borderPrimary,
+                        ? AppColors.primary
+                        : Colors.grey.shade300,
                   ),
                   child: Center(
                     child: isDone
-                        ? const AppSvgIcon(AppSvgAssets.check, size: 13, color: Colors.white)
+                        ? const AppSvgIcon(
+                            AppSvgAssets.check,
+                            size: 13,
+                            color: AppColors.surface,
+                          )
                         : Text(
                             '${i + 1}',
                             style: TextStyle(
                               fontSize: 11,
-                              color: isCurrent ? Colors.white : AppColors.textSecondary,
+                              color: isCurrent
+                                  ? AppColors.surface
+                                  : Colors.black54,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -183,10 +189,10 @@ class CompactStepper extends StatelessWidget {
                           ? FontWeight.w600
                           : FontWeight.normal,
                       color: isDone
-                          ? Colors.green.shade700
+                          ? AppColors.success
                           : isCurrent
-                          ? Colors.blue.shade700
-                          : AppColors.textSecondary,
+                          ? AppColors.primary
+                          : AppColors.background,
                     ),
                   ),
                 ),
@@ -197,12 +203,12 @@ class CompactStepper extends StatelessWidget {
                       vertical: 2,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.blue.shade50,
+                      color: AppColors.primary,
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: const Text(
                       "Current",
-                      style: TextStyle(fontSize: 10, color: AppColors.info),
+                      style: TextStyle(fontSize: 10, color: AppColors.primary),
                     ),
                   ),
               ],
@@ -213,8 +219,3 @@ class CompactStepper extends StatelessWidget {
     );
   }
 }
-
-
-
-
-

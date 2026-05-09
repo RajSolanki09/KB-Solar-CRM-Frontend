@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
-import 'package:solar_project/Helper/app_colors.dart';
 
 class AppInputField extends StatelessWidget {
   final TextEditingController controller;
@@ -44,7 +43,7 @@ class AppInputField extends StatelessWidget {
         labelText: label,
         prefixIcon: Padding(
           padding: const EdgeInsets.all(12),
-          child: AppSvgIcon(svgIcon, size: 20, color: AppColors.textSecondary), 
+          child: AppSvgIcon(svgIcon, size: 20, color: Colors.grey.shade600),
         ),
         suffixIcon: suffixIcon,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
@@ -52,6 +51,3 @@ class AppInputField extends StatelessWidget {
     );
   }
 }
-
-
-

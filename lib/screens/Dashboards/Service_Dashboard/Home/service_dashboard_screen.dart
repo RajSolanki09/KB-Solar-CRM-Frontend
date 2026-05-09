@@ -8,7 +8,7 @@ import 'package:solar_project/Helper/ui_helper.dart';
 import 'package:solar_project/data/Models/service_request_model.dart';
 import 'package:solar_project/screens/Dashboards/Service_Dashboard/Home/all_services_screen.dart';
 import 'package:solar_project/services/api_service.dart';
-import 'package:solar_project/Helper/app_colors.dart';
+import 'package:solar_project/core/app_colors.dart';    
 
 class ServiceDashboardPage extends StatefulWidget {
   const ServiceDashboardPage({super.key});
@@ -59,12 +59,12 @@ class _State extends State<ServiceDashboardPage> {
         children: [
           Positioned.fill(
             child: CircleAvatar(
-              backgroundColor: AppColors.primaryLightest,
+              backgroundColor: AppColors.primaryTint,
               backgroundImage: imageUrl != null ? NetworkImage(imageUrl) : null,
               child: imageUrl == null
                   ? AppSvgIcon(
                       AppSvgAssets.userRound,
-                      color: AppColors.accent1,
+                      color: AppColors.primary,
                       size: size * 0.52,
                     )
                   : null,
@@ -76,11 +76,11 @@ class _State extends State<ServiceDashboardPage> {
             child: Container(
               width: size * 0.26,
               height: size * 0.26,
-                decoration: BoxDecoration(
-                  color: AppColors.accent1,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 1.4),
-                ),
+              decoration: BoxDecoration(
+                color:  AppColors.success,
+                shape: BoxShape.circle,
+                border: Border.all(color: AppColors.surface, width: 1.4),
+              ),
             ),
           ),
         ],
@@ -140,264 +140,118 @@ class _State extends State<ServiceDashboardPage> {
         final isRefreshing = state is ServiceLeadLoading && services.isNotEmpty;
 
         return Scaffold(
-        backgroundColor: AppColors.primaryLightest,
-        body: SafeArea(
-             child: isLoading
-                 ? const Center(
-                     child: CircularProgressIndicator(color: AppColors.accent2))
-                 : RefreshIndicator(
-                    color: AppColors.accent1,
+          backgroundColor:  AppColors.background,
+          appBar: AppBar(
+            backgroundColor:  AppColors.background,
+            elevation: 0,
+            scrolledUnderElevation: 0,
+            centerTitle: false,
+            automaticallyImplyLeading: false,
+            title: Row(
+              children: [
+                // ── Profile Avatar ──────────────────────────────────
+                _buildProfileAvatar(size: 40),
+                const SizedBox(width: 12),
+
+                // ── Name + Greeting ─────────────────────────────────
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _profileUser != null
+                          ? (_profileUser!['name'] ??
+                                    _profileUser!['fullName'] ??
+                                    'Team Member')
+                                .toString()
+                          : 'Team Member',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 15,
+                        color: AppColors.darkNavy,
+                        letterSpacing: -0.3,
+                      ),
+                    ),
+                    Text(
+                      _getGreeting(),
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w400,
+                        color: AppColors.textLight,
+                      ),
+                    ),
+                  ],
+                ),
+
+                // ── Center Title ────────────────────────────────────
+                const Spacer(),
+                const Text(
+                  'Service Dashboard',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 20,
+                    color: AppColors.primary,
+                  ),
+                ),
+                const Spacer(),
+              ],
+            ),
+            actions: [
+              if (isRefreshing)
+                const Padding(
+                  padding: EdgeInsets.all(14),
+                  child: SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                )
+              else
+                Container(
+                  margin: const EdgeInsets.only(right: 12, top: 8, bottom: 8),
+                  child: Material(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(10),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(10),
+                      onTap: () =>
+                          ctx.read<ServiceLeadCubit>().fetchAllServices(),
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color:  AppColors.primaryTint),
+                        ),
+                        child: const AppSvgIcon(
+                          AppSvgAssets.refreshCw,
+                          color: AppColors.primary,
+                          size: 18,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          body: SafeArea(
+            child: isLoading
+                ? const Center(
+                    child: CircularProgressIndicator(color: AppColors.primary),
+                  )
+                : RefreshIndicator(
+                    color:  AppColors.primary,
                     onRefresh: () =>
-                        context.read<ServiceLeadCubit>().fetchAllServices(),
+                        ctx.read<ServiceLeadCubit>().fetchAllServices(),
                     child: SingleChildScrollView(
-                       physics: const AlwaysScrollableScrollPhysics(),
-                       padding: EdgeInsets.fromLTRB(
-                         isMobile ? 16 : 28,
-                         12,
-                         isMobile ? 16 : 28,
-                         24,
-                       ),
-                       child: Column(
-                         crossAxisAlignment: CrossAxisAlignment.start,
-                         children: [
-                           // ── Summary Strip ──────────────────────────
-                           _ServiceSummaryStrip(
-                             total: total,
-                             free: free,
-                             paid: paid,
-                             completed: completed,
-                           ),
-                           const SizedBox(height: 12),
-
-                           // ── Assignment Banner ──────────────────────
-                           if (total > 0)
-                             Container(
-                               width: double.infinity,
-                               margin: const EdgeInsets.only(bottom: 12),
-                               padding: const EdgeInsets.symmetric(
-                                 horizontal: 10,
-                                 vertical: 7,
-                               ),
-                               decoration: BoxDecoration(
-                                 color: AppColors.bgPrimary,
-                                 borderRadius: BorderRadius.circular(8),
-                                 border: Border.all(
-                                   color: AppColors.accent1.withOpacity(0.20),
-                                 ),
-                               ),
-                               child: Row(
-                                 children: [
-                                   const AppSvgIcon(
-                                     AppSvgAssets.idCard,
-                                     color: AppColors.accent1,
-                                   ),
-                                   const SizedBox(width: 6),
-                                   Text(
-                                     '$total active service${total == 1 ? '' : \'s\'}',
-                                     style: TextStyle(
-                                       fontWeight: FontWeight.w800,
-                                       color: AppColors.accent1,
-                                       fontSize: 12),
-                                   
-                                   const Spacer(),
-                                   Text(
-                                     '🔧 $inProg in progress  ⏳ $pending pending',
-                                     style: TextStyle(
-                                       color: AppColors.textSecondary,
-                                       fontSize: 11),
-                                   ),
-                                 ],
-                               ),
-                             ),
-
-                           // ── Overview Heading ───────────────────────
-                           const _SectionHeading(title: 'Overview'),
-                           const SizedBox(height: 12),
-
-                           // ── Dashboard Grid ─────────────────────────
-                           GridView.count(
-                             crossAxisCount: crossAxisCount,
-                             crossAxisSpacing: isMobile ? 12 : 16,
-                             mainAxisSpacing: isMobile ? 12 : 16,
-                             shrinkWrap: true,
-                             physics: const NeverScrollableScrollPhysics(),
-                             childAspectRatio: isMobile ? 1.55 : 1.65,
-                             children: [
-                               DashboardCard(
-                                 title: 'Total Services',
-                                 value: '$total',
-                                 svgAsset: AppSvgAssets.clipboardList,
-                                 cardColor: AppColors.accent1,
-                                 onTap: () => _go(ServiceFilter.all),
-                               ),
-                               DashboardCard(
-                                 title: 'Today Services',
-                                 value: '$today',
-                                 svgAsset: AppSvgAssets.calendarDays,
-                                 cardColor: AppColors.accent1,
-                                 onTap: () => _go(ServiceFilter.today),
-                               ),
-                               DashboardCard(
-                                 title: 'Pending',
-                                 value: '$pending',
-                                 svgAsset: AppSvgAssets.triangleAlert,
-                                 cardColor: AppColors.accent1,
-                                 onTap: () => _go(ServiceFilter.pending),
-                               ),
-                               DashboardCard(
-                                 title: 'In Progress',
-                                 value: '$inProg',
-                                 svgAsset: AppSvgAssets.refreshCw,
-                                 cardColor: AppColors.accent1,
-                                 onTap: () => _go(ServiceFilter.inProgress),
-                               ),
-                               DashboardCard(
-                                 title: 'Completed',
-                                 value: '$completed',
-                                 svgAsset: AppSvgAssets.circleCheckBig,
-                                 cardColor: AppColors.accent1,
-                                 onTap: () => _go(ServiceFilter.completed),
-                               ),
-                               DashboardCard(
-                                 title: 'Free Service',
-                                 value: '$free',
-                                 svgAsset: AppSvgAssets.handshake,
-                                 cardColor: AppColors.accent1,
-                                 onTap: () => _go(ServiceFilter.free),
-                               ),
-                               DashboardCard(
-                                 title: 'Paid Service',
-                                 value: '$paid',
-                                 svgAsset: AppSvgAssets.indianRupee,
-                                 cardColor: AppColors.accent1,
-                                 onTap: () => _go(ServiceFilter.paid),
-                               ),
-                             ],
-                           ),
-                         ],
-                       ),
-                     ),
-                   ),
-           ),
-                       child: Column(
-                         crossAxisAlignment: CrossAxisAlignment.start,
-                         children: [
-                           // ── Summary Strip ──────────────────────────
-                           _ServiceSummaryStrip(
-                             total: total,
-                             free: free,
-                             paid: paid,
-                             completed: completed,
-                           ),
-                           const SizedBox(height: 12),
-
-                           // ── Assignment Banner ──────────────────────
-                           if (total > 0)
-                             Container(
-                               width: double.infinity,
-                               margin: const EdgeInsets.only(bottom: 12),
-                               padding: const EdgeInsets.symmetric(
-                                 horizontal: 10,
-                                 vertical: 7,
-                               ),
-                               decoration: BoxDecoration(
-                                 color: AppColors.bgPrimary,
-                                 borderRadius: BorderRadius.circular(8),
-                                 border: Border.all(
-                                   color: AppColors.accent1.withOpacity(0.20),
-                                 ),
-                               ),
-                               child: Row(
-                                 children: [
-                                   const AppSvgIcon(
-                                     AppSvgAssets.idCard,
-                                     color: AppColors.accent1,
-                                     ),
-                                   const SizedBox(width: 6),
-                                   Text(
-                                     '$total active service${total == 1 ? '' : \'s\'},
-                                     style: TextStyle(
-                                       fontWeight: FontWeight.w800,
-                                       color: AppColors.accent1,
-                                       fontSize: 12),
-                                   ),
-                                   const Spacer(),
-                                   Text(
-                                     '🔧 $inProg in progress  ⏳ $pending pending',
-                                     style: TextStyle(
-                                       color: AppColors.textSecondary,
-                                       fontSize: 11),
-                                   ),
-                                 ],
-                               ),
-                             ),
-
-                           // ── Overview Heading ───────────────────────
-                           const _SectionHeading(title: 'Overview'),
-                           const SizedBox(height: 12),
-
-                           // ── Dashboard Grid ─────────────────────────
-                           GridView.count(
-                             crossAxisCount: crossAxisCount,
-                             crossAxisSpacing: isMobile ? 12 : 16,
-                             mainAxisSpacing: isMobile ? 12 : 16,
-                             shrinkWrap: true,
-                             physics: const NeverScrollableScrollPhysics(),
-                             childAspectRatio: isMobile ? 1.55 : 1.65,
-                             children: [
-                               DashboardCard(
-                                 title: 'Total Services',
-                                 value: '$total',
-                                 svgAsset: AppSvgAssets.clipboardList,
-                                 cardColor: AppColors.accent1,
-                                 onTap: () => _go(ServiceFilter.all),
-                               ),
-                               DashboardCard(
-                                 title: 'Today Services',
-                                 value: '$today',
-                                 svgAsset: AppSvgAssets.calendarDays,
-                                 cardColor: AppColors.accent1,
-                                 onTap: () => _go(ServiceFilter.today),
-                               ),
-                               DashboardCard(
-                                 title: 'Pending',
-                                 value: '$pending',
-                                 svgAsset: AppSvgAssets.triangleAlert,
-                                 cardColor: AppColors.accent1,
-                                 onTap: () => _go(ServiceFilter.pending),
-                               ),
-                               DashboardCard(
-                                 title: 'In Progress',
-                                 value: '$inProg',
-                                 svgAsset: AppSvgAssets.refreshCw,
-                                 cardColor: AppColors.accent1,
-                                 onTap: () => _go(ServiceFilter.inProgress),
-                               ),
-                               DashboardCard(
-                                 title: 'Completed',
-                                 value: '$completed',
-                                 svgAsset: AppSvgAssets.circleCheckBig,
-                                 cardColor: AppColors.accent1,
-                                 onTap: () => _go(ServiceFilter.completed),
-                               ),
-                               DashboardCard(
-                                 title: 'Free Service',
-                                 value: '$free',
-                                 svgAsset: AppSvgAssets.handshake,
-                                 cardColor: AppColors.accent1,
-                                 onTap: () => _go(ServiceFilter.free),
-                               ),
-                               DashboardCard(
-                                 title: 'Paid Service',
-                                 value: '$paid',
-                                 svgAsset: AppSvgAssets.indianRupee,
-                                 cardColor: AppColors.accent1,
-                                 onTap: () => _go(ServiceFilter.paid),
-                               ),
-                             ],
-                           ),
-                         ],
-                       ),
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: EdgeInsets.fromLTRB(
+                        isMobile ? 16 : 28,
+                        12,
+                        isMobile ? 16 : 28,
+                        24,
+                      ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -419,30 +273,28 @@ class _State extends State<ServiceDashboardPage> {
                                 horizontal: 10,
                                 vertical: 7,
                               ),
-                               decoration: BoxDecoration(
-                                 color: AppColors.bgPrimary,
-                                 borderRadius: BorderRadius.circular(8),
-                                 border: Border.all(
-                                   color: const Color(
-                                     AppColors.accent1,
-                                   ).withValues(alpha: 0.20),
-                                 ),
-                               ),
+                              decoration: BoxDecoration(
+                                color:  AppColors.primaryTint,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: const Color(
+                                    0xFF7B2FF7,
+                                  ).withValues(alpha: 0.20),
+                                ),
+                              ),
                               child: Row(
                                 children: [
                                   const AppSvgIcon(
                                     AppSvgAssets.idCard,
-                                    color: AppColors.accent1),
+                                    color: AppColors.primary,
                                     size: 14,
                                   ),
                                   const SizedBox(width: 6),
                                   Text(
                                     '$total active service${total == 1 ? '' : 's'}',
-                   style: TextStyle(
-                     fontWeight: FontWeight.w800,
-                     fontSize: 20,
-                     color: AppColors.accent1,
-                                  
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w800,
+                                      color: AppColors.primary,
                                       fontSize: 12,
                                     ),
                                   ),
@@ -450,14 +302,14 @@ class _State extends State<ServiceDashboardPage> {
                                   Text(
                                     '🔧 $inProg in progress  ⏳ $pending pending',
                                     style: TextStyle(
-                                      color: AppColors.textSecondary,
+                                      color: AppColors.background,
                                       fontSize: 11,
                                     ),
                                   ),
                                 ],
                               ),
                             ),
-                                   )
+
                           // ── Overview Heading ───────────────────────
                           const _SectionHeading(title: 'Overview'),
                           const SizedBox(height: 12),
@@ -471,62 +323,62 @@ class _State extends State<ServiceDashboardPage> {
                             physics: const NeverScrollableScrollPhysics(),
                             childAspectRatio: isMobile ? 1.55 : 1.65,
                             children: [
-                               DashboardCard(
-                                 title: 'Total Services',
-                                 value: '$total',
-                                 svgAsset: AppSvgAssets.clipboardList,
-                                 cardColor: AppColors.accent1,
-                                 onTap: () => _go(ServiceFilter.all),
-                               ),
-                               DashboardCard(
-                                 title: 'Today Services',
-                                 value: '$today',
-                                 svgAsset: AppSvgAssets.calendarDays,
-                                 cardColor: AppColors.accent1,
-                                 onTap: () => _go(ServiceFilter.today),
-                               ),
-                               DashboardCard(
-                                 title: 'Pending',
-                                 value: '$pending',
-                                 svgAsset: AppSvgAssets.triangleAlert,
-                                 cardColor: AppColors.accent1,
-                                 onTap: () => _go(ServiceFilter.pending),
-                               ),
+                              DashboardCard(
+                                title: 'Total Services',
+                                value: '$total',
+                                svgAsset: AppSvgAssets.clipboardList,
+                                cardColor:  AppColors.primary,
+                                onTap: () => _go(ServiceFilter.all),
+                              ),
+                              DashboardCard(
+                                title: 'Today Services',
+                                value: '$today',
+                                svgAsset: AppSvgAssets.calendarDays,
+                                cardColor: AppColors.primaryLight,
+                                onTap: () => _go(ServiceFilter.today),
+                              ),
+                              DashboardCard(
+                                title: 'Pending',
+                                value: '$pending',
+                                svgAsset: AppSvgAssets.triangleAlert,
+                                cardColor:  AppColors.solar,
+                                onTap: () => _go(ServiceFilter.pending),
+                              ),
                               DashboardCard(
                                 title: 'In Progress',
                                 value: '$inProg',
                                 svgAsset: AppSvgAssets.refreshCw,
-                                cardColor: AppColors.accent1,
+                                cardColor:  AppColors.primaryDark,
                                 onTap: () => _go(ServiceFilter.inProgress),
                               ),
-                               DashboardCard(
-                                 title: 'Completed',
-                                 value: '$completed',
-                                 svgAsset: AppSvgAssets.circleCheckBig,
-                                 cardColor: AppColors.accent1,
-                                 onTap: () => _go(ServiceFilter.completed),
-                               ),
-                                DashboardCard(
-                                  title: 'Free Service',
-                                  value: '$free',
-                                  svgAsset: AppSvgAssets.handshake,
-                                  cardColor: AppColors.accent1,
-                                  onTap: () => _go(ServiceFilter.free),
-                                );
-                                DashboardCard(
-                                  title: 'Paid Service',
-                                  value: '$paid',
-                                  svgAsset: AppSvgAssets.indianRupee,
-                                  cardColor: AppColors.accent1,
-                                  onTap: () => _go(ServiceFilter.paid),
-                                ),
+                              DashboardCard(
+                                title: 'Completed',
+                                value: '$completed',
+                                svgAsset: AppSvgAssets.circleCheckBig,
+                                cardColor:  AppColors.success,
+                                onTap: () => _go(ServiceFilter.completed),
+                              ),
+                              DashboardCard(
+                                title: 'Free Service',
+                                value: '$free',
+                                svgAsset: AppSvgAssets.handshake,
+                                cardColor:  AppColors.error,
+                                onTap: () => _go(ServiceFilter.free),
+                              ),
+                              DashboardCard(
+                                title: 'Paid Service',
+                                value: '$paid',
+                                svgAsset: AppSvgAssets.indianRupee,
+                                cardColor:  AppColors.success,
+                                onTap: () => _go(ServiceFilter.paid),
+                              ),
                             ],
                           ),
                         ],
                       ),
                     ),
                   ),
-          
+          ),
         );
       },
     );
@@ -554,34 +406,41 @@ class _ServiceSummaryStrip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.primaryLightest, width: 1),
+        border: Border.all(color:  AppColors.primaryTint, width: 1),
+        boxShadow: [
+          BoxShadow(
+            color:  AppColors.primary.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
       child: Row(
         children: [
           _StripStat(
             label: 'Total',
             value: '$total',
-            color: AppColors.accent1,
+            color:  AppColors.primary,
           ),
           _StripDivider(),
           _StripStat(
             label: 'Free',
             value: '$free',
-            color: const Color(0xFFFF416C),
+            color:  AppColors.error,
           ),
           _StripDivider(),
           _StripStat(
             label: 'Paid',
             value: '$paid',
-            color: AppColors.success,
+            color:  AppColors.success,
           ),
           _StripDivider(),
           _StripStat(
             label: 'Done',
             value: '$completed',
-            color: const Color(0xFF11998e),
+            color:  AppColors.success,
           ),
         ],
       ),
@@ -612,6 +471,7 @@ class _StripStat extends StatelessWidget {
               fontSize: 18,
               fontWeight: FontWeight.w700,
               color: color,
+              letterSpacing: -0.4,
             ),
           ),
           const SizedBox(width: 6),
@@ -620,7 +480,7 @@ class _StripStat extends StatelessWidget {
             style: const TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w500,
-              color: AppColors.accent1),
+              color: AppColors.textGray,
             ),
           ),
         ],
@@ -632,7 +492,7 @@ class _StripStat extends StatelessWidget {
 class _StripDivider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Container(width: 1, height: 22, color: AppColors.primaryLightest);
+    return Container(width: 1, height: 22, color:  AppColors.primaryTint);
   }
 }
 
@@ -651,26 +511,21 @@ class _SectionHeading extends StatelessWidget {
           width: 3,
           height: 15,
           decoration: BoxDecoration(
-            color: AppColors.accent1,
+            color:  AppColors.primary,
             borderRadius: BorderRadius.circular(2),
           ),
         ),
         const SizedBox(width: 8),
         Text(
           title,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary),
+            color: AppColors.darkNavy,
+            letterSpacing: -0.2,
           ),
         ),
       ],
     );
   }
 }
-
-
-
-
-
-

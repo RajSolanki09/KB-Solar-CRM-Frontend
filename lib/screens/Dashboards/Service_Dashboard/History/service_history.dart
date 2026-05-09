@@ -9,7 +9,7 @@ import 'package:solar_project/Cubits/ServiceLeads/service_leads_state.dart';
 import 'package:solar_project/Helper/lead_themes.dart';
 import 'package:solar_project/data/Models/service_request_model.dart';
 import 'package:solar_project/screens/Dashboards/Admin_Dashboards/Services/service_detail_screen.dart';
-import 'package:solar_project/Helper/app_colors.dart';
+import 'package:solar_project/core/app_colors.dart';
 
 class ServiceHistoryPage extends StatefulWidget {
   const ServiceHistoryPage({super.key});
@@ -24,7 +24,7 @@ class _State extends State<ServiceHistoryPage> {
   DateTime? _date;
   bool _showOlder = false;
 
-  static const Color _color = AppColors.accent1);
+  static const Color _color = AppColors.success;
 
   DateTime get _recentCutoff => DateTimeHelper.recentCutoff();
 
@@ -80,13 +80,14 @@ class _State extends State<ServiceHistoryPage> {
   Future<void> _pickDate() async {
     final picked = await DateTimeHelper.pickDateThemed(
       context,
-      accentColor: AppColors.accent1),
+      accentColor: _color,
       initialDate: _date,
     );
     if (picked != null) setState(() => _date = picked);
   }
 
-  String _getDateLabel(DateTime? date) => DateTimeHelper.leadDateFilterLabel(date);
+  String _getDateLabel(DateTime? date) =>
+      DateTimeHelper.leadDateFilterLabel(date);
 
   Future<void> _openDetail(
     BuildContext ctx,
@@ -107,15 +108,15 @@ class _State extends State<ServiceHistoryPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bgSecondary),
+      backgroundColor:  AppColors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.accent1),
+        backgroundColor: _color,
         elevation: 0,
         leading: Navigator.canPop(context)
             ? IconButton(
                 icon: const AppSvgIcon(
                   AppSvgAssets.chevronLeft,
-                  color: Colors.white,
+                  color: AppColors.surface,
                   size: 18,
                 ),
                 onPressed: () => Navigator.pop(context),
@@ -124,7 +125,7 @@ class _State extends State<ServiceHistoryPage> {
         title: const Text(
           'Service History',
           style: TextStyle(
-            color: Colors.white,
+            color: AppColors.surface,
             fontSize: 16,
             fontWeight: FontWeight.w700,
           ),
@@ -141,14 +142,14 @@ class _State extends State<ServiceHistoryPage> {
               child: const Text(
                 'Clear',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: AppColors.surface,
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
                 ),
               ),
             ),
           IconButton(
-            icon: const AppSvgIcon(AppSvgAssets.refreshCw, color: Colors.white),
+            icon: const AppSvgIcon(AppSvgAssets.refreshCw, color: AppColors.surface),
             onPressed: () =>
                 context.read<ServiceLeadCubit>().fetchAllServices(),
           ),
@@ -172,12 +173,12 @@ class _State extends State<ServiceHistoryPage> {
                   AppSvgIcon(
                     AppSvgAssets.triangleAlert,
                     size: 52,
-                    color: Colors.red.shade300,
+                    color: AppColors.error,
                   ),
                   const SizedBox(height: 12),
                   Text(
                     state.message,
-                    style: const TextStyle(color: AppColors.textSecondary),
+                    style: const TextStyle(color: Colors.grey),
                   ),
                   const SizedBox(height: 16),
                   ElevatedButton.icon(
@@ -215,7 +216,7 @@ class _State extends State<ServiceHistoryPage> {
 
                 // ── Filter row ─────────────────────────────────────────
                 Container(
-                  color: Colors.white,
+                  color: AppColors.surface,
                   padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
                   child: Row(
                     children: [
@@ -224,9 +225,9 @@ class _State extends State<ServiceHistoryPage> {
                         child: Container(
                           height: 42,
                           decoration: BoxDecoration(
-                            color: AppColors.bgSecondary),
+                            color:  AppColors.background,
                             borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: AppColors.borderLight),
+                            border: Border.all(color: AppColors.divider),
                           ),
                           child: TextField(
                             controller: _searchCtrl,
@@ -236,14 +237,14 @@ class _State extends State<ServiceHistoryPage> {
                               hintText: 'Search name / phone / ID',
                               hintStyle: TextStyle(
                                 fontSize: 12,
-                                color: AppColors.textSecondary,
+                                color: AppColors.textLight,
                               ),
                               prefixIcon: Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: const AppSvgIcon(
                                   AppSvgAssets.search,
                                   size: 16,
-                                  color: AppColors.accent1),
+                                  color: LeadTheme.primary,
                                 ),
                               ),
                               suffixIcon: _search.isNotEmpty
@@ -255,7 +256,7 @@ class _State extends State<ServiceHistoryPage> {
                                       child: AppSvgIcon(
                                         AppSvgAssets.x,
                                         size: 16,
-                                        color: AppColors.textSecondary,
+                                        color: AppColors.textLight,
                                       ),
                                     )
                                   : null,
@@ -275,12 +276,12 @@ class _State extends State<ServiceHistoryPage> {
                         height: 42,
                         padding: const EdgeInsets.symmetric(horizontal: 12),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: AppColors.surface,
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(
                             color: _charge != 'All'
-                                ? AppColors.accent1).withValues(alpha: 0.5)
-                                : AppColors.borderLight,
+                                ? _color.withValues(alpha: 0.5)
+                                : AppColors.divider,
                             width: _charge != 'All' ? 1.5 : 1,
                           ),
                         ),
@@ -290,13 +291,13 @@ class _State extends State<ServiceHistoryPage> {
                             icon: const AppSvgIcon(
                               AppSvgAssets.chevronDown,
                               size: 18,
-                              color: AppColors.accent1),
+                              color: _color,
                             ),
                             style: TextStyle(
                               fontSize: 13,
                               color: _charge != 'All'
-                                  ? AppColors.accent1)
-                                  : AppColors.textSecondary),
+                                  ? _color
+                                  :  AppColors.textGray,
                               fontWeight: _charge != 'All'
                                   ? FontWeight.w600
                                   : FontWeight.normal,
@@ -328,12 +329,10 @@ class _State extends State<ServiceHistoryPage> {
                           height: 42,
                           padding: const EdgeInsets.symmetric(horizontal: 14),
                           decoration: BoxDecoration(
-                            color: _date != null ? _color : Colors.white,
+                            color: _date != null ? _color : AppColors.surface,
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(
-                              color: _date != null
-                                  ? _color
-                                  : AppColors.borderLight,
+                              color: _date != null ? _color : AppColors.divider,
                             ),
                           ),
                           child: Row(
@@ -343,8 +342,8 @@ class _State extends State<ServiceHistoryPage> {
                                 AppSvgAssets.calendarDays,
                                 size: 17,
                                 color: _date != null
-                                    ? Colors.white
-                                    : AppColors.textSecondary),
+                                    ? AppColors.surface
+                                    :  AppColors.textGray,
                               ),
                               const SizedBox(width: 8),
                               Text(
@@ -352,8 +351,8 @@ class _State extends State<ServiceHistoryPage> {
                                 style: TextStyle(
                                   fontSize: 13,
                                   color: _date != null
-                                      ? Colors.white
-                                      : AppColors.textSecondary),
+                                      ? AppColors.surface
+                                      :  AppColors.textGray,
                                   fontWeight: _date != null
                                       ? FontWeight.w600
                                       : FontWeight.normal,
@@ -366,7 +365,7 @@ class _State extends State<ServiceHistoryPage> {
                                   child: AppSvgIcon(
                                     AppSvgAssets.x,
                                     size: 18,
-                                    color: Colors.white,
+                                    color: AppColors.surface,
                                   ),
                                 ),
                               ],
@@ -388,7 +387,7 @@ class _State extends State<ServiceHistoryPage> {
                         '${filtered.length} result${filtered.length != 1 ? "s" : ""}',
                         style: TextStyle(
                           fontSize: 12,
-                          color: AppColors.textSecondary.shade600,
+                          color: Colors.grey.shade600,
                         ),
                       ),
                     ),
@@ -409,7 +408,7 @@ class _State extends State<ServiceHistoryPage> {
                           }),
                         )
                       : RefreshIndicator(
-                          color: AppColors.accent1),
+                          color: _color,
                           onRefresh: () =>
                               ctx.read<ServiceLeadCubit>().fetchAllServices(),
                           child: LayoutBuilder(
@@ -487,9 +486,9 @@ class _HistoryTableSection extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.borderLight)),
+        border: Border.all(color:  AppColors.divider),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -504,13 +503,13 @@ class _HistoryTableSection extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary),
+                    color: AppColors.textDark,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   subtitle,
-                  style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                  style: TextStyle(fontSize: 11, color: AppColors.background),
                 ),
               ],
             ),
@@ -520,7 +519,7 @@ class _HistoryTableSection extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
               child: Text(
                 'No history in this section.',
-                style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                style: TextStyle(fontSize: 12, color: AppColors.textLight),
               ),
             )
           else if (items.isNotEmpty)
@@ -555,9 +554,9 @@ class _CollapsibleHistoryTableSection extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.borderLight)),
+        border: Border.all(color:  AppColors.divider),
       ),
       child: Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
@@ -567,19 +566,19 @@ class _CollapsibleHistoryTableSection extends StatelessWidget {
           onExpansionChanged: onExpansionChanged,
           tilePadding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
           childrenPadding: const EdgeInsets.only(bottom: 12),
-          iconColor: AppColors.accent1),
-          collapsedIconColor: AppColors.success),
+          iconColor:  AppColors.success,
+          collapsedIconColor:  AppColors.success,
           title: Text(
             '$title (${items.length})',
             style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary),
+              color: AppColors.textDark,
             ),
           ),
           subtitle: Text(
             subtitle,
-            style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+            style: TextStyle(fontSize: 11, color: AppColors.background),
           ),
           children: [
             if (items.isEmpty)
@@ -589,7 +588,7 @@ class _CollapsibleHistoryTableSection extends StatelessWidget {
                   alignment: Alignment.centerLeft,
                   child: Text(
                     'No older history found.',
-                    style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                    style: TextStyle(fontSize: 12, color: AppColors.textLight),
                   ),
                 ),
               )
@@ -614,7 +613,7 @@ class _HistoryDataTable extends StatelessWidget {
     required this.onTap,
   });
 
-  static const _color = AppColors.accent1);
+  static const _color = AppColors.success;
 
   Widget _badge(String label, Color color) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -632,7 +631,7 @@ class _HistoryDataTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDesktop = MediaQuery.sizeOf(context).width >= 1000;
-    const rowStyle = TextStyle(fontSize: 12, color: AppColors.textPrimary));
+    const rowStyle = TextStyle(fontSize: 12, color: AppColors.textDark);
 
     return SizedBox(
       width: double.infinity,
@@ -657,9 +656,9 @@ class _HistoryDataTable extends StatelessWidget {
               return null;
             }),
             border: TableBorder(
-              horizontalInside: BorderSide(color: Colors.blueGrey.shade50),
-              bottom: BorderSide(color: Colors.blueGrey.shade100),
-              top: BorderSide(color: Colors.blueGrey.shade100),
+              horizontalInside: BorderSide(color: AppColors.primary),
+              bottom: BorderSide(color: AppColors.primary),
+              top: BorderSide(color: AppColors.primary),
             ),
             columns: const [
               DataColumn(label: Text('Customer')),
@@ -674,7 +673,7 @@ class _HistoryDataTable extends StatelessWidget {
               DataColumn(label: Text('Action')),
             ],
             rows: items.map((s) {
-              final payColor = s.isPaid ? Colors.green : Colors.red;
+              final payColor = s.isPaid ? AppColors.success : AppColors.error;
               final payLabel = s.isPaid ? 'Paid' : 'Unpaid';
 
               return DataRow(
@@ -710,7 +709,7 @@ class _HistoryDataTable extends StatelessWidget {
                   DataCell(
                     _badge(
                       s.chargeType,
-                      s.chargeType == 'Paid' ? Colors.orange : Colors.teal,
+                      s.chargeType == 'Paid' ? AppColors.solar : Colors.teal,
                     ),
                   ),
                   DataCell(_badge(payLabel, payColor)),
@@ -722,13 +721,13 @@ class _HistoryDataTable extends StatelessWidget {
                               const AppSvgIcon(
                                 AppSvgAssets.indianRupee,
                                 size: 11,
-                                color: AppColors.warning,
+                                color: AppColors.solar,
                               ),
                               Text(
                                 s.amount.toStringAsFixed(0),
                                 style: rowStyle.copyWith(
                                   fontWeight: FontWeight.w700,
-                                  color: AppColors.warning,
+                                  color: AppColors.solar,
                                 ),
                               ),
                             ],
@@ -743,8 +742,8 @@ class _HistoryDataTable extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: rowStyle.copyWith(
                           color: s.assignedToName != null
-                              ? AppColors.textPrimary)
-                              : AppColors.textSecondary,
+                              ?  AppColors.textDark
+                              : AppColors.textLight,
                         ),
                       ),
                     ),
@@ -802,22 +801,22 @@ class _SummaryBar extends StatelessWidget {
       margin: const EdgeInsets.fromLTRB(12, 12, 12, 0),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: AppColors.accent1).withValues(alpha: 0.08),
+        color:  AppColors.success.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: AppColors.accent1).withValues(alpha: 0.2),
+          color:  AppColors.success.withValues(alpha: 0.2),
         ),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _Stat('Total', '$total', AppColors.accent1)),
-          Container(width: 1, height: 28, color: AppColors.borderLight),
-          _Stat('Free', '$free', AppColors.accent1)),
-          Container(width: 1, height: 28, color: AppColors.borderLight),
-          _Stat('Paid', '$paid', AppColors.accent1)),
-          Container(width: 1, height: 28, color: AppColors.borderLight),
-          _Stat('Revenue', '₹${revenue.toStringAsFixed(0)}', AppColors.accent1)),
+          _Stat('Total', '$total',  AppColors.success),
+          Container(width: 1, height: 28, color: AppColors.divider),
+          _Stat('Free', '$free', Colors.teal),
+          Container(width: 1, height: 28, color: AppColors.divider),
+          _Stat('Paid', '$paid', AppColors.solar),
+          Container(width: 1, height: 28, color: AppColors.divider),
+          _Stat('Revenue', '₹${revenue.toStringAsFixed(0)}', AppColors.success),
         ],
       ),
     );
@@ -840,7 +839,7 @@ class _Stat extends StatelessWidget {
           color: color,
         ),
       ),
-      Text(label, style: TextStyle(fontSize: 11, color: AppColors.textSecondary.shade600)),
+      Text(label, style: TextStyle(fontSize: 11, color: Colors.grey.shade600)),
     ],
   );
 }
@@ -856,7 +855,7 @@ class _EmptyState extends StatelessWidget {
     child: Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        AppSvgIcon(AppSvgAssets.history, size: 60, color: AppColors.borderLight),
+        AppSvgIcon(AppSvgAssets.history, size: 60, color: AppColors.divider),
         const SizedBox(height: 14),
         Text(
           hasFilter
@@ -865,31 +864,24 @@ class _EmptyState extends StatelessWidget {
           style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w600,
-            color: AppColors.textSecondary,
+            color: AppColors.textLight,
           ),
         ),
         const SizedBox(height: 6),
         Text(
           hasFilter ? 'Try changing your filters' : 'Pull down to refresh',
-          style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+          style: TextStyle(fontSize: 12, color: AppColors.textLight),
         ),
         if (hasFilter) ...[
           const SizedBox(height: 14),
           TextButton.icon(
             onPressed: onClear,
-              icon: const AppSvgIcon(AppSvgAssets.x, size: 14),
+            icon: const AppSvgIcon(AppSvgAssets.x, size: 14),
             label: const Text('Clear all filters'),
-            style: TextButton.styleFrom(foregroundColor: AppColors.textSecondary),
+            style: TextButton.styleFrom(foregroundColor: AppColors.background),
           ),
         ],
       ],
     ),
   );
 }
-
-
-
-
-
-
-

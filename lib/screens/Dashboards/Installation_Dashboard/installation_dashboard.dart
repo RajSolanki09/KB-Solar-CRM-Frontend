@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:solar_project/Cubits/InstallationNavigation/installation_nav_cubit.dart';
 import 'package:solar_project/Cubits/InstallationNavigation/installation_nav_state.dart';
 import 'package:solar_project/Cubits/Installation/installation_cubit.dart';
+import 'package:solar_project/core/app_colors.dart';
 import 'package:solar_project/data/Repository/installation_repository.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
 import 'package:solar_project/Helper/common_widgets.dart';
@@ -61,7 +62,7 @@ class _InstallationDashboardState extends State<InstallationDashboard> {
   Widget _desktopLayout(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        border: Border.all(color: const Color(0xFFCBC4CF)),
+        border: Border.all(color: AppColors.divider),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

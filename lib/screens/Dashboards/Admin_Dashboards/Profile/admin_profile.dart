@@ -7,7 +7,7 @@ import 'package:solar_project/services/api_service.dart';
 import 'package:solar_project/Helper/app_feedback.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
 import 'package:solar_project/Helper/profile_widgets.dart';
-import 'package:solar_project/Helper/app_colors.dart';
+import 'package:solar_project/core/app_colors.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // OWNER PROFILE PAGE
@@ -123,190 +123,349 @@ class _OwnerProfilePageState extends State<OwnerProfilePage> {
   // ── Build ──────────────────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return Scaffold(
-        backgroundColor: AppColors.bgSecondary,
-        body: Center(child: CircularProgressIndicator(color: AppColors.lightPurple))
-      );
-    }
-
-    if (_error != null) {
-      return Scaffold(
-        backgroundColor: AppColors.bgSecondary,
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(_error!, style: const TextStyle(color: AppColors.error)),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: _loadProfile,
-                child: const Text('Retry'),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
     return Scaffold(
-      backgroundColor: AppColors.bgSecondary,
+      backgroundColor:  AppColors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.primary,
+        backgroundColor:  AppColors.background,
         elevation: 0,
-        leading: Navigator.canPop(context)
-            ? IconButton(
-                icon: const AppSvgIcon(
-                  AppSvgAssets.chevronLeft,
-                  color: Colors.white,
-                  size: 18,
-                ),
-                onPressed: () => Navigator.pop(context),
-              )
-            : null,
         title: const Text(
           'My Profile',
           style: TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.bold,
+            color: AppColors.primary,
           ),
         ),
-        centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.logout_rounded, color: Colors.white),
-            onPressed: _confirmLogout,
+            icon: const AppSvgIcon(
+              AppSvgAssets.refreshCw,
+              color: AppColors.primary,
+            ),
+            onPressed: _loadProfile,
           ),
         ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(height: 1, color: Colors.grey.shade300),
+        ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            // Avatar
-            Center(
-              child: Stack(
-                children: [
-                  CircleAvatar(
-                    radius: 48,
-                    backgroundColor: AppColors.lightPurple.withValues(alpha: 0.15),
-                    backgroundImage: _imageProvider(),
-                    child: _imageProvider() == null
-                        ? const Icon(Icons.person, size: 48, color: AppColors.lightPurple)
-                        : null,
-                  ),
-                  if (_isUploadingImage)
-                    const Positioned.fill(
-                      child: CircleAvatar(
-                        backgroundColor: Colors.black38,
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
-                          strokeWidth: 2,
+      body: _isLoading
+          ? const Center(
+              child: CircularProgressIndicator(color: AppColors.primary),
+            )
+          : _error != null
+          ? ProfileErrorView(message: _error, onRetry: _loadProfile)
+          : _buildBody(),
+    );
+  }
+
+  // ── Main Body ──────────────────────────────────────────────────────────────
+  Widget _buildBody() {
+    final name = _user?['name'] ?? 'N/A';
+    final email = _user?['email'] ?? 'N/A';
+    final phone = _user?['phone'] ?? 'N/A';
+    final role = _user?['role'] ?? 'N/A';
+    final status = _user?['status'] ?? 'N/A';
+    final roleDisplay = role.toString().isNotEmpty
+        ? role.toString()[0].toUpperCase() + role.toString().substring(1)
+        : role.toString();
+    final isActive = status.toString().toLowerCase() == 'active';
+    final imgProvider = _imageProvider();
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        children: [
+          // ── Profile Header Card ────────────────────────────────────────────
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [AppColors.primary, AppColors.primaryDark],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.primary.withOpacity(0.35),
+                  blurRadius: 16,
+                  offset: const Offset(0, 6),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                // Avatar + camera
+                Stack(
+                  children: [
+                    CircleAvatar(
+                      radius: 40,
+                      backgroundColor: AppColors.surface,
+                      backgroundImage: imgProvider,
+                      child: imgProvider == null
+                          ? const AppSvgIcon(
+                              AppSvgAssets.userRound,
+                              size: 40,
+                              color: AppColors.primary,
+                            )
+                          : null,
+                    ),
+                    if (_isUploadingImage)
+                      Positioned.fill(
+                        child: CircleAvatar(
+                          radius: 40,
+                          backgroundColor: Colors.black45,
+                          child: const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                              color: AppColors.surface,
+                              strokeWidth: 2,
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                  Positioned(
-                    bottom: 0,
-                    right: 0,
-                    child: GestureDetector(
-                      onTap: _pickAndUpload,
-                        child: Container(
-                          width: 32,
-                          height: 32,
-                          decoration: const BoxDecoration(
-                            color: AppColors.lightPurple,
-                            shape: BoxShape.circle,
+                    if (!_isUploadingImage)
+                      Positioned(
+                        bottom: 0,
+                        right: 0,
+                        child: GestureDetector(
+                          onTap: _pickAndUpload,
+                          child: Container(
+                            width: 28,
+                            height: 28,
+                            decoration: BoxDecoration(
+                              color: AppColors.surface,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: AppColors.primary,
+                                width: 1.5,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.15),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: const AppSvgIcon(
+                              AppSvgAssets.camera,
+                              size: 12,
+                              color: AppColors.primary,
+                            ),
                           ),
-                          child: const Icon(Icons.camera_alt, size: 16, color: Colors.white),
                         ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              _user?['name'] ?? 'User',
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            Text(
-              _user?['email'] ?? '',
-              style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
-            ),
-            const SizedBox(height: 28),
-
-            // Edit Profile
-            _profileTile(
-              icon: AppSvgAssets.userRound,
-              label: 'Edit Profile',
-              onTap: () async {
-                await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => EditProfilePage(user: _user!),
-                  ),
-                );
-                _loadProfile();
-              },
-            ),
-
-            // Change Password
-            _profileTile(
-              icon: AppSvgAssets.lock,
-              label: 'Change Password',
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const ChangePasswordPage()),
-              ),
-            ),
-
-            // Notification Settings
-            _profileTile(
-              icon: AppSvgAssets.cog,
-              label: 'Notification Settings',
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const NotificationSettingsPage(),
+                      ),
+                  ],
                 ),
-              ),
-            ),
 
-            // Privacy Policy
-            _profileTile(
-              icon: AppSvgAssets.sun,
-              label: 'Privacy Policy',
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const PrivacyPolicyPage()),
-              ),
-            ),
+                const SizedBox(width: 20),
 
-            // Help & Support
-            _profileTile(
-              icon: AppSvgAssets.phone,
-              label: 'Help & Support',
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const HelpSupportPage()),
+                // Name / role / status
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        name,
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.surface,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        roleDisplay,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: AppColors.surface,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: isActive
+                              ? AppColors.success.withOpacity(0.3)
+                              : AppColors.error.withOpacity(0.3),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          status.toString(),
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: isActive
+                                ? AppColors.success
+                                : AppColors.error,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 24),
+
+          // ── Info Tiles ─────────────────────────────────────────────────────
+          _infoTile(AppSvgAssets.mail, 'Email', email),
+          _infoTile(AppSvgAssets.phone, 'Phone', phone),
+          _infoTile(AppSvgAssets.idCard, 'Role', roleDisplay),
+
+          const SizedBox(height: 24),
+
+          // ── Settings Section ───────────────────────────────────────────────
+          _sectionHeader('Settings'),
+          const SizedBox(height: 12),
+
+          _settingsTile(
+            svgAsset: AppSvgAssets.lock,
+            label: 'Change Password',
+            color: AppColors.primary,
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const ChangePasswordPage()),
+            ),
+          ),
+          _settingsTile(
+            svgAsset: AppSvgAssets.pencil,
+            label: 'Edit Profile',
+            color: AppColors.primary,
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => EditProfilePage(user: _user ?? {}),
+              ),
+            ).then((_) => _loadProfile()),
+          ),
+          _settingsTile(
+            svgAsset: AppSvgAssets.messageSquarePlus,
+            label: 'Notification Settings',
+            color: AppColors.solar,
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const NotificationSettingsPage(),
               ),
             ),
-          ],
-        ),
+          ),
+          _settingsTile(
+            svgAsset: AppSvgAssets.shield,
+            label: 'Privacy Policy',
+            color: Colors.teal,
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const PrivacyPolicyPage()),
+            ),
+          ),
+          _settingsTile(
+            svgAsset: AppSvgAssets.circle,
+            label: 'Help & Support',
+            color: AppColors.success,
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const HelpSupportPage()),
+            ),
+          ),
+
+          const SizedBox(height: 24),
+
+          // ── Logout ─────────────────────────────────────────────────────────
+          OutlinedButton.icon(
+            onPressed: _confirmLogout,
+            icon: const AppSvgIcon(AppSvgAssets.logOut, color: AppColors.error),
+            label: const Text(
+              'Logout',
+              style: TextStyle(color: AppColors.error, fontSize: 15),
+            ),
+            style: OutlinedButton.styleFrom(
+              side: const BorderSide(color: AppColors.error),
+              minimumSize: const Size(double.infinity, 50),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 20),
+        ],
       ),
     );
   }
 
-  Widget _profileTile({
-    required String icon,
+  // ── Helpers ────────────────────────────────────────────────────────────────
+  Widget _sectionHeader(String title) => Align(
+    alignment: Alignment.centerLeft,
+    child: Text(
+      title,
+      style: const TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.bold,
+        color: AppColors.textDark,
+      ),
+    ),
+  );
+
+  Widget _infoTile(String svgAsset, String title, String value) => Container(
+    margin: const EdgeInsets.only(bottom: 14),
+    padding: const EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      color: AppColors.surface,
+      borderRadius: BorderRadius.circular(14),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.05),
+          blurRadius: 6,
+          offset: const Offset(0, 3),
+        ),
+      ],
+    ),
+    child: Row(
+      children: [
+        AppSvgIcon(svgAsset, color: AppColors.primary),
+        const SizedBox(width: 18),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(fontSize: 13, color: Colors.grey),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
+
+  Widget _settingsTile({
+    required String svgAsset,
     required String label,
+    required Color color,
     required VoidCallback onTap,
   }) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
@@ -317,21 +476,20 @@ class _OwnerProfilePageState extends State<OwnerProfilePage> {
         ],
       ),
       child: ListTile(
-        leading: Container(
-          width: 36,
-          height: 36,
-          decoration: BoxDecoration(
-            color: AppColors.lightPurple.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: AppSvgIcon(icon, color: AppColors.lightPurple, size: 16),
-        ),
+        onTap: onTap,
+        leading: AppSvgIcon(
+          svgAsset,
+          color: color,
+        ), // ← no container, no fixed size
         title: Text(
           label,
           style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
         ),
-        trailing: const Icon(Icons.chevron_right, color: AppColors.textSecondary),
-        onTap: onTap,
+        trailing: const AppSvgIcon(
+          AppSvgAssets.chevronRight,
+          color: Colors.grey,
+        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       ),
     );
   }
@@ -348,42 +506,30 @@ class ChangePasswordPage extends StatefulWidget {
 
 class _ChangePasswordPageState extends State<ChangePasswordPage> {
   final _form = GlobalKey<FormState>();
-  final _currentPasswordCtrl = TextEditingController();
-  final _newPasswordCtrl = TextEditingController();
-  final _confirmPasswordCtrl = TextEditingController();
-
-  bool _showCurrentPassword = false;
-  bool _showNewPassword = false;
-  bool _showConfirmPassword = false;
+  final _oldCtrl = TextEditingController();
+  final _newCtrl = TextEditingController();
+  final _confirmCtrl = TextEditingController();
   bool _saving = false;
-
-  void _toggleCurrentPasswordVisibility() =>
-      setState(() => _showCurrentPassword = !_showCurrentPassword);
-  void _toggleNewPasswordVisibility() =>
-      setState(() => _showNewPassword = !_showNewPassword);
-  void _toggleConfirmPasswordVisibility() =>
-      setState(() => _showConfirmPassword = !_showConfirmPassword);
+  bool _showOld = false;
+  bool _showNew = false;
+  bool _showConfirm = false;
 
   @override
   void dispose() {
-    _currentPasswordCtrl.dispose();
-    _newPasswordCtrl.dispose();
-    _confirmPasswordCtrl.dispose();
+    _oldCtrl.dispose();
+    _newCtrl.dispose();
+    _confirmCtrl.dispose();
     super.dispose();
   }
 
-  Future<void> _save() async {
+  Future<void> _submit() async {
     if (!_form.currentState!.validate()) return;
-    if (_newPasswordCtrl.text != _confirmPasswordCtrl.text) {
-      AppFeedback.showError(context, 'New passwords do not match');
-      return;
-    }
     setState(() => _saving = true);
     try {
       await ApiService().changePassword(
-        currentPassword: _currentPasswordCtrl.text,
-        newPassword: _newPasswordCtrl.text,
-        confirmPassword: _confirmPasswordCtrl.text,
+        currentPassword: _oldCtrl.text,
+        newPassword: _newCtrl.text,
+        confirmPassword: _confirmCtrl.text,
       );
       if (mounted) {
         AppFeedback.showSuccess(context, 'Password changed successfully!');
@@ -403,30 +549,8 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bgSecondary,
-      appBar: AppBar(
-        backgroundColor: AppColors.lightPurple,
-        elevation: 0,
-        leading: Navigator.canPop(context)
-            ? IconButton(
-                icon: const AppSvgIcon(
-                  AppSvgAssets.chevronLeft,
-                  color: Colors.white,
-                  size: 18,
-                ),
-                onPressed: () => Navigator.pop(context),
-              )
-            : null,
-        title: const Text(
-          'Change Password',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        centerTitle: true,
-      ),
+      backgroundColor:  AppColors.background,
+      appBar: _appBar('Change Password'),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Form(
@@ -435,44 +559,53 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
             children: [
               _pwField(
                 'Current Password',
-                _currentPasswordCtrl,
-                _showCurrentPassword,
-                _toggleCurrentPasswordVisibility,
+                _oldCtrl,
+                _showOld,
+                () => setState(() => _showOld = !_showOld),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 14),
               _pwField(
                 'New Password',
-                _newPasswordCtrl,
-                _showNewPassword,
-                _toggleNewPasswordVisibility,
+                _newCtrl,
+                _showNew,
+                () => setState(() => _showNew = !_showNew),
+                validator: (v) {
+                  if (v == null || v.length < 6) return 'Minimum 6 characters';
+                  if (v == _oldCtrl.text)
+                    return 'New password must be different from current password';
+                  return null;
+                },
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 14),
               _pwField(
                 'Confirm New Password',
-                _confirmPasswordCtrl,
-                _showConfirmPassword,
-                _toggleConfirmPasswordVisibility,
+                _confirmCtrl,
+                _showConfirm,
+                () => setState(() => _showConfirm = !_showConfirm),
+                validator: (v) =>
+                    v != _newCtrl.text ? 'Passwords do not match' : null,
               ),
               const SizedBox(height: 28),
               SizedBox(
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: _saving ? null : _save,
+                  onPressed: _saving ? null : _submit,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary),
+                    backgroundColor: AppColors.primary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
-                    ),),),),
+                    ),
+                  ),
                   child: _saving
                       ? const CircularProgressIndicator(
-                          color: Colors.white,
+                          color: AppColors.surface,
                           strokeWidth: 2,
                         )
                       : const Text(
-                          'Change Password',
+                          'Update Password',
                           style: TextStyle(
-                            color: Colors.white,
+                            color: AppColors.surface,
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
                           ),
@@ -490,40 +623,42 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     String label,
     TextEditingController ctrl,
     bool show,
-    VoidCallback toggle,
-  ) {
+    VoidCallback toggle, {
+    FormFieldValidator<String>? validator,
+  }) {
     return TextFormField(
       controller: ctrl,
       obscureText: !show,
-      validator: (v) =>
-          (v == null || v.isEmpty) ? '$label is required' : null,
+      validator:
+          validator ??
+          (v) => (v == null || v.isEmpty) ? '$label is required' : null,
       decoration: InputDecoration(
         labelText: label,
         prefixIcon: const Padding(
           padding: EdgeInsets.all(8.0),
-          child: AppSvgIcon(AppSvgAssets.lock, color: AppColors.lightPurple),
+          child: AppSvgIcon(AppSvgAssets.lock, color: AppColors.primary),
         ),
         suffixIcon: IconButton(
           icon: AppSvgIcon(
             show ? AppSvgAssets.eyeOff : AppSvgAssets.eye,
-            color: AppColors.textSecondary,
+            color: Colors.grey,
           ),
           onPressed: toggle,
         ),
         filled: true,
-        fillColor: Colors.white,
+        fillColor: AppColors.surface,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.borderPrimary),
+          borderSide: BorderSide(color: Colors.grey.shade300),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.borderPrimary),
+          borderSide: BorderSide(color: Colors.grey.shade300),
         ),
-            focusedBorder: OutlineInputBorder(
-           borderRadius: BorderRadius.circular(12),
-           borderSide: const BorderSide(color: AppColors.lightPurple),
-         ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.primary),
+        ),
       ),
     );
   }
@@ -585,7 +720,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bgSecondary),
+      backgroundColor:  AppColors.background,
       appBar: _appBar('Edit Profile'),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
@@ -621,20 +756,20 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 child: ElevatedButton(
                   onPressed: _saving ? null : _save,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.lightPurple,
+                    backgroundColor: AppColors.primary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),
                   ),
                   child: _saving
                       ? const CircularProgressIndicator(
-                          color: Colors.white,
+                          color: AppColors.surface,
                           strokeWidth: 2,
                         )
                       : const Text(
                           'Save Changes',
                           style: TextStyle(
-                            color: Colors.white,
+                            color: AppColors.surface,
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
                           ),
@@ -663,21 +798,21 @@ class _EditProfilePageState extends State<EditProfilePage> {
         labelText: label,
         prefixIcon: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: AppSvgIcon(svgAsset, color: AppColors.lightPurple),
+          child: AppSvgIcon(svgAsset, color: AppColors.primary),
         ),
         filled: true,
-        fillColor: Colors.white,
+        fillColor: AppColors.surface,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.borderPrimary),
+          borderSide: BorderSide(color: Colors.grey.shade300),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.borderPrimary),
+          borderSide: BorderSide(color: Colors.grey.shade300),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.accent2)),
+          borderSide: const BorderSide(color: AppColors.primary),
         ),
       ),
     );
@@ -703,30 +838,8 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bgSecondary),
-      appBar: AppBar(
-        backgroundColor: AppColors.primary),
-        elevation: 0,
-        leading: Navigator.canPop(context)
-            ? IconButton(
-                icon: const AppSvgIcon(
-                  AppSvgAssets.chevronLeft,
-                  color: Colors.white,
-                  size: 18,
-                ),
-                onPressed: () => Navigator.pop(context),
-              )
-            : null,
-        title: const Text(
-          'Notification Settings',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        centerTitle: true,
-      ),
+      backgroundColor:  AppColors.background,
+      appBar: _appBar('Notification Settings'),
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
@@ -734,7 +847,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
             'Lead Notifications',
             'Get notified for new leads',
             AppSvgAssets.sun,
-            AppColors.warning,
+            AppColors.solar,
             _leads,
             (v) => setState(() => _leads = v),
           ),
@@ -742,7 +855,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
             'Service Updates',
             'Updates on service requests',
             AppSvgAssets.cog,
-            AppColors.lightPurple,
+            AppColors.primary,
             _services,
             (v) => setState(() => _services = v),
           ),
@@ -758,7 +871,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
             'Follow-up Reminders',
             'Daily follow-up alerts',
             AppSvgAssets.calendarDays,
-            AppColors.info,
+            AppColors.primary,
             _followups,
             (v) => setState(() => _followups = v),
           ),
@@ -779,7 +892,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
@@ -795,7 +908,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
+              color: color.withOpacity(0.1),
               borderRadius: BorderRadius.circular(10),
             ),
             child: AppSvgIcon(svgAsset, color: color, size: 16),
@@ -814,7 +927,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                 ),
                 Text(
                   subtitle,
-                  style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
                 ),
               ],
             ),
@@ -822,7 +935,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
           Switch(
             value: value,
             onChanged: onChanged,
-            activeColor: AppColors.lightPurple,
+            activeColor: AppColors.primary,
           ),
         ],
       ),
@@ -838,7 +951,7 @@ class PrivacyPolicyPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bgSecondary),
+      backgroundColor:  AppColors.background,
       appBar: _appBar('Privacy Policy'),
       body: ListView(
         padding: const EdgeInsets.all(20),
@@ -869,42 +982,42 @@ class PrivacyPolicyPage extends StatelessWidget {
   }
 
   Widget _policySection(String title, String body) => Container(
-        margin: const EdgeInsets.only(bottom: 16),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(14),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 6,
-              offset: const Offset(0, 3),
-            ),
-          ],
+    margin: const EdgeInsets.only(bottom: 16),
+    padding: const EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      color: AppColors.surface,
+      borderRadius: BorderRadius.circular(14),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.04),
+          blurRadius: 6,
+          offset: const Offset(0, 3),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.bold,
-                color: AppColors.lightPurple,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              body,
-              style: const TextStyle(
-                fontSize: 13,
-                color: AppColors.textPrimary,
-                height: 1.5,
-              ),
-            ),
-          ],
+      ],
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.bold,
+            color: AppColors.primary,
+          ),
         ),
-      );
+        const SizedBox(height: 8),
+        Text(
+          body,
+          style: const TextStyle(
+            fontSize: 13,
+            color: AppColors.textDark,
+            height: 1.5,
+          ),
+        ),
+      ],
+    ),
+  );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -915,7 +1028,7 @@ class HelpSupportPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bgSecondary),
+      backgroundColor:  AppColors.background,
       appBar: _appBar('Help & Support'),
       body: ListView(
         padding: const EdgeInsets.all(20),
@@ -925,7 +1038,7 @@ class HelpSupportPage extends StatelessWidget {
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [AppColors.lightPurple, AppColors.lightPurple],
+                colors: [AppColors.primary, AppColors.primaryDark],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -939,7 +1052,7 @@ class HelpSupportPage extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: AppColors.surface,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -970,12 +1083,15 @@ class HelpSupportPage extends StatelessWidget {
   }
 
   Widget _contactRow(String svgAsset, String text) => Row(
-        children: [
-          AppSvgIcon(svgAsset, color: Colors.white70),
-          const SizedBox(width: 10),
-          Text(text, style: const TextStyle(color: Colors.white, fontSize: 14)),
-        ],
-      );
+    children: [
+      AppSvgIcon(svgAsset, color: AppColors.surface),
+      const SizedBox(width: 10),
+      Text(
+        text,
+        style: const TextStyle(color: AppColors.surface, fontSize: 14),
+      ),
+    ],
+  );
 
   static const List<List<String>> _faqs = [
     [
@@ -1008,75 +1124,66 @@ class _FaqTileState extends State<_FaqTile> {
   bool _open = false;
   @override
   Widget build(BuildContext context) => Container(
-        margin: const EdgeInsets.only(bottom: 10),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(14),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 6,
-              offset: const Offset(0, 3),
-            ),
-          ],
+    margin: const EdgeInsets.only(bottom: 10),
+    decoration: BoxDecoration(
+      color: AppColors.surface,
+      borderRadius: BorderRadius.circular(14),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.04),
+          blurRadius: 6,
+          offset: const Offset(0, 3),
         ),
-        child: Column(
-          children: [
-            ListTile(
-              onTap: () => setState(() => _open = !_open),
-              title: Text(
-                widget.q,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              trailing: AppSvgIcon(
-                _open ? AppSvgAssets.chevronUp : AppSvgAssets.chevronDown,
-                color: AppColors.lightPurple,
+      ],
+    ),
+    child: Column(
+      children: [
+        ListTile(
+          onTap: () => setState(() => _open = !_open),
+          title: Text(
+            widget.q,
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+          ),
+          trailing: AppSvgIcon(
+            _open ? AppSvgAssets.chevronUp : AppSvgAssets.chevronDown,
+            color: AppColors.primary,
+          ),
+        ),
+        if (_open)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+            child: Text(
+              widget.a,
+              style: const TextStyle(
+                fontSize: 13,
+                color: Colors.black54,
+                height: 1.5,
               ),
             ),
-            if (_open)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
-                child: Text(
-                  widget.a,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: AppColors.textSecondary,
-                    height: 1.5,
-                  ),
-                ),
-              ),
-          ],
-        ),
-      );
+          ),
+      ],
+    ),
+  );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SHARED APP BAR HELPER
 // ─────────────────────────────────────────────────────────────────────────────
 AppBar _appBar(String title) => AppBar(
-      backgroundColor: AppColors.bgSecondary),
-      elevation: 0,
-      centerTitle: true,
-      iconTheme: const IconThemeData(color: AppColors.lightPurple),
-      title: Text(
-        title,
-        style: const TextStyle(
-          fontWeight: FontWeight.bold,
-          color: AppColors.lightPurple,
-          fontSize: 16,
-        ),
-      ),
-      bottom: PreferredSize(
-        preferredSize: const Size.fromHeight(1),
-        child: Container(height: 1, color: AppColors.borderPrimary),
-      ),
-    );
-
-
-
-
-
-
+  backgroundColor:  AppColors.background,
+  elevation: 0,
+  centerTitle: true,
+  iconTheme: const IconThemeData(color: AppColors.primary),
+  title: Text(
+    title,
+    style: const TextStyle(
+      fontWeight: FontWeight.bold,
+      color: AppColors.primary,
+      fontSize: 16,
+    ),
+  ),
+  bottom: PreferredSize(
+    preferredSize: const Size.fromHeight(1),
+    child: Container(height: 1, color: Colors.grey.shade300),
+  ),
+);

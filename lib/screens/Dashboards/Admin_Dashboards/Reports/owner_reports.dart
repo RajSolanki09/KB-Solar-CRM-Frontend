@@ -10,10 +10,10 @@ import 'package:solar_project/Cubits/SolarLeads/solar_leads_state.dart';
 import 'package:solar_project/Cubits/SprinklerLeads/sprinkler_leads_cubit.dart';
 import 'package:solar_project/Cubits/SprinklerLeads/sprinkler_leads_state.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
+import 'package:solar_project/core/app_colors.dart';
 import 'package:solar_project/data/Models/solar_leads_model.dart';
 import 'package:solar_project/data/Models/sprinkler_lead_model.dart';
 import 'package:solar_project/data/Models/service_request_model.dart';
-import 'package:solar_project/Helper/app_colors.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 enum _Period { today, week, month, all }
@@ -48,14 +48,11 @@ class _State extends State<OwnerReportsPage> with TickerProviderStateMixin {
       duration: const Duration(milliseconds: 900),
     );
     _prog = CurvedAnimation(parent: _anim, curve: Curves.easeOutCubic);
-
-    // FIX: mounted check + try/catch added to prevent
-    // "_elements.contains(element) is not true" assertion.
-    // This fires when the postFrameCallback runs after the widget's element
-    // has shifted in the tree during navigation transitions.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      _fetchAll();
+      context.read<SolarLeadCubit>().fetchAllLeads();
+      context.read<SprinklerLeadCubit>().fetchAllLeads();
+      context.read<ServiceLeadCubit>().fetchAllServices();
+      context.read<RevenueCubit>().fetchRevenue();
       _anim.forward();
     });
   }
@@ -66,27 +63,12 @@ class _State extends State<OwnerReportsPage> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  /// Safe fetch — always guard with mounted + try/catch before calling
-  /// context.read<>() because this screen is pushed without BlocProvider.value
-  /// wrappers (unlike the payment/installation screens). The cubits are
-  /// inherited from the root provider tree, so a context.read<>() call after
-  /// an async gap or navigation transition can find the element detached.
-  void _fetchAll() {
-    if (!mounted) return;
-    try {
-      context.read<SolarLeadCubit>().fetchAllLeads();
-      context.read<SprinklerLeadCubit>().fetchAllLeads();
-      context.read<ServiceLeadCubit>().fetchAllServices();
-      context.read<RevenueCubit>().fetchRevenue();
-    } catch (_) {
-      // Swallow ProviderNotFoundException if context leaves the tree.
-    }
-  }
-
   void _refresh() {
-    if (!mounted) return;
     _anim.reset();
-    _fetchAll();
+    context.read<SolarLeadCubit>().fetchAllLeads();
+    context.read<SprinklerLeadCubit>().fetchAllLeads();
+    context.read<ServiceLeadCubit>().fetchAllServices();
+    context.read<RevenueCubit>().fetchRevenue();
     _anim.forward();
   }
 
@@ -128,7 +110,8 @@ class _State extends State<OwnerReportsPage> with TickerProviderStateMixin {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(primary: AppColors.accent2)),
+            colorScheme: const ColorScheme.light(primary: AppColors.primary),
+          ),
           child: child!,
         );
       },
@@ -157,7 +140,7 @@ class _State extends State<OwnerReportsPage> with TickerProviderStateMixin {
             ? IconButton(
                 icon: const AppSvgIcon(
                   AppSvgAssets.chevronLeft,
-                  color: AppColors.accent2,
+                  color: AppColors.primary,
                   size: 18,
                 ),
                 onPressed: () => Navigator.pop(context),
@@ -169,18 +152,19 @@ class _State extends State<OwnerReportsPage> with TickerProviderStateMixin {
           style: TextStyle(
             fontWeight: FontWeight.w700,
             fontSize: 20,
-            color: AppColors.accent2),
+            color: AppColors.primary,
           ),
+        ),
         actions: [
           if (_selectedDate != null)
             TextButton.icon(
               onPressed: _clearDate,
-              icon: const Icon(Icons.close, size: 14, color: AppColors.accent2),
+              icon: const Icon(Icons.close, size: 14, color: AppColors.primary),
               label: Text(
                 '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}',
                 style: const TextStyle(
                   fontSize: 12,
-                  color: AppColors.accent2,
+                  color: AppColors.primary,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -189,7 +173,7 @@ class _State extends State<OwnerReportsPage> with TickerProviderStateMixin {
             IconButton(
               icon: const AppSvgIcon(
                 AppSvgAssets.calendarDays,
-                color: AppColors.accent2,
+                color: AppColors.primary,
               ),
               onPressed: _pickDate,
               tooltip: 'Filter by date',
@@ -197,7 +181,7 @@ class _State extends State<OwnerReportsPage> with TickerProviderStateMixin {
           IconButton(
             icon: const AppSvgIcon(
               AppSvgAssets.refreshCw,
-              color: AppColors.accent2,
+              color: AppColors.primary,
             ),
             onPressed: _refresh,
           ),
@@ -225,18 +209,19 @@ class _State extends State<OwnerReportsPage> with TickerProviderStateMixin {
 
                 if (loading) {
                   return const Center(
-                    child: CircularProgressIndicator(
-                      color: AppColors.accent2,
-                    ),
+                    child: CircularProgressIndicator(color: AppColors.primary),
                   );
                 }
 
-                final solar =
-                    allSolar.where((l) => _inPeriod(l.createdAt)).toList();
-                final spk =
-                    allSpk.where((l) => _inPeriod(l.createdAt)).toList();
-                final svc =
-                    allSvc.where((s) => _inPeriod(s.createdAt)).toList();
+                final solar = allSolar
+                    .where((l) => _inPeriod(l.createdAt))
+                    .toList();
+                final spk = allSpk
+                    .where((l) => _inPeriod(l.createdAt))
+                    .toList();
+                final svc = allSvc
+                    .where((s) => _inPeriod(s.createdAt))
+                    .toList();
 
                 return AnimatedBuilder(
                   animation: _prog,
@@ -300,6 +285,8 @@ class _Body extends StatelessWidget {
         .where((l) => l.currentStep.index >= SolarStep.installation.index)
         .length;
     final sCompleted = solar.where((l) => l.isCompleted).length;
+    // final sHot = solar.where((l) => l.interestLevel == 'hot').length;
+    // final sWarm = solar.where((l) => l.interestLevel == 'warm').length;
 
     // ── Sprinkler metrics ─────────────────────────────────────────────────
     final pTotal = spk.length;
@@ -309,13 +296,13 @@ class _Body extends StatelessWidget {
     final pInstalled = spk
         .where(
           (l) =>
-              l.currentStep.index >=
-              SprinklerStep.installationAssigned.index,
+              l.currentStep.index >= SprinklerStep.installationAssigned.index,
         )
         .length;
     final pCompleted = spk.where((l) => l.isCompleted).length;
+    // final pHot = spk.where((l) => l.interestLevel == 'hot').length;
 
-    // ── Revenue — RevenueCubit se ─────────────────────────────────────────
+    // ── Revenue — RevenueCubit se (same as AdminRevenueSummaryPage) ───────
     final sRevenue = revState is RevenueLoaded
         ? (revState as RevenueLoaded).displaySolar
         : 0.0;
@@ -332,6 +319,8 @@ class _Body extends StatelessWidget {
         ? (revState as RevenueLoaded).displayPending
         : 0.0;
 
+    // ── Per-source collected — RevenueCubit se ───────────────────────────
+
     final sPending = solar.fold<double>(
       0,
       (a, l) => a + l.pendingAmount.clamp(0, double.infinity),
@@ -346,7 +335,9 @@ class _Body extends StatelessWidget {
     );
 
     // ── Combined ──────────────────────────────────────────────────────────
+
     final totalCollect = totalRev - totalPending;
+    // final totalPending = sPending + pPending + svPending;
     final payRate = totalRev > 0 ? totalCollect / totalRev : 0.0;
 
     // ── 7-day new leads ───────────────────────────────────────────────────
@@ -379,21 +370,18 @@ class _Body extends StatelessWidget {
                       vertical: 8,
                     ),
                     decoration: BoxDecoration(
-                      color: sel ? AppColors.accent2 : Colors.white,
+                      color: sel ? AppColors.primary : AppColors.surface,
                       borderRadius: BorderRadius.circular(30),
                       border: Border.all(
-                        color: sel
-                            ? AppColors.accent2
-                            : AppColors.borderPrimary,
+                        color: sel ? AppColors.primary : Colors.grey.shade300,
                       ),
                     ),
                     child: Text(
                       p.label,
                       style: TextStyle(
                         fontSize: 13,
-                        fontWeight:
-                            sel ? FontWeight.w700 : FontWeight.w500,
-                        color: sel ? Colors.white : AppColors.textPrimary,
+                        fontWeight: sel ? FontWeight.w700 : FontWeight.w500,
+                        color: sel ? AppColors.surface : AppColors.textDark,
                       ),
                     ),
                   ),
@@ -415,6 +403,8 @@ class _Body extends StatelessWidget {
 
         const SizedBox(height: 20),
 
+        const SizedBox(height: 20),
+
         // ── Solar pipeline ────────────────────────────────────────────────
         _PipelineCard(
           title: '☀️  Solar Pipeline',
@@ -426,8 +416,7 @@ class _Body extends StatelessWidget {
               solar
                   .where(
                     (l) =>
-                        l.currentStep.index >=
-                        SolarStep.technicalVisit.index,
+                        l.currentStep.index >= SolarStep.technicalVisit.index,
                   )
                   .length,
             ),
@@ -435,8 +424,7 @@ class _Body extends StatelessWidget {
               'Quotation',
               solar
                   .where(
-                    (l) =>
-                        l.currentStep.index >= SolarStep.quotation.index,
+                    (l) => l.currentStep.index >= SolarStep.quotation.index,
                   )
                   .length,
             ),
@@ -453,16 +441,14 @@ class _Body extends StatelessWidget {
         // ── Sprinkler pipeline ────────────────────────────────────────────
         _PipelineCard(
           title: '💧  Sprinkler Pipeline',
-          accentColor: AppColors.primary,
+          accentColor: AppColors.primaryLight,
           stages: [
             _S('New Lead', pTotal),
             _S(
               'Site Visit',
               spk
                   .where(
-                    (l) =>
-                        l.currentStep.index >=
-                        SprinklerStep.siteVisit.index,
+                    (l) => l.currentStep.index >= SprinklerStep.siteVisit.index,
                   )
                   .length,
             ),
@@ -470,9 +456,7 @@ class _Body extends StatelessWidget {
               'Quotation',
               spk
                   .where(
-                    (l) =>
-                        l.currentStep.index >=
-                        SprinklerStep.quotation.index,
+                    (l) => l.currentStep.index >= SprinklerStep.quotation.index,
                   )
                   .length,
             ),
@@ -493,7 +477,7 @@ class _Body extends StatelessWidget {
           child: _BarChart(
             daily: daily7,
             maxVal: maxD,
-            color: AppColors.accent2,
+            color: AppColors.primary,
             progress: progress,
           ),
         ),
@@ -519,7 +503,7 @@ class _Body extends StatelessWidget {
                 '💧  Sprinkler',
                 pRevenue,
                 totalRev,
-                AppColors.primary,
+                AppColors.primaryLight,
                 _fmtRev,
                 progress,
               ),
@@ -556,7 +540,7 @@ class _Body extends StatelessWidget {
                 'Sprinkler',
                 pRevenue - pPending,
                 pRevenue,
-                AppColors.primary,
+                AppColors.primaryLight,
                 progress,
               ),
               const SizedBox(height: 10),
@@ -564,7 +548,7 @@ class _Body extends StatelessWidget {
                 'Service',
                 svRevenue - svPending,
                 svRevenue,
-                AppColors.primary ,
+                AppColors.primary,
                 progress,
               ),
             ],
@@ -601,93 +585,90 @@ class _RevenueHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(24),
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [AppColors.primary , AppColors.primaryLight],
+    width: double.infinity,
+    padding: const EdgeInsets.all(24),
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(24),
+      gradient: const LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [AppColors.primary, Color(0xFF9F44D3)],
+      ),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Total Business Revenue',
+          style: TextStyle(
+            fontSize: 13,
+            color: AppColors.surface,
+            letterSpacing: 0.3,
           ),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        const SizedBox(height: 8),
+        TweenAnimationBuilder<double>(
+          tween: Tween(begin: 0, end: total),
+          duration: const Duration(milliseconds: 1200),
+          curve: Curves.easeOutCubic,
+          builder: (_, v, __) => Text(
+            fmt(v),
+            style: const TextStyle(
+              fontSize: 32,
+              fontWeight: FontWeight.w800,
+              color: AppColors.surface,
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        // progress bar
+        ClipRRect(
+          borderRadius: BorderRadius.circular(4),
+          child: Stack(
+            children: [
+              Container(
+                height: 5,
+                color: AppColors.surface.withValues(alpha: 0.18),
+              ),
+              FractionallySizedBox(
+                widthFactor: (payRate * progress).clamp(0.0, 1.0),
+                child: Container(
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        Row(
           children: [
-            const Text(
-              'Total Business Revenue',
-              style: TextStyle(
-                fontSize: 13,
-                color: Colors.white70,
-                letterSpacing: 0.3,
-              ),
+            _Pill(
+              'Collected',
+              fmt(collected),
+              AppColors.surface,
+              AppColors.surface.withValues(alpha: 0.18),
             ),
-            const SizedBox(height: 8),
-            TweenAnimationBuilder<double>(
-              tween: Tween(begin: 0, end: total),
-              duration: const Duration(milliseconds: 1200),
-              curve: Curves.easeOutCubic,
-              builder: (_, v, __) => Text(
-                fmt(v),
-                style: const TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.w800,
-                  color: Colors.white,
-                ),
-              ),
+            const SizedBox(width: 10),
+            _Pill(
+              'Pending',
+              fmt(pending),
+              const Color(0xFFFFE08A),
+              AppColors.solar.withValues(alpha: 0.25),
             ),
-            const SizedBox(height: 16),
-            // progress bar
-            ClipRRect(
-              borderRadius: BorderRadius.circular(4),
-              child: Stack(
-                children: [
-                  Container(
-                    height: 5,
-                    color: Colors.white.withValues(alpha: 0.18),
-                  ),
-                  FractionallySizedBox(
-                    widthFactor: (payRate * progress).clamp(0.0, 1.0),
-                    child: Container(
-                      height: 5,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                _Pill(
-                  'Collected',
-                  fmt(collected),
-                  Colors.white,
-                  Colors.white.withValues(alpha: 0.18),
-                ),
-                const SizedBox(width: 10),
-                _Pill(
-                  'Pending',
-                  fmt(pending),
-                  AppColors.primaryLightest,
-                  Colors.orange.withValues(alpha: 0.25),
-                ),
-                const Spacer(),
-                Text(
-                  '${(payRate * 100).toStringAsFixed(1)}% collected',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.white60,
-                  ),
-                ),
-              ],
+            const Spacer(),
+            Text(
+              '${(payRate * 100).toStringAsFixed(1)}% collected',
+              style: const TextStyle(fontSize: 12, color: AppColors.surface),
             ),
           ],
         ),
-      );
+      ],
+    ),
+  );
 }
 
 class _Pill extends StatelessWidget {
@@ -696,32 +677,29 @@ class _Pill extends StatelessWidget {
   const _Pill(this.label, this.value, this.text, this.bg);
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: bg,
-          borderRadius: BorderRadius.circular(20),
+    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+    decoration: BoxDecoration(
+      color: bg,
+      borderRadius: BorderRadius.circular(20),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(fontSize: 10, color: text.withValues(alpha: 0.65)),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 10,
-                color: text.withValues(alpha: 0.65),
-              ),
-            ),
-            Text(
-              value,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-                color: text,
-              ),
-            ),
-          ],
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+            color: text,
+          ),
         ),
-      );
+      ],
+    ),
+  );
 }
 
 // ── Pipeline funnel ───────────────────────────────────────────────────────────
@@ -741,87 +719,81 @@ class _PipelineCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => _Card(
-        title: title,
-        svgAsset: AppSvgAssets.filter,
-        child: total == 0
-            ? Padding(
-                padding: const EdgeInsets.symmetric(vertical: 6),
-                child: Text(
-                  'No leads for this period',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              )
-            : Column(
-                children: stages.map((s) {
-                  final pct = total > 0 ? s.count / total : 0.0;
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 9),
-                    child: Row(
-                      children: [
-                        SizedBox(
-                          width: 76,
-                          child: Text(
-                            s.label,
-                            style: const TextStyle(
-                              fontSize: 11,
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
+    title: title,
+    svgAsset: AppSvgAssets.filter,
+    child: total == 0
+        ? Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            child: Text(
+              'No leads for this period',
+              style: TextStyle(fontSize: 13, color: AppColors.textLight),
+            ),
+          )
+        : Column(
+            children: stages.map((s) {
+              final pct = total > 0 ? s.count / total : 0.0;
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 9),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 76,
+                      child: Text(
+                        s.label,
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: Colors.black54,
                         ),
-                        Expanded(
-                          child: Stack(
-                            children: [
-                              Container(
-                                height: 8,
-                                decoration: BoxDecoration(
-                                  color: AppColors.textSecondary,
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                              ),
-                              FractionallySizedBox(
-                                widthFactor:
-                                    (pct * progress).clamp(0.0, 1.0),
-                                child: Container(
-                                  height: 8,
-                                  decoration: BoxDecoration(
-                                    color: accentColor,
-                                    borderRadius: BorderRadius.circular(4),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: accentColor.withValues(
-                                          alpha: 0.35,
-                                        ),
-                                        blurRadius: 4,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        SizedBox(
-                          width: 28,
-                          child: Text(
-                            '${s.count}',
-                            textAlign: TextAlign.right,
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
-                              color: accentColor,
-                            ),
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
-                  );
-                }).toList(),
-              ),
-      );
+                    Expanded(
+                      child: Stack(
+                        children: [
+                          Container(
+                            height: 8,
+                            decoration: BoxDecoration(
+                              color: AppColors.divider,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                          ),
+                          FractionallySizedBox(
+                            widthFactor: (pct * progress).clamp(0.0, 1.0),
+                            child: Container(
+                              height: 8,
+                              decoration: BoxDecoration(
+                                color: accentColor,
+                                borderRadius: BorderRadius.circular(4),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: accentColor.withValues(alpha: 0.35),
+                                    blurRadius: 4,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    SizedBox(
+                      width: 28,
+                      child: Text(
+                        '${s.count}',
+                        textAlign: TextAlign.right,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: accentColor,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }).toList(),
+          ),
+  );
 }
 
 // ── 7-day bar chart ───────────────────────────────────────────────────────────
@@ -863,7 +835,7 @@ class _BarChart extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 9,
                       fontWeight: FontWeight.w700,
-                      color: isToday ? color : AppColors.textSecondary,
+                      color: isToday ? color : AppColors.textLight,
                     ),
                   ),
                 ),
@@ -873,9 +845,7 @@ class _BarChart extends StatelessWidget {
                   height: h.clamp(4.0, 58.0),
                   margin: const EdgeInsets.symmetric(horizontal: 3),
                   decoration: BoxDecoration(
-                    color: isToday
-                        ? color
-                        : color.withValues(alpha: 0.2),
+                    color: isToday ? color : color.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
@@ -884,7 +854,7 @@ class _BarChart extends StatelessWidget {
                   _days[day.weekday - 1],
                   style: TextStyle(
                     fontSize: 9,
-                    color: isToday ? color : AppColors.textSecondary,
+                    color: isToday ? color : AppColors.textLight,
                   ),
                 ),
               ],
@@ -925,7 +895,7 @@ class _RevBar extends StatelessWidget {
               Container(
                 height: 10,
                 decoration: BoxDecoration(
-                  color: AppColors.textSecondary,
+                  color: AppColors.divider,
                   borderRadius: BorderRadius.circular(5),
                 ),
               ),
@@ -989,7 +959,7 @@ class _CollectRow extends StatelessWidget {
               Container(
                 height: 8,
                 decoration: BoxDecoration(
-                  color: AppColors.textSecondary,
+                  color: AppColors.divider,
                   borderRadius: BorderRadius.circular(4),
                 ),
               ),
@@ -1036,50 +1006,40 @@ class _Card extends StatelessWidget {
   });
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.all(18),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
-              blurRadius: 10,
-              offset: const Offset(0, 2),
-            ),
-          ],
+    padding: const EdgeInsets.all(18),
+    decoration: BoxDecoration(
+      color: AppColors.surface,
+      borderRadius: BorderRadius.circular(20),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withValues(alpha: 0.04),
+          blurRadius: 10,
+          offset: const Offset(0, 2),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      ],
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
           children: [
-            Row(
-              children: [
-                AppSvgIcon(
-                  svgAsset,
-                  size: 15,
-                  color: AppColors.accent2,
-                ),
-                const SizedBox(width: 7),
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF1F2937),
-                  ),
-                ),
-              ],
+            AppSvgIcon(svgAsset, size: 15, color: AppColors.primary),
+            const SizedBox(width: 7),
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textDark,
+              ),
             ),
-            const SizedBox(height: 14),
-            const Divider(height: 1, color: Color(0xFFF3F4F6)),
-            const SizedBox(height: 14),
-            child,
           ],
         ),
-      );
+        const SizedBox(height: 14),
+        const Divider(height: 1, color: AppColors.background),
+        const SizedBox(height: 14),
+        child,
+      ],
+    ),
+  );
 }
-
-
-
-
-
-

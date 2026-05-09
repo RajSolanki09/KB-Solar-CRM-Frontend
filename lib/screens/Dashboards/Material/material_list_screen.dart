@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:solar_project/Helper/app_feedback.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
+import 'package:solar_project/core/app_colors.dart';
 import 'package:solar_project/screens/Dashboards/Material/add_material_customer.dart';
 import 'package:solar_project/screens/Dashboards/Material/add_material.dart';
 import 'package:solar_project/screens/Dashboards/Material/material_customer_list_tab.dart';
 import 'package:solar_project/screens/Dashboards/Material/material_customer_pipeline_screen.dart';
 import 'package:solar_project/services/api_service.dart';
-import 'package:solar_project/Helper/app_colors.dart';
 
 class MaterialListScreen extends StatefulWidget {
   final Color? appBarColor;
@@ -27,17 +27,23 @@ class _MaterialListScreenState extends State<MaterialListScreen>
   List<Map<String, dynamic>> _materials = const [];
   List<Map<String, dynamic>> _customers = const [];
 
+  late final VoidCallback _tabListener;
+
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    _tabController.addListener(() => setState(() {}));
+    _tabListener = () {
+      if (mounted) setState(() {});
+    };
+    _tabController.addListener(_tabListener);
     _loadMaterials();
     _loadCustomers();
   }
 
   @override
   void dispose() {
+    _tabController.removeListener(_tabListener);
     _tabController.dispose();
     super.dispose();
   }
@@ -78,7 +84,8 @@ class _MaterialListScreenState extends State<MaterialListScreen>
     await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => const AddMaterialScreen(appBarColor: AppColors.primary)),
+        builder: (_) =>
+            const AddMaterialScreen(appBarColor: AppColors.primaryDark),
       ),
     );
     if (!mounted) return;
@@ -90,7 +97,7 @@ class _MaterialListScreenState extends State<MaterialListScreen>
       context,
       MaterialPageRoute(
         builder: (_) =>
-            const AddMaterialCustomerScreen(appBarColor: AppColors.primary)),
+            const AddMaterialCustomerScreen(appBarColor: AppColors.primaryDark),
       ),
     );
     if (!mounted) return;
@@ -102,7 +109,7 @@ class _MaterialListScreenState extends State<MaterialListScreen>
       context,
       MaterialPageRoute(
         builder: (_) => AddMaterialCustomerScreen(
-          appBarColor: AppColors.primary),
+          appBarColor: AppColors.primaryDark,
           initialCustomer: customer,
         ),
       ),
@@ -124,7 +131,7 @@ class _MaterialListScreenState extends State<MaterialListScreen>
         builder: (_) => MaterialCustomerPipelineScreen(
           customerId: id,
           initialCustomer: customer,
-          appBarColor: AppColors.primary),
+          appBarColor: AppColors.primaryDark,
         ),
       ),
     );
@@ -138,7 +145,7 @@ class _MaterialListScreenState extends State<MaterialListScreen>
       context,
       MaterialPageRoute(
         builder: (_) => AddMaterialScreen(
-          appBarColor: AppColors.primary),
+          appBarColor: AppColors.primaryDark,
           initialMaterial: material,
         ),
       ),
@@ -182,8 +189,8 @@ class _MaterialListScreenState extends State<MaterialListScreen>
             ElevatedButton(
               onPressed: () => Navigator.pop(ctx, true),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary),
-                foregroundColor: Colors.white,
+                backgroundColor: AppColors.error,
+                foregroundColor: AppColors.surface,
               ),
               child: const Text('Delete'),
             ),
@@ -230,8 +237,8 @@ class _MaterialListScreenState extends State<MaterialListScreen>
             ElevatedButton(
               onPressed: () => Navigator.pop(ctx, true),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary),
-                foregroundColor: Colors.white,
+                backgroundColor: AppColors.error,
+                foregroundColor: AppColors.surface,
               ),
               child: const Text('Delete'),
             ),
@@ -257,7 +264,7 @@ class _MaterialListScreenState extends State<MaterialListScreen>
 
   @override
   Widget build(BuildContext context) {
-    final color = widget.appBarColor ?? AppColors.primary);
+    final color = widget.appBarColor ?? AppColors.primaryDark;
     final screenWidth = MediaQuery.of(context).size.width;
     final isDesktop = screenWidth >= 1024;
     final isExtraLarge = screenWidth >= 1600;
@@ -270,15 +277,15 @@ class _MaterialListScreenState extends State<MaterialListScreen>
     final isMaterialTab = _tabController.index == 0;
 
     return Scaffold(
-      backgroundColor: AppColors.bgSecondary),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: color,
-        foregroundColor: Colors.white,
+        foregroundColor: AppColors.surface,
         title: const Row(
           children: [
             AppSvgIcon(
               AppSvgAssets.packagePlus, // 👈 material/inventory icon
-              color: Colors.white,
+              color: AppColors.surface,
               size: 18,
             ),
             SizedBox(width: 8),
@@ -291,7 +298,7 @@ class _MaterialListScreenState extends State<MaterialListScreen>
         leading: IconButton(
           icon: AppSvgIcon(
             AppSvgAssets.chevronLeft,
-            color: Colors.white,
+            color: AppColors.surface,
             size: 20,
           ),
           onPressed: () => Navigator.pop(context),
@@ -300,10 +307,10 @@ class _MaterialListScreenState extends State<MaterialListScreen>
       floatingActionButton: FloatingActionButton.extended(
         onPressed: isMaterialTab ? _openAddMaterial : _openAddCustomer,
         backgroundColor: color,
-        foregroundColor: Colors.white,
+        foregroundColor: AppColors.surface,
         icon: const AppSvgIcon(
           AppSvgAssets.plus,
-          color: Colors.white,
+          color: AppColors.surface,
           size: 18,
         ),
         label: Text(isMaterialTab ? 'Add Material' : 'Add Customer'),
@@ -311,11 +318,11 @@ class _MaterialListScreenState extends State<MaterialListScreen>
       body: Column(
         children: [
           Container(
-            color: Colors.white,
+            color: AppColors.surface,
             child: TabBar(
               controller: _tabController,
               labelColor: color,
-              unselectedLabelColor: AppColors.textSecondary),
+              unselectedLabelColor: AppColors.textGray,
               indicatorColor: color,
               tabs: const [
                 Tab(text: 'Materials'),
@@ -342,7 +349,7 @@ class _MaterialListScreenState extends State<MaterialListScreen>
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
-                                  color: AppColors.textSecondary),
+                                  color: AppColors.textGray,
                                 ),
                               ),
                             ),
@@ -355,11 +362,9 @@ class _MaterialListScreenState extends State<MaterialListScreen>
                               width: double.infinity,
                               child: Container(
                                 decoration: BoxDecoration(
-                                  color: Colors.white,
+                                  color: AppColors.surface,
                                   borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(
-                                    color: AppColors.bgPrimary),
-                                  ),
+                                  border: Border.all(color: AppColors.divider),
                                 ),
                                 clipBehavior: Clip.antiAlias,
                                 child: LayoutBuilder(
@@ -448,7 +453,7 @@ class _MaterialListScreenState extends State<MaterialListScreen>
                                                         icon: const Icon(
                                                           Icons.delete_outline,
                                                           color: Color(
-                                                            AppColors.error,
+                                                            0xFFDC2626,
                                                           ),
                                                           size: 20,
                                                         ),
@@ -503,8 +508,3 @@ class _MaterialListScreenState extends State<MaterialListScreen>
     return DateFormat('dd MMM yyyy').format(dt.toLocal());
   }
 }
-
-
-
-
-

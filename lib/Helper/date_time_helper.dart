@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:solar_project/core/app_colors.dart';
 
 class DateTimeHelper {
   static Future<DateTime?> pickPastDate(
@@ -35,7 +36,7 @@ class DateTimeHelper {
         data: Theme.of(ctx).copyWith(
           colorScheme: ColorScheme.light(
             primary: accentColor,
-            onPrimary: Colors.white,
+            onPrimary: AppColors.surface,
           ),
         ),
         child: child!,
@@ -47,8 +48,11 @@ class DateTimeHelper {
   /// (defaults to 7 days ago, i.e. last 6 full days + today).
   static DateTime recentCutoff({int days = 6}) {
     final now = DateTime.now();
-    return DateTime(now.year, now.month, now.day)
-        .subtract(Duration(days: days));
+    return DateTime(
+      now.year,
+      now.month,
+      now.day,
+    ).subtract(Duration(days: days));
   }
 
   /// Whether [date] falls within the "recent" window.

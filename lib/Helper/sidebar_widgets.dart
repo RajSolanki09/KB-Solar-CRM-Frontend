@@ -9,8 +9,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:solar_project/Cubits/Auth/auth_cubit.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
 import 'package:solar_project/Helper/app_feedback.dart';
+import 'package:solar_project/core/app_colors.dart';
 import 'package:solar_project/services/api_service.dart';
-import 'package:solar_project/Helper/app_colors.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Brand Header
@@ -39,18 +39,14 @@ class SidebarBrandHeader extends StatelessWidget {
         CircleAvatar(
           radius: 28,
           backgroundColor: const Color(0xffFFF7ED),
-          child: AppSvgIcon(
-            iconAsset,
-            size: 30,
-            color: const Color(0xffF59E0B),
-          ),
+          child: AppSvgIcon(iconAsset, size: 30, color: AppColors.primary),
         ),
         const SizedBox(height: 14),
         Text(
           title,
           textAlign: TextAlign.center,
           style: const TextStyle(
-            color: Color(0xff1E293B),
+            color: AppColors.textDark,
             fontSize: 15,
             fontWeight: FontWeight.w600,
             letterSpacing: 0.4,
@@ -60,7 +56,7 @@ class SidebarBrandHeader extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             subtitle!,
-            style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
+            style: const TextStyle(color: AppColors.textGray, fontSize: 12),
           ),
         ],
       ],
@@ -107,7 +103,7 @@ class _SidebarNavItemState extends State<SidebarNavItem> {
     final activeBg = widget.isActive
         ? const Color(0xffE0E7FF)
         : isDesktopHover
-        ? const Color(0xffF1F5F9)
+        ?  AppColors.background
         : Colors.transparent;
 
     return MouseRegion(
@@ -117,9 +113,7 @@ class _SidebarNavItemState extends State<SidebarNavItem> {
       onExit: _canHover(context)
           ? (_) => setState(() => _isHovering = false)
           : null,
-      cursor: _canHover(context)
-          ? SystemMouseCursors.click
-          : MouseCursor.defer,
+      cursor: _canHover(context) ? SystemMouseCursors.click : MouseCursor.defer,
       child: InkWell(
         borderRadius: BorderRadius.circular(10),
         onTap: widget.onTap,
@@ -134,7 +128,7 @@ class _SidebarNavItemState extends State<SidebarNavItem> {
             boxShadow: isDesktopHover
                 ? [
                     BoxShadow(
-                      color: const Color(0xff2563EB).withValues(alpha: 0.08),
+                      color: AppColors.primary.withValues(alpha: 0.08),
                       blurRadius: 10,
                       offset: const Offset(0, 3),
                     ),
@@ -147,8 +141,9 @@ class _SidebarNavItemState extends State<SidebarNavItem> {
                 widget.svgAsset,
                 size: 24,
                 color: widget.isActive
-                    ? const Color(0xff2563EB)
-                    : AppColors.textSecondary),
+                    ? AppColors.primary
+                    :  AppColors.textGray,
+              ),
               const SizedBox(width: 16),
               Expanded(
                 child: Text(
@@ -156,10 +151,11 @@ class _SidebarNavItemState extends State<SidebarNavItem> {
                   style: TextStyle(
                     color: widget.isActive
                         ? const Color(0xff1E40AF)
-                        : const Color(0xff475569),
+                        :  AppColors.textGray,
                     fontSize: 14,
-                    fontWeight:
-                        widget.isActive ? FontWeight.w600 : FontWeight.w500,
+                    fontWeight: widget.isActive
+                        ? FontWeight.w600
+                        : FontWeight.w500,
                   ),
                 ),
               ),
@@ -168,7 +164,7 @@ class _SidebarNavItemState extends State<SidebarNavItem> {
                   width: 4,
                   height: 24,
                   decoration: BoxDecoration(
-                    color: const Color(0xff2563EB),
+                    color: AppColors.primary,
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
@@ -201,20 +197,20 @@ class SidebarLogoutButton extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
-            color: AppColors.primary),
-          
+            color: const Color(0xffEEF2FF),
+          ),
           child: const Row(
             children: [
               AppSvgIcon(
                 AppSvgAssets.logOut,
                 size: 20,
-                color: Colors.white,
+                color: AppColors.textGray,
               ),
               SizedBox(width: 12),
               Text(
                 'Logout',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: AppColors.textGray,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -245,7 +241,7 @@ void showSidebarLogoutDialog(BuildContext context) {
         constraints: const BoxConstraints(maxWidth: 400),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          color: Colors.white,
+          color: AppColors.surface,
         ),
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -261,7 +257,7 @@ void showSidebarLogoutDialog(BuildContext context) {
                 ),
                 child: const AppSvgIcon(
                   AppSvgAssets.logOut,
-                  color: Color(0xffF59E0B),
+                  color: AppColors.primary,
                   size: 28,
                 ),
               ),
@@ -271,7 +267,7 @@ void showSidebarLogoutDialog(BuildContext context) {
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xff1E293B),
+                  color: AppColors.textDark,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -280,7 +276,7 @@ void showSidebarLogoutDialog(BuildContext context) {
                 'Are you sure you want to logout? You will need to log in again to access your account.',
                 style: TextStyle(
                   fontSize: 14,
-                  color: AppColors.textSecondary,
+                  color: AppColors.textGray,
                   height: 1.5,
                 ),
                 textAlign: TextAlign.center,
@@ -296,7 +292,7 @@ void showSidebarLogoutDialog(BuildContext context) {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                           side: const BorderSide(
-                            color: Color(0xffE2E8F0),
+                            color: AppColors.divider,
                             width: 1.5,
                           ),
                         ),
@@ -304,7 +300,7 @@ void showSidebarLogoutDialog(BuildContext context) {
                       child: const Text(
                         'Cancel',
                         style: TextStyle(
-                          color: Color(0xff475569),
+                          color: AppColors.textGray,
                           fontWeight: FontWeight.w600,
                           fontSize: 14,
                         ),
@@ -328,7 +324,7 @@ void showSidebarLogoutDialog(BuildContext context) {
                         }
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xffEF4444),
+                        backgroundColor: AppColors.error,
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
@@ -338,7 +334,7 @@ void showSidebarLogoutDialog(BuildContext context) {
                       child: const Text(
                         'Logout',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: AppColors.surface,
                           fontWeight: FontWeight.w600,
                           fontSize: 14,
                         ),
@@ -354,7 +350,3 @@ void showSidebarLogoutDialog(BuildContext context) {
     ),
   );
 }
-
-
-
-

@@ -14,11 +14,11 @@ import 'package:solar_project/data/Models/sprinkler_lead_model.dart';
 import 'package:solar_project/Helper/lead_themes.dart';
 import 'package:solar_project/screens/Dashboards/Leads/Sprinkler/add_sprinkler_lead_screen.dart';
 import 'package:solar_project/screens/Dashboards/Leads/Sprinkler/sprinkler_lead_detail_screen.dart';
-import 'package:solar_project/Helper/app_colors.dart';
+import 'package:solar_project/core/app_colors.dart';
 
 class SprinklerLeadsListScreen extends StatefulWidget {
   final Color appBarColor;
-  final bool embedded;
+  final bool embedded; // If true, shows body only — no Scaffold/AppBar/FAB
   const SprinklerLeadsListScreen({
     super.key,
     this.appBarColor = LeadTheme.secondary,
@@ -41,10 +41,8 @@ class _SprinklerLeadsListScreenState extends State<SprinklerLeadsListScreen> {
   @override
   void initState() {
     super.initState();
-    // FIX: mounted check added — same pattern as solar_leads_list_screen.dart
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      _fetchLeads();
+      context.read<SprinklerLeadCubit>().fetchAllLeads();
     });
   }
 
@@ -54,15 +52,9 @@ class _SprinklerLeadsListScreenState extends State<SprinklerLeadsListScreen> {
     super.dispose();
   }
 
-  /// Safe fetch helper — always guards with mounted + try/catch.
-  void _fetchLeads() {
-    if (!mounted) return;
-    try {
-      context.read<SprinklerLeadCubit>().fetchAllLeads();
-    } catch (_) {}
+  void _refresh() {
+    if (mounted) context.read<SprinklerLeadCubit>().fetchAllLeads();
   }
-
-  void _refresh() => _fetchLeads();
 
   List<SprinklerLeadModel> _filterActive(List<SprinklerLeadModel> all) {
     return all.where((l) {
@@ -158,6 +150,7 @@ class _SprinklerLeadsListScreenState extends State<SprinklerLeadsListScreen> {
     return null;
   }
 
+  // ── Permanent delete with two-step confirmation ───────────────────────────
   Future<void> _confirmDeleteLead(SprinklerLeadModel lead) async {
     if (!_isAdmin) {
       if (!mounted) return;
@@ -165,6 +158,7 @@ class _SprinklerLeadsListScreenState extends State<SprinklerLeadsListScreen> {
       return;
     }
 
+    // ── Step 1: warning dialog ────────────────────────────────────────────
     final confirmed = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
@@ -178,13 +172,13 @@ class _SprinklerLeadsListScreenState extends State<SprinklerLeadsListScreen> {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: AppColors.primaryLightest),
+                color:  AppColors.errorLight,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: const AppSvgIcon(
                 AppSvgAssets.trash2,
                 size: 20,
-                color: AppColors.primary),
+                color: AppColors.error,
               ),
             ),
             const SizedBox(width: 10),
@@ -193,7 +187,7 @@ class _SprinklerLeadsListScreenState extends State<SprinklerLeadsListScreen> {
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary),
+                color: AppColors.textDark,
               ),
             ),
           ],
@@ -207,9 +201,9 @@ class _SprinklerLeadsListScreenState extends State<SprinklerLeadsListScreen> {
               width: double.infinity,
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppColors.bgSecondary),
+                color:  AppColors.background,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: AppColors.borderLight)),
+                border: Border.all(color:  AppColors.divider),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -219,17 +213,23 @@ class _SprinklerLeadsListScreenState extends State<SprinklerLeadsListScreen> {
                     style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary),
+                      color: AppColors.textDark,
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     lead.phone,
-                    style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: AppColors.textGray,
+                    ),
                   ),
                   Text(
                     lead.address,
-                    style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: AppColors.textGray,
+                    ),
                   ),
                 ],
               ),
@@ -239,9 +239,9 @@ class _SprinklerLeadsListScreenState extends State<SprinklerLeadsListScreen> {
               width: double.infinity,
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: AppColors.primaryLightest),
+                color: AppColors.warning.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: AppColors.primaryLightest)),
+                border: Border.all(color: AppColors.warning.withValues(alpha: 0.3)),
               ),
               child: const Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -249,7 +249,7 @@ class _SprinklerLeadsListScreenState extends State<SprinklerLeadsListScreen> {
                   AppSvgIcon(
                     AppSvgAssets.triangleAlert,
                     size: 16,
-                    color: AppColors.primary),
+                    color: AppColors.warning,
                   ),
                   SizedBox(width: 8),
                   Expanded(
@@ -259,7 +259,7 @@ class _SprinklerLeadsListScreenState extends State<SprinklerLeadsListScreen> {
                       'and photos. This action cannot be undone.',
                       style: TextStyle(
                         fontSize: 12,
-                        color: AppColors.primary),
+                        color: AppColors.warning,
                         height: 1.4,
                       ),
                     ),
@@ -272,13 +272,18 @@ class _SprinklerLeadsListScreenState extends State<SprinklerLeadsListScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary))),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: AppColors.textGray),
+            ),
           ),
           FilledButton(
             style: FilledButton.styleFrom(
-              backgroundColor: AppColors.primary),
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              backgroundColor:  AppColors.error,
+              foregroundColor: AppColors.surface,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
             onPressed: () => Navigator.pop(dialogContext, true),
             child: const Text(
@@ -292,6 +297,7 @@ class _SprinklerLeadsListScreenState extends State<SprinklerLeadsListScreen> {
 
     if (confirmed != true || !mounted) return;
 
+    // ── Step 2: second confirmation ───────────────────────────────────────
     final doubleConfirmed = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
@@ -305,30 +311,42 @@ class _SprinklerLeadsListScreenState extends State<SprinklerLeadsListScreen> {
           style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w700,
-            color: AppColors.primary),
+            color: AppColors.error,
           ),
         ),
         content: Text(
           'You are about to permanently delete the lead for '
           '"${lead.customerName}". All records will be gone forever.',
-          style: const TextStyle(fontSize: 13, color: AppColors.textPrimary), height: 1.5),
+          style: const TextStyle(
+            fontSize: 13,
+            color: AppColors.textDark,
+            height: 1.5,
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
             child: const Text(
               'No, Keep It',
-              style: TextStyle(color: AppColors.textPrimary), fontWeight: FontWeight.w600),
+              style: TextStyle(
+                color: AppColors.textDark,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
           FilledButton(
             style: FilledButton.styleFrom(
-              backgroundColor: AppColors.primary),
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              backgroundColor: AppColors.error,
+              foregroundColor: AppColors.surface,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
             onPressed: () => Navigator.pop(dialogContext, true),
-            child: const Text('Delete Forever', style: TextStyle(fontWeight: FontWeight.w700)),
+            child: const Text(
+              'Delete Forever',
+              style: TextStyle(fontWeight: FontWeight.w700),
+            ),
           ),
         ],
       ),
@@ -336,7 +354,7 @@ class _SprinklerLeadsListScreenState extends State<SprinklerLeadsListScreen> {
 
     if (doubleConfirmed != true || !mounted) return;
 
-    // FIX: cubit captured before any async gap
+    // ── Perform delete ────────────────────────────────────────────────────
     final cubit = context.read<SprinklerLeadCubit>();
     await cubit.deleteLead(lead.id);
 
@@ -357,11 +375,8 @@ class _SprinklerLeadsListScreenState extends State<SprinklerLeadsListScreen> {
     );
   }
 
-  // FIX: mounted check added after await + try/catch for safe fetch
   Future<void> _openDetail(SprinklerLeadModel lead) async {
-    // Capture cubit BEFORE pushing — stable reference across async gap
     final cubit = context.read<SprinklerLeadCubit>();
-
     await Navigator.push(
       context,
       MaterialPageRoute(
@@ -371,23 +386,10 @@ class _SprinklerLeadsListScreenState extends State<SprinklerLeadsListScreen> {
         ),
       ),
     );
-
-    // FIX: mounted check before fetchAllLeads
-    if (!mounted) return;
-    setState(() {
-      _filter = 'All';
-      _selectedDate = null;
-      _search = '';
-      _searchCtrl.clear();
-      _showOlderLeads = false;
-    });
-    try {
-      cubit.fetchAllLeads();
-    } catch (_) {}
+    cubit.fetchAllLeads();
   }
 
   Future<void> _openAddLead() async {
-    // Capture cubit BEFORE pushing
     final cubit = context.read<SprinklerLeadCubit>();
 
     final addedLead = await Navigator.push<Object?>(
@@ -402,12 +404,11 @@ class _SprinklerLeadsListScreenState extends State<SprinklerLeadsListScreen> {
 
     if (!mounted) return;
     if (addedLead != null) {
-      try {
-        await cubit.fetchAllLeads();
-      } catch (_) {}
+      await cubit.fetchAllLeads();
     }
   }
 
+  // ── Extracted body — reused by both embedded and full-screen modes ─────────
   Widget _buildBody() {
     return BlocBuilder<SprinklerLeadCubit, SprinklerLeadState>(
       builder: (ctx, state) {
@@ -425,10 +426,10 @@ class _SprinklerLeadsListScreenState extends State<SprinklerLeadsListScreen> {
                 AppSvgIcon(
                   AppSvgAssets.triangleAlert,
                   size: 48,
-                  color: Colors.red.shade300,
+                  color: AppColors.error,
                 ),
                 const SizedBox(height: 12),
-                Text(state.message, style: const TextStyle(color: AppColors.textSecondary)),
+                Text(state.message, style: const TextStyle(color: Colors.grey)),
                 const SizedBox(height: 16),
                 ElevatedButton.icon(
                   onPressed: _refresh,
@@ -436,7 +437,7 @@ class _SprinklerLeadsListScreenState extends State<SprinklerLeadsListScreen> {
                   label: const Text('Retry'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: LeadTheme.secondary,
-                    foregroundColor: Colors.white,
+                    foregroundColor: AppColors.surface,
                   ),
                 ),
               ],
@@ -453,10 +454,14 @@ class _SprinklerLeadsListScreenState extends State<SprinklerLeadsListScreen> {
 
           return Column(
             children: [
+              // ── Summary bar ──────────────────────────────────────
               if (all.isNotEmpty)
                 Container(
                   margin: const EdgeInsets.fromLTRB(12, 10, 12, 0),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 10,
+                  ),
                   decoration: BoxDecoration(
                     color: LeadTheme.secondary.withValues(alpha: 0.06),
                     borderRadius: BorderRadius.circular(10),
@@ -468,14 +473,15 @@ class _SprinklerLeadsListScreenState extends State<SprinklerLeadsListScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       _Stat('Total', '${all.length}', LeadTheme.secondary),
-                      Container(width: 1, height: 24, color: AppColors.borderLight),
-                      _Stat('Active', '$active', AppColors.warning),
-                      Container(width: 1, height: 24, color: AppColors.borderLight),
+                      Container(width: 1, height: 24, color: AppColors.divider),
+                      _Stat('Active', '$active', AppColors.solar),
+                      Container(width: 1, height: 24, color: AppColors.divider),
                       _Stat('Done', '$completed', AppColors.success),
                     ],
                   ),
                 ),
 
+              // ── Filters row ──────────────────────────────────────
               Padding(
                 padding: const EdgeInsets.fromLTRB(12, 10, 12, 0),
                 child: Row(
@@ -485,9 +491,9 @@ class _SprinklerLeadsListScreenState extends State<SprinklerLeadsListScreen> {
                       child: Container(
                         height: 38,
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: AppColors.surface,
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: AppColors.borderLight),
+                          border: Border.all(color: AppColors.divider),
                         ),
                         child: TextField(
                           controller: _searchCtrl,
@@ -496,7 +502,7 @@ class _SprinklerLeadsListScreenState extends State<SprinklerLeadsListScreen> {
                             hintText: 'Search name / phone / created by',
                             hintStyle: const TextStyle(
                               fontSize: 12,
-                              color: AppColors.textTertiary),
+                              color: AppColors.textLight,
                             ),
                             prefixIcon: const Padding(
                               padding: EdgeInsets.all(8.0),
@@ -507,7 +513,9 @@ class _SprinklerLeadsListScreenState extends State<SprinklerLeadsListScreen> {
                               ),
                             ),
                             border: InputBorder.none,
-                            contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                            contentPadding: const EdgeInsets.symmetric(
+                              vertical: 10,
+                            ),
                           ),
                           style: const TextStyle(fontSize: 13),
                         ),
@@ -520,11 +528,11 @@ class _SprinklerLeadsListScreenState extends State<SprinklerLeadsListScreen> {
                         height: 38,
                         padding: const EdgeInsets.symmetric(horizontal: 10),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: AppColors.surface,
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
                             color: _filter == 'All'
-                                ? AppColors.borderLight
+                                ? AppColors.divider
                                 : LeadTheme.secondary.withValues(alpha: 0.5),
                             width: _filter == 'All' ? 1 : 1.5,
                           ),
@@ -535,10 +543,12 @@ class _SprinklerLeadsListScreenState extends State<SprinklerLeadsListScreen> {
                               child: DropdownButton2<String>(
                                 value: _filter,
                                 isExpanded: true,
+
                                 buttonStyleData: const ButtonStyleData(
                                   padding: EdgeInsets.symmetric(horizontal: 10),
                                   height: 38,
                                 ),
+
                                 iconStyleData: const IconStyleData(
                                   icon: AppSvgIcon(
                                     AppSvgAssets.chevronDown,
@@ -546,25 +556,29 @@ class _SprinklerLeadsListScreenState extends State<SprinklerLeadsListScreen> {
                                     color: LeadTheme.secondary,
                                   ),
                                 ),
+
                                 dropdownStyleData: DropdownStyleData(
-                                  width: constraints.maxWidth,
+                                  width: constraints.maxWidth, // ✅ FIX
                                   maxHeight: 320,
                                   decoration: BoxDecoration(
-                                    color: Colors.white,
+                                    color: AppColors.surface,
                                     borderRadius: BorderRadius.circular(10),
                                   ),
                                 ),
-                                items: [
-                                  'All',
-                                  'Active',
-                                  'Completed',
-                                  ...SprinklerLeadModel.workflowSteps,
-                                ].map((s) {
-                                  return DropdownMenuItem<String>(
-                                    value: s,
-                                    child: Text(s),
-                                  );
-                                }).toList(),
+
+                                items:
+                                    [
+                                      'All',
+                                      'Active',
+                                      'Completed',
+                                      ...SprinklerLeadModel.workflowSteps,
+                                    ].map((s) {
+                                      return DropdownMenuItem<String>(
+                                        value: s,
+                                        child: Text(s),
+                                      );
+                                    }).toList(),
+
                                 onChanged: (v) {
                                   if (v != null) setState(() => _filter = v);
                                 },
@@ -582,12 +596,12 @@ class _SprinklerLeadsListScreenState extends State<SprinklerLeadsListScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: 12),
                         decoration: BoxDecoration(
                           color: _selectedDate == null
-                              ? Colors.white
+                              ? AppColors.surface
                               : LeadTheme.secondary,
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
                             color: _selectedDate == null
-                                ? AppColors.borderLight
+                                ? AppColors.divider
                                 : LeadTheme.secondary.withValues(alpha: 0.5),
                           ),
                         ),
@@ -598,8 +612,8 @@ class _SprinklerLeadsListScreenState extends State<SprinklerLeadsListScreen> {
                               AppSvgAssets.calendarDays,
                               size: 16,
                               color: _selectedDate == null
-                                  ? AppColors.textSecondary)
-                                  : Colors.white,
+                                  ?  AppColors.textGray
+                                  : AppColors.surface,
                             ),
                             const SizedBox(width: 6),
                             Text(
@@ -607,8 +621,8 @@ class _SprinklerLeadsListScreenState extends State<SprinklerLeadsListScreen> {
                               style: TextStyle(
                                 fontSize: 12,
                                 color: _selectedDate == null
-                                    ? AppColors.textSecondary)
-                                    : Colors.white,
+                                    ?  AppColors.textGray
+                                    : AppColors.surface,
                                 fontWeight: _selectedDate == null
                                     ? FontWeight.normal
                                     : FontWeight.w600,
@@ -621,7 +635,7 @@ class _SprinklerLeadsListScreenState extends State<SprinklerLeadsListScreen> {
                                 child: const AppSvgIcon(
                                   AppSvgAssets.x,
                                   size: 16,
-                                  color: Colors.white,
+                                  color: AppColors.surface,
                                 ),
                               ),
                             ],
@@ -633,6 +647,7 @@ class _SprinklerLeadsListScreenState extends State<SprinklerLeadsListScreen> {
                 ),
               ),
 
+              // ── Result count ─────────────────────────────────────
               if (filteredActive.isNotEmpty || filteredCompleted.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(14, 6, 14, 0),
@@ -640,11 +655,15 @@ class _SprinklerLeadsListScreenState extends State<SprinklerLeadsListScreen> {
                     alignment: Alignment.centerLeft,
                     child: Text(
                       '${filteredActive.length + filteredCompleted.length} lead${(filteredActive.length + filteredCompleted.length) != 1 ? "s" : ""}',
-                      style: const TextStyle(fontSize: 11, color: LeadTheme.textMuted),
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: LeadTheme.textMuted,
+                      ),
                     ),
                   ),
                 ),
 
+              // ── List / empty state ───────────────────────────────
               Expanded(
                 child: (filteredActive.isEmpty && filteredCompleted.isEmpty)
                     ? Center(
@@ -654,7 +673,7 @@ class _SprinklerLeadsListScreenState extends State<SprinklerLeadsListScreen> {
                             AppSvgIcon(
                               AppSvgAssets.droplet,
                               size: 52,
-                              color: AppColors.borderLight,
+                              color: AppColors.divider,
                             ),
                             const SizedBox(height: 10),
                             Text(
@@ -665,7 +684,7 @@ class _SprinklerLeadsListScreenState extends State<SprinklerLeadsListScreen> {
                                   : 'No leads match filter',
                               style: TextStyle(
                                 fontSize: 14,
-                                color: AppColors.textSecondary,
+                                color: AppColors.textLight,
                                 fontWeight: FontWeight.w500,
                               ),
                               textAlign: TextAlign.center,
@@ -679,15 +698,23 @@ class _SprinklerLeadsListScreenState extends State<SprinklerLeadsListScreen> {
                         child: LayoutBuilder(
                           builder: (context, constraints) {
                             final sortedActive = [...filteredActive]
-                              ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+                              ..sort(
+                                (a, b) => b.createdAt.compareTo(a.createdAt),
+                              );
                             final recent = sortedActive
-                                .where((l) => !l.createdAt.isBefore(_recentCutoff))
+                                .where(
+                                  (l) => !l.createdAt.isBefore(_recentCutoff),
+                                )
                                 .toList();
                             final older = sortedActive
-                                .where((l) => l.createdAt.isBefore(_recentCutoff))
+                                .where(
+                                  (l) => l.createdAt.isBefore(_recentCutoff),
+                                )
                                 .toList();
                             final sortedCompleted = [...filteredCompleted]
-                              ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+                              ..sort(
+                                (a, b) => b.createdAt.compareTo(a.createdAt),
+                              );
 
                             return ListView(
                               physics: const AlwaysScrollableScrollPhysics(),
@@ -710,11 +737,16 @@ class _SprinklerLeadsListScreenState extends State<SprinklerLeadsListScreen> {
                                 const SizedBox(height: 12),
                                 _CollapsibleTableSection(
                                   title: 'Older Leads',
-                                  subtitle: 'Older records are collapsed by default',
+                                  subtitle:
+                                      'Older records are collapsed by default',
                                   leads: older,
                                   initiallyExpanded: _showOlderLeads,
                                   onExpansionChanged: (expanded) {
-                                    if (mounted) setState(() => _showOlderLeads = expanded);
+                                    if (mounted) {
+                                      setState(
+                                        () => _showOlderLeads = expanded,
+                                      );
+                                    }
                                   },
                                   onLeadTap: _openDetail,
                                   onDeleteTap: _confirmDeleteLead,
@@ -728,12 +760,15 @@ class _SprinklerLeadsListScreenState extends State<SprinklerLeadsListScreen> {
                                 if (sortedCompleted.isNotEmpty)
                                   _CollapsibleTableSection(
                                     title: 'Completed Projects',
-                                    subtitle: 'All completed projects are listed here',
+                                    subtitle:
+                                        'All completed projects are listed here',
                                     leads: sortedCompleted,
                                     initiallyExpanded: _showCompletedLeads,
                                     onExpansionChanged: (expanded) {
                                       if (mounted) {
-                                        setState(() => _showCompletedLeads = expanded);
+                                        setState(
+                                          () => _showCompletedLeads = expanded,
+                                        );
                                       }
                                     },
                                     onLeadTap: _openDetail,
@@ -761,12 +796,14 @@ class _SprinklerLeadsListScreenState extends State<SprinklerLeadsListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // ── Embedded mode: no Scaffold / AppBar / FAB ─────────────────────────
     if (widget.embedded) {
       return _buildBody();
     }
 
+    // ── Full-screen mode ──────────────────────────────────────────────────
     return Scaffold(
-      backgroundColor: AppColors.bgSecondary),
+      backgroundColor:  AppColors.background,
       appBar: AppBar(
         backgroundColor: widget.appBarColor,
         elevation: 0,
@@ -774,7 +811,7 @@ class _SprinklerLeadsListScreenState extends State<SprinklerLeadsListScreen> {
             ? IconButton(
                 icon: const AppSvgIcon(
                   AppSvgAssets.chevronLeft,
-                  color: Colors.white,
+                  color: AppColors.surface,
                   size: 18,
                 ),
                 onPressed: () => Navigator.maybePop(context),
@@ -782,21 +819,28 @@ class _SprinklerLeadsListScreenState extends State<SprinklerLeadsListScreen> {
             : null,
         title: const Row(
           children: [
-            AppSvgIcon(AppSvgAssets.droplet, color: Colors.white, size: 18),
+            AppSvgIcon(
+              AppSvgAssets.droplet,
+              color: AppColors.surface,
+              size: 18,
+            ),
             SizedBox(width: 8),
             Text(
               'Sprinkler Leads',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
-                color: Colors.white,
+                color: AppColors.surface,
               ),
             ),
           ],
         ),
         actions: [
           IconButton(
-            icon: const AppSvgIcon(AppSvgAssets.refreshCw, color: Colors.white),
+            icon: const AppSvgIcon(
+              AppSvgAssets.refreshCw,
+              color: AppColors.surface,
+            ),
             onPressed: _refresh,
           ),
         ],
@@ -804,18 +848,25 @@ class _SprinklerLeadsListScreenState extends State<SprinklerLeadsListScreen> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _openAddLead,
         backgroundColor: LeadTheme.secondary,
-        foregroundColor: Colors.white,
-        icon: const AppSvgIcon(AppSvgAssets.plus, color: Colors.white, size: 18),
-        label: const Text('Sprinkler Lead', style: TextStyle(fontWeight: FontWeight.w700)),
+        foregroundColor: AppColors.surface,
+        icon: const AppSvgIcon(
+          AppSvgAssets.plus,
+          color: AppColors.surface,
+          size: 18,
+        ),
+        label: const Text(
+          'Sprinkler Lead',
+          style: TextStyle(fontWeight: FontWeight.w700),
+        ),
       ),
       body: _buildBody(),
     );
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────
 //  Table Section (always expanded)
-// ─────────────────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────
 class _TableSection extends StatelessWidget {
   final String title;
   final String subtitle;
@@ -844,9 +895,9 @@ class _TableSection extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.borderLight)),
+        border: Border.all(color:  AppColors.divider),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -861,13 +912,16 @@ class _TableSection extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary),
+                    color: AppColors.textDark,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   subtitle,
-                  style: const TextStyle(fontSize: 11, color: LeadTheme.textMuted),
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: LeadTheme.textMuted,
+                  ),
                 ),
               ],
             ),
@@ -895,9 +949,9 @@ class _TableSection extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────
 //  Table Section (collapsible)
-// ─────────────────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────
 class _CollapsibleTableSection extends StatelessWidget {
   final String title;
   final String subtitle;
@@ -928,13 +982,15 @@ class _CollapsibleTableSection extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.borderLight)),
+        border: Border.all(color:  AppColors.divider),
       ),
       child: Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
         child: ExpansionTile(
+          // ── Unique key per section title to avoid Flutter confusing
+          //    "Older Leads" with "Completed Projects" ────────────────
           key: ValueKey('sprinkler_section_$title'),
           initiallyExpanded: initiallyExpanded,
           onExpansionChanged: onExpansionChanged,
@@ -945,7 +1001,7 @@ class _CollapsibleTableSection extends StatelessWidget {
             style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary),
+              color: AppColors.textDark,
             ),
           ),
           subtitle: Text(
@@ -980,9 +1036,9 @@ class _CollapsibleTableSection extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────
 //  Data Table
-// ─────────────────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────
 class _LeadsDataTable extends StatelessWidget {
   final List<SprinklerLeadModel> leads;
   final ValueChanged<SprinklerLeadModel> onLeadTap;
@@ -1015,6 +1071,11 @@ class _LeadsDataTable extends StatelessWidget {
     return 'Rs. ${LeadTheme.formatAmount(lead.totalAmount)}';
   }
 
+  String _progressLabel(SprinklerLeadModel lead) {
+    final total = SprinklerLeadModel.workflowSteps.length;
+    return '${lead.currentStep.index + 1}/$total';
+  }
+
   Widget _statusBadge(String status) {
     final color = LeadTheme.statusColor(status);
     return Container(
@@ -1038,7 +1099,7 @@ class _LeadsDataTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDesktop = MediaQuery.sizeOf(context).width >= 1000;
-    const rowStyle = TextStyle(fontSize: 12, color: AppColors.textPrimary));
+    const rowStyle = TextStyle(fontSize: 12, color: AppColors.textDark);
 
     return SizedBox(
       width: double.infinity,
@@ -1052,7 +1113,7 @@ class _LeadsDataTable extends StatelessWidget {
             dataRowMinHeight: 46,
             dataRowMaxHeight: 56,
             horizontalMargin: isDesktop ? 12 : 8,
-            headingRowColor: WidgetStateProperty.all(const Color(0XFFF1F8FE)),
+            headingRowColor: WidgetStateProperty.all(AppColors.primaryTint),
             columnSpacing: isDesktop ? 14 : 8,
             dataRowColor: WidgetStateProperty.resolveWith((states) {
               if (states.contains(WidgetState.selected)) {
@@ -1061,9 +1122,9 @@ class _LeadsDataTable extends StatelessWidget {
               return null;
             }),
             border: TableBorder(
-              horizontalInside: BorderSide(color: Colors.blueGrey.shade50),
-              bottom: BorderSide(color: Colors.blueGrey.shade100),
-              top: BorderSide(color: Colors.blueGrey.shade100),
+              horizontalInside: BorderSide(color: AppColors.primary),
+              bottom: BorderSide(color: AppColors.primary),
+              top: BorderSide(color: AppColors.primary),
             ),
             columns: [
               _buildColumn('Customer'),
@@ -1076,9 +1137,10 @@ class _LeadsDataTable extends StatelessWidget {
               if (isAdmin) _buildColumn('Actions'),
             ],
             rows: leads.map((lead) {
-              final addressText = [lead.address, lead.village]
-                  .where((s) => s.isNotEmpty)
-                  .join(', ');
+              final addressText = [
+                lead.address,
+                lead.village,
+              ].where((s) => s.isNotEmpty).join(', ');
 
               return DataRow(
                 onSelectChanged: (_) => onLeadTap(lead),
@@ -1127,17 +1189,19 @@ class _LeadsDataTable extends StatelessWidget {
                       ],
                     ),
                   ),
-                  DataCell(Text(_formatCreatedAt(lead.createdAt), style: rowStyle)),
+                  DataCell(
+                    Text(_formatCreatedAt(lead.createdAt), style: rowStyle),
+                  ),
                   if (isAdmin)
                     DataCell(
                       Tooltip(
                         message: 'Permanently delete this lead',
                         child: IconButton(
                           onPressed: () => onDeleteTap(lead),
-                          icon: const AppSvgIcon(
+                          icon: AppSvgIcon(
                             AppSvgAssets.trash2,
                             size: 18,
-                            color: AppColors.primary),
+                            color:  AppColors.error,
                           ),
                         ),
                       ),
@@ -1153,18 +1217,18 @@ class _LeadsDataTable extends StatelessWidget {
 }
 
 DataColumn _buildColumn(String title) => DataColumn(
-      label: Text(
-        title,
-        style: const TextStyle(
-          fontWeight: FontWeight.bold,
-          color: AppColors.primary),
-        ),
-      ),
-    );
+  label: Text(
+    title,
+    style: const TextStyle(
+      fontWeight: FontWeight.bold,
+      color: LeadTheme.secondary,
+    ),
+  ),
+);
 
-// ─────────────────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────
 //  Stat Widget
-// ─────────────────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────
 class _Stat extends StatelessWidget {
   final String label;
   final String value;
@@ -1178,7 +1242,11 @@ class _Stat extends StatelessWidget {
       children: [
         Text(
           value,
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: color),
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+            color: color,
+          ),
         ),
         Text(
           label,
@@ -1188,9 +1256,3 @@ class _Stat extends StatelessWidget {
     );
   }
 }
-
-
-
-
-
-

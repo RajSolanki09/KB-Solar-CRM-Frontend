@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:solar_project/Helper/app_feedback.dart';
+import 'package:solar_project/core/app_colors.dart';
 import 'package:solar_project/services/api_service.dart';
-import 'package:solar_project/Helper/app_colors.dart';
 
 class AddMaterialCustomerScreen extends StatefulWidget {
   final Color? appBarColor;
@@ -192,13 +192,13 @@ class _AddMaterialCustomerScreenState extends State<AddMaterialCustomerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final color = widget.appBarColor ?? AppColors.primary);
+    final color = widget.appBarColor ?? AppColors.primaryDark;
 
     return Scaffold(
-      backgroundColor: AppColors.bgSecondary),
+      backgroundColor:  AppColors.background,
       appBar: AppBar(
         backgroundColor: color,
-        foregroundColor: Colors.white,
+        foregroundColor: AppColors.surface,
         title: Text(_isEditMode ? 'Edit Customer' : 'Add Customer'),
       ),
       body: _loadingSchema
@@ -215,14 +215,14 @@ class _AddMaterialCustomerScreenState extends State<AddMaterialCustomerScreen> {
         child: Container(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 14),
           decoration: const BoxDecoration(
-            color: Colors.white,
-            border: Border(top: BorderSide(color: AppColors.bgPrimary))),
+            color: AppColors.surface,
+            border: Border(top: BorderSide(color: AppColors.divider)),
           ),
           child: ElevatedButton(
             onPressed: _saving ? null : _saveCustomer,
             style: ElevatedButton.styleFrom(
               backgroundColor: color,
-              foregroundColor: Colors.white,
+              foregroundColor: AppColors.surface,
               minimumSize: const Size.fromHeight(48),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -234,7 +234,7 @@ class _AddMaterialCustomerScreenState extends State<AddMaterialCustomerScreen> {
                     height: 20,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: Colors.white,
+                      color: AppColors.surface,
                     ),
                   )
                 : Text(
@@ -255,9 +255,9 @@ class _AddMaterialCustomerScreenState extends State<AddMaterialCustomerScreen> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.bgPrimary)),
+        border: Border.all(color:  AppColors.divider),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -267,7 +267,7 @@ class _AddMaterialCustomerScreenState extends State<AddMaterialCustomerScreen> {
             style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w700,
-              color: Color(0xFF334155),
+              color: AppColors.textGray,
             ),
           ),
           const SizedBox(height: 12),
@@ -288,7 +288,8 @@ class _AddMaterialCustomerScreenState extends State<AddMaterialCustomerScreen> {
     final label = (field['label'] ?? key).toString();
     final required = field['required'] == true;
     final type = (field['type'] ?? 'text').toString();
-    final isAddress = key.toLowerCase().contains('address') || type == 'multiline';
+    final isAddress =
+        key.toLowerCase().contains('address') || type == 'multiline';
 
     return TextFormField(
       controller: _controllers[key],
@@ -319,24 +320,19 @@ class _AddMaterialCustomerScreenState extends State<AddMaterialCustomerScreen> {
     return InputDecoration(
       labelText: required ? '$label *' : label,
       filled: true,
-      fillColor: AppColors.bgSecondary),
+      fillColor:  AppColors.background,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: AppColors.bgPrimary)),
+        borderSide: const BorderSide(color: AppColors.divider),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: AppColors.bgPrimary)),
+        borderSide: const BorderSide(color: AppColors.divider),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: AppColors.primary), width: 1.3),
+        borderSide: const BorderSide(color: AppColors.primaryDark, width: 1.3),
       ),
     );
   }
 }
-
-
-
-
-

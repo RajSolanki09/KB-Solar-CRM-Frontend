@@ -4,10 +4,9 @@ import 'package:solar_project/Cubits/Auth/auth_cubit.dart';
 import 'package:solar_project/Cubits/Auth/auth_state.dart';
 import 'package:solar_project/Helper/app_inputfield.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
+import 'package:solar_project/core/app_colors.dart';
 import 'package:solar_project/services/api_service.dart';
 import 'package:solar_project/services/notification_service.dart';
-import 'package:solar_project/Helper/app_logo.dart';
-import 'package:solar_project/Helper/app_colors.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -61,33 +60,33 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
     final isSmall = size.width < 400;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F5FF),
+      backgroundColor: const Color(0xFFF0F4FF),
       body: Stack(
         children: [
           // ── Decorative background circles ──────────────────────────────
           Positioned(
             top: -80,
             right: -60,
-             child: _GlowCircle(
-               size: 260,
-               color: const Color(0xFF7F36E6).withValues(alpha: 0.08),
-             ),
+            child: _GlowCircle(
+              size: 260,
+              color: AppColors.primary.withValues(alpha: 0.08),
+            ),
           ),
           Positioned(
             bottom: -100,
             left: -80,
-             child: _GlowCircle(
-               size: 300,
-               color: const Color(0xFF7F36E6).withValues(alpha: 0.07),
-             ),
+            child: _GlowCircle(
+              size: 300,
+              color: AppColors.primaryDark.withValues(alpha: 0.07),
+            ),
           ),
           Positioned(
             top: size.height * 0.3,
             left: -40,
-             child: _GlowCircle(
-               size: 160,
-               color: const Color(0xFF7F36E6).withValues(alpha: 0.06),
-             ),
+            child: _GlowCircle(
+              size: 160,
+              color: AppColors.primaryLight.withValues(alpha: 0.06),
+            ),
           ),
 
           // ── Main content ───────────────────────────────────────────────
@@ -114,14 +113,16 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                         // ── Card ─────────────────────────────────────────
                         Container(
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: AppColors.surface,
                             borderRadius: BorderRadius.circular(20),
                             boxShadow: [
-                               BoxShadow(
-                                 color: const Color(0xFF7F36E6).withValues(alpha: 0.08),
-                                 blurRadius: 32,
-                                 offset: const Offset(0, 8),
-                               ),
+                              BoxShadow(
+                                color: AppColors.primary.withValues(
+                                  alpha: 0.08,
+                                ),
+                                blurRadius: 32,
+                                offset: const Offset(0, 8),
+                              ),
                               BoxShadow(
                                 color: Colors.black.withValues(alpha: 0.04),
                                 blurRadius: 8,
@@ -144,26 +145,26 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                   style: TextStyle(
                                     fontSize: 22,
                                     fontWeight: FontWeight.w800,
-                                    color: Color(0xFF0F172A),
+                                    color: AppColors.textDark,
                                     letterSpacing: -0.3,
                                   ),
                                 ),
                                 const SizedBox(height: 4),
-                                 const Text(
-                                   'Sign in to your KaaryaBook account',
-                                   style: TextStyle(
-                                     fontSize: 13,
-                                     color: AppColors.textSecondary,
-                                     fontWeight: FontWeight.w400,
-                                   ),
-                                 ),
+                                const Text(
+                                  'Sign in to your Solar CRM account',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: AppColors.textGray,
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                ),
 
                                 const SizedBox(height: 24),
 
                                 // ── Divider line ─────────────────────────
                                 Container(
                                   height: 1,
-                                  color: const Color(0xFFF1F5F9),
+                                  color:  AppColors.background,
                                 ),
 
                                 const SizedBox(height: 20),
@@ -176,7 +177,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                       vertical: 10,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFFFEF2F2),
+                                      color:  AppColors.errorLight,
                                       borderRadius: BorderRadius.circular(10),
                                       border: Border.all(
                                         color: const Color(0xFFFECACA),
@@ -184,31 +185,31 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                     ),
                                     child: Row(
                                       children: [
-                                         const AppSvgIcon(
-                                           AppSvgAssets.triangleAlert,
-                                           size: 16,
-                                           color: AppColors.error,
-                                         ),
+                                        const AppSvgIcon(
+                                          AppSvgAssets.triangleAlert,
+                                          size: 16,
+                                          color: AppColors.error,
+                                        ),
                                         const SizedBox(width: 8),
                                         Expanded(
-                                           child: Text(
-                                             _errorMessage!,
-                                             style: const TextStyle(
-                                               fontSize: 12,
-                                               color: AppColors.error,
-                                               fontWeight: FontWeight.w500,
-                                             ),
-                                           ),
+                                          child: Text(
+                                            _errorMessage!,
+                                            style: const TextStyle(
+                                              fontSize: 12,
+                                              color: AppColors.error,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
                                         ),
                                         GestureDetector(
                                           onTap: () => setState(
                                             () => _errorMessage = null,
                                           ),
-                                           child: const AppSvgIcon(
-                                             AppSvgAssets.x,
-                                             size: 15,
-                                             color: AppColors.error,
-                                           ),
+                                          child: const AppSvgIcon(
+                                            AppSvgAssets.x,
+                                            size: 15,
+                                            color: AppColors.error,
+                                          ),
                                         ),
                                       ],
                                     ),
@@ -217,7 +218,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                 ],
 
                                 // ── Email ─────────────────────────────────
-                                _FieldLabel(label: 'Email Address'),
+                                const _FieldLabel(label: 'Email Address'),
                                 const SizedBox(height: 6),
                                 AppInputField(
                                   controller: _emailController,
@@ -243,7 +244,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                 const SizedBox(height: 16),
 
                                 // ── Password ──────────────────────────────
-                                _FieldLabel(label: 'Password'),
+                                const _FieldLabel(label: 'Password'),
                                 const SizedBox(height: 6),
                                 AppInputField(
                                   controller: _passwordController,
@@ -261,13 +262,13 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                     return null;
                                   },
                                   suffixIcon: IconButton(
-                                     icon: AppSvgIcon(
-                                       _obscurePassword
-                                           ? AppSvgAssets.eyeOff
-                                           : AppSvgAssets.eye,
-                                       size: 18,
-                                       color: AppColors.textTertiary,
-                                     ),
+                                    icon: AppSvgIcon(
+                                      _obscurePassword
+                                          ? AppSvgAssets.eyeOff
+                                          : AppSvgAssets.eye,
+                                      size: 18,
+                                      color:  AppColors.textLight,
+                                    ),
                                     onPressed: () => setState(
                                       () =>
                                           _obscurePassword = !_obscurePassword,
@@ -287,7 +288,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                   child: TextButton(
                                     onPressed: () {},
                                     style: TextButton.styleFrom(
-                                      foregroundColor: AppColors.textSecondary,
+                                      foregroundColor:  AppColors.textGray,
                                     ),
                                     child: const Text(
                                       "Don't have an account? Contact admin",
@@ -312,14 +313,14 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                             AppSvgIcon(
                               AppSvgAssets.shield,
                               size: 13,
-                              color: AppColors.textSecondary,
+                              color: AppColors.textLight,
                             ),
                             const SizedBox(width: 5),
                             Text(
                               'Secured & encrypted login',
                               style: TextStyle(
                                 fontSize: 11,
-                                color: AppColors.textSecondary,
+                                color: AppColors.textLight,
                               ),
                             ),
                           ],
@@ -337,12 +338,35 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
   }
 
   Widget _buildBrand(BuildContext context, bool isSmall) {
-    return AppLogo(
-      size: LogoSize.custom,
-      customWidth: isSmall ? 100 : 130,
-      customHeight: isSmall ? 100 : 130,
-      borderRadius: 28,
-      withShadow: true,
+    final double imgSize = isSmall ? 110 : 140;
+    return Container(
+      // padding sirf image ke around — card image ke saath shrink hoga
+      padding: EdgeInsets.all(isSmall ? 14 : 18),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withValues(alpha: 0.10),
+            blurRadius: 24,
+            offset: const Offset(0, 6),
+          ),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      // IntrinsicWidth — card sirf image jitna wide hoga
+      child: IntrinsicWidth(
+        child: Image.asset(
+          'assets/images/splash-logo.png',
+          height: imgSize,
+          width: imgSize,
+          fit: BoxFit.contain,
+        ),
+      ),
     );
   }
 
@@ -352,8 +376,8 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
       child: ElevatedButton(
         onPressed: _isLoading ? null : _onLogin,
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF5A3FD1),
-          disabledBackgroundColor: AppColors.accent1,
+          backgroundColor: AppColors.primary,
+          disabledBackgroundColor: AppColors.primary.withValues(alpha: 0.5),
           elevation: 0,
           shadowColor: Colors.transparent,
           shape: RoundedRectangleBorder(
@@ -365,7 +389,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                 width: 20,
                 height: 20,
                 child: CircularProgressIndicator(
-                  color: Colors.white,
+                  color: AppColors.surface,
                   strokeWidth: 2,
                 ),
               )
@@ -377,14 +401,14 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
-                      color: Colors.white,
+                      color: AppColors.surface,
                       letterSpacing: 0.3,
                     ),
                   ),
                   SizedBox(width: 8),
                   AppSvgIcon(
                     AppSvgAssets.arrowRight,
-                    color: Colors.white,
+                    color: AppColors.surface,
                     size: 18,
                   ),
                 ],
@@ -395,9 +419,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
 
   Future<void> _onLogin() async {
     setState(() => _errorMessage = null);
-
     if (!_formKey.currentState!.validate()) return;
-
     setState(() => _isLoading = true);
 
     try {
@@ -406,17 +428,14 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
 
       final user = await _authService.login(email, password);
 
-      // Register FCM token with backend
       NotificationService.instance.registerToken();
 
       final dynamic rawRole = user['role'];
       if (rawRole == null) throw Exception('Role missing in server response');
-
       final String roleStr = rawRole.toString().toLowerCase().trim();
 
       if (!mounted) return;
 
-      // ── Map role string → UserRole enum ─────────────────────────────────
       UserRole userRole;
       if (roleStr == 'admin' || roleStr == 'owner') {
         userRole = UserRole.admin;
@@ -430,7 +449,6 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
         throw Exception('Unknown role: $roleStr');
       }
 
-      // ── Emit authenticated state ─────────────────────────────────────────
       if (!mounted) return;
       context.read<AppStateCubit>().login(
         role: userRole,
@@ -451,12 +469,9 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
   }
 }
 
-// ── Glow Circle decoration ────────────────────────────────────────────────────
-
 class _GlowCircle extends StatelessWidget {
   final double size;
   final Color color;
-
   const _GlowCircle({required this.size, required this.color});
 
   @override
@@ -469,11 +484,8 @@ class _GlowCircle extends StatelessWidget {
   }
 }
 
-// ── Field Label ───────────────────────────────────────────────────────────────
-
 class _FieldLabel extends StatelessWidget {
   final String label;
-
   const _FieldLabel({required this.label});
 
   @override
@@ -483,16 +495,9 @@ class _FieldLabel extends StatelessWidget {
       style: const TextStyle(
         fontSize: 12,
         fontWeight: FontWeight.w600,
-        color: AppColors.textPrimary,
+        color: AppColors.textDark,
         letterSpacing: 0.1,
       ),
     );
   }
 }
-
-
-
-
-
-
-

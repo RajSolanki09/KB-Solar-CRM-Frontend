@@ -9,7 +9,7 @@ import 'package:solar_project/services/api_service.dart';
 import 'package:solar_project/Helper/app_feedback.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
 import 'package:solar_project/Helper/profile_widgets.dart';
-import 'package:solar_project/Helper/app_colors.dart';
+import 'package:solar_project/core/app_colors.dart';
 
 class InstallationProfileScreen extends StatefulWidget {
   const InstallationProfileScreen({super.key});
@@ -107,7 +107,10 @@ class _InstallationProfileScreenState extends State<InstallationProfileScreen> {
           _localImage = null;
           _isUploadingImage = false;
         });
-        AppFeedback.showError(context, e.toString().replaceAll('Exception: ', ''));
+        AppFeedback.showError(
+          context,
+          e.toString().replaceAll('Exception: ', ''),
+        );
       }
     }
   }
@@ -126,35 +129,35 @@ class _InstallationProfileScreenState extends State<InstallationProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bgSecondary),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.bgSecondary),
+        backgroundColor: AppColors.background,
         elevation: 0,
         centerTitle: true,
         title: const Text(
           'My Profile',
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            color: AppColors.accent2),
+            color: AppColors.primary,
           ),
         ),
         actions: [
           IconButton(
             icon: const AppSvgIcon(
               AppSvgAssets.refreshCw,
-              color: AppColors.accent2),
+              color: AppColors.primary,
             ),
             onPressed: _loadProfile,
           ),
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(height: 1, color: AppColors.borderPrimary),
+          child: Container(height: 1, color: AppColors.divider),
         ),
       ),
       body: _isLoading
           ? const Center(
-              child: CircularProgressIndicator(color: AppColors.accent2)),
+              child: CircularProgressIndicator(color: AppColors.primary),
             )
           : _error != null
           ? ProfileErrorView(message: _error, onRetry: _loadProfile)
@@ -187,14 +190,14 @@ class _InstallationProfileScreenState extends State<InstallationProfileScreen> {
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [AppColors.accent2), Color(0xFF9F44D3)],
+                colors: [AppColors.primary, AppColors.primaryLight],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.accent2).withValues(alpha: 0.35),
+                  color: AppColors.primary.withValues(alpha: 0.35),
                   blurRadius: 16,
                   offset: const Offset(0, 6),
                 ),
@@ -207,31 +210,25 @@ class _InstallationProfileScreenState extends State<InstallationProfileScreen> {
                   children: [
                     CircleAvatar(
                       radius: 40,
-                      backgroundColor: Colors.white,
+                      backgroundColor: AppColors.primary.withValues(alpha: 0.2),
                       backgroundImage: hasImage ? imageProvider : null,
-                      child: !hasImage
-                          ? const AppSvgIcon(
-                              AppSvgAssets.userRound,
+                      child: _isUploadingImage
+                          ? const SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(
+                                color: AppColors.surface,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : !hasImage
+                          ? const Icon(
+                              Icons.person,
                               size: 40,
-                              color: AppColors.accent2),
+                              color: AppColors.surface,
                             )
                           : null,
                     ),
-                    if (_isUploadingImage)
-                      Positioned.fill(
-                        child: CircleAvatar(
-                          radius: 40,
-                          backgroundColor: Colors.black45,
-                          child: const SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 2,
-                            ),
-                          ),
-                        ),
-                      ),
                     if (!_isUploadingImage)
                       Positioned(
                         bottom: 0,
@@ -242,24 +239,17 @@ class _InstallationProfileScreenState extends State<InstallationProfileScreen> {
                             width: 28,
                             height: 28,
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: AppColors.surface,
                               shape: BoxShape.circle,
                               border: Border.all(
-                                color: AppColors.accent2),
+                                color: AppColors.primary,
                                 width: 1.5,
                               ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.15),
-                                  blurRadius: 4,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
                             ),
                             child: const AppSvgIcon(
                               AppSvgAssets.camera,
                               size: 16,
-                              color: AppColors.accent2),
+                              color: AppColors.primary,
                             ),
                           ),
                         ),
@@ -279,7 +269,7 @@ class _InstallationProfileScreenState extends State<InstallationProfileScreen> {
                         style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          color: AppColors.surface,
                         ),
                       ),
                       const SizedBox(height: 6),
@@ -287,7 +277,7 @@ class _InstallationProfileScreenState extends State<InstallationProfileScreen> {
                         roleDisplay,
                         style: const TextStyle(
                           fontSize: 14,
-                          color: Colors.white70,
+                          color: AppColors.surface,
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -298,8 +288,8 @@ class _InstallationProfileScreenState extends State<InstallationProfileScreen> {
                         ),
                         decoration: BoxDecoration(
                           color: isActive
-                              ? Colors.green.withValues(alpha: 0.3)
-                              : Colors.red.withValues(alpha: 0.3),
+                              ? AppColors.success.withValues(alpha: 0.3)
+                              : AppColors.error.withValues(alpha: 0.3),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
@@ -307,8 +297,8 @@ class _InstallationProfileScreenState extends State<InstallationProfileScreen> {
                           style: TextStyle(
                             fontSize: 12,
                             color: isActive
-                                ? Colors.greenAccent
-                                : Colors.redAccent,
+                                ? AppColors.success
+                                : AppColors.error,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -361,11 +351,11 @@ class _InstallationProfileScreenState extends State<InstallationProfileScreen> {
       margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: AppColors.textDark.withValues(alpha: 0.05),
             blurRadius: 6,
             offset: const Offset(0, 3),
           ),
@@ -373,7 +363,7 @@ class _InstallationProfileScreenState extends State<InstallationProfileScreen> {
       ),
       child: Row(
         children: [
-          AppSvgIcon(svgAsset, color: AppColors.accent2)),
+          AppSvgIcon(svgAsset, color: AppColors.primary),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
@@ -381,7 +371,10 @@ class _InstallationProfileScreenState extends State<InstallationProfileScreen> {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: AppColors.textGray,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -399,9 +392,3 @@ class _InstallationProfileScreenState extends State<InstallationProfileScreen> {
     );
   }
 }
-
-
-
-
-
-

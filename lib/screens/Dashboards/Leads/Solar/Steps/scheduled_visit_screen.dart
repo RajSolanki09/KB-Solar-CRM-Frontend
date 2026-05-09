@@ -4,12 +4,11 @@ import 'package:solar_project/Cubits/SolarLeads/solar_leads_cubit.dart';
 import 'package:solar_project/Cubits/SolarLeads/solar_leads_state.dart';
 import 'package:solar_project/Helper/app_feedback.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
-import 'package:solar_project/Helper/common_widgets.dart';
 import 'package:solar_project/Helper/lead_themes.dart';
 import 'package:solar_project/core/constants/api_constants.dart';
 import 'package:solar_project/core/network/dio_client.dart';
 import 'package:solar_project/data/Models/solar_leads_model.dart';
-import 'package:solar_project/Helper/app_colors.dart';
+import 'package:solar_project/core/app_colors.dart';
 
 // ── Sales person fetched from backend ────────────────────────────────────────
 class _SalesPerson {
@@ -236,7 +235,7 @@ class _State extends State<SolarVisitScheduledScreen> {
         if (state is SolarLeadSaved) {
           setState(() => _saving = false);
           Future.delayed(const Duration(milliseconds: 100), () {
-            if (mounted) safePop(context);
+            if (mounted) Navigator.pop(context);
           });
         }
         if (state is SolarLeadError) {
@@ -245,10 +244,10 @@ class _State extends State<SolarVisitScheduledScreen> {
         }
       },
       child: Scaffold(
-        backgroundColor: AppColors.bgSecondary),
+        backgroundColor:  AppColors.background,
         appBar: AppBar(
           backgroundColor: LeadTheme.primary,
-          foregroundColor: Colors.white,
+          foregroundColor: AppColors.surface,
           elevation: 0,
           title: Text(
             widget.isEditing ? 'Edit Visit Schedule' : 'Schedule Site Visit',
@@ -257,7 +256,7 @@ class _State extends State<SolarVisitScheduledScreen> {
           leading: IconButton(
             icon: const AppSvgIcon(
               AppSvgAssets.chevronLeft,
-              color: Colors.white,
+              color: AppColors.surface,
               size: 18,
             ),
             onPressed: () => Navigator.pop(context),
@@ -287,7 +286,7 @@ class _State extends State<SolarVisitScheduledScreen> {
                     style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
-                      color: AppColors.textPrimary),
+                      color: AppColors.textDark,
                     ),
                     decoration: _inputDecoration(
                       hint: 'Select visit date',
@@ -295,8 +294,8 @@ class _State extends State<SolarVisitScheduledScreen> {
                         AppSvgAssets.calendarDays,
                         size: 18,
                         color: visitDate != null
-                            ? Colors.green
-                            : AppColors.textSecondary),
+                            ? AppColors.success
+                            :  AppColors.textGray,
                       ),
                     ),
                   ),
@@ -312,7 +311,7 @@ class _State extends State<SolarVisitScheduledScreen> {
                     style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
-                      color: AppColors.textPrimary),
+                      color: AppColors.textDark,
                     ),
                     decoration: _inputDecoration(
                       hint: 'Select visit time (optional)',
@@ -321,7 +320,7 @@ class _State extends State<SolarVisitScheduledScreen> {
                         size: 18,
                         color: visitTime != null
                             ? LeadTheme.primary
-                            : AppColors.textSecondary),
+                            :  AppColors.textGray,
                       ),
                     ),
                   ),
@@ -347,7 +346,7 @@ class _State extends State<SolarVisitScheduledScreen> {
                     maxLines: 3,
                     style: const TextStyle(
                       fontSize: 13,
-                      color: AppColors.textPrimary),
+                      color: AppColors.textDark,
                     ),
                     validator: (value) {
                       if (value != null && value.trim().isNotEmpty) {
@@ -382,7 +381,7 @@ class _State extends State<SolarVisitScheduledScreen> {
         MediaQuery.of(context).padding.bottom + 12,
       ),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.08),
@@ -398,7 +397,7 @@ class _State extends State<SolarVisitScheduledScreen> {
           onPressed: _saving ? null : _save,
           style: ElevatedButton.styleFrom(
             backgroundColor: LeadTheme.primary,
-            foregroundColor: Colors.white,
+            foregroundColor: AppColors.surface,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
@@ -409,7 +408,7 @@ class _State extends State<SolarVisitScheduledScreen> {
                   width: 20,
                   height: 20,
                   child: CircularProgressIndicator(
-                    color: Colors.white,
+                    color: AppColors.surface,
                     strokeWidth: 2,
                   ),
                 )
@@ -435,7 +434,7 @@ class _State extends State<SolarVisitScheduledScreen> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -497,7 +496,7 @@ class _State extends State<SolarVisitScheduledScreen> {
       style: const TextStyle(
         fontSize: 12.5,
         fontWeight: FontWeight.w600,
-        color: AppColors.textPrimary),
+        color: AppColors.textDark,
       ),
       children: required
           ? const [
@@ -517,9 +516,9 @@ class _State extends State<SolarVisitScheduledScreen> {
     Widget? prefixIcon,
   }) => InputDecoration(
     hintText: hint,
-    hintStyle: const TextStyle(fontSize: 13, color: AppColors.textTertiary)),
+    hintStyle: const TextStyle(fontSize: 13, color: AppColors.textLight),
     filled: true,
-    fillColor: Colors.white,
+    fillColor: AppColors.surface,
     prefixIcon: prefixIcon != null
         ? Padding(padding: const EdgeInsets.all(13), child: prefixIcon)
         : null,
@@ -529,11 +528,11 @@ class _State extends State<SolarVisitScheduledScreen> {
     contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
     border: OutlineInputBorder(
       borderRadius: BorderRadius.circular(10),
-      borderSide: const BorderSide(color: AppColors.borderLight)),
+      borderSide: const BorderSide(color: AppColors.divider),
     ),
     enabledBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(10),
-      borderSide: const BorderSide(color: AppColors.borderLight)),
+      borderSide: const BorderSide(color: AppColors.divider),
     ),
     focusedBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(10),
@@ -556,9 +555,9 @@ class _State extends State<SolarVisitScheduledScreen> {
       return Container(
         height: 50,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: AppColors.borderLight)),
+          border: Border.all(color:  AppColors.divider),
         ),
         child: Row(
           children: [
@@ -574,7 +573,7 @@ class _State extends State<SolarVisitScheduledScreen> {
             const SizedBox(width: 10),
             Text(
               'Loading sales persons…',
-              style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+              style: TextStyle(fontSize: 13, color: AppColors.background),
             ),
           ],
         ),
@@ -586,9 +585,9 @@ class _State extends State<SolarVisitScheduledScreen> {
       return Container(
         height: 50,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: AppColors.borderLight)),
+          border: Border.all(color:  AppColors.divider),
         ),
         padding: const EdgeInsets.symmetric(horizontal: 14),
         child: Row(
@@ -596,12 +595,12 @@ class _State extends State<SolarVisitScheduledScreen> {
             AppSvgIcon(
               AppSvgAssets.userRound,
               size: 16,
-              color: AppColors.textSecondary,
+              color: AppColors.textLight,
             ),
             const SizedBox(width: 8),
             Text(
               'No sales persons found',
-              style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+              style: TextStyle(fontSize: 13, color: AppColors.background),
             ),
           ],
         ),
@@ -616,14 +615,14 @@ class _State extends State<SolarVisitScheduledScreen> {
         prefixIcon: AppSvgIcon(
           AppSvgAssets.userRound,
           size: 16,
-          color: AppColors.textSecondary,
+          color: AppColors.background,
         ),
       ),
       isExpanded: true,
       icon: AppSvgIcon(
         AppSvgAssets.arrowRight, // swap to chevronDown if you have it
         size: 16,
-        color: AppColors.textSecondary,
+        color: AppColors.background,
       ),
       items: [
         // "None" option
@@ -633,7 +632,7 @@ class _State extends State<SolarVisitScheduledScreen> {
             'None',
             style: TextStyle(
               fontSize: 13,
-              color: AppColors.textSecondary,
+              color: AppColors.background,
               fontStyle: FontStyle.italic,
             ),
           ),
@@ -651,7 +650,7 @@ class _State extends State<SolarVisitScheduledScreen> {
                   style: const TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary),
+                    color: AppColors.textDark,
                   ),
                 ),
                 if (person.phone.isNotEmpty)
@@ -659,7 +658,7 @@ class _State extends State<SolarVisitScheduledScreen> {
                     person.phone,
                     style: const TextStyle(
                       fontSize: 11,
-                      color: AppColors.textSecondary),
+                      color: AppColors.textGray,
                     ),
                   ),
               ],
@@ -673,7 +672,7 @@ class _State extends State<SolarVisitScheduledScreen> {
           'None',
           style: TextStyle(
             fontSize: 13,
-            color: AppColors.textSecondary,
+            color: AppColors.background,
             fontStyle: FontStyle.italic,
           ),
         ),
@@ -683,7 +682,7 @@ class _State extends State<SolarVisitScheduledScreen> {
             style: const TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary),
+              color: AppColors.textDark,
             ),
             overflow: TextOverflow.ellipsis,
           ),
@@ -738,9 +737,3 @@ Widget _infoBanner(SolarLeadsModel lead) {
     ),
   );
 }
-
-
-
-
-
-

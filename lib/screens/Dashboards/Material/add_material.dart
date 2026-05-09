@@ -1,17 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:solar_project/Helper/app_feedback.dart';
+import 'package:solar_project/core/app_colors.dart';
 import 'package:solar_project/services/api_service.dart';
-import 'package:solar_project/Helper/app_colors.dart';
 
 class AddMaterialScreen extends StatefulWidget {
   final Color? appBarColor;
   final Map<String, dynamic>? initialMaterial;
-  const AddMaterialScreen({
-    super.key,
-    this.appBarColor,
-    this.initialMaterial,
-  });
+  const AddMaterialScreen({super.key, this.appBarColor, this.initialMaterial});
 
   @override
   State<AddMaterialScreen> createState() => _AddMaterialScreenState();
@@ -60,9 +56,7 @@ class _AddMaterialScreenState extends State<AddMaterialScreen> {
           .map((e) => Map<String, dynamic>.from(e))
           .toList();
 
-      _options = {
-        'gstOptions': gstOptions,
-      };
+      _options = {'gstOptions': gstOptions};
 
       _prepareFieldState();
     } catch (_) {
@@ -85,12 +79,7 @@ class _AddMaterialScreenState extends State<AddMaterialScreen> {
             'type': 'text',
             'required': true,
           },
-          {
-            'key': 'brand',
-            'label': 'Brand',
-            'type': 'text',
-            'required': false,
-          },
+          {'key': 'brand', 'label': 'Brand', 'type': 'text', 'required': false},
         ],
       },
       {
@@ -184,9 +173,7 @@ class _AddMaterialScreenState extends State<AddMaterialScreen> {
   Map<String, dynamic> _extractCustomFields(Map<String, dynamic> source) {
     final raw = source['customFields'];
     if (raw is Map) {
-      return raw.map(
-        (k, v) => MapEntry(k.toString(), v),
-      );
+      return raw.map((k, v) => MapEntry(k.toString(), v));
     }
     return const <String, dynamic>{};
   }
@@ -277,13 +264,13 @@ class _AddMaterialScreenState extends State<AddMaterialScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final color = widget.appBarColor ?? AppColors.primary);
+    final color = widget.appBarColor ?? AppColors.primaryDark;
 
     return Scaffold(
-      backgroundColor: AppColors.bgSecondary),
+      backgroundColor:  AppColors.background,
       appBar: AppBar(
         backgroundColor: color,
-        foregroundColor: Colors.white,
+        foregroundColor: AppColors.surface,
         title: Text(_isEditMode ? 'Edit Material' : 'Add Material'),
       ),
       body: _loadingSchema
@@ -300,14 +287,14 @@ class _AddMaterialScreenState extends State<AddMaterialScreen> {
         child: Container(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 14),
           decoration: const BoxDecoration(
-            color: Colors.white,
-            border: Border(top: BorderSide(color: AppColors.bgPrimary))),
+            color: AppColors.surface,
+            border: Border(top: BorderSide(color: AppColors.divider)),
           ),
           child: ElevatedButton(
             onPressed: _saving ? null : _saveMaterial,
             style: ElevatedButton.styleFrom(
               backgroundColor: color,
-              foregroundColor: Colors.white,
+              foregroundColor: AppColors.surface,
               minimumSize: const Size.fromHeight(48),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -319,11 +306,11 @@ class _AddMaterialScreenState extends State<AddMaterialScreen> {
                     height: 20,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: Colors.white,
+                      color: AppColors.surface,
                     ),
                   )
                 : Text(
-                  _isEditMode ? 'Update Material' : 'Save Material',
+                    _isEditMode ? 'Update Material' : 'Save Material',
                     style: TextStyle(fontWeight: FontWeight.w700),
                   ),
           ),
@@ -340,9 +327,9 @@ class _AddMaterialScreenState extends State<AddMaterialScreen> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.bgPrimary)),
+        border: Border.all(color:  AppColors.divider),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -352,7 +339,7 @@ class _AddMaterialScreenState extends State<AddMaterialScreen> {
             style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w700,
-              color: Color(0xFF334155),
+              color: AppColors.textGray,
             ),
           ),
           const SizedBox(height: 12),
@@ -428,24 +415,19 @@ class _AddMaterialScreenState extends State<AddMaterialScreen> {
     return InputDecoration(
       labelText: required ? '$label *' : label,
       filled: true,
-      fillColor: AppColors.bgSecondary),
+      fillColor:  AppColors.background,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: AppColors.bgPrimary)),
+        borderSide: const BorderSide(color: AppColors.divider),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: AppColors.bgPrimary)),
+        borderSide: const BorderSide(color: AppColors.divider),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: AppColors.primary), width: 1.3),
+        borderSide: const BorderSide(color: AppColors.primaryDark, width: 1.3),
       ),
     );
   }
 }
-
-
-
-
-

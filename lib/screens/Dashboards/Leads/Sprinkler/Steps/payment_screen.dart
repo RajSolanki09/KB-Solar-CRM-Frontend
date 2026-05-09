@@ -7,7 +7,7 @@ import 'package:solar_project/Helper/app_svg_icon.dart';
 import 'package:solar_project/Helper/lead_themes.dart';
 import 'package:solar_project/Helper/lead_widgets.dart';
 import 'package:solar_project/data/Models/sprinkler_lead_model.dart';
-import 'package:solar_project/Helper/app_colors.dart';
+import 'package:solar_project/core/app_colors.dart';
 
 class SprinklerPaymentScreen extends StatefulWidget {
   final SprinklerLeadModel lead;
@@ -105,7 +105,7 @@ class _State extends State<SprinklerPaymentScreen> {
           leading: IconButton(
             icon: const AppSvgIcon(
               AppSvgAssets.chevronLeft,
-              color: Colors.white,
+              color: AppColors.surface,
               size: 18,
             ),
             onPressed: () => Navigator.pop(context),
@@ -141,7 +141,7 @@ class _State extends State<SprinklerPaymentScreen> {
                   _pRow(
                     'Total Amount',
                     '₹${totalAmount.toStringAsFixed(0)}',
-                    AppColors.textSecondary.shade600,
+                    Colors.grey.shade600,
                   ),
                   _pRow(
                     'Paid So Far',
@@ -152,7 +152,7 @@ class _State extends State<SprinklerPaymentScreen> {
                   _pRow(
                     'Remaining',
                     '₹${remaining.toStringAsFixed(0)}',
-                    remaining > 0 ? Colors.orange : AppColors.success,
+                    remaining > 0 ? AppColors.solar : AppColors.success,
                     large: true,
                   ),
                 ],
@@ -164,15 +164,15 @@ class _State extends State<SprinklerPaymentScreen> {
                 padding: const EdgeInsets.all(14),
                 margin: const EdgeInsets.only(bottom: 10),
                 decoration: BoxDecoration(
-                  color: Colors.green.shade50,
-                  border: Border.all(color: Colors.green.shade300),
+                  color: AppColors.success,
+                  border: Border.all(color: AppColors.success),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Row(
                   children: [
                     AppSvgIcon(
                       AppSvgAssets.circleCheckBig,
-                      color: AppColors.success,
+                      color: AppColors.background,
                       size: 22,
                     ),
                     SizedBox(width: 10),
@@ -230,7 +230,7 @@ class _State extends State<SprinklerPaymentScreen> {
                               border: Border.all(
                                 color: selected
                                     ? LeadTheme.secondary
-                                    : AppColors.borderPrimary,
+                                    : Colors.grey.shade300,
                                 width: selected ? 1.5 : 1,
                               ),
                               borderRadius: BorderRadius.circular(8),
@@ -301,7 +301,7 @@ class _State extends State<SprinklerPaymentScreen> {
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
                           color: LeadTheme.bg,
-                          border: Border.all(color: AppColors.borderLight),
+                          border: Border.all(color: AppColors.divider),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Row(
@@ -310,7 +310,7 @@ class _State extends State<SprinklerPaymentScreen> {
                               width: 28,
                               height: 28,
                               decoration: BoxDecoration(
-                                color: Colors.green.shade100,
+                                color: AppColors.success,
                                 shape: BoxShape.circle,
                               ),
                               child: Center(
@@ -510,7 +510,7 @@ class _State extends State<SprinklerPaymentScreen> {
         onPressed: saving ? null : onPressed,
         style: ElevatedButton.styleFrom(
           backgroundColor: LeadTheme.secondary,
-          foregroundColor: Colors.white,
+          foregroundColor: AppColors.surface,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
           ),
@@ -521,7 +521,7 @@ class _State extends State<SprinklerPaymentScreen> {
                 height: 20,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  color: Colors.white,
+                  color: AppColors.surface,
                 ),
               )
             : Text(
@@ -562,7 +562,3 @@ class _State extends State<SprinklerPaymentScreen> {
     );
   }
 }
-
-
-
-
