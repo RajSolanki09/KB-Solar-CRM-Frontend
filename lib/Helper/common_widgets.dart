@@ -104,10 +104,10 @@ class DashboardCard extends StatefulWidget {
 }
 
 class _DashboardCardState extends State<DashboardCard>
-    with TickerProviderStateMixin {
+    with SingleTickerProviderStateMixin { // ← TickerProviderStateMixin se change karo
   late AnimationController _scaleController;
   late Animation<double> _scaleAnim;
-  final List<_RippleData> _ripples = [];
+  // ← _ripples list hata do
 
   @override
   void initState() {
@@ -130,27 +130,20 @@ class _DashboardCardState extends State<DashboardCard>
   }
 
   void _onTapDown(TapDownDetails details) {
+    if (!mounted) return;
     _scaleController.forward();
-    final ripple = _RippleData(
-      offset: details.localPosition,
-      controller: AnimationController(
-        vsync: this,
-        duration: const Duration(milliseconds: 550),
-      ),
-    );
-    ripple.controller.forward().whenComplete(() {
-      setState(() => _ripples.remove(ripple));
-      ripple.controller.dispose();
-    });
-    setState(() => _ripples.add(ripple));
   }
 
   void _onTapUp(TapUpDetails _) {
+    if (!mounted) return;
     _scaleController.reverse();
     widget.onTap?.call();
   }
 
-  void _onTapCancel() => _scaleController.reverse();
+  void _onTapCancel() {
+    if (!mounted) return;
+    _scaleController.reverse();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -158,9 +151,7 @@ class _DashboardCardState extends State<DashboardCard>
     final double iconSize = responsiveFont(context, 18);
     final double valueSize = responsiveFont(context, 30);
     final double titleSize = responsiveFont(context, 13);
-    // final double cardHeight = responsivePadding(context, 130);
 
-    // Dynamic text color based on card background brightness
     final Color textColor = widget.cardColor.computeLuminance() > 0.5
         ? AppColors.textDark
         : AppColors.surface;
@@ -193,21 +184,14 @@ class _DashboardCardState extends State<DashboardCard>
           clipBehavior: Clip.hardEdge,
           child: Stack(
             children: [
-              // ── Sun rays ───────────────────────────────────
               Positioned.fill(
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(
-                    responsivePadding(context, 18),
-                  ),
+                  borderRadius: BorderRadius.circular(responsivePadding(context, 18)),
                   child: CustomPaint(painter: _SunRaysPainter()),
                 ),
               ),
-
-              // ── Bottom bar ─────────────────────────────────
               Positioned(
-                left: 0,
-                right: 0,
-                bottom: 0,
+                left: 0, right: 0, bottom: 0,
                 child: Container(
                   height: 3,
                   decoration: const BoxDecoration(
@@ -219,11 +203,7 @@ class _DashboardCardState extends State<DashboardCard>
                   ),
                 ),
               ),
-
-              // ── Ripple layer ───────────────────────────────
-              ..._ripples.map((r) => _RipplePainterWidget(ripple: r)),
-
-              // ── Content ────────────────────────────────────
+              // ← Ripple layer hata do (_ripples.map(...) wali line)
               Padding(
                 padding: EdgeInsets.all(pad),
                 child: Column(
@@ -235,17 +215,17 @@ class _DashboardCardState extends State<DashboardCard>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Expanded(
-                           child: Text(
-                             widget.title,
-                             maxLines: 1,
-                             overflow: TextOverflow.ellipsis,
-                             style: TextStyle(
-                               color: textColor,
-                               fontSize: titleSize,
-                               fontWeight: FontWeight.w800,
-                               letterSpacing: 0.1,
-                             ),
-                           ),
+                          child: Text(
+                            widget.title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: textColor,
+                              fontSize: titleSize,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.1,
+                            ),
+                          ),
                         ),
                         SizedBox(width: responsivePadding(context, 8)),
                         SizedBox(
@@ -254,29 +234,17 @@ class _DashboardCardState extends State<DashboardCard>
                           child: DecoratedBox(
                             decoration: BoxDecoration(
                               color: AppColors.surface.withValues(alpha: 0.18),
-                              borderRadius: BorderRadius.circular(
-                                responsivePadding(context, 12),
-                              ),
+                              borderRadius: BorderRadius.circular(responsivePadding(context, 12)),
                               border: Border.all(
-                                color: AppColors.surface.withValues(
-                                  alpha: 0.12,
-                                ),
+                                color: AppColors.surface.withValues(alpha: 0.12),
                                 width: 1,
                               ),
                             ),
                             child: Center(
                               child: widget.svgAsset != null
-                                   ? AppSvgIcon(
-                                       widget.svgAsset!,
-                                       size: iconSize,
-                                       color: textColor,
-                                     )
-                                   : widget.icon != null
-                                   ? Icon(
-                                       widget.icon!,
-                                       color: textColor,
-                                       size: iconSize,
-                                     )
+                                  ? AppSvgIcon(widget.svgAsset!, size: iconSize, color: textColor)
+                                  : widget.icon != null
+                                  ? Icon(widget.icon!, color: textColor, size: iconSize)
                                   : const SizedBox.shrink(),
                             ),
                           ),
@@ -287,16 +255,16 @@ class _DashboardCardState extends State<DashboardCard>
                     FittedBox(
                       fit: BoxFit.scaleDown,
                       alignment: Alignment.centerLeft,
-                       child: Text(
-                         widget.value,
-                         style: TextStyle(
-                           color: textColor,
-                           fontSize: valueSize,
-                           fontWeight: FontWeight.w900,
-                           letterSpacing: -1.5,
-                           height: 1,
-                         ),
-                       ),
+                      child: Text(
+                        widget.value,
+                        style: TextStyle(
+                          color: textColor,
+                          fontSize: valueSize,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -1.5,
+                          height: 1,
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -308,7 +276,6 @@ class _DashboardCardState extends State<DashboardCard>
     );
   }
 }
-
 // ── Sun Rays Painter ──────────────────────────────────────────────────────────
 
 class _SunRaysPainter extends CustomPainter {
@@ -371,72 +338,6 @@ class _SunRaysPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_SunRaysPainter old) => false;
-}
-
-// ── Ripple internals ──────────────────────────────────────────────────────────
-
-class _RippleData {
-  final Offset offset;
-  final AnimationController controller;
-  _RippleData({required this.offset, required this.controller});
-}
-
-class _RipplePainterWidget extends StatefulWidget {
-  final _RippleData ripple;
-  const _RipplePainterWidget({required this.ripple});
-
-  @override
-  State<_RipplePainterWidget> createState() => _RipplePainterWidgetState();
-}
-
-class _RipplePainterWidgetState extends State<_RipplePainterWidget> {
-  @override
-  void initState() {
-    super.initState();
-    widget.ripple.controller.addListener(() => setState(() {}));
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final t = widget.ripple.controller.value;
-    final radius = 200.0 * Curves.easeOut.transform(t);
-    final opacity = (1.0 - Curves.easeIn.transform(t)).clamp(0.0, 1.0);
-
-    return Positioned.fill(
-      child: CustomPaint(
-        painter: _RipplePainter(
-          center: widget.ripple.offset,
-          radius: radius,
-          opacity: opacity,
-        ),
-      ),
-    );
-  }
-}
-
-class _RipplePainter extends CustomPainter {
-  final Offset center;
-  final double radius;
-  final double opacity;
-
-  _RipplePainter({
-    required this.center,
-    required this.radius,
-    required this.opacity,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    canvas.drawCircle(
-      center,
-      radius,
-      Paint()..color = AppColors.surface.withValues(alpha: opacity * 0.30),
-    );
-  }
-
-  @override
-  bool shouldRepaint(_RipplePainter old) =>
-      old.radius != radius || old.opacity != opacity;
 }
 
 /// ---------------- STATUS CHIP ----------------
@@ -721,9 +622,7 @@ class _ModernDropdown<T> extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: hasValue
-                          ? AppColors.primary
-                          :  AppColors.textDark,
+                      color: hasValue ? AppColors.primary : AppColors.textDark,
                     ),
                   ),
                 ],
@@ -906,7 +805,7 @@ class _DropdownSheetState<T> extends State<_DropdownSheet<T>> {
                                     : FontWeight.w400,
                                 color: isSelected
                                     ? AppColors.primary
-                                    :  AppColors.textDark,
+                                    : AppColors.textDark,
                               ),
                             ),
                           ),
@@ -932,23 +831,22 @@ class _DropdownSheetState<T> extends State<_DropdownSheet<T>> {
   }
 }
 
- 
 class KeepAlivePage extends StatefulWidget {
   final Widget child;
-  const KeepAlivePage({required this.child});
- 
+  const KeepAlivePage({super.key, required this.child});
+
   @override
   State<KeepAlivePage> createState() => _KeepAlivePageState();
 }
- 
+
 class _KeepAlivePageState extends State<KeepAlivePage>
     with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
- 
+
   @override
   Widget build(BuildContext context) {
-    super.build(context); // required by AutomaticKeepAliveClientMixin
+    super.build(context);
     return widget.child;
   }
 }

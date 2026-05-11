@@ -248,8 +248,8 @@ class _SplashScreenState extends State<SplashScreen>
                                 ),
                               ],
                             ),
-                            child: Image.asset(
-                              'assets/images/splash-logo.png',
+                             child: Image.asset(
+                               'assets/images/splash-logo.png',
                               // ── SIZE YAHAN CONTROL KARO ────────────────
                               width: logoSize,
                               height: logoSize,

@@ -40,23 +40,23 @@ class _State extends State<OwnerReportsPage> with TickerProviderStateMixin {
   late AnimationController _anim;
   late Animation<double> _prog;
 
-  @override
-  void initState() {
-    super.initState();
-    _anim = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 900),
-    );
-    _prog = CurvedAnimation(parent: _anim, curve: Curves.easeOutCubic);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<SolarLeadCubit>().fetchAllLeads();
-      context.read<SprinklerLeadCubit>().fetchAllLeads();
-      context.read<ServiceLeadCubit>().fetchAllServices();
-      context.read<RevenueCubit>().fetchRevenue();
-      _anim.forward();
-    });
-  }
-
+ @override
+void initState() {
+  super.initState();
+  _anim = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 900),
+  );
+  _prog = CurvedAnimation(parent: _anim, curve: Curves.easeOutCubic);
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    if (!mounted) return; // ✅ ADD THIS
+    context.read<SolarLeadCubit>().fetchAllLeads();
+    context.read<SprinklerLeadCubit>().fetchAllLeads();
+    context.read<ServiceLeadCubit>().fetchAllServices();
+    context.read<RevenueCubit>().fetchRevenue();
+    _anim.forward();
+  });
+}
   @override
   void dispose() {
     _anim.dispose();

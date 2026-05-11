@@ -28,12 +28,13 @@ class _State extends State<MyServicesPage> {
   DateTime get _recentCutoff => DateTimeHelper.recentCutoff();
 
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback(
-      (_) => context.read<ServiceLeadCubit>().fetchAllServices(),
-    );
-  }
+void initState() {
+  super.initState();
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    if (!mounted) return; 
+    context.read<ServiceLeadCubit>().fetchAllServices();
+  });
+}
 
   @override
   void dispose() {
@@ -134,7 +135,7 @@ class _State extends State<MyServicesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor:  AppColors.background,
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: BlocBuilder<ServiceLeadCubit, ServiceLeadState>(
           builder: (ctx, state) {
@@ -260,7 +261,7 @@ class _State extends State<MyServicesPage> {
                         child: Container(
                           height: 42,
                           decoration: BoxDecoration(
-                            color:  AppColors.background,
+                            color: AppColors.background,
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(color: AppColors.divider),
                           ),
@@ -332,7 +333,7 @@ class _State extends State<MyServicesPage> {
                               fontSize: 13,
                               color: _status != 'All'
                                   ? _color
-                                  :  AppColors.textGray,
+                                  : AppColors.textGray,
                               fontWeight: _status != 'All'
                                   ? FontWeight.w600
                                   : FontWeight.normal,
@@ -379,7 +380,7 @@ class _State extends State<MyServicesPage> {
                                 size: 17,
                                 color: _date != null
                                     ? AppColors.surface
-                                    :  AppColors.textGray,
+                                    : AppColors.textGray,
                               ),
                               const SizedBox(width: 8),
                               Text(
@@ -388,7 +389,7 @@ class _State extends State<MyServicesPage> {
                                   fontSize: 13,
                                   color: _date != null
                                       ? AppColors.surface
-                                      :  AppColors.textGray,
+                                      : AppColors.textGray,
                                   fontWeight: _date != null
                                       ? FontWeight.w600
                                       : FontWeight.normal,
@@ -550,7 +551,7 @@ class _MyServiceTableSection extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color:  AppColors.divider),
+        border: Border.all(color: AppColors.divider),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -631,7 +632,7 @@ class _CollapsibleMyServiceTableSection extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color:  AppColors.divider),
+        border: Border.all(color: AppColors.divider),
       ),
       child: Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),

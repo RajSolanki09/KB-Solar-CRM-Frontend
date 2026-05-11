@@ -31,9 +31,10 @@ class _State extends State<ServiceHistoryPage> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback(
-      (_) => context.read<ServiceLeadCubit>().fetchAllServices(),
-    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.read<ServiceLeadCubit>().fetchAllServices();
+    });
   }
 
   @override
@@ -108,7 +109,7 @@ class _State extends State<ServiceHistoryPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor:  AppColors.background,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: _color,
         elevation: 0,
@@ -149,7 +150,10 @@ class _State extends State<ServiceHistoryPage> {
               ),
             ),
           IconButton(
-            icon: const AppSvgIcon(AppSvgAssets.refreshCw, color: AppColors.surface),
+            icon: const AppSvgIcon(
+              AppSvgAssets.refreshCw,
+              color: AppColors.surface,
+            ),
             onPressed: () =>
                 context.read<ServiceLeadCubit>().fetchAllServices(),
           ),
@@ -225,7 +229,7 @@ class _State extends State<ServiceHistoryPage> {
                         child: Container(
                           height: 42,
                           decoration: BoxDecoration(
-                            color:  AppColors.background,
+                            color: AppColors.background,
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(color: AppColors.divider),
                           ),
@@ -297,7 +301,7 @@ class _State extends State<ServiceHistoryPage> {
                               fontSize: 13,
                               color: _charge != 'All'
                                   ? _color
-                                  :  AppColors.textGray,
+                                  : AppColors.textGray,
                               fontWeight: _charge != 'All'
                                   ? FontWeight.w600
                                   : FontWeight.normal,
@@ -343,7 +347,7 @@ class _State extends State<ServiceHistoryPage> {
                                 size: 17,
                                 color: _date != null
                                     ? AppColors.surface
-                                    :  AppColors.textGray,
+                                    : AppColors.textGray,
                               ),
                               const SizedBox(width: 8),
                               Text(
@@ -352,7 +356,7 @@ class _State extends State<ServiceHistoryPage> {
                                   fontSize: 13,
                                   color: _date != null
                                       ? AppColors.surface
-                                      :  AppColors.textGray,
+                                      : AppColors.textGray,
                                   fontWeight: _date != null
                                       ? FontWeight.w600
                                       : FontWeight.normal,
@@ -488,7 +492,7 @@ class _HistoryTableSection extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color:  AppColors.divider),
+        border: Border.all(color: AppColors.divider),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -556,7 +560,7 @@ class _CollapsibleHistoryTableSection extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color:  AppColors.divider),
+        border: Border.all(color: AppColors.divider),
       ),
       child: Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
@@ -566,8 +570,8 @@ class _CollapsibleHistoryTableSection extends StatelessWidget {
           onExpansionChanged: onExpansionChanged,
           tilePadding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
           childrenPadding: const EdgeInsets.only(bottom: 12),
-          iconColor:  AppColors.success,
-          collapsedIconColor:  AppColors.success,
+          iconColor: AppColors.success,
+          collapsedIconColor: AppColors.success,
           title: Text(
             '$title (${items.length})',
             style: const TextStyle(
@@ -742,7 +746,7 @@ class _HistoryDataTable extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: rowStyle.copyWith(
                           color: s.assignedToName != null
-                              ?  AppColors.textDark
+                              ? AppColors.textDark
                               : AppColors.textLight,
                         ),
                       ),
@@ -801,16 +805,14 @@ class _SummaryBar extends StatelessWidget {
       margin: const EdgeInsets.fromLTRB(12, 12, 12, 0),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color:  AppColors.success.withValues(alpha: 0.08),
+        color: AppColors.success.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color:  AppColors.success.withValues(alpha: 0.2),
-        ),
+        border: Border.all(color: AppColors.success.withValues(alpha: 0.2)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _Stat('Total', '$total',  AppColors.success),
+          _Stat('Total', '$total', AppColors.success),
           Container(width: 1, height: 28, color: AppColors.divider),
           _Stat('Free', '$free', Colors.teal),
           Container(width: 1, height: 28, color: AppColors.divider),

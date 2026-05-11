@@ -4,9 +4,12 @@ import 'package:solar_project/Cubits/AdminNavigation/admin_nav_cubit.dart';
 import 'package:solar_project/Cubits/AdminNavigation/admin_nav_state.dart';
 import 'package:solar_project/Cubits/Revenue/revenue_cubit.dart';
 import 'package:solar_project/Cubits/ServiceLeads/service_leads_cubit.dart';
+import 'package:solar_project/Cubits/SolarLeads/solar_leads_cubit.dart';
+import 'package:solar_project/Cubits/SprinklerLeads/sprinkler_leads_cubit.dart';
 import 'package:solar_project/core/network/dio_client.dart';
 import 'package:solar_project/data/Repository/revenue_repository.dart';
 import 'package:solar_project/data/Repository/service_repository.dart';
+import 'package:solar_project/data/Repository/solar_leads_repository.dart';
 import 'package:solar_project/screens/Dashboards/Admin_Dashboards/Dashboard/admin_sidebar.dart';
 import 'package:solar_project/screens/Dashboards/Admin_Dashboards/Dashboard/admin_dashboard_screen.dart';
 import 'package:solar_project/screens/Dashboards/Admin_Dashboards/Dashboard/business_report.dart';
@@ -36,9 +39,14 @@ class _AdminDashboardState extends State<AdminDashboard> {
         BlocProvider(
           create: (_) => RevenueCubit(RevenueRepository(DioClient())),
         ),
+        BlocProvider(
+          create: (_) => SolarLeadCubit(SolarLeadRepository(DioClient())),
+        ),
+        BlocProvider(create: (_) => SprinklerLeadCubit()),
       ],
       child: Builder(
         builder: (context) {
+          // ← yeh context use karo
           final compactLayout = !Responsive.isDesktop(context);
           return WillPopScope(
             onWillPop: () async {
@@ -50,14 +58,18 @@ class _AdminDashboardState extends State<AdminDashboard> {
               return true;
             },
             child: Scaffold(
-              bottomNavigationBar: compactLayout ? _bottomNav() : null,
+              bottomNavigationBar: compactLayout
+                  ? _bottomNav(context)
+                  : null, // ← context pass karo
               body: SafeArea(
                 child: compactLayout
-                    ? _mobileLayout()
+                    ? _mobileLayout(context) // ← context pass karo
                     : Row(
                         children: [
                           const Sidebar(),
-                          Expanded(child: _desktopLayout()),
+                          Expanded(
+                            child: _desktopLayout(context),
+                          ), // ← context pass karo
                         ],
                       ),
               ),
@@ -68,58 +80,49 @@ class _AdminDashboardState extends State<AdminDashboard> {
     );
   }
 
-  Widget _desktopLayout() {
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: const Color(0xFFCBC4CF)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [Expanded(child: _pageBody())],
-      ),
-    );
-  }
+ Widget _desktopLayout(BuildContext context) {
+  return Container(
+    decoration: BoxDecoration(
+      border: Border.all(color: const Color(0xFFCBC4CF)),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [Expanded(child: _pageBody(context))],
+    ),
+  );
+}
 
-  Widget _mobileLayout() {
-    return Column(children: [Expanded(child: _pageBody())]);
-  }
+Widget _mobileLayout(BuildContext context) {
+  return Column(children: [Expanded(child: _pageBody(context))]);
+}
 
-  // ── KEY FIX: IndexedStack — pages are built once and kept alive ───────────
-  // Previously BlocBuilder returned a new widget instance every rebuild,
-  // which destroyed and recreated the element tree → assertion crash.
-  // IndexedStack builds all pages once and just shows/hides them.
-  Widget _pageBody() {
-    return BlocBuilder<AdminNavCubit, AdminNavPage>(
-      builder: (context, page) {
-        return IndexedStack(
-          index: page.index,
-          children: [
-            // index 0 — dashboard
-            const KeepAlivePage(child: AdminDashboardScreen()),
-            // index 1 — leads
-            const KeepAlivePage(child: SalesLeadScreen()),
-            // index 2 — service
-            const KeepAlivePage(child: ServiceRequestPage()),
-            // index 3 — reports (needs its own RevenueCubit provided above)
-            const KeepAlivePage(child: AdminRevenueSummaryPage()),
-            // index 4 — profile
-            const KeepAlivePage(child: OwnerProfilePage()),
-          ],
-        );
-      },
-    );
-  }
+Widget _pageBody(BuildContext context) {
+  return BlocBuilder<AdminNavCubit, AdminNavPage>(
+    builder: (context, page) {   // ← BlocBuilder ka apna context sahi hai
+      return IndexedStack(
+        index: page.index,
+        children: const [
+          KeepAlivePage(child: AdminDashboardScreen()),
+          KeepAlivePage(child: SalesLeadScreen()),
+          KeepAlivePage(child: ServiceRequestPage()),
+          KeepAlivePage(child: AdminRevenueSummaryPage()),
+          KeepAlivePage(child: OwnerProfilePage()),
+        ],
+      );
+    },
+  );
+}
 
-  Widget _bottomNav() {
+  Widget _bottomNav(BuildContext context) {
     return BlocBuilder<AdminNavCubit, AdminNavPage>(
       builder: (context, page) {
         return NavigationBar(
           indicatorColor: Colors.transparent,
           selectedIndex: page.index,
           onDestinationSelected: (index) {
-            context
-                .read<AdminNavCubit>()
-                .changePage(AdminNavPage.values[index]);
+            context.read<AdminNavCubit>().changePage(
+              AdminNavPage.values[index],
+            );
           },
           destinations: [
             NavigationDestination(

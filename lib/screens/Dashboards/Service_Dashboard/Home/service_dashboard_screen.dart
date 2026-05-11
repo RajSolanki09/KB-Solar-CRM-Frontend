@@ -8,7 +8,7 @@ import 'package:solar_project/Helper/ui_helper.dart';
 import 'package:solar_project/data/Models/service_request_model.dart';
 import 'package:solar_project/screens/Dashboards/Service_Dashboard/Home/all_services_screen.dart';
 import 'package:solar_project/services/api_service.dart';
-import 'package:solar_project/core/app_colors.dart';    
+import 'package:solar_project/core/app_colors.dart';
 
 class ServiceDashboardPage extends StatefulWidget {
   const ServiceDashboardPage({super.key});
@@ -77,7 +77,7 @@ class _State extends State<ServiceDashboardPage> {
               width: size * 0.26,
               height: size * 0.26,
               decoration: BoxDecoration(
-                color:  AppColors.success,
+                color: AppColors.success,
                 shape: BoxShape.circle,
                 border: Border.all(color: AppColors.surface, width: 1.4),
               ),
@@ -140,20 +140,17 @@ class _State extends State<ServiceDashboardPage> {
         final isRefreshing = state is ServiceLeadLoading && services.isNotEmpty;
 
         return Scaffold(
-          backgroundColor:  AppColors.background,
+          backgroundColor: AppColors.background,
           appBar: AppBar(
-            backgroundColor:  AppColors.background,
+            backgroundColor: AppColors.background,
             elevation: 0,
             scrolledUnderElevation: 0,
             centerTitle: false,
             automaticallyImplyLeading: false,
             title: Row(
               children: [
-                // ── Profile Avatar ──────────────────────────────────
-                _buildProfileAvatar(size: 40),
-                const SizedBox(width: 12),
-
-                // ── Name + Greeting ─────────────────────────────────
+                _buildProfileAvatar(size: 36), // ← size thoda kam karo
+                const SizedBox(width: 8),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -166,29 +163,25 @@ class _State extends State<ServiceDashboardPage> {
                           : 'Team Member',
                       style: const TextStyle(
                         fontWeight: FontWeight.w700,
-                        fontSize: 15,
+                        fontSize: 13, // ← size kam karo
                         color: AppColors.darkNavy,
-                        letterSpacing: -0.3,
                       ),
                     ),
                     Text(
                       _getGreeting(),
                       style: const TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w400,
+                        fontSize: 10,
                         color: AppColors.textLight,
                       ),
                     ),
                   ],
                 ),
-
-                // ── Center Title ────────────────────────────────────
                 const Spacer(),
                 const Text(
                   'Service Dashboard',
                   style: TextStyle(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 16, // ← 20 se 16 karo
                     color: AppColors.primary,
                   ),
                 ),
@@ -222,7 +215,7 @@ class _State extends State<ServiceDashboardPage> {
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color:  AppColors.primaryTint),
+                          border: Border.all(color: AppColors.primaryTint),
                         ),
                         child: const AppSvgIcon(
                           AppSvgAssets.refreshCw,
@@ -241,7 +234,7 @@ class _State extends State<ServiceDashboardPage> {
                     child: CircularProgressIndicator(color: AppColors.primary),
                   )
                 : RefreshIndicator(
-                    color:  AppColors.primary,
+                    color: AppColors.primary,
                     onRefresh: () =>
                         ctx.read<ServiceLeadCubit>().fetchAllServices(),
                     child: SingleChildScrollView(
@@ -274,7 +267,7 @@ class _State extends State<ServiceDashboardPage> {
                                 vertical: 7,
                               ),
                               decoration: BoxDecoration(
-                                color:  AppColors.primaryTint,
+                                color: AppColors.primaryTint,
                                 borderRadius: BorderRadius.circular(8),
                                 border: Border.all(
                                   color: const Color(
@@ -321,55 +314,55 @@ class _State extends State<ServiceDashboardPage> {
                             mainAxisSpacing: isMobile ? 12 : 16,
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),
-                            childAspectRatio: isMobile ? 1.55 : 1.65,
+                            childAspectRatio: isMobile ? 1.3 : 1.4,
                             children: [
                               DashboardCard(
                                 title: 'Total Services',
                                 value: '$total',
                                 svgAsset: AppSvgAssets.clipboardList,
-                                cardColor:  AppColors.primary,
+                                cardColor: AppColors.primary,
                                 onTap: () => _go(ServiceFilter.all),
                               ),
                               DashboardCard(
                                 title: 'Today Services',
                                 value: '$today',
                                 svgAsset: AppSvgAssets.calendarDays,
-                                cardColor: AppColors.primaryLight,
+                                cardColor: AppColors.primary,
                                 onTap: () => _go(ServiceFilter.today),
                               ),
                               DashboardCard(
                                 title: 'Pending',
                                 value: '$pending',
                                 svgAsset: AppSvgAssets.triangleAlert,
-                                cardColor:  AppColors.solar,
+                                cardColor: AppColors.solar,
                                 onTap: () => _go(ServiceFilter.pending),
                               ),
                               DashboardCard(
                                 title: 'In Progress',
                                 value: '$inProg',
                                 svgAsset: AppSvgAssets.refreshCw,
-                                cardColor:  AppColors.primaryDark,
+                                cardColor: AppColors.primaryDark,
                                 onTap: () => _go(ServiceFilter.inProgress),
                               ),
                               DashboardCard(
                                 title: 'Completed',
                                 value: '$completed',
                                 svgAsset: AppSvgAssets.circleCheckBig,
-                                cardColor:  AppColors.success,
+                                cardColor: AppColors.success,
                                 onTap: () => _go(ServiceFilter.completed),
                               ),
                               DashboardCard(
                                 title: 'Free Service',
                                 value: '$free',
                                 svgAsset: AppSvgAssets.handshake,
-                                cardColor:  AppColors.error,
+                                cardColor: AppColors.error,
                                 onTap: () => _go(ServiceFilter.free),
                               ),
                               DashboardCard(
                                 title: 'Paid Service',
                                 value: '$paid',
                                 svgAsset: AppSvgAssets.indianRupee,
-                                cardColor:  AppColors.success,
+                                cardColor: AppColors.success,
                                 onTap: () => _go(ServiceFilter.paid),
                               ),
                             ],
@@ -408,10 +401,10 @@ class _ServiceSummaryStrip extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color:  AppColors.primaryTint, width: 1),
+        border: Border.all(color: AppColors.primaryTint, width: 1),
         boxShadow: [
           BoxShadow(
-            color:  AppColors.primary.withValues(alpha: 0.05),
+            color: AppColors.primary.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
@@ -419,28 +412,16 @@ class _ServiceSummaryStrip extends StatelessWidget {
       ),
       child: Row(
         children: [
-          _StripStat(
-            label: 'Total',
-            value: '$total',
-            color:  AppColors.primary,
-          ),
+          _StripStat(label: 'Total', value: '$total', color: AppColors.primary),
           _StripDivider(),
-          _StripStat(
-            label: 'Free',
-            value: '$free',
-            color:  AppColors.error,
-          ),
+          _StripStat(label: 'Free', value: '$free', color: AppColors.error),
           _StripDivider(),
-          _StripStat(
-            label: 'Paid',
-            value: '$paid',
-            color:  AppColors.success,
-          ),
+          _StripStat(label: 'Paid', value: '$paid', color: AppColors.success),
           _StripDivider(),
           _StripStat(
             label: 'Done',
             value: '$completed',
-            color:  AppColors.success,
+            color: AppColors.success,
           ),
         ],
       ),
@@ -492,7 +473,7 @@ class _StripStat extends StatelessWidget {
 class _StripDivider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Container(width: 1, height: 22, color:  AppColors.primaryTint);
+    return Container(width: 1, height: 22, color: AppColors.primaryTint);
   }
 }
 
@@ -511,7 +492,7 @@ class _SectionHeading extends StatelessWidget {
           width: 3,
           height: 15,
           decoration: BoxDecoration(
-            color:  AppColors.primary,
+            color: AppColors.primary,
             borderRadius: BorderRadius.circular(2),
           ),
         ),

@@ -446,7 +446,7 @@ class _SalesDashboardScreenState extends State<SalesDashboardScreen> {
                                     title: 'Sprinkler Leads',
                                     value: '${spkLeads.length}',
                                     svgAsset: AppSvgAssets.droplet,
-                                    cardColor:  AppColors.primaryLight,
+                                    cardColor:  AppColors.primary,
                                     onTap: () => Navigator.push(
                                       context,
                                       MaterialPageRoute(
@@ -474,7 +474,7 @@ class _SalesDashboardScreenState extends State<SalesDashboardScreen> {
                                     title: 'Today Followups',
                                     value: '$todayFollowups',
                                     svgAsset: AppSvgAssets.calendarDays,
-                                    cardColor:  AppColors.primaryLight,
+                                    cardColor:  AppColors.primary,
                                     onTap: () => Navigator.push(
                                       context,
                                       MaterialPageRoute(

@@ -140,7 +140,7 @@ class _State extends State<InstallationPendingScreen>
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(44),
-          child: Container(
+          child: ColoredBox(
             color: AppColors.surface,
             child: TabBar(
               controller: _tab,
@@ -148,6 +148,7 @@ class _State extends State<InstallationPendingScreen>
               indicatorWeight: 2.5,
               labelColor: tabColor,
               unselectedLabelColor:  AppColors.textDark,
+              dividerColor: Colors.transparent, 
               labelStyle: const TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,

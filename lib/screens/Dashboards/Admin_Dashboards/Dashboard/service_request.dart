@@ -38,6 +38,7 @@ class _State extends State<ServiceRequestPage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       context.read<ServiceLeadCubit>().fetchAllServices();
     });
   }
@@ -162,7 +163,7 @@ class _State extends State<ServiceRequestPage> {
               decoration: BoxDecoration(
                 color: AppColors.background,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color:  AppColors.divider),
+                border: Border.all(color: AppColors.divider),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -238,7 +239,7 @@ class _State extends State<ServiceRequestPage> {
           ),
           FilledButton(
             style: FilledButton.styleFrom(
-              backgroundColor:  AppColors.error,
+              backgroundColor: AppColors.error,
               foregroundColor: AppColors.surface,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
@@ -349,7 +350,7 @@ class _State extends State<ServiceRequestPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor:  AppColors.background,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: widget.appBarColor,
         elevation: 0,
@@ -379,7 +380,10 @@ class _State extends State<ServiceRequestPage> {
         ),
         actions: [
           IconButton(
-            icon: const AppSvgIcon(AppSvgAssets.refreshCw, color: AppColors.surface),
+            icon: const AppSvgIcon(
+              AppSvgAssets.refreshCw,
+              color: AppColors.surface,
+            ),
             onPressed: _refresh,
           ),
         ],
@@ -390,7 +394,10 @@ class _State extends State<ServiceRequestPage> {
         icon: const AppSvgIcon(AppSvgAssets.plus, color: AppColors.surface),
         label: const Text(
           'New Request',
-          style: TextStyle(color: AppColors.surface, fontWeight: FontWeight.w600),
+          style: TextStyle(
+            color: AppColors.surface,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
       body: BlocConsumer<ServiceLeadCubit, ServiceLeadState>(
@@ -559,7 +566,7 @@ class _State extends State<ServiceRequestPage> {
                               style: TextStyle(
                                 fontSize: 12,
                                 color: _filter == 'All'
-                                    ?  AppColors.textGray
+                                    ? AppColors.textGray
                                     : _kGreen,
                                 fontWeight: _filter == 'All'
                                     ? FontWeight.normal
@@ -752,7 +759,7 @@ class _State extends State<ServiceRequestPage> {
         builder: (_) => BlocProvider.value(
           value: ctx.read<ServiceLeadCubit>(),
           child: Scaffold(
-            backgroundColor:  AppColors.background,
+            backgroundColor: AppColors.background,
             appBar: AppBar(
               backgroundColor: _kGreen,
               elevation: 0,
@@ -811,7 +818,7 @@ class _TableSection extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color:  AppColors.divider),
+        border: Border.all(color: AppColors.divider),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -893,7 +900,7 @@ class _CollapsibleTableSection extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color:  AppColors.divider),
+        border: Border.all(color: AppColors.divider),
       ),
       child: Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
@@ -1130,7 +1137,7 @@ class _ServiceDataTable extends StatelessWidget {
                             AppSvgAssets.trash2,
                             size: 18,
                             color: canDelete
-                                ?  AppColors.error
+                                ? AppColors.error
                                 : Colors.grey.shade300,
                           ),
                         ),
@@ -1412,8 +1419,8 @@ class _AddState extends State<_AddServiceSheet> {
                                 style: TextStyle(
                                   fontSize: 13,
                                   color: _serviceDate != null
-                                      ?  AppColors.textDark
-                                      :  AppColors.textLight,
+                                      ? AppColors.textDark
+                                      : AppColors.textLight,
                                   fontWeight: _serviceDate != null
                                       ? FontWeight.w600
                                       : FontWeight.normal,
@@ -1463,8 +1470,8 @@ class _AddState extends State<_AddServiceSheet> {
                                 style: TextStyle(
                                   fontSize: 13,
                                   color: _serviceTime != null
-                                      ?  AppColors.textDark
-                                      :  AppColors.textLight,
+                                      ? AppColors.textDark
+                                      : AppColors.textLight,
                                   fontWeight: _serviceTime != null
                                       ? FontWeight.w600
                                       : FontWeight.normal,
@@ -1688,7 +1695,7 @@ class _AddState extends State<_AddServiceSheet> {
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w600,
-            color: selected ? color :  AppColors.textGray,
+            color: selected ? color : AppColors.textGray,
           ),
         ),
       ),

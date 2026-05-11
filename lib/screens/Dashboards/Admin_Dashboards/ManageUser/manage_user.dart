@@ -146,7 +146,7 @@ class _AdminManageUsersPageState extends State<AdminManageUsersPage>
       case "service":
         return _RoleStyle(
           color: AppColors.primary,
-          bg: AppColors.successLight,
+          bg:  AppColors.background,
           svgAsset: AppSvgAssets.cog,
         );
       default:
@@ -1089,7 +1089,7 @@ class _AdminManageUsersPageState extends State<AdminManageUsersPage>
                             "Service",
                             serviceCount,
                             AppColors.primary,
-                            AppColors.successLight,
+                            AppColors.background,
                             AppSvgAssets.cog,
                             isMini,
                           ),

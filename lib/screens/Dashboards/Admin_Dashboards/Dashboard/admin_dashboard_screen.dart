@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:solar_project/Cubits/ServiceLeads/service_leads_cubit.dart';
 import 'package:solar_project/Helper/common_widgets.dart';
@@ -65,17 +65,16 @@ class _State extends State<AdminDashboardScreen> {
     });
   }
 
-  Future<void> _loadProfilePreview() async {
-    try {
-      final user = await _apiService.getProfile();
-      if (!mounted) return;
-      setState(() {
-        _profileUser = user;
-        _profileImagePath = user?['image'] as String?;
-      });
-    } catch (_) {}
-  }
-
+ Future<void> _loadProfilePreview() async {
+  try {
+    final user = await _apiService.getProfile();
+    if (!mounted) return; 
+    setState(() {
+      _profileUser = user;
+      _profileImagePath = user?['image'] as String?;
+    });
+  } catch (_) {}
+}
   Map<String, dynamic> _materialPipelineOf(Map<String, dynamic> customer) {
     final raw = customer['pipeline'];
     if (raw is Map) return Map<String, dynamic>.from(raw);
@@ -878,7 +877,7 @@ class _State extends State<AdminDashboardScreen> {
                                         svgAsset:
                                             AppSvgAssets.droplet,
                                         cardColor:
-                                            AppColors.primaryLight,
+                                            AppColors.primary,
                                         onTap: _goSpkLeads,
                                       ),
                                       DashboardCard(
@@ -914,7 +913,7 @@ class _State extends State<AdminDashboardScreen> {
                                         svgAsset:
                                             AppSvgAssets.calendarDays,
                                         cardColor:
-                                            AppColors.primaryLight,
+                                            AppColors.primary,
                                         onTap: _goFollowups,
                                       ),
                                       DashboardCard(
@@ -924,7 +923,7 @@ class _State extends State<AdminDashboardScreen> {
                                         svgAsset:
                                             AppSvgAssets.hammer,
                                         cardColor:
-                                            AppColors.primaryDark,
+                                            AppColors.primary,
                                         onTap: _goInstallPending,
                                       ),
                                       DashboardCard(
@@ -932,7 +931,7 @@ class _State extends State<AdminDashboardScreen> {
                                         value: '$pendingCount',
                                         svgAsset:
                                             AppSvgAssets.indianRupee,
-                                        cardColor: AppColors.error,
+                                        cardColor: AppColors.primary,
                                         onTap: _goPendingPayment,
                                       ),
                                       BlocBuilder<RevenueCubit,

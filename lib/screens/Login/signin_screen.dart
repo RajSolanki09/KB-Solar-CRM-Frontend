@@ -360,8 +360,8 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
       ),
       // IntrinsicWidth — card sirf image jitna wide hoga
       child: IntrinsicWidth(
-        child: Image.asset(
-          'assets/images/splash-logo.png',
+         child: Image.asset(
+           'assets/images/splash-logo.png',
           height: imgSize,
           width: imgSize,
           fit: BoxFit.contain,

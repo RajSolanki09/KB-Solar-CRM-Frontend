@@ -37,6 +37,7 @@ class _SalesLeadScreenState extends State<SalesLeadScreen>
       });
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return; // ← ADD
       context.read<SolarLeadCubit>().fetchAllLeads();
       context.read<SprinklerLeadCubit>().fetchAllLeads();
     });
@@ -94,9 +95,9 @@ class _SalesLeadScreenState extends State<SalesLeadScreen>
         : LeadTheme.secondary;
 
     return Scaffold(
-      backgroundColor:  AppColors.background,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor:  AppColors.background,
+        backgroundColor: AppColors.background,
         elevation: 0,
         titleSpacing: 16,
         leading: Navigator.canPop(context)
@@ -145,7 +146,7 @@ class _SalesLeadScreenState extends State<SalesLeadScreen>
               indicatorColor: activeColor,
               indicatorWeight: 2.5,
               labelColor: activeColor,
-              unselectedLabelColor:  AppColors.textLight,
+              unselectedLabelColor: AppColors.textLight,
               labelStyle: const TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
