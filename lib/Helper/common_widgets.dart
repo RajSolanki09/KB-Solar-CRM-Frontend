@@ -432,23 +432,17 @@ class GlowIcon extends StatelessWidget {
             boxShadow: isSelected
                 ? [
                     BoxShadow(
-                      color: const Color(
-                        0xFF7B2FF7,
-                      ).withValues(alpha: 0.6 * value),
+                      color: AppColors.primaryDark.withValues(alpha: 0.6 * value),
                       blurRadius: 14 * value,
                       spreadRadius: 2 * value,
                     ),
                     BoxShadow(
-                      color: const Color(
-                        0xFF6EB6FF,
-                      ).withValues(alpha: 0.6 * value),
+                      color: AppColors.primary.withValues(alpha: 0.6 * value),
                       blurRadius: 20 * value,
                       spreadRadius: 4 * value,
                     ),
                     BoxShadow(
-                      color: const Color(
-                        0xFFFF5D8F,
-                      ).withValues(alpha: 0.6 * value),
+                      color: AppColors.primaryLight.withValues(alpha: 0.6 * value),
                       blurRadius: 26 * value,
                       spreadRadius: 6 * value,
                     ),
