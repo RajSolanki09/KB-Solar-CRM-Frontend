@@ -6,12 +6,13 @@ import 'package:solar_project/Cubits/SolarLeads/solar_leads_cubit.dart';
 import 'package:solar_project/Cubits/SolarLeads/solar_leads_state.dart';
 import 'package:solar_project/Helper/app_feedback.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
+import 'package:solar_project/Helper/lead_form_widgets.dart';
 import 'package:solar_project/Helper/lead_themes.dart';
 import 'package:solar_project/Helper/lead_widgets.dart';
+import 'package:solar_project/core/app_colors.dart';
 import 'package:solar_project/core/constants/api_constants.dart';
 import 'package:solar_project/core/network/dio_client.dart';
 import 'package:solar_project/data/Models/solar_leads_model.dart';
-import 'package:solar_project/core/app_colors.dart';
 
 class _InstallMember {
   final String id, name, phone;
@@ -105,14 +106,7 @@ class _State extends State<SolarInstallationAssignScreen> {
         if (body is List) {
           raw = body;
         } else if (body is Map) {
-          for (final key in [
-            'staff',
-            'data',
-            'users',
-            'members',
-            'results',
-            'list',
-          ]) {
+          for (final key in ['staff', 'data', 'users', 'members', 'results', 'list']) {
             if (body[key] is List) {
               raw = body[key] as List;
               break;
@@ -126,11 +120,7 @@ class _State extends State<SolarInstallationAssignScreen> {
             .where((m) => m.id.isNotEmpty && m.name.isNotEmpty)
             .toList();
 
-        if (mounted)
-          setState(() {
-            _teamMembers = list;
-            _teamLoading = false;
-          });
+        if (mounted) setState(() { _teamMembers = list; _teamLoading = false; });
         return;
       } on DioException catch (e) {
         final code = e.response?.statusCode ?? 0;
@@ -152,14 +142,13 @@ class _State extends State<SolarInstallationAssignScreen> {
   Future<void> _pickDate() async {
     final d = await showDatePicker(
       context: context,
-      initialDate:
-          _scheduledDate ?? DateTime.now().add(const Duration(days: 1)),
+      initialDate: _scheduledDate ?? DateTime.now().add(const Duration(days: 1)),
       firstDate: DateTime.now().subtract(const Duration(days: 1)),
       lastDate: DateTime.now().add(const Duration(days: 365)),
       builder: (ctx, child) => Theme(
-        data: Theme.of(
-          ctx,
-        ).copyWith(colorScheme: ColorScheme.light(primary: LeadTheme.primary)),
+        data: Theme.of(ctx).copyWith(
+          colorScheme: ColorScheme.light(primary: LeadTheme.primary),
+        ),
         child: child!,
       ),
     );
@@ -171,9 +160,9 @@ class _State extends State<SolarInstallationAssignScreen> {
       context: context,
       initialTime: _scheduledTime ?? TimeOfDay.now(),
       builder: (ctx, child) => Theme(
-        data: Theme.of(
-          ctx,
-        ).copyWith(colorScheme: ColorScheme.light(primary: LeadTheme.primary)),
+        data: Theme.of(ctx).copyWith(
+          colorScheme: ColorScheme.light(primary: LeadTheme.primary),
+        ),
         child: child!,
       ),
     );
@@ -278,7 +267,8 @@ class _State extends State<SolarInstallationAssignScreen> {
             const SizedBox(height: 10),
 
             // ── Deal summary reminder ──────────────────────────────────
-            if (widget.lead.finalAmount != null) _dealSummaryCard(widget.lead),
+            if (widget.lead.finalAmount != null)
+              _dealSummaryCard(widget.lead),
 
             // ── Assign Team ───────────────────────────────────────────
             CompactCard(
@@ -397,7 +387,7 @@ class _State extends State<SolarInstallationAssignScreen> {
             ? _teamError
             : 'No installation staff found. Tap refresh.',
         onRefresh: _fetchInstallTeam,
-        color: AppColors.solar,
+        color: Colors.orange,
       );
     }
 
@@ -420,7 +410,7 @@ class _State extends State<SolarInstallationAssignScreen> {
                     style: const TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.surface,
+                      color: Colors.white,
                     ),
                   ),
                 ),
@@ -502,9 +492,7 @@ class _State extends State<SolarInstallationAssignScreen> {
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
-                            color: isSelected
-                                ? AppColors.surface
-                                : LeadTheme.primary,
+                            color: isSelected ? Colors.white : LeadTheme.primary,
                           ),
                         ),
                       ),
@@ -521,7 +509,7 @@ class _State extends State<SolarInstallationAssignScreen> {
                                 fontWeight: isSelected
                                     ? FontWeight.w700
                                     : FontWeight.w500,
-                                color:  AppColors.textDark,
+                                color:   AppColors.textDark,
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -577,18 +565,18 @@ Widget _dealSummaryCard(SolarLeadsModel lead) {
     margin: const EdgeInsets.only(bottom: 10),
     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
     decoration: BoxDecoration(
-      color: AppColors.primary,
-      border: Border.all(color: AppColors.primary),
+      color: Colors.blue.shade50,
+      border: Border.all(color: Colors.blue.shade200),
       borderRadius: BorderRadius.circular(10),
     ),
     child: Row(
       children: [
-        AppSvgIcon(AppSvgAssets.handshake, size: 16, color: AppColors.primary),
+        AppSvgIcon(AppSvgAssets.handshake, size: 16, color: Colors.blue.shade700),
         const SizedBox(width: 8),
         Expanded(
           child: Text(
             'Deal Closed  •  ${amt(lead.finalAmount!)}  •  Advance: ${amt(lead.advancePayment ?? 0)}',
-            style: TextStyle(fontSize: 12, color: AppColors.primary),
+            style: TextStyle(fontSize: 12, color: Colors.blue.shade800),
           ),
         ),
       ],
@@ -599,22 +587,19 @@ Widget _dealSummaryCard(SolarLeadsModel lead) {
 Widget _loadingTile(String msg) => Container(
   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
   decoration: BoxDecoration(
-    color:  AppColors.background,
+    color:   AppColors.gray100,
     borderRadius: BorderRadius.circular(8),
-    border: Border.all(color: AppColors.divider),
+    border: Border.all(color: Colors.grey.shade200),
   ),
   child: Row(
     children: [
       const SizedBox(
         width: 16,
         height: 16,
-        child: CircularProgressIndicator(
-          strokeWidth: 2,
-          color: LeadTheme.primary,
-        ),
+        child: CircularProgressIndicator(strokeWidth: 2, color: LeadTheme.primary),
       ),
       const SizedBox(width: 10),
-      Text(msg, style: TextStyle(fontSize: 13, color: AppColors.background)),
+      Text(msg, style: TextStyle(fontSize: 13, color: Colors.grey.shade500)),
     ],
   ),
 );
@@ -622,7 +607,7 @@ Widget _loadingTile(String msg) => Container(
 Widget _warningTile(
   String msg, {
   required VoidCallback onRefresh,
-  Color color = AppColors.primaryDark,
+  Color color = Colors.amber,
 }) => Container(
   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
   decoration: BoxDecoration(
@@ -653,9 +638,9 @@ Widget _timeTile(TimeOfDay? time) {
   return Container(
     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
     decoration: BoxDecoration(
-      color: hasTime ? AppColors.success :  AppColors.background,
+      color: hasTime ? Colors.green.shade50 :   AppColors.gray100,
       border: Border.all(
-        color: hasTime ? AppColors.success : Colors.grey.shade300,
+        color: hasTime ? Colors.green.shade300 : Colors.grey.shade300,
       ),
       borderRadius: BorderRadius.circular(8),
     ),
@@ -664,7 +649,7 @@ Widget _timeTile(TimeOfDay? time) {
         AppSvgIcon(
           AppSvgAssets.clock,
           size: 16,
-          color: hasTime ? AppColors.success : LeadTheme.textSecondary,
+          color: hasTime ? Colors.green : LeadTheme.textSecondary,
         ),
         const SizedBox(width: 8),
         Column(
@@ -679,7 +664,7 @@ Widget _timeTile(TimeOfDay? time) {
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
-                color: hasTime ? AppColors.success : LeadTheme.textMuted,
+                color: hasTime ? Colors.green : LeadTheme.textMuted,
               ),
             ),
           ],
@@ -688,7 +673,7 @@ Widget _timeTile(TimeOfDay? time) {
         AppSvgIcon(
           hasTime ? AppSvgAssets.circleCheckBig : AppSvgAssets.arrowRight,
           size: 14,
-          color: hasTime ? AppColors.success : AppColors.textLight,
+          color: hasTime ? Colors.green : Colors.grey.shade400,
         ),
       ],
     ),
@@ -703,13 +688,13 @@ String _fmt(TimeOfDay t) {
 }
 
 Widget _dateTile(String svgAsset, String label, DateTime? date) {
-  final c = date != null ? AppColors.success : LeadTheme.textSecondary;
+  final c = date != null ? Colors.green : LeadTheme.textSecondary;
   return Container(
     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
     decoration: BoxDecoration(
-      color: date != null ? AppColors.success : LeadTheme.surface,
+      color: date != null ? Colors.green.shade50 : LeadTheme.surface,
       border: Border.all(
-        color: date != null ? AppColors.success : Colors.grey.shade300,
+        color: date != null ? Colors.green.shade300 : Colors.grey.shade300,
       ),
       borderRadius: BorderRadius.circular(8),
     ),
@@ -720,13 +705,9 @@ Widget _dateTile(String svgAsset, String label, DateTime? date) {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              label,
-              style: const TextStyle(
-                fontSize: 11,
-                color: LeadTheme.textSecondary,
-              ),
-            ),
+            Text(label,
+                style: const TextStyle(
+                    fontSize: 11, color: LeadTheme.textSecondary)),
             Text(
               date == null
                   ? 'Tap to select date'
@@ -743,7 +724,7 @@ Widget _dateTile(String svgAsset, String label, DateTime? date) {
         AppSvgIcon(
           date != null ? AppSvgAssets.circleCheckBig : AppSvgAssets.arrowRight,
           size: 14,
-          color: date != null ? AppColors.success : AppColors.textLight,
+          color: date != null ? Colors.green : Colors.grey.shade400,
         ),
       ],
     ),
@@ -759,11 +740,7 @@ Widget _infoBanner(SolarLeadsModel lead) => Container(
   ),
   child: Row(
     children: [
-      const AppSvgIcon(
-        AppSvgAssets.userRound,
-        size: 16,
-        color: LeadTheme.primary,
-      ),
+      const AppSvgIcon(AppSvgAssets.userRound, size: 16, color: LeadTheme.primary),
       const SizedBox(width: 8),
       Expanded(
         child: Column(
@@ -772,17 +749,14 @@ Widget _infoBanner(SolarLeadsModel lead) => Container(
             Text(
               lead.customerName,
               style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: LeadTheme.textPrimary,
-              ),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: LeadTheme.textPrimary),
             ),
             Text(
               '${lead.mobile}  ·  ${lead.address}',
               style: const TextStyle(
-                fontSize: 11,
-                color: LeadTheme.textSecondary,
-              ),
+                  fontSize: 11, color: LeadTheme.textSecondary),
             ),
           ],
         ),
@@ -796,26 +770,14 @@ Widget _field(
   String label,
   String svgAsset, {
   int maxLines = 1,
-}) => TextField(
+}) => LeadTextFormField(
   controller: c,
+  label: label,
+  svgIcon: svgAsset,
+  accentColor: LeadTheme.orange,
+  required: false,
   maxLines: maxLines,
-  style: const TextStyle(fontSize: 13, color: LeadTheme.textPrimary),
-  decoration: InputDecoration(
-    labelText: label,
-    labelStyle: const TextStyle(fontSize: 12, color: LeadTheme.textSecondary),
-    prefixIcon: Padding(
-      padding: const EdgeInsets.only(left: 10, right: 6),
-      child: AppSvgIcon(svgAsset, size: 16, color: LeadTheme.textSecondary),
-    ),
-    prefixIconConstraints: const BoxConstraints(minWidth: 36),
-    filled: true,
-    fillColor: LeadTheme.surface,
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(8),
-      borderSide: BorderSide.none,
-    ),
-    contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-  ),
+  bottomSpacing: 0,
 );
 
 Widget _saveBtn(bool saving, VoidCallback onPressed, String label) => SizedBox(
@@ -825,7 +787,7 @@ Widget _saveBtn(bool saving, VoidCallback onPressed, String label) => SizedBox(
     onPressed: saving ? null : onPressed,
     style: ElevatedButton.styleFrom(
       backgroundColor: LeadTheme.primary,
-      foregroundColor: AppColors.surface,
+      foregroundColor: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
     ),
     child: saving
@@ -833,13 +795,13 @@ Widget _saveBtn(bool saving, VoidCallback onPressed, String label) => SizedBox(
             width: 20,
             height: 20,
             child: CircularProgressIndicator(
-              strokeWidth: 2,
-              color: AppColors.surface,
-            ),
+                strokeWidth: 2, color: Colors.white),
           )
         : Text(
             label,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+            style:
+                const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
           ),
   ),
 );
+

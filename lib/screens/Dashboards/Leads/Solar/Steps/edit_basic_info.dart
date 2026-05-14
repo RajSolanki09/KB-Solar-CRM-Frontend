@@ -1,6 +1,5 @@
 // lib/screens/Dashboards/Leads/Solar/Steps/edit_lead_basic_info_screen.dart
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:solar_project/Cubits/SolarLeads/solar_leads_cubit.dart';
 import 'package:solar_project/Cubits/SolarLeads/solar_leads_state.dart';
@@ -125,14 +124,14 @@ class _EditLeadBasicInfoScreenState extends State<EditLeadBasicInfoScreen> {
         }
       },
       child: Scaffold(
-        backgroundColor:  AppColors.background,
+        backgroundColor: AppColors.background,
         appBar: AppBar(
           backgroundColor: LeadTheme.primary,
           elevation: 0,
           leading: IconButton(
             icon: const AppSvgIcon(
               AppSvgAssets.chevronLeft,
-              color: AppColors.surface,
+              color: Colors.white,
               size: 18,
             ),
             onPressed: () => Navigator.pop(context),
@@ -140,7 +139,7 @@ class _EditLeadBasicInfoScreenState extends State<EditLeadBasicInfoScreen> {
           title: const Text(
             'Edit Lead Info',
             style: TextStyle(
-              color: AppColors.surface,
+              color: Colors.white,
               fontSize: 16,
               fontWeight: FontWeight.w700,
             ),
@@ -319,3 +318,7 @@ class _EditLeadBasicInfoScreenState extends State<EditLeadBasicInfoScreen> {
     );
   }
 }
+
+
+
+

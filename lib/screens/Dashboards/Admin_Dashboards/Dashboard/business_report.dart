@@ -11,13 +11,13 @@ import 'package:solar_project/data/Models/solar_leads_model.dart';
 import 'package:solar_project/data/Models/sprinkler_lead_model.dart';
 import 'package:solar_project/data/Repository/solar_leads_repository.dart';
 import 'package:solar_project/data/Repository/sprinkler_leads_repository.dart';
-import 'package:solar_project/services/api_service.dart';
+import 'package:solar_project/services/api_service.dart' show ApiService;
 
 class AdminRevenueSummaryPage extends StatefulWidget {
   final Color appBarColor;
   const AdminRevenueSummaryPage({
     super.key,
-    this.appBarColor =  AppColors.primary,
+    this.appBarColor =   AppColors.accentDarkGreen,
   });
 
   @override
@@ -115,32 +115,44 @@ class _AdminRevenueSummaryPageState extends State<AdminRevenueSummaryPage>
   }
 
   Future<List<SolarLeadsModel>> _fetchAllSolarLeads() async {
-    const pageSize = 50;
-    final all = <SolarLeadsModel>[];
-    var page = 1;
+  const pageSize = 10;
+  final all = <SolarLeadsModel>[];
+  var page = 1;
 
-    while (true) {
-      final batch = await _solarRepo.getAllLeads(page: page, limit: pageSize);
-      if (batch.isEmpty) break;
-      all.addAll(batch);
-      if (batch.length < pageSize) break;
-      page += 1;
-      if (page > 100) break;
-    }
+  while (true) {
+    final response = await _solarRepo.getAllLeads(page: page, limit: pageSize);
+    final batch = response.leads; // ← extract the list from the record
 
-    return all;
+    if (batch.isEmpty) break;
+    all.addAll(batch);
+    if (batch.length < pageSize) break;
+
+    // Optional: use pagination metadata to avoid over-fetching
+    if (page >= response.pages) break;
+
+    page += 1;
+    if (page > 100) break;
   }
 
+  return all;
+}
+
   Future<List<SprinklerLeadModel>> _fetchAllSprinklerLeads() async {
-    const pageSize = 20;
+    const pageSize = 10;
     final all = <SprinklerLeadModel>[];
     var page = 1;
 
     while (true) {
-      final batch = await _sprinklerRepo.getAllLeads(page: page);
+      final response = await _sprinklerRepo.getAllLeads(page: page, limit: pageSize);
+      final batch = response.leads; // ← extract the list from the record
+
       if (batch.isEmpty) break;
       all.addAll(batch);
       if (batch.length < pageSize) break;
+
+      // Optional: use pagination metadata to avoid over-fetching
+      if (page >= response.pages) break;
+
       page += 1;
       if (page > 100) break;
     }
@@ -149,7 +161,7 @@ class _AdminRevenueSummaryPageState extends State<AdminRevenueSummaryPage>
   }
 
   Future<List<Map<String, dynamic>>> _fetchAllMaterialCustomers() async {
-    return _apiService.getMaterialCustomers();
+    return await _apiService.fetchAllMaterialCustomers(apiService: _apiService);
   }
 
   @override
@@ -158,21 +170,32 @@ class _AdminRevenueSummaryPageState extends State<AdminRevenueSummaryPage>
         ? LeadTheme.warning
         : _tabController.index == 1
         ? LeadTheme.secondary
-        : AppColors.primaryDark;
+        :   AppColors.indigo500;
 
     return DefaultTabController(
       length: 3,
       child: Scaffold(
-        backgroundColor:  AppColors.background,
+        backgroundColor:   AppColors.lightBg,
         appBar: AppBar(
           elevation: 0,
-          backgroundColor:  AppColors.background,
-          title: const Text(
-            'Business Report',
-            style: TextStyle(
-              fontWeight: FontWeight.w700,
-              color: AppColors.primary,
-            ),
+          backgroundColor:   AppColors.lightBg,
+          title: Row(
+            children: [
+              AppSvgIcon(
+                AppSvgAssets.chartNoAxisCombined,
+                color: AppColors.purple500,
+                size: 18,
+              ),
+              SizedBox(width: 8),
+              const Text(
+                'Business Report',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.purple500,
+                ),
+              ),
+            ],
           ),
           actions: [
             IconButton(
@@ -181,7 +204,7 @@ class _AdminRevenueSummaryPageState extends State<AdminRevenueSummaryPage>
               icon: AppSvgIcon(
                 AppSvgAssets.download,
                 size: 24,
-                color: AppColors.primary,
+                color: AppColors.purple500,
               ),
             ),
             IconButton(
@@ -189,7 +212,7 @@ class _AdminRevenueSummaryPageState extends State<AdminRevenueSummaryPage>
               onPressed: _isLoading ? null : _loadData,
               icon: AppSvgIcon(
                 AppSvgAssets.refreshCw,
-                color: AppColors.primary,
+                color: AppColors.purple500,
               ),
             ),
           ],
@@ -203,7 +226,7 @@ class _AdminRevenueSummaryPageState extends State<AdminRevenueSummaryPage>
                   Container(
                     margin: const EdgeInsets.fromLTRB(12, 8, 12, 0),
                     decoration: BoxDecoration(
-                      color: AppColors.surface,
+                      color: Colors.white,
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: TabBar(
@@ -211,7 +234,7 @@ class _AdminRevenueSummaryPageState extends State<AdminRevenueSummaryPage>
                       indicatorColor: activeColor,
                       indicatorWeight: 2.5,
                       labelColor: activeColor,
-                      unselectedLabelColor:  AppColors.textLight,
+                      unselectedLabelColor:   AppColors.textLight,
                       labelStyle: const TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
@@ -255,6 +278,9 @@ class _AdminRevenueSummaryPageState extends State<AdminRevenueSummaryPage>
   }
 }
 
+// ─────────────────────────────────────────────────────────────
+//  Solar Tab
+// ─────────────────────────────────────────────────────────────
 class _SolarReportTab extends StatelessWidget {
   final List<SolarLeadsModel> leads;
   final NumberFormat currency;
@@ -299,16 +325,35 @@ class _SolarReportTab extends StatelessWidget {
       dateFmt: dateFmt,
       showSystemFarmColumn: true,
       summary: [
-        _SummaryTileData(title: 'Total Leads', value: '$total'),
-        _SummaryTileData(title: 'Deal Closed', value: '$closed'),
-        _SummaryTileData(title: 'Completed', value: '$completed'),
-        _SummaryTileData(title: 'Revenue', value: currency.format(totalAmount)),
+        _SummaryTileData(
+          title: 'Total Leads',
+          value: '$total',
+          icon: AppSvgAssets.users,
+        ),
+        _SummaryTileData(
+          title: 'Deal Closed',
+          value: '$closed',
+          icon: AppSvgAssets.check,
+        ),
+        _SummaryTileData(
+          title: 'Completed',
+          value: '$completed',
+          icon: AppSvgAssets.circleCheckBig,
+        ),
+        _SummaryTileData(
+          title: 'Revenue',
+          value: currency.format(totalAmount),
+          icon: AppSvgAssets.indianRupee,
+        ),
       ],
       leadType: 'Solar',
     );
   }
 }
 
+// ─────────────────────────────────────────────────────────────
+//  Sprinkler Tab
+// ─────────────────────────────────────────────────────────────
 class _SprinklerReportTab extends StatelessWidget {
   final List<SprinklerLeadModel> leads;
   final NumberFormat currency;
@@ -347,22 +392,41 @@ class _SprinklerReportTab extends StatelessWidget {
 
     return _ReportTabBody(
       key: tabKey,
-      theme:  AppColors.primaryLight,
+      theme:   AppColors.bgDark,
       rows: rows,
       currency: currency,
       dateFmt: dateFmt,
       showSystemFarmColumn: false,
       summary: [
-        _SummaryTileData(title: 'Total Leads', value: '$total'),
-        _SummaryTileData(title: 'Deal Closed', value: '$closed'),
-        _SummaryTileData(title: 'Completed', value: '$completed'),
-        _SummaryTileData(title: 'Revenue', value: currency.format(totalAmount)),
+        _SummaryTileData(
+          title: 'Total Leads',
+          value: '$total',
+          icon: AppSvgAssets.users,
+        ),
+        _SummaryTileData(
+          title: 'Deal Closed',
+          value: '$closed',
+          icon: AppSvgAssets.check,
+        ),
+        _SummaryTileData(
+          title: 'Completed',
+          value: '$completed',
+          icon: AppSvgAssets.circleCheckBig,
+        ),
+        _SummaryTileData(
+          title: 'Revenue',
+          value: currency.format(totalAmount),
+          icon: AppSvgAssets.indianRupee,
+        ),
       ],
       leadType: 'Sprinkler',
     );
   }
 }
 
+// ─────────────────────────────────────────────────────────────
+//  Material Tab
+// ─────────────────────────────────────────────────────────────
 class _MaterialReportTab extends StatelessWidget {
   final List<Map<String, dynamic>> customers;
   final NumberFormat currency;
@@ -505,22 +569,41 @@ class _MaterialReportTab extends StatelessWidget {
 
     return _ReportTabBody(
       key: tabKey,
-      theme: AppColors.primaryDark,
+      theme:   AppColors.indigo500,
       rows: rows,
       currency: currency,
       dateFmt: dateFmt,
       showSystemFarmColumn: false,
       summary: [
-        _SummaryTileData(title: 'Total Leads', value: '$total'),
-        _SummaryTileData(title: 'Deal Closed', value: '$closed'),
-        _SummaryTileData(title: 'Completed', value: '$completed'),
-        _SummaryTileData(title: 'Revenue', value: currency.format(totalAmount)),
+        _SummaryTileData(
+          title: 'Total Leads',
+          value: '$total',
+          icon: AppSvgAssets.users,
+        ),
+        _SummaryTileData(
+          title: 'Deal Closed',
+          value: '$closed',
+          icon: AppSvgAssets.check,
+        ),
+        _SummaryTileData(
+          title: 'Completed',
+          value: '$completed',
+          icon: AppSvgAssets.circleCheckBig,
+        ),
+        _SummaryTileData(
+          title: 'Revenue',
+          value: currency.format(totalAmount),
+          icon: AppSvgAssets.indianRupee,
+        ),
       ],
       leadType: 'Material',
     );
   }
 }
 
+// ─────────────────────────────────────────────────────────────
+//  Report Tab Body
+// ─────────────────────────────────────────────────────────────
 class _ReportTabBody extends StatefulWidget {
   final Color theme;
   final List<_LeadReportRow> rows;
@@ -803,7 +886,7 @@ class _ReportTabBodyState extends State<_ReportTabBody> {
       verticalAlign: xl.VerticalAlign.Center,
     );
 
-    // Professional column widths
+    // Column widths
     sheet.setColumnWidth(0, 22);
     sheet.setColumnWidth(1, 15);
     sheet.setColumnWidth(2, 24);
@@ -812,9 +895,9 @@ class _ReportTabBodyState extends State<_ReportTabBody> {
       sheet.setColumnWidth(dynamicColumn, 18);
       dynamicColumn += 1;
     }
-    sheet.setColumnWidth(dynamicColumn, 14); // Start Date
-    sheet.setColumnWidth(dynamicColumn + 1, 14); // End Date
-    sheet.setColumnWidth(dynamicColumn + 2, 18); // Total Revenue
+    sheet.setColumnWidth(dynamicColumn, 14);
+    sheet.setColumnWidth(dynamicColumn + 1, 14);
+    sheet.setColumnWidth(dynamicColumn + 2, 18);
 
     final encoded = excel.encode();
     if (encoded == null) {
@@ -830,8 +913,7 @@ class _ReportTabBodyState extends State<_ReportTabBody> {
     final fileName = '${widget.leadType.toLowerCase()}_report_$timestamp.xlsx';
 
     try {
-      await saveFile(bytes, fileName); // ✅ web + mobile dono handle
-
+      await saveFile(bytes, fileName);
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
@@ -852,83 +934,118 @@ class _ReportTabBodyState extends State<_ReportTabBody> {
       (sum, row) => sum + row.totalRevenue,
     );
 
+    // ── Responsive: desktop = single row, mobile = 2x2 grid
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isDesktop = screenWidth >= 600;
+
     return ListView(
       padding: const EdgeInsets.fromLTRB(12, 8, 12, 24),
       children: [
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: widget.summary
-              .map((s) => _SummaryTile(data: s, color: widget.theme))
-              .toList(),
-        ),
+        // ── Summary Cards ─────────────────────────────────────
+        if (isDesktop)
+          // Desktop: single row — all 4 cards
+          Row(
+            children: widget.summary.asMap().entries.map((entry) {
+              final index = entry.key;
+              final s = entry.value;
+              return Expanded(
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    right: index < widget.summary.length - 1 ? 10 : 0,
+                  ),
+                  child: _SummaryTile(data: s, color: widget.theme),
+                ),
+              );
+            }).toList(),
+          )
+        else
+          // Mobile: 2x2 grid
+          GridView.count(
+            crossAxisCount: 2,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            crossAxisSpacing: 10,
+            mainAxisSpacing: 10,
+            childAspectRatio: 2.4,
+            children: widget.summary
+                .map((s) => _SummaryTile(data: s, color: widget.theme))
+                .toList(),
+          ),
+
         const SizedBox(height: 12),
+
+        // ── Filter Chips ──────────────────────────────────────
         Container(
           width: double.infinity,
           padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
           decoration: BoxDecoration(
-            color: AppColors.surface,
+            color: Colors.white,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color:  AppColors.divider),
+            border: Border.all(color:   AppColors.accentOrange),
           ),
-          child: Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              _filterChip(
-                'Today',
-                _selectedFilter == _TableFilterType.today,
-                () {
-                  setState(() => _selectedFilter = _TableFilterType.today);
-                },
-              ),
-              _filterChip(
-                'This Week',
-                _selectedFilter == _TableFilterType.thisWeek,
-                () {
-                  setState(() => _selectedFilter = _TableFilterType.thisWeek);
-                },
-              ),
-              _filterChip(
-                'This Month',
-                _selectedFilter == _TableFilterType.thisMonth,
-                () {
-                  setState(() => _selectedFilter = _TableFilterType.thisMonth);
-                },
-              ),
-              _filterChip(
-                'Duration',
-                _selectedFilter == _TableFilterType.duration,
-                _pickDuration,
-              ),
-            ],
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            child: Row(
+              children: [
+                _filterChip(
+                  'Today',
+                  _selectedFilter == _TableFilterType.today,
+                  () =>
+                      setState(() => _selectedFilter = _TableFilterType.today),
+                ),
+                const SizedBox(width: 8),
+                _filterChip(
+                  'This Week',
+                  _selectedFilter == _TableFilterType.thisWeek,
+                  () => setState(
+                    () => _selectedFilter = _TableFilterType.thisWeek,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                _filterChip(
+                  'This Month',
+                  _selectedFilter == _TableFilterType.thisMonth,
+                  () => setState(
+                    () => _selectedFilter = _TableFilterType.thisMonth,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                _filterChip(
+                  'Duration',
+                  _selectedFilter == _TableFilterType.duration,
+                  _pickDuration,
+                ),
+              ],
+            ),
           ),
         ),
+
         const SizedBox(height: 12),
+
+        // ── Data Table ────────────────────────────────────────
         Container(
           decoration: BoxDecoration(
-            color: AppColors.surface,
+            color: Colors.white,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color:  AppColors.divider),
+            border: Border.all(color:   AppColors.accentOrange),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
                 padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
-                child: Column(
-                  children: [
-                    Center(
-                      child: Text(
-                        '${widget.leadType} Project Details',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: widget.theme,
-                        ),
-                      ),
+                child: Center(
+                  child: Text(
+                    widget.leadType == 'Material'
+                        ? 'Material Details'
+                        : '${widget.leadType} Project Details',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                      color:   AppColors.purple500,
                     ),
-                  ],
+                  ),
                 ),
               ),
               const Divider(height: 1),
@@ -954,22 +1071,22 @@ class _ReportTabBodyState extends State<_ReportTabBody> {
                           horizontalMargin: 10,
                           columnSpacing: 20,
                           headingRowColor: WidgetStateProperty.all(
-                             AppColors.primaryTint,
+                              AppColors.bgOther1,
                           ),
                           dataRowColor: WidgetStateProperty.resolveWith((
                             states,
                           ) {
                             if (states.contains(WidgetState.selected)) {
-                              return  AppColors.primaryTint;
+                              return   AppColors.blueLight;
                             }
                             return null;
                           }),
                           border: TableBorder(
                             horizontalInside: BorderSide(
-                              color: AppColors.primary,
+                              color: Colors.blueGrey.shade50,
                             ),
-                            bottom: BorderSide(color: AppColors.primary),
-                            top: BorderSide(color: AppColors.primary),
+                            bottom: BorderSide(color: Colors.blueGrey.shade100),
+                            top: BorderSide(color: Colors.blueGrey.shade100),
                           ),
                           columns:
                               [
@@ -1130,24 +1247,25 @@ class _ReportTabBodyState extends State<_ReportTabBody> {
             ],
           ),
         ),
+
         const SizedBox(height: 10),
+
+        // ── Total Revenue Bar ─────────────────────────────────
         Container(
           width: double.infinity,
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           decoration: BoxDecoration(
-            color: const Color(
-              0xFF16A34A,
-            ).withValues(alpha: 0.08), // ✅ green tint
+            color:   AppColors.greenSuccess.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
-              color:  AppColors.success.withValues(alpha: 0.25),
-            ), // ✅ green border
+              color:   AppColors.greenSuccess.withValues(alpha: 0.25),
+            ),
           ),
           child: Row(
             children: [
               Icon(
                 Icons.account_balance_wallet_rounded,
-                color: AppColors.success,
+                color:   AppColors.greenSuccess,
                 size: 18,
               ),
               const SizedBox(width: 8),
@@ -1156,16 +1274,16 @@ class _ReportTabBodyState extends State<_ReportTabBody> {
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
-                  color:  AppColors.success,
+                  color:   AppColors.greenSuccess,
                 ),
               ),
               const Spacer(),
               Text(
                 widget.currency.format(filteredTotalRevenue),
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w800,
-                  color: AppColors.success,
+                  color: AppColors.greenSuccess,
                 ),
               ),
             ],
@@ -1182,17 +1300,108 @@ class _ReportTabBodyState extends State<_ReportTabBody> {
       onSelected: (_) => onTap(),
       selectedColor: widget.theme.withValues(alpha: 0.2),
       labelStyle: TextStyle(
-        color: selected ? widget.theme : AppColors.textDark,
+        color: selected ? widget.theme : Colors.black87,
         fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
       ),
       side: BorderSide(
-        color: selected ? widget.theme :  AppColors.divider,
+        color: selected ? widget.theme :   AppColors.accentOrange,
       ),
-      backgroundColor: AppColors.surface,
+      backgroundColor: Colors.white,
     );
   }
 }
 
+// ─────────────────────────────────────────────────────────────
+//  Summary Tile Data Model
+// ─────────────────────────────────────────────────────────────
+class _SummaryTileData {
+  final String title;
+  final String value;
+  final String icon;
+  const _SummaryTileData({
+    required this.title,
+    required this.value,
+    required this.icon,
+  });
+}
+
+// ─────────────────────────────────────────────────────────────
+//  Summary Tile — Rich Card
+// ─────────────────────────────────────────────────────────────
+class _SummaryTile extends StatelessWidget {
+  final _SummaryTileData data;
+  final Color color;
+  const _SummaryTile({required this.data, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withValues(alpha: 0.18)),
+        boxShadow: [
+          BoxShadow(
+            color: color.withValues(alpha: 0.07),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          // Icon box
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Center(child: AppSvgIcon(data.icon, size: 16, color: color)),
+          ),
+          const SizedBox(width: 10),
+          // Value + title
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  data.value,
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w800,
+                    color: color,
+                    height: 1,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  data.title,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.textGray,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+//  Duration Picker Sheet
+// ─────────────────────────────────────────────────────────────
 class _DurationPickerSheet extends StatefulWidget {
   final DateTime? initialStart;
   final DateTime? initialEnd;
@@ -1231,9 +1440,9 @@ class _DurationPickerSheetState extends State<_DurationPickerSheet> {
       lastDate: DateTime(now.year + 1),
       builder: (ctx, child) => Theme(
         data: Theme.of(ctx).copyWith(
-          colorScheme: ColorScheme.light(
-            primary:  AppColors.success,
-            onSurface:  AppColors.textDark,
+          colorScheme: const ColorScheme.light(
+            primary: AppColors.greenDark,
+            onSurface: AppColors.textDark,
           ),
         ),
         child: child!,
@@ -1244,7 +1453,6 @@ class _DurationPickerSheetState extends State<_DurationPickerSheet> {
     setState(() {
       if (isStart) {
         _start = picked;
-        // agar start > end ho toh end reset karo
         if (_end != null && picked.isAfter(_end!)) _end = null;
       } else {
         _end = picked;
@@ -1258,7 +1466,7 @@ class _DurationPickerSheetState extends State<_DurationPickerSheet> {
   Widget build(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(
-        color: AppColors.surface,
+        color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       padding: EdgeInsets.only(
@@ -1271,31 +1479,28 @@ class _DurationPickerSheetState extends State<_DurationPickerSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Handle bar
           Center(
             child: Container(
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color:  AppColors.divider,
+                color:   AppColors.divider,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
           ),
           const SizedBox(height: 16),
-
-          // Title
           Row(
             children: [
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color:  AppColors.success.withValues(alpha: 0.08),
+                  color:   AppColors.greenDark.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Icon(
                   Icons.date_range_rounded,
-                  color: AppColors.success,
+                  color: AppColors.greenDark,
                   size: 18,
                 ),
               ),
@@ -1311,8 +1516,6 @@ class _DurationPickerSheetState extends State<_DurationPickerSheet> {
             ],
           ),
           const SizedBox(height: 20),
-
-          // Date selectors
           Row(
             children: [
               Expanded(
@@ -1324,11 +1527,10 @@ class _DurationPickerSheetState extends State<_DurationPickerSheet> {
                 ),
               ),
               const SizedBox(width: 12),
-              // Arrow icon
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color:  AppColors.background,
+                  color:   AppColors.lightBg5,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Icon(
@@ -1350,17 +1552,15 @@ class _DurationPickerSheetState extends State<_DurationPickerSheet> {
             ],
           ),
           const SizedBox(height: 16),
-
-          // Selected range preview
           if (_start != null && _end != null) ...[
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
-                color:  AppColors.success.withValues(alpha: 0.05),
+                color:   AppColors.greenDark.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(
-                  color:  AppColors.success.withValues(alpha: 0.2),
+                  color:   AppColors.greenDark.withValues(alpha: 0.2),
                 ),
               ),
               child: Row(
@@ -1368,7 +1568,7 @@ class _DurationPickerSheetState extends State<_DurationPickerSheet> {
                   const Icon(
                     Icons.info_outline_rounded,
                     size: 15,
-                    color: AppColors.success,
+                    color: AppColors.greenDark,
                   ),
                   const SizedBox(width: 8),
                   Text(
@@ -1376,7 +1576,7 @@ class _DurationPickerSheetState extends State<_DurationPickerSheet> {
                     style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.success,
+                      color: AppColors.greenDark,
                     ),
                   ),
                   const Spacer(),
@@ -1392,8 +1592,6 @@ class _DurationPickerSheetState extends State<_DurationPickerSheet> {
             ),
             const SizedBox(height: 16),
           ],
-
-          // Quick presets
           const Text(
             'Quick Presets',
             style: TextStyle(
@@ -1438,8 +1636,6 @@ class _DurationPickerSheetState extends State<_DurationPickerSheet> {
             ],
           ),
           const SizedBox(height: 20),
-
-          // Action buttons
           Row(
             children: [
               Expanded(
@@ -1469,7 +1665,7 @@ class _DurationPickerSheetState extends State<_DurationPickerSheet> {
                         }
                       : null,
                   style: FilledButton.styleFrom(
-                    backgroundColor:  AppColors.success,
+                    backgroundColor:   AppColors.greenDark,
                     padding: const EdgeInsets.symmetric(vertical: 13),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
@@ -1494,16 +1690,16 @@ class _DurationPickerSheetState extends State<_DurationPickerSheet> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color:  AppColors.background,
+          color:   AppColors.lightBg5,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color:  AppColors.divider),
+          border: Border.all(color:   AppColors.divider),
         ),
         child: Text(
           label,
           style: const TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w500,
-            color: AppColors.textDark,
+            color: AppColors.gray400,
           ),
         ),
       ),
@@ -1511,6 +1707,9 @@ class _DurationPickerSheetState extends State<_DurationPickerSheet> {
   }
 }
 
+// ─────────────────────────────────────────────────────────────
+//  Date Selector
+// ─────────────────────────────────────────────────────────────
 class _DateSelector extends StatelessWidget {
   final String label;
   final DateTime? date;
@@ -1536,15 +1735,15 @@ class _DateSelector extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         decoration: BoxDecoration(
           color: disabled
-              ?  AppColors.background
+              ?   AppColors.gray100
               : hasDate
-              ?  AppColors.success.withValues(alpha: 0.05)
-              : AppColors.surface,
+              ?   AppColors.greenDark.withValues(alpha: 0.05)
+              : Colors.white,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
             color: hasDate
-                ?  AppColors.success.withValues(alpha: 0.4)
-                :  AppColors.divider,
+                ?   AppColors.greenDark.withValues(alpha: 0.4)
+                :   AppColors.divider,
           ),
         ),
         child: Column(
@@ -1556,8 +1755,8 @@ class _DateSelector extends StatelessWidget {
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
                 color: hasDate
-                    ?  AppColors.success
-                    :  AppColors.textLight,
+                    ?   AppColors.greenDark
+                    :   AppColors.textLight,
               ),
             ),
             const SizedBox(height: 4),
@@ -1567,8 +1766,8 @@ class _DateSelector extends StatelessWidget {
                   Icons.calendar_today_rounded,
                   size: 13,
                   color: hasDate
-                      ?  AppColors.success
-                      :  AppColors.textLight,
+                      ?   AppColors.greenDark
+                      :   AppColors.textLight,
                 ),
                 const SizedBox(width: 6),
                 Text(
@@ -1577,8 +1776,8 @@ class _DateSelector extends StatelessWidget {
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                     color: hasDate
-                        ?  AppColors.textDark
-                        :  AppColors.textLight,
+                        ?   AppColors.textDark
+                        :   AppColors.textLight,
                   ),
                 ),
               ],
@@ -1590,49 +1789,9 @@ class _DateSelector extends StatelessWidget {
   }
 }
 
-class _SummaryTileData {
-  final String title;
-  final String value;
-  const _SummaryTileData({required this.title, required this.value});
-}
-
-class _SummaryTile extends StatelessWidget {
-  final _SummaryTileData data;
-  final Color color;
-  const _SummaryTile({required this.data, required this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 180,
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color:  AppColors.divider),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            data.title,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: color,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            data.value,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
+// ─────────────────────────────────────────────────────────────
+//  Lead Report Row
+// ─────────────────────────────────────────────────────────────
 class _LeadReportRow {
   final String customerName;
   final String mobile;
@@ -1653,6 +1812,9 @@ class _LeadReportRow {
   });
 }
 
+// ─────────────────────────────────────────────────────────────
+//  Error State
+// ─────────────────────────────────────────────────────────────
 class _ErrorState extends StatelessWidget {
   final String message;
   final VoidCallback onRetry;
@@ -1667,12 +1829,12 @@ class _ErrorState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.error_outline, color: AppColors.error, size: 42),
+            const Icon(Icons.error_outline, color: Colors.red, size: 42),
             const SizedBox(height: 10),
             Text(
               message,
               textAlign: TextAlign.center,
-              style: const TextStyle(color: AppColors.error),
+              style: const TextStyle(color: Colors.red),
             ),
             const SizedBox(height: 14),
             FilledButton.icon(
@@ -1686,3 +1848,12 @@ class _ErrorState extends StatelessWidget {
     );
   }
 }
+
+
+
+
+
+
+
+
+

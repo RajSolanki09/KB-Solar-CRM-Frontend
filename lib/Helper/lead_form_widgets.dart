@@ -31,7 +31,7 @@ class LeadSectionLabel extends StatelessWidget {
           style: const TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w700,
-            color: AppColors.textDark,
+            color: AppColors.gray300,
             letterSpacing: 0.3,
           ),
         ),
@@ -44,7 +44,7 @@ class LeadTextFormField extends StatelessWidget {
   const LeadTextFormField({
     super.key,
     required this.controller,
-    required this.label,
+    this.label,
     required this.svgIcon,
     required this.accentColor,
     this.required = true,
@@ -57,10 +57,23 @@ class LeadTextFormField extends StatelessWidget {
     this.prefixStyle,
     this.counterText,
     this.focusedErrorBorder = false,
+    this.readOnly = false,
+    this.enabled = true,
+    this.autofocus = false,
+    this.onTap,
+    this.onChanged,
+    this.textInputAction,
+    this.onFieldSubmitted,
+    this.textCapitalization = TextCapitalization.none,
+    this.hintText,
+    this.suffixIcon,
+    this.suffixText,
+    this.fillColor,
+    this.bottomSpacing = 10,
   });
 
   final TextEditingController controller;
-  final String label;
+  final String? label;
   final String svgIcon;
   final Color accentColor;
   final bool required;
@@ -73,41 +86,69 @@ class LeadTextFormField extends StatelessWidget {
   final TextStyle? prefixStyle;
   final String? counterText;
   final bool focusedErrorBorder;
+  final bool readOnly;
+  final bool enabled;
+  final bool autofocus;
+  final VoidCallback? onTap;
+  final ValueChanged<String>? onChanged;
+  final TextInputAction? textInputAction;
+  final ValueChanged<String>? onFieldSubmitted;
+  final TextCapitalization textCapitalization;
+  final String? hintText;
+  final Widget? suffixIcon;
+  final String? suffixText;
+  final Color? fillColor;
+  final double bottomSpacing;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+      padding: EdgeInsets.only(bottom: bottomSpacing),
       child: TextFormField(
         controller: controller,
+        readOnly: readOnly,
+        enabled: enabled,
+        autofocus: autofocus,
+        onTap: onTap,
+        onChanged: onChanged,
         keyboardType: keyboardType,
+        textInputAction: textInputAction,
+        onFieldSubmitted: onFieldSubmitted,
+        textCapitalization: textCapitalization,
         maxLines: maxLines,
         maxLength: maxLength,
         inputFormatters: inputFormatters,
-        style: const TextStyle(fontSize: 13.5, color: AppColors.textDark),
+        style: const TextStyle(fontSize: 13.5, color: AppColors.gray300),
         decoration: InputDecoration(
           labelText: label,
-          labelStyle: const TextStyle(fontSize: 13, color: AppColors.textGray),
+          hintText: hintText,
+          labelStyle: const TextStyle(fontSize: 13, color: AppColors.gray300),
           prefixIcon: Padding(
             padding: const EdgeInsets.all(12),
-            child: AppSvgIcon(svgIcon, size: 16, color: AppColors.textLight),
+            child: AppSvgIcon(
+              svgIcon,
+              size: 16,
+              color:  AppColors.gray300,
+            ),
           ),
+          suffixIcon: suffixIcon,
+          suffixText: suffixText,
           prefixText: prefixText,
           prefixStyle: prefixStyle,
           counterText: counterText,
           filled: true,
-          fillColor: AppColors.surface,
+          fillColor: fillColor ?? Colors.white,
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 14,
             vertical: 16,
           ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(color: AppColors.divider),
+            borderSide: BorderSide(color: Colors.grey.shade200),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(color: AppColors.divider),
+            borderSide: BorderSide(color: Colors.grey.shade200),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
@@ -115,13 +156,13 @@ class LeadTextFormField extends StatelessWidget {
           ),
           errorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
-            borderSide: const BorderSide(color: AppColors.error),
+            borderSide: const BorderSide(color: AppColors.gray300),
           ),
           focusedErrorBorder: focusedErrorBorder
               ? OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: const BorderSide(
-                    color: AppColors.error,
+                    color: AppColors.gray300,
                     width: 1.5,
                   ),
                 )
@@ -171,29 +212,33 @@ class LeadDropdownField extends StatelessWidget {
         icon: const AppSvgIcon(
           AppSvgAssets.chevronDown,
           size: 18,
-          color: AppColors.textGray,
+          color: AppColors.gray300,
         ),
-        style: const TextStyle(fontSize: 13.5, color: AppColors.textDark),
+        style: const TextStyle(fontSize: 13.5, color: AppColors.gray300),
         decoration: InputDecoration(
           labelText: label,
-          labelStyle: const TextStyle(fontSize: 13, color: AppColors.textGray),
+          labelStyle: const TextStyle(fontSize: 13, color: AppColors.gray300),
           prefixIcon: Padding(
             padding: const EdgeInsets.all(12),
-            child: AppSvgIcon(svgIcon, size: 16, color: AppColors.textLight),
+            child: AppSvgIcon(
+              svgIcon,
+              size: 16,
+              color:  AppColors.gray300,
+            ),
           ),
           filled: true,
-          fillColor: AppColors.surface,
+          fillColor: Colors.white,
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 14,
             vertical: 16,
           ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(color: AppColors.divider),
+            borderSide: BorderSide(color: Colors.grey.shade200),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(color: AppColors.divider),
+            borderSide: BorderSide(color: Colors.grey.shade200),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
@@ -242,7 +287,7 @@ class LeadSubmitButton extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: color,
           disabledBackgroundColor: color.withValues(alpha: 0.6),
-          foregroundColor: AppColors.surface,
+          foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
           ),
@@ -254,7 +299,7 @@ class LeadSubmitButton extends StatelessWidget {
                 width: 20,
                 height: 20,
                 child: CircularProgressIndicator(
-                  color: AppColors.surface,
+                  color: Colors.white,
                   strokeWidth: 2,
                 ),
               )
@@ -269,3 +314,34 @@ class LeadSubmitButton extends StatelessWidget {
     );
   }
 }
+
+// ── Label builder ─────────────────────────────────────────────────────────
+Widget buildLabel(String text, {bool required = false}) => Column(
+  crossAxisAlignment: CrossAxisAlignment.start,
+  children: [
+    RichText(
+      text: TextSpan(
+        text: text,
+        style: const TextStyle(
+          fontSize: 12.5,
+          fontWeight: FontWeight.w400,
+          color: AppColors.gray300,
+        ),
+        children: required
+            ? const [
+                TextSpan(
+                  text: ' *',
+                  style: TextStyle(color: Colors.red),
+                ),
+              ]
+            : [],
+      ),
+    ),
+    const SizedBox(height: 6),
+  ],
+);
+
+
+
+
+

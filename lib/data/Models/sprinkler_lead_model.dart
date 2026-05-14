@@ -717,8 +717,9 @@ class SprinklerLeadModel {
     if (currentStep == SprinklerStep.fullPayment) {
       return pendingAmount > 0 ? 'Payment Remaining' : 'Project Completed';
     }
-    if (currentStep == SprinklerStep.projectCompleted)
+    if (currentStep == SprinklerStep.projectCompleted) {
       return 'Project Completed';
+    }
     return sprinklerStepToDisplay(currentStep);
   }
 

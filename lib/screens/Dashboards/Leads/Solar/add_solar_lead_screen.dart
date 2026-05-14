@@ -1,6 +1,5 @@
 // lib/screens/AddSolarLeadScreen.dart
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:solar_project/Cubits/SolarLeads/solar_leads_cubit.dart';
 import 'package:solar_project/Cubits/SolarLeads/solar_leads_state.dart';
@@ -71,8 +70,8 @@ class _AddSolarLeadScreenState extends State<AddSolarLeadScreen> {
       source: _source,
       referenceName: _source == 'reference'
           ? _referenceNameC.text.trim().isEmpty
-                ? null
-                : _referenceNameC.text.trim()
+              ? null
+              : _referenceNameC.text.trim()
           : null,
       note: _noteC.text.trim().isEmpty ? null : _noteC.text.trim(),
       createdAt: DateTime.now(),
@@ -109,14 +108,14 @@ class _AddSolarLeadScreenState extends State<AddSolarLeadScreen> {
         }
       },
       child: Scaffold(
-        backgroundColor:  AppColors.background,
+        backgroundColor: AppColors.background,
         appBar: AppBar(
           backgroundColor: LeadTheme.primary,
           elevation: 0,
           leading: IconButton(
             icon: const AppSvgIcon(
               AppSvgAssets.chevronLeft,
-              color: AppColors.surface,
+              color: Colors.white,
               size: 18,
             ),
             onPressed: () => Navigator.pop(context),
@@ -124,7 +123,7 @@ class _AddSolarLeadScreenState extends State<AddSolarLeadScreen> {
           title: const Text(
             'New Solar Lead',
             style: TextStyle(
-              color: AppColors.surface,
+              color: Colors.white,
               fontSize: 16,
               fontWeight: FontWeight.w700,
             ),
@@ -266,3 +265,6 @@ class _AddSolarLeadScreenState extends State<AddSolarLeadScreen> {
     );
   }
 }
+
+
+

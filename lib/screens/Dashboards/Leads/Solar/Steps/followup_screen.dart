@@ -4,10 +4,11 @@ import 'package:solar_project/Cubits/SolarLeads/solar_leads_cubit.dart';
 import 'package:solar_project/Cubits/SolarLeads/solar_leads_state.dart';
 import 'package:solar_project/Helper/app_feedback.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
+import 'package:solar_project/Helper/lead_form_widgets.dart';
 import 'package:solar_project/Helper/lead_themes.dart';
 import 'package:solar_project/Helper/lead_widgets.dart';
-import 'package:solar_project/data/Models/solar_leads_model.dart';
 import 'package:solar_project/core/app_colors.dart';
+import 'package:solar_project/data/Models/solar_leads_model.dart';
 
 class SolarFollowupScreen extends StatefulWidget {
   final SolarLeadsModel lead;
@@ -34,19 +35,19 @@ class _State extends State<SolarFollowupScreen> {
     _DropOption(
       value: 'cold',
       label: 'Cold',
-      color: AppColors.primary,
+      color: AppColors.textGray,
       icon: AppSvgAssets.activity,
     ),
     _DropOption(
       value: 'medium',
       label: 'Medium',
-      color: AppColors.warning,
+      color: AppColors.textGray,
       icon: AppSvgAssets.clock,
     ),
     _DropOption(
       value: 'hot',
       label: 'Hot',
-      color: AppColors.error,
+      color: AppColors.textGray,
       icon: AppSvgAssets.sun,
     ),
   ];
@@ -55,25 +56,25 @@ class _State extends State<SolarFollowupScreen> {
     _DropOption(
       value: 'thinking',
       label: 'Thinking',
-      color: AppColors.warning,
+      color: AppColors.textGray,
       icon: AppSvgAssets.history,
     ),
     _DropOption(
       value: 'negotiation',
       label: 'Negotiation',
-      color: AppColors.primary,
+      color: AppColors.textGray,
       icon: AppSvgAssets.handshake,
     ),
     _DropOption(
       value: 'revisionNeeded',
       label: 'Revision Needed',
-      color: Color(0xFF0891B2),
+      color: AppColors.textGray,
       icon: AppSvgAssets.pencil,
     ),
     _DropOption(
       value: 'rejected',
       label: 'Rejected',
-      color: AppColors.error,
+      color: AppColors.textGray,
       icon: AppSvgAssets.x,
     ),
   ];
@@ -88,7 +89,7 @@ class _State extends State<SolarFollowupScreen> {
         _DropOption(
           value: initialValue,
           label: _humanize(initialValue),
-          color: AppColors.success,
+          color:  AppColors.textGray,
           icon: AppSvgAssets.history,
         ),
       );
@@ -123,8 +124,7 @@ class _State extends State<SolarFollowupScreen> {
       }
     }
 
-    selectedOutcome =
-        widget.lead.followupData.response ?? widget.lead.followupOutcome;
+    selectedOutcome = widget.lead.followupData.response ?? widget.lead.followupOutcome;
     selectedCustomerType = widget.lead.followupData.customerType;
     _responseOptions = _buildDynamicResponseOptions(selectedOutcome);
   }
@@ -145,9 +145,9 @@ class _State extends State<SolarFollowupScreen> {
       firstDate: DateTime(2020),
       lastDate: DateTime.now().add(const Duration(days: 365)),
       builder: (ctx, child) => Theme(
-        data: Theme.of(
-          ctx,
-        ).copyWith(colorScheme: ColorScheme.light(primary: LeadTheme.primary)),
+        data: Theme.of(ctx).copyWith(
+          colorScheme: ColorScheme.light(primary: LeadTheme.primary),
+        ),
         child: child!,
       ),
     );
@@ -161,9 +161,9 @@ class _State extends State<SolarFollowupScreen> {
       context: context,
       initialTime: initial,
       builder: (ctx, child) => Theme(
-        data: Theme.of(
-          ctx,
-        ).copyWith(colorScheme: ColorScheme.light(primary: LeadTheme.primary)),
+        data: Theme.of(ctx).copyWith(
+          colorScheme: ColorScheme.light(primary: LeadTheme.primary),
+        ),
         child: child!,
       ),
     );
@@ -382,11 +382,7 @@ Widget _infoBanner(SolarLeadsModel lead) {
     ),
     child: Row(
       children: [
-        const AppSvgIcon(
-          AppSvgAssets.userRound,
-          size: 16,
-          color: LeadTheme.primary,
-        ),
+        const AppSvgIcon(AppSvgAssets.userRound, size: 16, color: LeadTheme.primary),
         const SizedBox(width: 8),
         Expanded(
           child: Column(
@@ -416,13 +412,13 @@ Widget _infoBanner(SolarLeadsModel lead) {
 }
 
 Widget _dateTile(String svgAsset, String label, DateTime? date) {
-  final c = date != null ? AppColors.success : LeadTheme.textSecondary;
+  final c = date != null ? Colors.green : LeadTheme.textSecondary;
   return Container(
     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
     decoration: BoxDecoration(
-      color: date != null ? AppColors.success : LeadTheme.surface,
+      color: date != null ? Colors.green.shade50 : LeadTheme.surface,
       border: Border.all(
-        color: date != null ? AppColors.success : Colors.grey.shade300,
+        color: date != null ? Colors.green.shade300 : Colors.grey.shade300,
       ),
       borderRadius: BorderRadius.circular(8),
     ),
@@ -456,7 +452,7 @@ Widget _dateTile(String svgAsset, String label, DateTime? date) {
         AppSvgIcon(
           date != null ? AppSvgAssets.circleCheckBig : AppSvgAssets.arrowRight,
           size: 14,
-          color: date != null ? AppColors.success : AppColors.textLight,
+          color: date != null ? Colors.green : Colors.grey.shade400,
         ),
       ],
     ),
@@ -466,9 +462,9 @@ Widget _dateTile(String svgAsset, String label, DateTime? date) {
 // ── NEW: time tile ────────────────────────────────────────────────────────────
 Widget _timeTile(TimeOfDay? time) {
   final hasTime = time != null;
-  final c = hasTime ? AppColors.success : LeadTheme.textSecondary;
+  final c = hasTime ? Colors.green.shade600 : LeadTheme.textSecondary;
 
-  String _fmt(TimeOfDay t) {
+  String fmt(TimeOfDay t) {
     final h = t.hour;
     final m = t.minute.toString().padLeft(2, '0');
     final period = h >= 12 ? 'PM' : 'AM';
@@ -479,9 +475,9 @@ Widget _timeTile(TimeOfDay? time) {
   return Container(
     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
     decoration: BoxDecoration(
-      color: hasTime ? AppColors.success : LeadTheme.surface,
+      color: hasTime ? Colors.green.shade50 : LeadTheme.surface,
       border: Border.all(
-        color: hasTime ? AppColors.success : Colors.grey.shade300,
+        color: hasTime ? Colors.green.shade300 : Colors.grey.shade300,
       ),
       borderRadius: BorderRadius.circular(8),
     ),
@@ -497,7 +493,7 @@ Widget _timeTile(TimeOfDay? time) {
               style: TextStyle(fontSize: 11, color: LeadTheme.textSecondary),
             ),
             Text(
-              hasTime ? _fmt(time) : 'Tap to select time',
+              hasTime ? fmt(time) : 'Tap to select time',
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
@@ -510,7 +506,7 @@ Widget _timeTile(TimeOfDay? time) {
         AppSvgIcon(
           hasTime ? AppSvgAssets.circleCheckBig : AppSvgAssets.arrowRight,
           size: 14,
-          color: hasTime ? AppColors.success : AppColors.textLight,
+          color: hasTime ? Colors.green.shade400 : Colors.grey.shade400,
         ),
       ],
     ),
@@ -547,7 +543,7 @@ Widget _buildColoredDropdown({
   final selectedColor = selected?.color;
 
   return DropdownButtonFormField<String>(
-    value: value,
+    initialValue: value,
     decoration: InputDecoration(
       filled: true,
       fillColor: selectedColor?.withValues(alpha: 0.08) ?? LeadTheme.surface,
@@ -608,29 +604,15 @@ Widget _field(
   String label,
   String svgAsset, {
   int maxLines = 1,
-}) {
-  return TextField(
-    controller: c,
-    maxLines: maxLines,
-    style: const TextStyle(fontSize: 13, color: LeadTheme.textPrimary),
-    decoration: InputDecoration(
-      labelText: label,
-      labelStyle: const TextStyle(fontSize: 12, color: LeadTheme.textSecondary),
-      prefixIcon: Padding(
-        padding: const EdgeInsets.only(left: 10, right: 6),
-        child: AppSvgIcon(svgAsset, size: 16, color: LeadTheme.textSecondary),
-      ),
-      prefixIconConstraints: const BoxConstraints(minWidth: 36),
-      filled: true,
-      fillColor: LeadTheme.surface,
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: BorderSide.none,
-      ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-    ),
-  );
-}
+}) => LeadTextFormField(
+  controller: c,
+  label: label,
+  svgIcon: svgAsset,
+  accentColor: LeadTheme.orange,
+  required: false,
+  maxLines: maxLines,
+  bottomSpacing: 0,
+);
 
 Widget _saveBtn(bool saving, VoidCallback onPressed, String label) {
   return SizedBox(
@@ -640,7 +622,7 @@ Widget _saveBtn(bool saving, VoidCallback onPressed, String label) {
       onPressed: saving ? null : onPressed,
       style: ElevatedButton.styleFrom(
         backgroundColor: LeadTheme.primary,
-        foregroundColor: AppColors.surface,
+        foregroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
       child: saving
@@ -649,7 +631,7 @@ Widget _saveBtn(bool saving, VoidCallback onPressed, String label) {
               height: 20,
               child: CircularProgressIndicator(
                 strokeWidth: 2,
-                color: AppColors.surface,
+                color: Colors.white,
               ),
             )
           : Text(
@@ -659,3 +641,11 @@ Widget _saveBtn(bool saving, VoidCallback onPressed, String label) {
     ),
   );
 }
+
+
+
+
+
+
+
+

@@ -4,12 +4,12 @@ import 'package:solar_project/Cubits/SprinklerLeads/sprinkler_leads_cubit.dart';
 import 'package:solar_project/Cubits/SprinklerLeads/sprinkler_leads_state.dart';
 import 'package:solar_project/Helper/app_feedback.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
+import 'package:solar_project/Helper/lead_form_widgets.dart';
 import 'package:solar_project/Helper/lead_themes.dart';
 import 'package:solar_project/Helper/lead_widgets.dart';
 import 'package:solar_project/Helper/spk_photo_picker.dart';
 import 'package:solar_project/data/Models/sprinkler_lead_model.dart';
 import '../../../../../Helper/picked_photo.dart';
-import 'package:solar_project/core/app_colors.dart';
 
 class SpkInstallationStartedScreen extends StatefulWidget {
   final SprinklerLeadModel lead;
@@ -119,7 +119,7 @@ class _SpkInstallationStartedScreenState
           leading: IconButton(
             icon: const AppSvgIcon(
               AppSvgAssets.chevronLeft,
-              color: AppColors.surface,
+              color: Colors.white,
               size: 18,
             ),
             onPressed: () => Navigator.pop(context),
@@ -265,30 +265,23 @@ Widget _field(
   String hint,
   String icon, {
   int maxLines = 1,
-}) {
-  return TextField(
-    controller: controller,
-    maxLines: maxLines,
-    decoration: InputDecoration(
-      hintText: hint,
-      prefixIcon: AppSvgIcon(icon, size: 18, color: LeadTheme.secondary),
-      filled: true,
-      fillColor: AppColors.surface,
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide.none,
-      ),
-      contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 14),
-    ),
-  );
-}
+}) => LeadTextFormField(
+  controller: controller,
+  label: hint,
+  hintText: hint,
+  svgIcon: icon,
+  accentColor: LeadTheme.secondary,
+  required: false,
+  maxLines: maxLines,
+  bottomSpacing: 0,
+);
 
 Widget _saveBtn(bool loading, VoidCallback onPressed, String label) => SizedBox(
   width: double.infinity,
   child: ElevatedButton(
     style: ElevatedButton.styleFrom(
       backgroundColor: LeadTheme.secondary,
-      foregroundColor: AppColors.surface,
+      foregroundColor: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       padding: const EdgeInsets.symmetric(vertical: 14),
     ),
@@ -298,7 +291,7 @@ Widget _saveBtn(bool loading, VoidCallback onPressed, String label) => SizedBox(
             height: 18,
             width: 18,
             child: CircularProgressIndicator(
-              color: AppColors.surface,
+              color: Colors.white,
               strokeWidth: 2,
             ),
           )
@@ -313,12 +306,12 @@ Widget _dateTile(
   String icon,
   String title,
   DateTime? date, {
-  Color color = AppColors.primary,
+  Color color = Colors.blue,
 }) => Container(
   width: double.infinity,
   padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 14),
   decoration: BoxDecoration(
-    color: AppColors.surface,
+    color: Colors.white,
     borderRadius: BorderRadius.circular(12),
     border: Border.all(color: Colors.grey.shade300),
   ),
@@ -361,13 +354,13 @@ Widget _timeTile(TimeOfDay? time) {
     width: double.infinity,
     padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 14),
     decoration: BoxDecoration(
-      color: AppColors.surface,
+      color: Colors.white,
       borderRadius: BorderRadius.circular(12),
       border: Border.all(color: Colors.grey.shade300),
     ),
     child: Row(
       children: [
-        AppSvgIcon(AppSvgAssets.clock, size: 18, color: AppColors.primary),
+        AppSvgIcon(AppSvgAssets.clock, size: 18, color: Colors.blue),
         const SizedBox(width: 10),
         Expanded(
           child: Column(

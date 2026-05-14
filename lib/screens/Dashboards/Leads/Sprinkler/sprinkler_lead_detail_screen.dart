@@ -17,6 +17,7 @@ import 'package:solar_project/Cubits/SprinklerLeads/sprinkler_leads_cubit.dart';
 import 'package:solar_project/Cubits/SprinklerLeads/sprinkler_leads_state.dart';
 import 'package:solar_project/Helper/lead_themes.dart';
 import 'package:solar_project/Helper/role_helper.dart';
+import 'package:solar_project/core/app_colors.dart';
 import 'package:solar_project/core/constants/api_constants.dart';
 import 'package:solar_project/core/network/dio_client.dart';
 import 'package:solar_project/data/Models/sprinkler_lead_model.dart';
@@ -30,7 +31,6 @@ import 'package:solar_project/screens/Dashboards/Leads/Sprinkler/Steps/spk_insta
 import 'package:solar_project/screens/Dashboards/Leads/Sprinkler/Steps/spk_installation_started_screen.dart';
 import 'package:solar_project/screens/Dashboards/Leads/Sprinkler/Steps/spk_installation_completed_screen.dart';
 import 'package:solar_project/screens/Dashboards/Leads/Sprinkler/Steps/visit_data.dart';
-import 'package:solar_project/core/app_colors.dart';
 
 class _TeamMember {
   final String id, name, phone;
@@ -181,12 +181,10 @@ class _SprinklerLeadDetailScreenState extends State<SprinklerLeadDetailScreen> {
       'assets/images/final-sign.jpg',
     ]);
 
-    final brandDark = PdfColor.fromInt(AppColors.primary.value);
-    final brandBlue = PdfColor.fromInt(AppColors.primaryLight.value);
-    final softRow = PdfColor.fromInt(
-      AppColors.primary.withValues(alpha: 0.05).value,
-    );
-    final border = PdfColor.fromInt(AppColors.divider.value);
+    const brandDark = PdfColor.fromInt(0xFF0D3B82);
+    const brandBlue = PdfColor.fromInt(0xFF42A5F5);
+    const softRow = PdfColor.fromInt(0xFFF1F6FF);
+    const border = PdfColor.fromInt(0xFFB0BEC5);
 
     String txt(String? value) => value == null ? '' : value.trim();
     String money(double value) =>
@@ -259,7 +257,7 @@ class _SprinklerLeadDetailScreenState extends State<SprinklerLeadDetailScreen> {
           color: brandBlue,
           padding: const pw.EdgeInsets.symmetric(vertical: 7, horizontal: 10),
           child: pw.Text(
-            ' Mota varaccha , Surat -395010  |  Email: contact@kaaryabook.com  |  Phone: +91 87805 03913 ',
+            ' Mota varaccha , Surat -395010  |  Email: KaaryaBookcleanenergy@gmail.com  |  Phone: +91 90999 66333 ',
             style: const pw.TextStyle(color: PdfColors.white, fontSize: 8),
             textAlign: pw.TextAlign.center,
           ),
@@ -345,11 +343,11 @@ class _SprinklerLeadDetailScreenState extends State<SprinklerLeadDetailScreen> {
                       ),
                     ),
                     pw.SizedBox(height: 6),
-                    pw.Text('Mota varachha,'),
-                    pw.Text('Surat - 395010'),
+                    pw.Text('Amroli,'),
+                    pw.Text('Surat - 394107'),
                     pw.SizedBox(height: 6),
                     pw.Text('Email: contact@kaaryabook.com'),
-                    pw.Text('Phone: +91 87805 03913'),
+                    pw.Text('Phone: 87805 03913'),
                   ],
                 ),
               ),
@@ -359,7 +357,7 @@ class _SprinklerLeadDetailScreenState extends State<SprinklerLeadDetailScreen> {
           pw.TableHelper.fromTextArray(
             headers: const ['DESCRIPTION', 'QUANTITY', 'UNIT PRICE', 'TOTAL'],
             data: tableData,
-            headerDecoration: pw.BoxDecoration(color: brandBlue),
+            headerDecoration: const pw.BoxDecoration(color: brandBlue),
             headerStyle: pw.TextStyle(
               color: PdfColors.white,
               fontSize: 9,
@@ -372,7 +370,7 @@ class _SprinklerLeadDetailScreenState extends State<SprinklerLeadDetailScreen> {
               2: pw.Alignment.centerRight,
               3: pw.Alignment.centerRight,
             },
-            oddRowDecoration: pw.BoxDecoration(color: softRow),
+            oddRowDecoration: const pw.BoxDecoration(color: softRow),
             border: pw.TableBorder.all(color: border, width: 0.6),
             columnWidths: {
               0: const pw.FlexColumnWidth(3.6),
@@ -394,7 +392,7 @@ class _SprinklerLeadDetailScreenState extends State<SprinklerLeadDetailScreen> {
                 horizontal: 10,
                 vertical: 6,
               ),
-              decoration: pw.BoxDecoration(
+              decoration: const pw.BoxDecoration(
                 border: pw.Border(
                   top: pw.BorderSide(color: border),
                   bottom: pw.BorderSide(color: border),
@@ -615,7 +613,7 @@ class _SprinklerLeadDetailScreenState extends State<SprinklerLeadDetailScreen> {
           if (!didPop) _popWithRefresh();
         },
         child: Scaffold(
-          backgroundColor: AppColors.background,
+          backgroundColor: AppColors.lightBg,
           body: CustomScrollView(
             slivers: [
               SliverAppBar(
@@ -626,7 +624,7 @@ class _SprinklerLeadDetailScreenState extends State<SprinklerLeadDetailScreen> {
                     ? IconButton(
                         icon: const AppSvgIcon(
                           AppSvgAssets.chevronLeft,
-                          color: AppColors.surface,
+                          color: Colors.white,
                           size: 18,
                         ),
                         onPressed: _popWithRefresh,
@@ -641,7 +639,7 @@ class _SprinklerLeadDetailScreenState extends State<SprinklerLeadDetailScreen> {
                               width: 18,
                               height: 18,
                               child: CircularProgressIndicator(
-                                color: AppColors.surface,
+                                color: Colors.white,
                                 strokeWidth: 2,
                               ),
                             ),
@@ -649,7 +647,7 @@ class _SprinklerLeadDetailScreenState extends State<SprinklerLeadDetailScreen> {
                         : IconButton(
                             icon: const AppSvgIcon(
                               AppSvgAssets.fileText,
-                              color: AppColors.surface,
+                              color: Colors.white,
                               size: 20,
                             ),
                             tooltip: 'Download Quotation PDF',
@@ -662,7 +660,7 @@ class _SprinklerLeadDetailScreenState extends State<SprinklerLeadDetailScreen> {
                         width: 18,
                         height: 18,
                         child: CircularProgressIndicator(
-                          color: AppColors.surface,
+                          color: Colors.white,
                           strokeWidth: 2,
                         ),
                       ),
@@ -671,7 +669,7 @@ class _SprinklerLeadDetailScreenState extends State<SprinklerLeadDetailScreen> {
                     IconButton(
                       icon: const AppSvgIcon(
                         AppSvgAssets.refreshCw,
-                        color: AppColors.surface,
+                        color: Colors.white,
                         size: 20,
                       ),
                       onPressed: _refresh,
@@ -683,7 +681,7 @@ class _SprinklerLeadDetailScreenState extends State<SprinklerLeadDetailScreen> {
                       gradient: LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
-                        colors: [LeadTheme.secondary, LeadTheme.secondary],
+                        colors: [AppColors.blue700, AppColors.cyan600],
                       ),
                     ),
                     child: SafeArea(
@@ -699,7 +697,7 @@ class _SprinklerLeadDetailScreenState extends State<SprinklerLeadDetailScreen> {
                                   child: Text(
                                     lead.customerName,
                                     style: const TextStyle(
-                                      color: AppColors.surface,
+                                      color: Colors.white,
                                       fontSize: 20,
                                       fontWeight: FontWeight.w700,
                                     ),
@@ -713,12 +711,12 @@ class _SprinklerLeadDetailScreenState extends State<SprinklerLeadDetailScreen> {
                                       vertical: 3,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: AppColors.surface.withValues(
+                                      color: Colors.white.withValues(
                                         alpha: 0.2,
                                       ),
                                       borderRadius: BorderRadius.circular(20),
                                       border: Border.all(
-                                        color: AppColors.surface.withValues(
+                                        color: Colors.white.withValues(
                                           alpha: 0.4,
                                         ),
                                       ),
@@ -726,7 +724,7 @@ class _SprinklerLeadDetailScreenState extends State<SprinklerLeadDetailScreen> {
                                     child: Text(
                                       _isInstallationRole ? 'Install' : 'Sales',
                                       style: const TextStyle(
-                                        color: AppColors.surface,
+                                        color: Colors.white,
                                         fontSize: 10,
                                         fontWeight: FontWeight.w700,
                                       ),
@@ -738,12 +736,10 @@ class _SprinklerLeadDetailScreenState extends State<SprinklerLeadDetailScreen> {
                                     vertical: 4,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: AppColors.surface.withValues(
-                                      alpha: 0.2,
-                                    ),
+                                    color: Colors.white.withValues(alpha: 0.2),
                                     borderRadius: BorderRadius.circular(20),
                                     border: Border.all(
-                                      color: AppColors.surface.withValues(
+                                      color: Colors.white.withValues(
                                         alpha: 0.4,
                                       ),
                                     ),
@@ -751,7 +747,7 @@ class _SprinklerLeadDetailScreenState extends State<SprinklerLeadDetailScreen> {
                                   child: Text(
                                     lead.status,
                                     style: const TextStyle(
-                                      color: AppColors.surface,
+                                      color: Colors.white,
                                       fontSize: 11,
                                       fontWeight: FontWeight.w700,
                                     ),
@@ -765,13 +761,13 @@ class _SprinklerLeadDetailScreenState extends State<SprinklerLeadDetailScreen> {
                                 const AppSvgIcon(
                                   AppSvgAssets.phone,
                                   size: 12,
-                                  color: AppColors.surface,
+                                  color: Colors.white70,
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
                                   lead.phone,
                                   style: const TextStyle(
-                                    color: AppColors.surface,
+                                    color: Colors.white70,
                                     fontSize: 12,
                                   ),
                                 ),
@@ -779,14 +775,14 @@ class _SprinklerLeadDetailScreenState extends State<SprinklerLeadDetailScreen> {
                                 const AppSvgIcon(
                                   AppSvgAssets.mapPin,
                                   size: 12,
-                                  color: AppColors.surface,
+                                  color: Colors.white70,
                                 ),
                                 const SizedBox(width: 4),
                                 Expanded(
                                   child: Text(
                                     '${lead.address}${lead.village.isNotEmpty ? ", ${lead.village}" : ""}',
                                     style: const TextStyle(
-                                      color: AppColors.surface,
+                                      color: Colors.white70,
                                       fontSize: 12,
                                     ),
                                     overflow: TextOverflow.ellipsis,
@@ -831,20 +827,24 @@ class _SprinklerLeadDetailScreenState extends State<SprinklerLeadDetailScreen> {
 
   Widget _buildInfoCard() {
     final rows = <Widget>[];
-    if (lead.farmSize != null)
+    if (lead.farmSize != null) {
       rows.add(
         _infoRow(AppSvgAssets.maximize, 'Farm Size', '${lead.farmSize} acres'),
       );
-    if (lead.waterSource != null)
+    }
+    if (lead.waterSource != null) {
       rows.add(
         _infoRow(AppSvgAssets.droplet, 'Water Source', lead.waterSource!),
       );
-    if (lead.cropType?.isNotEmpty == true)
+    }
+    if (lead.cropType?.isNotEmpty == true) {
       rows.add(_infoRow(AppSvgAssets.leaf, 'Crop Type', lead.cropType!));
-    if (lead.source != null)
+    }
+    if (lead.source != null) {
       rows.add(_infoRow(AppSvgAssets.megaphone, 'Source', lead.source!));
+    }
     if (lead.source == 'reference' &&
-        lead.referenceName?.trim().isNotEmpty == true)
+        lead.referenceName?.trim().isNotEmpty == true) {
       rows.add(
         _infoRow(
           AppSvgAssets.userRound,
@@ -852,21 +852,25 @@ class _SprinklerLeadDetailScreenState extends State<SprinklerLeadDetailScreen> {
           lead.referenceName!.trim(),
         ),
       );
-    if (lead.note != null && lead.note!.isNotEmpty)
+    }
+    if (lead.note != null && lead.note!.isNotEmpty) {
       rows.add(_infoRow(AppSvgAssets.fileText, 'Note', lead.note!));
-    if (lead.createdByName != null)
+    }
+    if (lead.createdByName != null) {
       rows.add(
         _infoRow(AppSvgAssets.userPlus, 'Created By', lead.createdByName!),
       );
-    if (lead.assignedToName != null)
+    }
+    if (lead.assignedToName != null) {
       rows.add(
         _infoRow(AppSvgAssets.idCard, 'Assigned To', lead.assignedToName!),
       );
+    }
     if (rows.isEmpty) return const SizedBox.shrink();
 
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -990,21 +994,21 @@ class _SprinklerLeadDetailScreenState extends State<SprinklerLeadDetailScreen> {
         width: double.infinity,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppColors.solar,
+          color: Colors.orange.shade50,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.solar),
+          border: Border.all(color: Colors.orange.shade200),
         ),
         child: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: AppColors.solar,
+                color: Colors.orange.shade100,
                 borderRadius: BorderRadius.circular(10),
               ),
               child: AppSvgIcon(
                 AppSvgAssets.lock,
-                color: AppColors.solar,
+                color: Colors.orange.shade600,
                 size: 20,
               ),
             ),
@@ -1018,12 +1022,15 @@ class _SprinklerLeadDetailScreenState extends State<SprinklerLeadDetailScreen> {
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.solar,
+                      color: Colors.orange.shade800,
                     ),
                   ),
                   Text(
                     'Current: ${lead.status}',
-                    style: TextStyle(fontSize: 11, color: AppColors.solar),
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: Colors.orange.shade600,
+                    ),
                   ),
                 ],
               ),
@@ -1040,7 +1047,7 @@ class _SprinklerLeadDetailScreenState extends State<SprinklerLeadDetailScreen> {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           gradient: const LinearGradient(
-            colors: [LeadTheme.secondary, LeadTheme.secondary],
+            colors: [AppColors.blue700, AppColors.cyan600],
           ),
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
@@ -1056,12 +1063,12 @@ class _SprinklerLeadDetailScreenState extends State<SprinklerLeadDetailScreen> {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: AppColors.surface.withValues(alpha: 0.2),
+                color: Colors.white.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: const AppSvgIcon(
                 AppSvgAssets.arrowRight,
-                color: AppColors.surface,
+                color: Colors.white,
                 size: 16,
               ),
             ),
@@ -1073,7 +1080,7 @@ class _SprinklerLeadDetailScreenState extends State<SprinklerLeadDetailScreen> {
                   Text(
                     'Continue: ${lead.status}',
                     style: const TextStyle(
-                      color: AppColors.surface,
+                      color: Colors.white,
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
                     ),
@@ -1081,7 +1088,7 @@ class _SprinklerLeadDetailScreenState extends State<SprinklerLeadDetailScreen> {
                   Text(
                     'Next Step → ${_nextStepLabel()}',
                     style: TextStyle(
-                      color: AppColors.surface.withValues(alpha: 0.75),
+                      color: Colors.white.withValues(alpha: 0.75),
                       fontSize: 11,
                     ),
                   ),
@@ -1090,7 +1097,7 @@ class _SprinklerLeadDetailScreenState extends State<SprinklerLeadDetailScreen> {
             ),
             const AppSvgIcon(
               AppSvgAssets.chevronRight,
-              color: AppColors.surface,
+              color: Colors.white,
               size: 24,
             ),
           ],
@@ -1102,21 +1109,21 @@ class _SprinklerLeadDetailScreenState extends State<SprinklerLeadDetailScreen> {
   Widget _buildCompletedBanner() => Container(
     padding: const EdgeInsets.all(16),
     decoration: BoxDecoration(
-      color: AppColors.successLight,
+      color: AppColors.lightBg3,
       borderRadius: BorderRadius.circular(12),
-      border: Border.all(color: AppColors.success),
+      border: Border.all(color: AppColors.greenAccent2),
     ),
     child: Row(
       children: [
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: AppColors.success,
+            color: Colors.green.shade100,
             borderRadius: BorderRadius.circular(8),
           ),
           child: AppSvgIcon(
             AppSvgAssets.circleCheckBig,
-            color: AppColors.success,
+            color: Colors.green.shade700,
             size: 20,
           ),
         ),
@@ -1129,12 +1136,12 @@ class _SprinklerLeadDetailScreenState extends State<SprinklerLeadDetailScreen> {
               style: TextStyle(
                 fontWeight: FontWeight.w700,
                 fontSize: 14,
-                color: AppColors.success,
+                color: AppColors.green800,
               ),
             ),
             Text(
               'All $_totalSteps steps done successfully',
-              style: TextStyle(fontSize: 11, color: AppColors.success),
+              style: TextStyle(fontSize: 11, color: Colors.green.shade600),
             ),
           ],
         ),
@@ -1150,7 +1157,7 @@ class _SprinklerLeadDetailScreenState extends State<SprinklerLeadDetailScreen> {
     return Container(
       padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -1212,7 +1219,7 @@ class _SprinklerLeadDetailScreenState extends State<SprinklerLeadDetailScreen> {
               minHeight: 6,
               backgroundColor: AppColors.divider,
               valueColor: AlwaysStoppedAnimation<Color>(
-                lead.isCompleted ? AppColors.success : LeadTheme.secondary,
+                lead.isCompleted ? Colors.green : LeadTheme.secondary,
               ),
             ),
           ),
@@ -1223,7 +1230,9 @@ class _SprinklerLeadDetailScreenState extends State<SprinklerLeadDetailScreen> {
                 : 'Current: ${lead.status}',
             style: TextStyle(
               fontSize: 11,
-              color: lead.isCompleted ? AppColors.success : AppColors.textGray,
+              color: lead.isCompleted
+                  ? Colors.green.shade600
+                  : AppColors.textGray,
             ),
           ),
         ],
@@ -1262,8 +1271,9 @@ class _SprinklerLeadDetailScreenState extends State<SprinklerLeadDetailScreen> {
       if (m == null) return value;
       final hour24 = int.tryParse(m.group(1)!);
       final minute = int.tryParse(m.group(2)!);
-      if (hour24 == null || minute == null || hour24 > 23 || minute > 59)
+      if (hour24 == null || minute == null || hour24 > 23 || minute > 59) {
         return value;
+      }
       final isPm = hour24 >= 12;
       final hour12 = hour24 % 12 == 0 ? 12 : hour24 % 12;
       return '${hour12.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')} ${isPm ? 'PM' : 'AM'}';
@@ -1476,7 +1486,7 @@ class _SprinklerLeadDetailScreenState extends State<SprinklerLeadDetailScreen> {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -1609,12 +1619,12 @@ class _SpkPipelineRowState extends State<_SpkPipelineRow> {
     final step = widget.step;
 
     final Color dotColor = isDone
-        ? AppColors.success
+        ? AppColors.blue700
         : isCurrent
         ? LeadTheme.secondary
-        : AppColors.divider;
+        : AppColors.gray300;
 
-    final Color lineColor = isDone ? AppColors.success : AppColors.divider;
+    final Color lineColor = isDone ? AppColors.blueLight2 : AppColors.divider;
 
     final isNewLead = step.index == 0;
     final hasData =
@@ -1656,13 +1666,13 @@ class _SpkPipelineRowState extends State<_SpkPipelineRow> {
                         ? const AppSvgIcon(
                             AppSvgAssets.check,
                             size: 15,
-                            color: AppColors.surface,
+                            color: Colors.white,
                           )
                         : AppSvgIcon(
                             step.svgAsset,
                             size: isCurrent ? 14 : 13,
                             color: isCurrent
-                                ? AppColors.surface
+                                ? Colors.white
                                 : AppColors.textLight,
                           ),
                   ),
@@ -1714,7 +1724,7 @@ class _SpkPipelineRowState extends State<_SpkPipelineRow> {
                                   ? FontWeight.w600
                                   : FontWeight.w400,
                               color: isDone
-                                  ? AppColors.success
+                                  ? AppColors.blue700
                                   : isCurrent
                                   ? LeadTheme.secondary
                                   : AppColors.textLight,
@@ -1777,9 +1787,11 @@ class _SpkPipelineRowState extends State<_SpkPipelineRow> {
                                 vertical: 3,
                               ),
                               decoration: BoxDecoration(
-                                color: AppColors.solar,
+                                color: Colors.orange.shade50,
                                 borderRadius: BorderRadius.circular(6),
-                                border: Border.all(color: AppColors.solar),
+                                border: Border.all(
+                                  color: Colors.orange.shade300,
+                                ),
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
@@ -1787,18 +1799,18 @@ class _SpkPipelineRowState extends State<_SpkPipelineRow> {
                                   AppSvgIcon(
                                     AppSvgAssets.cog,
                                     size: 11,
-                                    color: AppColors.solar,
+                                    color: Colors.orange.shade700,
                                   ),
                                   const SizedBox(width: 3),
-                                   Text(
-                                     widget.installerName ?? 'Assign',
-                                     overflow: TextOverflow.ellipsis,
-                                     style: TextStyle(
-                                       fontSize: 10,
-                                       fontWeight: FontWeight.w600,
-                                       color: AppColors.surface,
-                                     ),
-                                   ),
+                                  Text(
+                                    widget.installerName ?? 'Assign',
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.orange.shade700,
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),
@@ -1806,12 +1818,12 @@ class _SpkPipelineRowState extends State<_SpkPipelineRow> {
                         ],
                         const SizedBox(width: 4),
                         if (isDone)
-                          _Badge('Done', AppColors.success)
+                          _Badge('Done', AppColors.blue700)
                         else if (isCurrent)
                           _Badge('Current', LeadTheme.secondary),
                         if (widget.showAdminBadge && !isDone) ...[
                           const SizedBox(width: 4),
-                          _Badge('Admin', AppColors.primary),
+                          _Badge('Admin', Colors.purple),
                         ],
                         if (canToggle && (hasData || hasPhotos)) ...[
                           const SizedBox(width: 4),
@@ -1866,12 +1878,12 @@ class _SpkPipelineRowState extends State<_SpkPipelineRow> {
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
             decoration: BoxDecoration(
               color: isDone
-                  ? AppColors.successLight
-                  : AppColors.successLight.withValues(alpha: 0.5),
+                  ? AppColors.lightBg6
+                  : AppColors.lightBg6.withValues(alpha: 0.5),
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
                 color: isDone
-                    ? AppColors.success
+                    ? AppColors.blueLight2
                     : LeadTheme.secondary.withValues(alpha: 0.15),
               ),
             ),
@@ -1931,7 +1943,7 @@ class _SpkPipelineRowState extends State<_SpkPipelineRow> {
                       margin: const EdgeInsets.only(right: 8),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(8),
-                        color: AppColors.divider,
+                        color: Colors.grey.shade200,
                         border: Border.all(color: Colors.grey.shade300),
                       ),
                       child: ClipRRect(
@@ -1954,7 +1966,7 @@ class _SpkPipelineRowState extends State<_SpkPipelineRow> {
                             child: AppSvgIcon(
                               AppSvgAssets.imageOff,
                               size: 24,
-                              color: AppColors.textLight,
+                              color: Colors.grey.shade400,
                             ),
                           ),
                         ),
@@ -2046,12 +2058,12 @@ class _PhotoViewerState extends State<_PhotoViewer> {
     appBar: AppBar(
       backgroundColor: Colors.black,
       leading: IconButton(
-        icon: const AppSvgIcon(AppSvgAssets.x, color: AppColors.surface),
+        icon: const AppSvgIcon(AppSvgAssets.x, color: Colors.white),
         onPressed: () => Navigator.pop(context),
       ),
       title: Text(
         '${_current + 1} / ${widget.urls.length}',
-        style: const TextStyle(color: AppColors.surface, fontSize: 14),
+        style: const TextStyle(color: Colors.white, fontSize: 14),
       ),
       centerTitle: true,
     ),
@@ -2069,7 +2081,7 @@ class _PhotoViewerState extends State<_PhotoViewer> {
             loadingBuilder: (_, child, prog) => prog == null
                 ? child
                 : const Center(
-                    child: CircularProgressIndicator(color: AppColors.surface),
+                    child: CircularProgressIndicator(color: Colors.white),
                   ),
             errorBuilder: (_, __, ___) => const Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -2100,9 +2112,7 @@ class _PhotoViewerState extends State<_PhotoViewer> {
                   width: _current == i ? 18 : 6,
                   height: 6,
                   decoration: BoxDecoration(
-                    color: _current == i
-                        ? AppColors.surface
-                        : Colors.grey.shade600,
+                    color: _current == i ? Colors.white : Colors.grey.shade600,
                     borderRadius: BorderRadius.circular(3),
                   ),
                 ),

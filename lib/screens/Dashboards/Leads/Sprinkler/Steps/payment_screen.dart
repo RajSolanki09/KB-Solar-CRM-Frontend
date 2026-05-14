@@ -4,10 +4,10 @@ import 'package:solar_project/Cubits/SprinklerLeads/sprinkler_leads_cubit.dart';
 import 'package:solar_project/Cubits/SprinklerLeads/sprinkler_leads_state.dart';
 import 'package:solar_project/Helper/app_feedback.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
+import 'package:solar_project/Helper/lead_form_widgets.dart';
 import 'package:solar_project/Helper/lead_themes.dart';
 import 'package:solar_project/Helper/lead_widgets.dart';
 import 'package:solar_project/data/Models/sprinkler_lead_model.dart';
-import 'package:solar_project/core/app_colors.dart';
 
 class SprinklerPaymentScreen extends StatefulWidget {
   final SprinklerLeadModel lead;
@@ -105,7 +105,7 @@ class _State extends State<SprinklerPaymentScreen> {
           leading: IconButton(
             icon: const AppSvgIcon(
               AppSvgAssets.chevronLeft,
-              color: AppColors.surface,
+              color: Colors.white,
               size: 18,
             ),
             onPressed: () => Navigator.pop(context),
@@ -146,13 +146,13 @@ class _State extends State<SprinklerPaymentScreen> {
                   _pRow(
                     'Paid So Far',
                     '₹${alreadyPaid.toStringAsFixed(0)}',
-                    AppColors.success,
+                    Colors.green,
                   ),
                   const Divider(height: 16),
                   _pRow(
                     'Remaining',
                     '₹${remaining.toStringAsFixed(0)}',
-                    remaining > 0 ? AppColors.solar : AppColors.success,
+                    remaining > 0 ? Colors.orange : Colors.green,
                     large: true,
                   ),
                 ],
@@ -164,15 +164,15 @@ class _State extends State<SprinklerPaymentScreen> {
                 padding: const EdgeInsets.all(14),
                 margin: const EdgeInsets.only(bottom: 10),
                 decoration: BoxDecoration(
-                  color: AppColors.success,
-                  border: Border.all(color: AppColors.success),
+                  color: Colors.green.shade50,
+                  border: Border.all(color: Colors.green.shade300),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Row(
                   children: [
                     AppSvgIcon(
                       AppSvgAssets.circleCheckBig,
-                      color: AppColors.background,
+                      color: Colors.green,
                       size: 22,
                     ),
                     SizedBox(width: 10),
@@ -181,7 +181,7 @@ class _State extends State<SprinklerPaymentScreen> {
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.success,
+                        color: Colors.green,
                       ),
                     ),
                   ],
@@ -301,7 +301,7 @@ class _State extends State<SprinklerPaymentScreen> {
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
                           color: LeadTheme.bg,
-                          border: Border.all(color: AppColors.divider),
+                          border: Border.all(color: Colors.grey.shade200),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Row(
@@ -310,7 +310,7 @@ class _State extends State<SprinklerPaymentScreen> {
                               width: 28,
                               height: 28,
                               decoration: BoxDecoration(
-                                color: AppColors.success,
+                                color: Colors.green.shade100,
                                 shape: BoxShape.circle,
                               ),
                               child: Center(
@@ -319,7 +319,7 @@ class _State extends State<SprinklerPaymentScreen> {
                                   style: const TextStyle(
                                     fontSize: 11,
                                     fontWeight: FontWeight.w700,
-                                    color: AppColors.success,
+                                    color: Colors.green,
                                   ),
                                 ),
                               ),
@@ -360,7 +360,7 @@ class _State extends State<SprinklerPaymentScreen> {
                               style: const TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w700,
-                                color: AppColors.success,
+                                color: Colors.green,
                               ),
                             ),
                           ],
@@ -429,78 +429,32 @@ class _State extends State<SprinklerPaymentScreen> {
     String svgAsset, {
     int maxLines = 1,
     TextInputType? type,
-  }) {
-    return TextField(
-      controller: c,
-      maxLines: maxLines,
-      keyboardType: type,
-      style: const TextStyle(fontSize: 13, color: LeadTheme.textPrimary),
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: const TextStyle(
-          fontSize: 12,
-          color: LeadTheme.textSecondary,
-        ),
-        prefixIcon: Padding(
-          padding: const EdgeInsets.only(left: 10, right: 6),
-          child: AppSvgIcon(svgAsset, size: 16, color: LeadTheme.textSecondary),
-        ),
-        prefixIconConstraints: const BoxConstraints(minWidth: 36),
-        filled: true,
-        fillColor: LeadTheme.surface,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide.none,
-        ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 10,
-          vertical: 10,
-        ),
-      ),
-    );
-  }
+  }) => LeadTextFormField(
+    controller: c,
+    label: label,
+    svgIcon: svgAsset,
+    accentColor: LeadTheme.secondary,
+    required: false,
+    maxLines: maxLines,
+    keyboardType: type ?? TextInputType.text,
+    bottomSpacing: 0,
+  );
 
   Widget _spkNumField(
     TextEditingController c,
     String label, {
     String? icon,
     void Function(String)? onChange,
-  }) {
-    return TextField(
-      controller: c,
-      keyboardType: TextInputType.number,
-      onChanged: onChange,
-      style: const TextStyle(fontSize: 13, color: LeadTheme.textPrimary),
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: const TextStyle(
-          fontSize: 12,
-          color: LeadTheme.textSecondary,
-        ),
-        prefixIcon: icon != null
-            ? Padding(
-                padding: const EdgeInsets.only(left: 10, right: 6),
-                child: AppSvgIcon(
-                  icon,
-                  size: 16,
-                  color: LeadTheme.textSecondary,
-                ),
-              )
-            : null,
-        prefixIconConstraints: const BoxConstraints(minWidth: 36),
-        filled: true,
-        fillColor: LeadTheme.surface,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide.none,
-        ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 10,
-          vertical: 10,
-        ),
-      ),
-    );
-  }
+  }) => LeadTextFormField(
+    controller: c,
+    label: label,
+    svgIcon: icon ?? AppSvgAssets.fileText,
+    accentColor: LeadTheme.secondary,
+    required: false,
+    keyboardType: TextInputType.number,
+    onChanged: onChange,
+    bottomSpacing: 0,
+  );
 
   Widget _spkSaveBtn(bool saving, VoidCallback onPressed, String label) {
     return SizedBox(
@@ -510,7 +464,7 @@ class _State extends State<SprinklerPaymentScreen> {
         onPressed: saving ? null : onPressed,
         style: ElevatedButton.styleFrom(
           backgroundColor: LeadTheme.secondary,
-          foregroundColor: AppColors.surface,
+          foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
           ),
@@ -521,7 +475,7 @@ class _State extends State<SprinklerPaymentScreen> {
                 height: 20,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  color: AppColors.surface,
+                  color: Colors.white,
                 ),
               )
             : Text(

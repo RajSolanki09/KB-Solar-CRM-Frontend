@@ -7,11 +7,17 @@ import 'package:solar_project/Cubits/SolarLeads/solar_leads_cubit.dart';
 import 'package:solar_project/Cubits/SolarLeads/solar_leads_state.dart';
 import 'package:solar_project/Cubits/SprinklerLeads/sprinkler_leads_cubit.dart';
 import 'package:solar_project/Cubits/SprinklerLeads/sprinkler_leads_state.dart';
+import 'package:solar_project/core/app_colors.dart';
 import 'package:solar_project/data/Models/solar_leads_model.dart';
 import 'package:solar_project/data/Models/sprinkler_lead_model.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
 import 'package:solar_project/Helper/lead_themes.dart';
-import 'package:solar_project/core/app_colors.dart';
+
+// ─── Brand color aliases ──────────────────────────────────────────────────────
+// ✅ Solar tab  = brand primary      #5B4FCF
+// ✅ Sprinkler  = brand primaryLight #7B6FE0
+const _kSolar      = AppColors.primary;       // was: LeadTheme.orange
+const _kSprinkler  = AppColors.primaryLight;  // was: AppColors.cyan
 
 // ─── Unified pending payment entry ───────────────────────────────────────────
 class _PayEntry {
@@ -46,39 +52,40 @@ class _PayEntry {
   });
 
   factory _PayEntry.fromSolar(SolarLeadsModel l) {
-    final total = l.finalAmount ?? l.totalAmount;
-    final paid = l.advancePayment ?? 0;
+    final total = l.paymentSummary.totalAmount > 0
+        ? l.paymentSummary.totalAmount
+        : (l.finalAmount ?? l.totalAmount);
+    final paid = l.paymentSummary.amountReceived > 0
+        ? l.paymentSummary.amountReceived
+        : (l.advancePayment ?? 0);
+    final pending = l.paymentSummary.remainingBalance > 0
+        ? l.paymentSummary.remainingBalance
+        : (total - paid).clamp(0, double.infinity).toDouble();
     return _PayEntry(
-      id: l.id,
-      customerName: l.customerName,
-      phone: l.mobile,
-      address: l.address,
-      projectType: 'Solar',
-      totalAmount: total,
-      paidAmount: paid,
-      pendingAmount: (total - paid).clamp(0, double.infinity),
+      id: l.id, customerName: l.customerName, phone: l.mobile,
+      address: l.address, projectType: 'Solar',
+      totalAmount: total, paidAmount: paid, pendingAmount: pending,
       paymentMode: l.paymentMode,
       dealDate: l.dealData.closedAt ?? l.createdAt,
-      teamName: l.installationTeam,
-      solarLead: l,
+      teamName: l.installationTeam, solarLead: l,
     );
   }
 
   factory _PayEntry.fromSprinkler(SprinklerLeadModel l) {
-    final total = l.totalAmount;
-    final paid = l.advancePayment ?? 0;
+    final total = l.paymentSummary.totalAmount > 0
+        ? l.paymentSummary.totalAmount : l.totalAmount;
+    final paid = l.paymentSummary.amountReceived > 0
+        ? l.paymentSummary.amountReceived : (l.advancePayment ?? 0);
+    final pending = l.paymentSummary.remainingBalance > 0
+        ? l.paymentSummary.remainingBalance
+        : (total - paid).clamp(0, double.infinity).toDouble();
     return _PayEntry(
-      id: l.id,
-      customerName: l.customerName,
-      phone: l.phone,
-      address: l.address,
-      projectType: 'Sprinkler',
-      totalAmount: total,
-      paidAmount: paid,
-      pendingAmount: (total - paid).clamp(0, double.infinity),
+      id: l.id, customerName: l.customerName, phone: l.phone,
+      address: l.address, projectType: 'Sprinkler',
+      totalAmount: total, paidAmount: paid, pendingAmount: pending,
       paymentMode: l.paymentMode,
-      dealDate: l.createdAt,
-      teamName: l.installerName,
+      dealDate: l.dealData.closedAt ?? l.createdAt,
+      teamName: l.effectiveInstallerName ?? l.installerName,
       sprinklerLead: l,
     );
   }
@@ -89,6 +96,7 @@ class AdminPendingPaymentPage extends StatefulWidget {
   final Color appBarColor;
   const AdminPendingPaymentPage({
     super.key,
+    // ✅ default = brand primary — was AppColors.error (red)
     this.appBarColor = AppColors.primary,
   });
 
@@ -103,44 +111,25 @@ class _State extends State<AdminPendingPaymentPage>
   String _search = '';
   String _sort = 'Highest';
 
-  // ✅ FIX: Named callbacks so we can properly remove them in dispose
-  late final VoidCallback _tabListener;
-  late final VoidCallback _searchListener;
-
   static final _currency = NumberFormat.currency(
-    locale: 'en_IN',
-    symbol: '₹',
-    decimalDigits: 0,
+    locale: 'en_IN', symbol: '₹', decimalDigits: 0,
   );
 
   @override
   void initState() {
     super.initState();
-    _tab = TabController(length: 3, vsync: this);
-
-    // ✅ FIX: mounted check in listeners to prevent setState after dispose
-    _tabListener = () {
-      if (mounted) setState(() {});
-    };
-    _searchListener = () {
-      if (mounted) setState(() => _search = _searchCtrl.text);
-    };
-
-    _tab.addListener(_tabListener);
-    _searchCtrl.addListener(_searchListener);
-
+    _tab = TabController(length: 2, vsync: this);
+    _tab.addListener(() => setState(() {}));
+    _searchCtrl.addListener(() => setState(() => _search = _searchCtrl.text));
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      context.read<SolarLeadCubit>().fetchAllLeads();
-      context.read<SprinklerLeadCubit>().fetchAllLeads();
+      context.read<SolarLeadCubit>().fetchAllLeadsForPendingPayment();
+      context.read<SprinklerLeadCubit>().fetchAllLeadsForPendingPayment();
     });
   }
 
   @override
   void dispose() {
-    // ✅ FIX: Remove named listeners before dispose
-    _tab.removeListener(_tabListener);
-    _searchCtrl.removeListener(_searchListener);
     _tab.dispose();
     _searchCtrl.dispose();
     super.dispose();
@@ -148,36 +137,30 @@ class _State extends State<AdminPendingPaymentPage>
 
   List<_PayEntry> _solarEntries(List<SolarLeadsModel> all) => all
       .where((l) {
-        final afterDeal =
-            l.currentStep == SolarStep.dealDone ||
-            l.currentStep == SolarStep.installationAssigned ||
-            l.currentStep == SolarStep.installationStarted ||
-            l.currentStep == SolarStep.installation ||
-            l.currentStep == SolarStep.meter ||
-            l.currentStep == SolarStep.portal ||
-            l.currentStep == SolarStep.subsidy ||
-            l.currentStep == SolarStep.payment;
-        final isPaymentCompleted =
-            l.status == 'Payment Completed' || l.isCompleted == true;
-        final pending =
-            (l.finalAmount ?? l.totalAmount) - (l.advancePayment ?? 0);
-        return afterDeal && !isPaymentCompleted && pending > 0;
+        if (l.isCompleted) return false;
+        if (l.currentStep == SolarStep.projectCompleted) return false;
+        final afterDeal = l.currentStep.index >= SolarStep.dealDone.index;
+        if (!afterDeal) return false;
+        final remaining = l.paymentSummary.remainingBalance > 0
+            ? l.paymentSummary.remainingBalance
+            : ((l.finalAmount ?? l.totalAmount) - (l.advancePayment ?? 0))
+                  .clamp(0, double.infinity).toDouble();
+        return remaining > 0;
       })
       .map(_PayEntry.fromSolar)
       .toList();
 
   List<_PayEntry> _sprinklerEntries(List<SprinklerLeadModel> all) => all
       .where((l) {
-        final afterDeal =
-            l.currentStep == SprinklerStep.dealDone ||
-            l.currentStep == SprinklerStep.installationAssigned ||
-            l.currentStep == SprinklerStep.installationCompleted ||
-            l.currentStep == SprinklerStep.systemTested ||
-            l.currentStep == SprinklerStep.fullPayment;
-        final isPaymentCompleted =
-            l.status == 'Payment Completed' || l.isCompleted == true;
-        final pending = (l.totalAmount) - (l.advancePayment ?? 0);
-        return afterDeal && !isPaymentCompleted && pending > 0;
+        if (l.isCompleted) return false;
+        if (l.currentStep == SprinklerStep.projectCompleted) return false;
+        final afterDeal = l.currentStep.index >= SprinklerStep.dealDone.index;
+        if (!afterDeal) return false;
+        final remaining = l.paymentSummary.remainingBalance > 0
+            ? l.paymentSummary.remainingBalance
+            : (l.totalAmount - (l.advancePayment ?? 0))
+                  .clamp(0, double.infinity).toDouble();
+        return remaining > 0;
       })
       .map(_PayEntry.fromSprinkler)
       .toList();
@@ -193,25 +176,15 @@ class _State extends State<AdminPendingPaymentPage>
 
     switch (_sort) {
       case 'Highest':
-        list.sort((a, b) => b.pendingAmount.compareTo(a.pendingAmount));
-        break;
+        list.sort((a, b) => b.pendingAmount.compareTo(a.pendingAmount)); break;
       case 'Lowest':
-        list.sort((a, b) => a.pendingAmount.compareTo(b.pendingAmount));
-        break;
+        list.sort((a, b) => a.pendingAmount.compareTo(b.pendingAmount)); break;
       case 'Oldest':
-        list.sort(
-          (a, b) => (a.dealDate ?? DateTime(2000)).compareTo(
-            b.dealDate ?? DateTime(2000),
-          ),
-        );
-        break;
+        list.sort((a, b) => (a.dealDate ?? DateTime(2000))
+            .compareTo(b.dealDate ?? DateTime(2000))); break;
       case 'Newest':
-        list.sort(
-          (a, b) => (b.dealDate ?? DateTime(2000)).compareTo(
-            a.dealDate ?? DateTime(2000),
-          ),
-        );
-        break;
+        list.sort((a, b) => (b.dealDate ?? DateTime(2000))
+            .compareTo(a.dealDate ?? DateTime(2000))); break;
     }
     return list;
   }
@@ -219,16 +192,8 @@ class _State extends State<AdminPendingPaymentPage>
   double _totalPending(List<_PayEntry> entries) =>
       entries.fold(0, (s, e) => s + e.pendingAmount);
 
-  Color _tabColor() {
-    switch (_tab.index) {
-      case 1:
-        return LeadTheme.primary;
-      case 2:
-        return AppColors.primaryLight;
-      default:
-        return AppColors.primary;
-    }
-  }
+  // ✅ Both tabs use brand purple shades — no more orange/cyan
+  Color _tabColor() => _tab.index == 0 ? _kSolar : _kSprinkler;
 
   @override
   Widget build(BuildContext context) {
@@ -237,15 +202,13 @@ class _State extends State<AdminPendingPaymentPage>
         return BlocBuilder<SprinklerLeadCubit, SprinklerLeadState>(
           builder: (ctx2, spkState) {
             final solarAll = solarState is SolarLeadsLoaded
-                ? solarState.leads
-                : <SolarLeadsModel>[];
+                ? solarState.leads : <SolarLeadsModel>[];
             final spkAll = spkState is SprinklerLeadsLoaded
-                ? spkState.leads
-                : <SprinklerLeadModel>[];
+                ? spkState.leads : <SprinklerLeadModel>[];
 
-            final solarEntries = _applyFilters(_solarEntries(solarAll));
-            final spkEntries = _applyFilters(_sprinklerEntries(spkAll));
-            final allEntries = _applyFilters([
+            final solarEntries  = _applyFilters(_solarEntries(solarAll));
+            final spkEntries    = _applyFilters(_sprinklerEntries(spkAll));
+            final allEntries    = _applyFilters([
               ..._solarEntries(solarAll),
               ..._sprinklerEntries(spkAll),
             ]);
@@ -256,19 +219,20 @@ class _State extends State<AdminPendingPaymentPage>
 
             final totalPending = _totalPending(allEntries);
             final solarPending = _totalPending(solarEntries);
-            final spkPending = _totalPending(spkEntries);
+            final spkPending   = _totalPending(spkEntries);
 
             return Scaffold(
-              backgroundColor: AppColors.background,
+              // ✅ brand purple-tinted background — was AppColors.lightBg
+              backgroundColor: AppColors.purple50,
               appBar: AppBar(
-                backgroundColor: widget.appBarColor,
+                // ✅ brand primary — was AppColors.error (red)
+                backgroundColor: AppColors.primary,
                 elevation: 0,
                 leading: Navigator.canPop(context)
                     ? IconButton(
                         icon: const AppSvgIcon(
                           AppSvgAssets.chevronLeft,
-                          color: AppColors.surface,
-                          size: 18,
+                          color: Colors.white, size: 18,
                         ),
                         onPressed: () => Navigator.pop(context),
                       )
@@ -276,39 +240,25 @@ class _State extends State<AdminPendingPaymentPage>
                 title: const Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Pending Payments',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.surface,
-                      ),
-                    ),
-                    Text(
-                      'Deal closed — balance outstanding',
-                      style: TextStyle(fontSize: 11, color: AppColors.surface),
-                    ),
+                    Text('Pending Payments',
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Colors.white)),
+                    Text('Deal closed — balance outstanding',
+                      style: TextStyle(fontSize: 11, color: Colors.white70)),
                   ],
                 ),
                 actions: [
                   IconButton(
-                    icon: const AppSvgIcon(
-                      AppSvgAssets.refreshCw,
-                      color: AppColors.surface,
-                    ),
+                    icon: const AppSvgIcon(AppSvgAssets.refreshCw, color: Colors.white),
                     onPressed: () {
-                      if (!mounted) return;
-                      context.read<SolarLeadCubit>().fetchAllLeads();
-                      context.read<SprinklerLeadCubit>().fetchAllLeads();
+                      context.read<SolarLeadCubit>().fetchAllLeadsForPendingPayment();
+                      context.read<SprinklerLeadCubit>().fetchAllLeadsForPendingPayment();
                     },
                   ),
                 ],
               ),
               body: loading
                   ? const Center(
-                      child: CircularProgressIndicator(
-                        color: AppColors.primary,
-                      ),
+                      child: CircularProgressIndicator(color: AppColors.primary),
                     )
                   : Column(
                       children: [
@@ -317,15 +267,12 @@ class _State extends State<AdminPendingPaymentPage>
                           padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
                           child: Container(
                             decoration: BoxDecoration(
-                              color: AppColors.surface,
+                              color: Colors.white,
                               borderRadius: BorderRadius.circular(12),
                               boxShadow: [
                                 BoxShadow(
-                                  color: AppColors.primary.withValues(
-                                    alpha: 0.05,
-                                  ),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 2),
+                                  color: AppColors.primary.withValues(alpha: 0.08),
+                                  blurRadius: 8, offset: const Offset(0, 2),
                                 ),
                               ],
                             ),
@@ -333,33 +280,22 @@ class _State extends State<AdminPendingPaymentPage>
                               controller: _tab,
                               indicatorSize: TabBarIndicatorSize.tab,
                               indicator: BoxDecoration(
+                                // ✅ selected tab = brand purple shade
                                 color: _tabColor(),
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               dividerColor: Colors.transparent,
-                              labelColor: AppColors.surface,
+                              labelColor: Colors.white,
                               unselectedLabelColor: AppColors.textGray,
                               labelStyle: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
+                                fontSize: 12, fontWeight: FontWeight.w600,
                               ),
                               padding: const EdgeInsets.all(4),
                               tabs: [
-                                _TabItem(
-                                  'All',
-                                  allEntries.length,
-                                  AppColors.primary,
-                                ),
-                                _TabItem(
-                                  'Solar',
-                                  solarEntries.length,
-                                  LeadTheme.primary,
-                                ),
-                                _TabItem(
-                                  'Sprinkler',
-                                  spkEntries.length,
-                                  AppColors.primaryLight,
-                                ),
+                                // ✅ Solar tab = _kSolar (primary)
+                                _TabItem('Solar',     solarEntries.length, _kSolar),
+                                // ✅ Sprinkler tab = _kSprinkler (primaryLight)
+                                _TabItem('Sprinkler', spkEntries.length,   _kSprinkler),
                               ],
                             ),
                           ),
@@ -384,21 +320,16 @@ class _State extends State<AdminPendingPaymentPage>
                         // ── 4. Result count ────────────────────────────
                         Builder(
                           builder: (context) {
-                            final shown = [
-                              allEntries,
-                              solarEntries,
-                              spkEntries,
-                            ][_tab.index];
+                            final shown = _tab.index == 0 ? solarEntries : spkEntries;
                             if (shown.isEmpty) return const SizedBox.shrink();
                             return Padding(
-                              padding: const EdgeInsets.all(8.0),
+                              padding: const EdgeInsets.fromLTRB(14, 6, 14, 0),
                               child: Align(
                                 alignment: Alignment.centerLeft,
                                 child: Text(
                                   '${shown.length} record${shown.length != 1 ? "s" : ""}',
                                   style: const TextStyle(
-                                    fontSize: 11,
-                                    color: AppColors.textLight,
+                                    fontSize: 11, color: AppColors.textLight,
                                   ),
                                 ),
                               ),
@@ -412,23 +343,18 @@ class _State extends State<AdminPendingPaymentPage>
                             controller: _tab,
                             children: [
                               _PayTable(
-                                entries: allEntries,
-                                currency: _currency,
-                                accentColor: AppColors.primary,
-                                emptyMessage: 'No pending payments',
-                                emptyIcon: AppSvgAssets.indianRupee,
-                              ),
-                              _PayTable(
                                 entries: solarEntries,
                                 currency: _currency,
-                                accentColor: LeadTheme.primary,
+                                // ✅ brand primary
+                                accentColor: _kSolar,
                                 emptyMessage: 'No pending solar payments',
                                 emptyIcon: AppSvgAssets.sun,
                               ),
                               _PayTable(
                                 entries: spkEntries,
                                 currency: _currency,
-                                accentColor: AppColors.primaryLight,
+                                // ✅ brand primaryLight
+                                accentColor: _kSprinkler,
                                 emptyMessage: 'No pending sprinkler payments',
                                 emptyIcon: AppSvgAssets.droplet,
                               ),
@@ -463,10 +389,7 @@ class _PayTable extends StatelessWidget {
     required this.emptyIcon,
   });
 
-  static const _solar = LeadTheme.primary;
-  static const _spk = AppColors.primaryLight;
-
-  Color _typeColor(String type) => type == 'Solar' ? _solar : _spk;
+  Color _typeColor(String type) => type == 'Solar' ? _kSolar : _kSprinkler;
 
   String _formatDate(DateTime? d) {
     if (d == null) return '—';
@@ -476,11 +399,8 @@ class _PayTable extends StatelessWidget {
   String _modeLabel(String? raw) {
     if (raw == null || raw.isEmpty) return '—';
     const map = {
-      'cash': 'Cash',
-      'bankTransfer': 'Bank Transfer',
-      'cheque': 'Cheque',
-      'upi': 'UPI',
-      'loan': 'Loan',
+      'cash': 'Cash', 'bankTransfer': 'Bank Transfer',
+      'cheque': 'Cheque', 'upi': 'UPI', 'loan': 'Loan',
     };
     return map[raw] ?? raw;
   }
@@ -499,18 +419,11 @@ class _PayTable extends StatelessWidget {
         children: [
           AppSvgIcon(
             type == 'Solar' ? AppSvgAssets.sun : AppSvgAssets.droplet,
-            size: 10,
-            color: color,
+            size: 10, color: color,
           ),
           const SizedBox(width: 3),
-          Text(
-            type,
-            style: TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w700,
-              color: color,
-            ),
-          ),
+          Text(type,
+            style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: color)),
         ],
       ),
     );
@@ -532,21 +445,16 @@ class _PayTable extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            AppSvgIcon(emptyIcon, size: 56, color: AppColors.divider),
+            // ✅ empty icon = brand purple — was grey
+            AppSvgIcon(emptyIcon, size: 56, color: AppColors.purple300),
             const SizedBox(height: 12),
-            Text(
-              emptyMessage,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textLight,
-              ),
-            ),
+            Text(emptyMessage,
+              style: const TextStyle(
+                fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textGray,
+              )),
             const SizedBox(height: 6),
-            Text(
-              'All payments are settled!',
-              style: TextStyle(fontSize: 12, color: AppColors.textLight),
-            ),
+            const Text('All payments are settled!',
+              style: TextStyle(fontSize: 12, color: AppColors.textLight)),
           ],
         ),
       );
@@ -559,8 +467,8 @@ class _PayTable extends StatelessWidget {
     return RefreshIndicator(
       color: accentColor,
       onRefresh: () async {
-        context.read<SolarLeadCubit>().fetchAllLeads();
-        context.read<SprinklerLeadCubit>().fetchAllLeads();
+        context.read<SolarLeadCubit>().fetchAllLeadsForPendingPayment();
+        context.read<SprinklerLeadCubit>().fetchAllLeadsForPendingPayment();
       },
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
@@ -568,16 +476,22 @@ class _PayTable extends StatelessWidget {
         child: Container(
           width: double.infinity,
           decoration: BoxDecoration(
-            color: AppColors.surface,
+            color: Colors.white,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppColors.divider),
+            // ✅ brand purple border
+            border: Border.all(color: AppColors.purple200),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primary.withValues(alpha: 0.05),
+                blurRadius: 8, offset: const Offset(0, 2),
+              ),
+            ],
           ),
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: SizedBox(
               width: isDesktop
-                  ? MediaQuery.sizeOf(context).width - 24
-                  : minWidth,
+                  ? MediaQuery.sizeOf(context).width - 24 : minWidth,
               child: DataTable(
                 showCheckboxColumn: false,
                 headingRowHeight: 44,
@@ -585,13 +499,17 @@ class _PayTable extends StatelessWidget {
                 dataRowMaxHeight: 72,
                 horizontalMargin: isDesktop ? 18 : 12,
                 columnSpacing: isDesktop ? 20 : 14,
-                headingRowColor: WidgetStateProperty.all(
-                  accentColor.withValues(alpha: 0.07),
+                // ✅ heading row = brand purple tint
+                headingRowColor: WidgetStateProperty.all(AppColors.purple100),
+                headingTextStyle: const TextStyle(
+                  fontSize: 12, fontWeight: FontWeight.w600,
+                  color: AppColors.primary,
                 ),
-                border: TableBorder(
-                  horizontalInside: BorderSide(color: AppColors.divider),
-                  bottom: BorderSide(color: AppColors.divider),
-                  top: BorderSide(color: AppColors.divider),
+                // ✅ table borders = brand purple — was blueGrey
+                border: const TableBorder(
+                  horizontalInside: BorderSide(color: AppColors.purple200, width: 0.5),
+                  bottom: BorderSide(color: AppColors.purple200),
+                  top: BorderSide(color: AppColors.purple200),
                 ),
                 columns: const [
                   DataColumn(label: Text('Type')),
@@ -606,63 +524,31 @@ class _PayTable extends StatelessWidget {
                   DataColumn(label: Text('Deal Date')),
                 ],
                 rows: entries.map((e) {
-                  return DataRow(
-                    cells: [
-                      DataCell(_typeBadge(e.projectType)),
-                      DataCell(
-                        Text(
-                          e.customerName,
-                          style: rowStyle.copyWith(fontWeight: FontWeight.w600),
-                        ),
-                      ),
-                      DataCell(Text(e.phone, style: rowStyle)),
-                      DataCell(
-                        SizedBox(
-                          width: isDesktop ? 180 : 150,
-                          child: Text(
-                            e.address.isEmpty ? '—' : e.address,
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 2,
-                            style: rowStyle,
-                          ),
-                        ),
-                      ),
-                      DataCell(
-                        _amtCell(
-                          currency.format(e.totalAmount),
-                          AppColors.textDark,
-                        ),
-                      ),
-                      DataCell(
-                        _amtCell(
-                          currency.format(e.paidAmount),
-                          AppColors.success,
-                        ),
-                      ),
-                      DataCell(
-                        _amtCell(
-                          currency.format(e.pendingAmount),
-                          AppColors.primaryDark,
-                          bold: true,
-                        ),
-                      ),
-                      DataCell(
-                        Text(_modeLabel(e.paymentMode), style: rowStyle),
-                      ),
-                      DataCell(
-                        Text(
-                          e.teamName?.isNotEmpty == true ? e.teamName! : '—',
-                          style: rowStyle,
-                        ),
-                      ),
-                      DataCell(
-                        Text(
-                          _formatDate(e.dealDate),
-                          style: rowStyle.copyWith(fontSize: 11),
-                        ),
-                      ),
-                    ],
-                  );
+                  return DataRow(cells: [
+                    DataCell(_typeBadge(e.projectType)),
+                    DataCell(Text(e.customerName,
+                      style: rowStyle.copyWith(fontWeight: FontWeight.w600))),
+                    DataCell(Text(e.phone, style: rowStyle)),
+                    DataCell(SizedBox(
+                      width: isDesktop ? 180 : 150,
+                      child: Text(e.address.isEmpty ? '—' : e.address,
+                        overflow: TextOverflow.ellipsis, maxLines: 2,
+                        style: rowStyle),
+                    )),
+                    // ✅ Total = textGray — was Colors.grey.shade700
+                    DataCell(_amtCell(currency.format(e.totalAmount), AppColors.textGray)),
+                    // ✅ Paid = primary — was Colors.green.shade600
+                    DataCell(_amtCell(currency.format(e.paidAmount), AppColors.primary)),
+                    // ✅ Pending = purple700 (darker) — was Colors.red.shade500
+                    DataCell(_amtCell(currency.format(e.pendingAmount),
+                        AppColors.purple700, bold: true)),
+                    DataCell(Text(_modeLabel(e.paymentMode), style: rowStyle)),
+                    DataCell(Text(
+                      e.teamName?.isNotEmpty == true ? e.teamName! : '—',
+                      style: rowStyle)),
+                    DataCell(Text(_formatDate(e.dealDate),
+                      style: rowStyle.copyWith(fontSize: 11))),
+                  ]);
                 }).toList(),
               ),
             ),
@@ -680,10 +566,8 @@ class _SummaryBanner extends StatelessWidget {
   final double total, solar, sprinkler;
   final NumberFormat currency;
   const _SummaryBanner({
-    required this.total,
-    required this.solar,
-    required this.sprinkler,
-    required this.currency,
+    required this.total, required this.solar,
+    required this.sprinkler, required this.currency,
   });
 
   @override
@@ -692,44 +576,36 @@ class _SummaryBanner extends StatelessWidget {
       margin: const EdgeInsets.fromLTRB(12, 10, 12, 0),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
+        // ✅ brand gradient primary → primaryDark — was pink500/pinkAccent
         gradient: const LinearGradient(
-          colors: [AppColors.primaryLight, AppColors.primaryDark],
+          colors: [AppColors.primary, AppColors.primaryDark],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primaryLight.withValues(alpha: 0.3),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
+            color: AppColors.primary.withValues(alpha: 0.3),
+            blurRadius: 8, offset: const Offset(0, 3),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Total Outstanding',
-            style: TextStyle(fontSize: 11, color: AppColors.surface),
-          ),
+          const Text('Total Outstanding',
+            style: TextStyle(fontSize: 11, color: Colors.white70)),
           const SizedBox(height: 2),
-          Text(
-            currency.format(total),
+          Text(currency.format(total),
             style: const TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.w800,
-              color: AppColors.surface,
-            ),
-          ),
+              fontSize: 22, fontWeight: FontWeight.w800, color: Colors.white,
+            )),
           const SizedBox(height: 10),
           Row(
             children: [
               Expanded(child: _BannerStat('☀ Solar', currency.format(solar))),
-              Container(width: 1, height: 28, color: AppColors.surface),
-              Expanded(
-                child: _BannerStat('💧 Sprinkler', currency.format(sprinkler)),
-              ),
+              Container(width: 1, height: 28, color: Colors.white24),
+              Expanded(child: _BannerStat('💧 Sprinkler', currency.format(sprinkler))),
             ],
           ),
         ],
@@ -744,19 +620,12 @@ class _BannerStat extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Column(
     children: [
-      Text(
-        label,
-        style: const TextStyle(fontSize: 10, color: AppColors.surface),
-      ),
+      Text(label, style: const TextStyle(fontSize: 10, color: Colors.white70)),
       const SizedBox(height: 2),
-      Text(
-        value,
+      Text(value,
         style: const TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.w700,
-          color: AppColors.surface,
-        ),
-      ),
+          fontSize: 13, fontWeight: FontWeight.w700, color: Colors.white,
+        )),
     ],
   );
 }
@@ -770,10 +639,8 @@ class _SearchSortBar extends StatelessWidget {
   final Color tabColor;
   final ValueChanged<String> onSortChanged;
   const _SearchSortBar({
-    required this.ctrl,
-    required this.sort,
-    required this.tabColor,
-    required this.onSortChanged,
+    required this.ctrl, required this.sort,
+    required this.tabColor, required this.onSortChanged,
   });
 
   @override
@@ -787,26 +654,20 @@ class _SearchSortBar extends StatelessWidget {
             child: Container(
               height: 38,
               decoration: BoxDecoration(
-                color: AppColors.surface,
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: AppColors.divider),
+                // ✅ brand purple border — was Colors.grey.shade200
+                border: Border.all(color: AppColors.purple200),
               ),
               child: TextField(
                 controller: ctrl,
                 style: const TextStyle(fontSize: 13),
                 decoration: InputDecoration(
                   hintText: 'Search name / phone / address',
-                  hintStyle: const TextStyle(
-                    fontSize: 12,
-                    color: AppColors.textLight,
-                  ),
+                  hintStyle: const TextStyle(fontSize: 12, color: AppColors.textLight),
                   prefixIcon: Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: AppSvgIcon(
-                      AppSvgAssets.search,
-                      size: 16,
-                      color: tabColor,
-                    ),
+                    child: AppSvgIcon(AppSvgAssets.search, size: 16, color: tabColor),
                   ),
                   suffixIcon: ctrl.text.isNotEmpty
                       ? IconButton(
@@ -827,30 +688,22 @@ class _SearchSortBar extends StatelessWidget {
               height: 38,
               padding: const EdgeInsets.symmetric(horizontal: 10),
               decoration: BoxDecoration(
-                color: AppColors.surface,
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: AppColors.divider),
+                // ✅ brand purple border
+                border: Border.all(color: AppColors.purple200),
               ),
               child: DropdownButtonHideUnderline(
                 child: DropdownButton<String>(
                   value: sort,
                   isExpanded: true,
                   isDense: true,
-                  icon: AppSvgIcon(
-                    AppSvgAssets.chevronDown,
-                    size: 16,
-                    color: tabColor,
-                  ),
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: AppColors.textDark,
-                  ),
+                  icon: AppSvgIcon(AppSvgAssets.chevronDown, size: 16, color: tabColor),
+                  style: const TextStyle(fontSize: 12, color: AppColors.textDark),
                   items: ['Highest', 'Lowest', 'Newest', 'Oldest']
                       .map((s) => DropdownMenuItem(value: s, child: Text(s)))
                       .toList(),
-                  onChanged: (v) {
-                    if (v != null) onSortChanged(v);
-                  },
+                  onChanged: (v) { if (v != null) onSortChanged(v); },
                 ),
               ),
             ),
@@ -881,17 +734,12 @@ class _TabItem extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
             decoration: BoxDecoration(
-              color: color,
-              borderRadius: BorderRadius.circular(10),
+              color: color, borderRadius: BorderRadius.circular(10),
             ),
-            child: Text(
-              '$count',
+            child: Text('$count',
               style: const TextStyle(
-                fontSize: 10,
-                color: AppColors.surface,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
+                fontSize: 10, color: Colors.white, fontWeight: FontWeight.w700,
+              )),
           ),
         ],
       ],

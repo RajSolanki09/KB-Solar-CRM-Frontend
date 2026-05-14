@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
-import 'package:solar_project/core/app_colors.dart';
 
 // ─────────────────────────────────────────────
 //  COMPACT CARD
@@ -42,7 +41,7 @@ class CompactRow extends StatelessWidget {
             child: Text(
               value,
               textAlign: TextAlign.end,
-              style: const TextStyle(fontSize: 13, color: AppColors.textDark),
+              style: const TextStyle(fontSize: 13, color: Colors.black87),
             ),
           ),
         ],
@@ -65,7 +64,7 @@ class SectionTitle extends StatelessWidget {
       style: const TextStyle(
         fontSize: 13,
         fontWeight: FontWeight.w600,
-        color: AppColors.textDark,
+        color: Colors.black87,
       ),
     );
   }
@@ -82,7 +81,7 @@ class StatusBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     return Chip(
       label: Text(status, style: const TextStyle(fontSize: 11)),
-      backgroundColor: AppColors.primary,
+      backgroundColor: Colors.blue.shade50,
       padding: EdgeInsets.zero,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
     );
@@ -155,25 +154,19 @@ class CompactStepper extends StatelessWidget {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: isDone
-                        ? AppColors.success
+                        ? Colors.green
                         : isCurrent
-                        ? AppColors.primary
+                        ? Colors.blue
                         : Colors.grey.shade300,
                   ),
                   child: Center(
                     child: isDone
-                        ? const AppSvgIcon(
-                            AppSvgAssets.check,
-                            size: 13,
-                            color: AppColors.surface,
-                          )
+                        ? const AppSvgIcon(AppSvgAssets.check, size: 13, color: Colors.white)
                         : Text(
                             '${i + 1}',
                             style: TextStyle(
                               fontSize: 11,
-                              color: isCurrent
-                                  ? AppColors.surface
-                                  : Colors.black54,
+                              color: isCurrent ? Colors.white : Colors.black54,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -189,10 +182,10 @@ class CompactStepper extends StatelessWidget {
                           ? FontWeight.w600
                           : FontWeight.normal,
                       color: isDone
-                          ? AppColors.success
+                          ? Colors.green.shade700
                           : isCurrent
-                          ? AppColors.primary
-                          : AppColors.background,
+                          ? Colors.blue.shade700
+                          : Colors.grey.shade500,
                     ),
                   ),
                 ),
@@ -203,12 +196,12 @@ class CompactStepper extends StatelessWidget {
                       vertical: 2,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.primary,
+                      color: Colors.blue.shade50,
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: const Text(
                       "Current",
-                      style: TextStyle(fontSize: 10, color: AppColors.primary),
+                      style: TextStyle(fontSize: 10, color: Colors.blue),
                     ),
                   ),
               ],

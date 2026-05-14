@@ -1,13 +1,13 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:solar_project/core/app_colors.dart';
 import 'package:solar_project/services/api_service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:solar_project/Cubits/Auth/auth_cubit.dart';
 import 'package:solar_project/Helper/app_feedback.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
 import 'package:solar_project/Helper/profile_widgets.dart';
-import 'package:solar_project/core/app_colors.dart';
 
 class SalesProfilePage extends StatefulWidget {
   const SalesProfilePage({super.key});
@@ -40,17 +40,19 @@ class _SalesProfilePageState extends State<SalesProfilePage> {
     });
     try {
       final user = await _apiService.getProfile();
-      if (mounted)
+      if (mounted) {
         setState(() {
           _user = user;
           _isLoading = false;
         });
+      }
     } catch (e) {
-      if (mounted)
+      if (mounted) {
         setState(() {
           _error = e.toString().replaceAll('Exception: ', '');
           _isLoading = false;
         });
+      }
     }
   }
 
@@ -102,10 +104,7 @@ class _SalesProfilePageState extends State<SalesProfilePage> {
           _localImage = null;
           _isUploadingImage = false;
         });
-        AppFeedback.showError(
-          context,
-          e.toString().replaceAll('Exception: ', ''),
-        );
+        AppFeedback.showError(context, e.toString().replaceAll('Exception: ', ''));
       }
     }
   }
@@ -124,23 +123,23 @@ class _SalesProfilePageState extends State<SalesProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor:  AppColors.background,
+      backgroundColor:   AppColors.slate50,
       appBar: AppBar(
-        backgroundColor:  AppColors.background,
+        backgroundColor:   AppColors.slate50,
         elevation: 0,
         centerTitle: true,
         title: const Text(
           "My Profile",
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            color: AppColors.primary,
+            color: AppColors.purple500,
           ),
         ),
         actions: [
           IconButton(
             icon: const AppSvgIcon(
               AppSvgAssets.refreshCw,
-              color: AppColors.primary,
+              color: AppColors.purple500,
             ),
             onPressed: _loadProfile,
           ),
@@ -152,7 +151,7 @@ class _SalesProfilePageState extends State<SalesProfilePage> {
       ),
       body: _isLoading
           ? const Center(
-              child: CircularProgressIndicator(color: AppColors.primary),
+              child: CircularProgressIndicator(color: AppColors.purple500),
             )
           : _error != null
           ? ProfileErrorView(message: _error, onRetry: _loadProfile)
@@ -185,14 +184,14 @@ class _SalesProfilePageState extends State<SalesProfilePage> {
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [AppColors.primary, Color(0xFF9F44D3)],
+                colors: [AppColors.purple500, AppColors.purpleVariant1],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.primary.withOpacity(0.35),
+                  color:   AppColors.purple500.withOpacity(0.35),
                   blurRadius: 16,
                   offset: const Offset(0, 6),
                 ),
@@ -205,13 +204,13 @@ class _SalesProfilePageState extends State<SalesProfilePage> {
                   children: [
                     CircleAvatar(
                       radius: 40,
-                      backgroundColor: AppColors.surface,
+                      backgroundColor: Colors.white,
                       backgroundImage: hasImage ? imageProvider : null,
                       child: !hasImage
                           ? const AppSvgIcon(
                               AppSvgAssets.userRound,
                               size: 40,
-                              color: AppColors.primary,
+                              color: AppColors.purple500,
                             )
                           : null,
                     ),
@@ -224,7 +223,7 @@ class _SalesProfilePageState extends State<SalesProfilePage> {
                             width: 24,
                             height: 24,
                             child: CircularProgressIndicator(
-                              color: AppColors.surface,
+                              color: Colors.white,
                               strokeWidth: 2,
                             ),
                           ),
@@ -240,10 +239,10 @@ class _SalesProfilePageState extends State<SalesProfilePage> {
                             width: 28,
                             height: 28,
                             decoration: BoxDecoration(
-                              color: AppColors.surface,
+                              color: Colors.white,
                               shape: BoxShape.circle,
                               border: Border.all(
-                                color: AppColors.primary,
+                                color:   AppColors.purple500,
                                 width: 1.5,
                               ),
                               boxShadow: [
@@ -257,7 +256,7 @@ class _SalesProfilePageState extends State<SalesProfilePage> {
                             child: const AppSvgIcon(
                               AppSvgAssets.camera,
                               size: 16,
-                              color: AppColors.primary,
+                              color: AppColors.purple500,
                             ),
                           ),
                         ),
@@ -277,7 +276,7 @@ class _SalesProfilePageState extends State<SalesProfilePage> {
                         style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.surface,
+                          color: Colors.white,
                         ),
                       ),
                       const SizedBox(height: 6),
@@ -285,7 +284,7 @@ class _SalesProfilePageState extends State<SalesProfilePage> {
                         roleDisplay,
                         style: const TextStyle(
                           fontSize: 14,
-                          color: AppColors.surface,
+                          color: Colors.white70,
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -296,8 +295,8 @@ class _SalesProfilePageState extends State<SalesProfilePage> {
                         ),
                         decoration: BoxDecoration(
                           color: isActive
-                              ? AppColors.success.withOpacity(0.3)
-                              : AppColors.error.withOpacity(0.3),
+                              ? Colors.green.withOpacity(0.3)
+                              : Colors.red.withOpacity(0.3),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
@@ -305,8 +304,8 @@ class _SalesProfilePageState extends State<SalesProfilePage> {
                           style: TextStyle(
                             fontSize: 12,
                             color: isActive
-                                ? AppColors.success
-                                : AppColors.error,
+                                ? Colors.greenAccent
+                                : Colors.redAccent,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -330,13 +329,13 @@ class _SalesProfilePageState extends State<SalesProfilePage> {
           // ── Logout Button ────────────────────────────────────────────────
           OutlinedButton.icon(
             onPressed: _confirmLogout,
-            icon: const AppSvgIcon(AppSvgAssets.logOut, color: AppColors.error),
+            icon: const AppSvgIcon(AppSvgAssets.logOut, color: Colors.red),
             label: const Text(
               'Logout',
-              style: TextStyle(color: AppColors.error, fontSize: 15),
+              style: TextStyle(color: Colors.red, fontSize: 15),
             ),
             style: OutlinedButton.styleFrom(
-              side: const BorderSide(color: AppColors.error),
+              side: const BorderSide(color: Colors.red),
               minimumSize: const Size(double.infinity, 50),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14),
@@ -354,7 +353,7 @@ class _SalesProfilePageState extends State<SalesProfilePage> {
       margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
@@ -366,7 +365,7 @@ class _SalesProfilePageState extends State<SalesProfilePage> {
       ),
       child: Row(
         children: [
-          AppSvgIcon(svgAsset, color: AppColors.primary),
+          AppSvgIcon(svgAsset, color:   AppColors.purple500),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
@@ -392,3 +391,6 @@ class _SalesProfilePageState extends State<SalesProfilePage> {
     );
   }
 }
+
+
+

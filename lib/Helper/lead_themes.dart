@@ -3,32 +3,32 @@ import 'package:solar_project/core/app_colors.dart';
 
 class LeadTheme {
   // ─────────────────────────────────────────
-  // BACKGROUND & SURFACE
+  // LIGHT CRM BACKGROUND (Compact Friendly)
   // ─────────────────────────────────────────
-  static const Color bg = AppColors.background;
-  static const Color surface = AppColors.surface;
-  static const Color surfaceDeep = AppColors.surface;
-  static const Color border = AppColors.divider;
+  static const Color bg = AppColors.primary;
+  static const Color surface = Colors.white;
+  static const Color surfaceDeep = Colors.white;
+  static const Color border = AppColors.primary;
 
   // ─────────────────────────────────────────
   // BRAND COLORS
   // ─────────────────────────────────────────
-  static const Color primary = AppColors.primary;
-  static const Color secondary = AppColors.primaryLight;
-  static const Color warning = AppColors.warning;       // = primary (0xFF5B4FCF)
-  static const Color danger = AppColors.error;
-  static const Color success = AppColors.success;       // = primary (0xFF5B4FCF)
-  static const Color orange = AppColors.primaryDark;
+  static const Color primary = AppColors.primary; // Solar
+  static const Color secondary = AppColors.primary; // Sprinkler
+  static const Color warning = AppColors.primary;
+  static const Color danger = AppColors.primary;
+  static const Color success = AppColors.primary;
+  static const Color orange = AppColors.primary;
 
   // ─────────────────────────────────────────
-  // TEXT COLORS
+  // TEXT COLORS (DARK TEXT)
   // ─────────────────────────────────────────
-  static const Color textPrimary = AppColors.textDark;
-  static const Color textSecondary = AppColors.textGray;
-  static const Color textMuted = AppColors.textLight;
+  static const Color textPrimary = AppColors.primary;
+  static const Color textSecondary = AppColors.primary;
+  static const Color textMuted = AppColors.primary;
 
   // ─────────────────────────────────────────
-  // COMPACT SPACING
+  // COMPACT SPACING (IMPORTANT)
   // ─────────────────────────────────────────
   static const double paddingSmall = 6;
   static const double paddingMedium = 10;
@@ -43,35 +43,35 @@ class LeadTheme {
   static Color statusColor(String status) {
     switch (status) {
       case 'New Lead':
-        return AppColors.primaryLight;
+        return secondary;
       case 'Visit Scheduled':
-        return AppColors.primary;
+        return warning;
       case 'Visited':
-        return AppColors.primaryDark;
+        return primary;
       case 'Quotation Sent':
-        return AppColors.primary;
+        return warning;
       case 'Followup':
-        return AppColors.primaryLight;
+        return warning;
       case 'Deal Closed':
-        return AppColors.success;           // = primary
+        return success;
       case 'Portal Submitted':
-        return AppColors.primaryTint;
+        return secondary;
       case 'Installed':
-        return AppColors.solar;             // = primary
+        return primary;
       case 'Meter Installed':
-        return AppColors.primaryDark;
+        return warning;
       case 'Subsidy Completed':
-        return AppColors.success;
+        return success;
       case 'Payment Completed':
-        return AppColors.success;
+        return success;
       case 'Payment Remaining':
-        return AppColors.warning;           // = primary
+        return warning;
       case 'Project Completed':
-        return AppColors.darkNavy;
+        return success;
       case 'Cancelled':
-        return AppColors.error;
+        return danger;
       default:
-        return AppColors.primaryLight;
+        return secondary;
     }
   }
 
@@ -81,13 +81,13 @@ class LeadTheme {
   static Color priorityColor(String priority) {
     switch (priority) {
       case 'High':
-        return AppColors.error;
+        return danger;
       case 'Medium':
-        return AppColors.primary;
+        return warning;
       case 'Low':
-        return AppColors.primaryLight;
+        return success;
       default:
-        return AppColors.primaryLight;
+        return secondary;
     }
   }
 
@@ -100,3 +100,9 @@ class LeadTheme {
     return amount.toStringAsFixed(0);
   }
 }
+
+
+
+
+
+

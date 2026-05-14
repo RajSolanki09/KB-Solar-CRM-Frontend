@@ -14,7 +14,18 @@ class SprinklerLeadLoading extends SprinklerLeadState {}
 /// Emitted by fetchAllLeads() — carries the full list for the list screen.
 class SprinklerLeadsLoaded extends SprinklerLeadState {
   final List<SprinklerLeadModel> leads;
-  SprinklerLeadsLoaded(this.leads);
+  final int total;
+  final int page;
+  final int pages;
+  final int tabIndex;
+
+  SprinklerLeadsLoaded(
+    this.leads, {
+    required this.total,
+    required this.page,
+    required this.pages,
+    required this.tabIndex,
+  });
 }
 
 /// Emitted after any single-lead operation succeeds:

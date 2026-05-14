@@ -5,10 +5,10 @@ import 'package:solar_project/Cubits/SolarLeads/solar_leads_cubit.dart';
 import 'package:solar_project/Cubits/SolarLeads/solar_leads_state.dart';
 import 'package:solar_project/Helper/app_feedback.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
+import 'package:solar_project/Helper/lead_form_widgets.dart';
 import 'package:solar_project/Helper/lead_themes.dart';
 import 'package:solar_project/Helper/lead_widgets.dart';
 import 'package:solar_project/data/Models/solar_leads_model.dart';
-import 'package:solar_project/core/app_colors.dart';
 
 class SolarSubsidyScreen extends StatefulWidget {
   final SolarLeadsModel lead;
@@ -145,7 +145,11 @@ class _State extends State<SolarSubsidyScreen> {
                 children: [
                   const SectionTitle('Notes'),
                   const SizedBox(height: 8),
-                  _subsidyField(_notesC, 'Notes...', maxLines: 3),
+                  _subsidyField(
+                    _notesC,
+                    'Notes...',
+                    maxLines: 3,
+                  ),
                 ],
               ),
             ),
@@ -194,14 +198,14 @@ class _YesNoRow extends StatelessWidget {
         _Chip(
           label: 'Yes',
           selected: value == true,
-          color: AppColors.success,
+          color: Colors.green,
           onTap: () => onChanged(value == true ? null : true),
         ),
         const SizedBox(width: 6),
         _Chip(
           label: 'No',
           selected: value == false,
-          color: AppColors.error,
+          color: Colors.red,
           onTap: () => onChanged(value == false ? null : false),
         ),
       ],
@@ -257,11 +261,7 @@ Widget _infoBanner(SolarLeadsModel lead) => Container(
   ),
   child: Row(
     children: [
-      const AppSvgIcon(
-        AppSvgAssets.userRound,
-        size: 16,
-        color: LeadTheme.primary,
-      ),
+      const AppSvgIcon(AppSvgAssets.userRound, size: 16, color: LeadTheme.primary),
       const SizedBox(width: 8),
       Expanded(
         child: Column(
@@ -293,21 +293,15 @@ Widget _subsidyField(
   TextEditingController c,
   String label, {
   int maxLines = 1,
-}) => TextField(
+}) => LeadTextFormField(
   controller: c,
+  label: label,
+  hintText: label,
+  svgIcon: AppSvgAssets.fileText,
+  accentColor: LeadTheme.orange,
+  required: false,
   maxLines: maxLines,
-  style: const TextStyle(fontSize: 13, color: LeadTheme.textPrimary),
-  decoration: InputDecoration(
-    hintText: label,
-    hintStyle: const TextStyle(fontSize: 12, color: LeadTheme.textSecondary),
-    filled: true,
-    fillColor: LeadTheme.surface,
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(8),
-      borderSide: BorderSide.none,
-    ),
-    contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-  ),
+  bottomSpacing: 0,
 );
 
 Widget _saveBtn(bool saving, VoidCallback onPressed, String label) => SizedBox(
@@ -317,7 +311,7 @@ Widget _saveBtn(bool saving, VoidCallback onPressed, String label) => SizedBox(
     onPressed: saving ? null : onPressed,
     style: ElevatedButton.styleFrom(
       backgroundColor: LeadTheme.primary,
-      foregroundColor: AppColors.surface,
+      foregroundColor: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
     ),
     child: saving
@@ -326,7 +320,7 @@ Widget _saveBtn(bool saving, VoidCallback onPressed, String label) => SizedBox(
             height: 20,
             child: CircularProgressIndicator(
               strokeWidth: 2,
-              color: AppColors.surface,
+              color: Colors.white,
             ),
           )
         : Text(

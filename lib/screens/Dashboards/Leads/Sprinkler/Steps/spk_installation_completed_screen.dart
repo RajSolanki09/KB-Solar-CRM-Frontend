@@ -7,12 +7,12 @@ import 'package:solar_project/Cubits/SprinklerLeads/sprinkler_leads_cubit.dart';
 import 'package:solar_project/Cubits/SprinklerLeads/sprinkler_leads_state.dart';
 import 'package:solar_project/Helper/app_feedback.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
+import 'package:solar_project/Helper/lead_form_widgets.dart';
 import 'package:solar_project/Helper/lead_themes.dart';
 import 'package:solar_project/Helper/lead_widgets.dart';
 import 'package:solar_project/Helper/picked_photo.dart';
 import 'package:solar_project/Helper/spk_photo_picker.dart';
 import 'package:solar_project/data/Models/sprinkler_lead_model.dart';
-import 'package:solar_project/core/app_colors.dart';
 
 class SpkInstallationCompleteScreen extends StatefulWidget {
   final SprinklerLeadModel lead;
@@ -134,7 +134,7 @@ class _State extends State<SpkInstallationCompleteScreen> {
           leading: IconButton(
             icon: const AppSvgIcon(
               AppSvgAssets.chevronLeft,
-              color: AppColors.surface,
+              color: Colors.white,
               size: 18,
             ),
             onPressed: () => Navigator.pop(context),
@@ -184,7 +184,7 @@ class _State extends State<SpkInstallationCompleteScreen> {
         if (widget.lead.dealData.finalDealAmount != null)
           _InfoBanner(
             svgAsset: AppSvgAssets.handshake,
-            color: AppColors.success,
+            color: Colors.green,
             text:
                 'Deal: ₹${widget.lead.dealData.finalDealAmount!.toStringAsFixed(0)}'
                 '  |  Advance: ₹${widget.lead.dealData.advancePayment?.toStringAsFixed(0) ?? "0"}',
@@ -406,32 +406,14 @@ class _Field extends StatelessWidget {
   const _Field(this.c, this.label, this.svgAsset, {this.maxLines = 1});
   @override
   Widget build(BuildContext context) {
-    return TextField(
+    return LeadTextFormField(
       controller: c,
+      label: label,
+      svgIcon: svgAsset,
+      accentColor: LeadTheme.secondary,
+      required: false,
       maxLines: maxLines,
-      style: const TextStyle(fontSize: 13, color: LeadTheme.textPrimary),
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: const TextStyle(
-          fontSize: 12,
-          color: LeadTheme.textSecondary,
-        ),
-        prefixIcon: Padding(
-          padding: const EdgeInsets.only(left: 10, right: 6),
-          child: AppSvgIcon(svgAsset, size: 16, color: LeadTheme.textSecondary),
-        ),
-        prefixIconConstraints: const BoxConstraints(minWidth: 36),
-        filled: true,
-        fillColor: LeadTheme.surface,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide.none,
-        ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 10,
-          vertical: 10,
-        ),
-      ),
+      bottomSpacing: 0,
     );
   }
 }
@@ -496,7 +478,7 @@ class _DateTile extends StatelessWidget {
                   ? AppSvgAssets.circleCheckBig
                   : AppSvgAssets.chevronRight,
               size: 14,
-              color: date != null ? Colors.teal : AppColors.textLight,
+              color: date != null ? Colors.teal : Colors.grey.shade400,
             ),
           ],
         ),
@@ -616,7 +598,7 @@ class _SaveBtn extends StatelessWidget {
         onPressed: saving ? null : onTap,
         style: ElevatedButton.styleFrom(
           backgroundColor: LeadTheme.secondary,
-          foregroundColor: AppColors.surface,
+          foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
           ),
@@ -627,7 +609,7 @@ class _SaveBtn extends StatelessWidget {
                 height: 20,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  color: AppColors.surface,
+                  color: Colors.white,
                 ),
               )
             : Text(

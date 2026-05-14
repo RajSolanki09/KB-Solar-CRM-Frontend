@@ -17,8 +17,106 @@ class MaterialListScreen extends StatefulWidget {
   State<MaterialListScreen> createState() => _MaterialListScreenState();
 }
 
-class _MaterialListScreenState extends State<MaterialListScreen>
-    with TickerProviderStateMixin {
+class _MaterialListScreenState extends State<MaterialListScreen> with TickerProviderStateMixin {
+  // Helper to build page number buttons for material pagination bar
+  List<Widget> _buildPageNumbers() {
+    const Color primaryColor = AppColors.indigo500;
+    const Color borderColor = AppColors.slate200;
+    const Color unselectedBg = AppColors.slate50;
+    const int maxPagesToShow = 5;
+    List<Widget> widgets = [];
+    int start = (_materialPage - 2).clamp(1, (_materialTotalPages - maxPagesToShow + 1).clamp(1, _materialTotalPages));
+    int end = (start + maxPagesToShow - 1).clamp(1, _materialTotalPages);
+    if (_materialTotalPages <= maxPagesToShow) {
+      start = 1;
+      end = _materialTotalPages;
+    }
+    for (int i = start; i <= end; i++) {
+      final bool isSelected = i == _materialPage;
+      widgets.add(
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: GestureDetector(
+            onTap: isSelected || _loadingMaterials ? null : () => _onMaterialPageChanged(i),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 150),
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: isSelected ? primaryColor : unselectedBg,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: borderColor, width: 1.5),
+              ),
+              child: Center(
+                child: Text(
+                  '$i',
+                  style: TextStyle(
+                    color: isSelected ? Colors.white : primaryColor,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 18,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+    return widgets;
+  }
+
+  // Helper to build page number buttons for customer pagination bar
+  List<Widget> _buildCustomerPageNumbers() {
+    const Color primaryColor = AppColors.indigo500;
+    const Color borderColor = AppColors.slate200;
+    const Color unselectedBg = AppColors.slate50;
+    const int maxPagesToShow = 5;
+    List<Widget> widgets = [];
+    int start = (_customerPage - 2).clamp(1, (_customerTotalPages - maxPagesToShow + 1).clamp(1, _customerTotalPages));
+    int end = (start + maxPagesToShow - 1).clamp(1, _customerTotalPages);
+    if (_customerTotalPages <= maxPagesToShow) {
+      start = 1;
+      end = _customerTotalPages;
+    }
+    for (int i = start; i <= end; i++) {
+      final bool isSelected = i == _customerPage;
+      widgets.add(
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: GestureDetector(
+            onTap: isSelected || _loadingCustomers ? null : () => _onCustomerPageChanged(i),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 150),
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: isSelected ? primaryColor : unselectedBg,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: borderColor, width: 1.5),
+              ),
+              child: Center(
+                child: Text(
+                  '$i',
+                  style: TextStyle(
+                    color: isSelected ? Colors.white : primaryColor,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 18,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+    return widgets;
+  }
+
+  void _onCustomerPageChanged(int newPage) {
+    if (newPage < 1 || newPage > _customerTotalPages) return;
+    _loadCustomers(page: newPage);
+  }
+    // (removed duplicate material pagination code)
   final ApiService _apiService = ApiService();
   late TabController _tabController;
 
@@ -26,35 +124,51 @@ class _MaterialListScreenState extends State<MaterialListScreen>
   bool _loadingCustomers = true;
   List<Map<String, dynamic>> _materials = const [];
   List<Map<String, dynamic>> _customers = const [];
+  int _customerPage = 1;
+  int _customerTotalPages = 1;
+  static const int _customerLimit = 10;
+  int _materialPage = 1;
+  int _materialTotalPages = 1;
+  // Helper for INR formatting
+  String _inr(dynamic value) {
+    final numValue = value is num
+        ? value.toDouble()
+        : double.tryParse('$value') ?? 0;
+    return '₹${numValue.toStringAsFixed(2)}';
+  }
 
-  late final VoidCallback _tabListener;
+  String _formatDate(dynamic value) {
+      final raw = value?.toString() ?? '';
+      final dt = DateTime.tryParse(raw);
+      if (dt == null) return '-';
+      return DateFormat('dd MMM yyyy').format(dt.toLocal());
+    }
+  static const int _materialLimit = 10;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    _tabListener = () {
-      if (mounted) setState(() {});
-    };
-    _tabController.addListener(_tabListener);
+    _tabController.addListener(() => setState(() {}));
     _loadMaterials();
     _loadCustomers();
   }
 
   @override
   void dispose() {
-    _tabController.removeListener(_tabListener);
     _tabController.dispose();
     super.dispose();
   }
 
-  Future<void> _loadMaterials() async {
+  Future<void> _loadMaterials({int page = 1}) async {
     setState(() => _loadingMaterials = true);
     try {
-      final data = await _apiService.getMaterials();
+      final data = await _apiService.getMaterials(page: page, limit: _materialLimit);
       if (!mounted) return;
       setState(() {
-        _materials = data;
+        _materials = List<Map<String, dynamic>>.from(data['materials'] ?? []);
+        _materialPage = data['page'] ?? 1;
+        _materialTotalPages = data['totalPages'] ?? 1;
         _loadingMaterials = false;
       });
     } catch (e) {
@@ -64,13 +178,15 @@ class _MaterialListScreenState extends State<MaterialListScreen>
     }
   }
 
-  Future<void> _loadCustomers() async {
+  Future<void> _loadCustomers({int page = 1}) async {
     setState(() => _loadingCustomers = true);
     try {
-      final data = await _apiService.getMaterialCustomers();
+      final data = await _apiService.getMaterialCustomers(page: page, limit: _customerLimit);
       if (!mounted) return;
       setState(() {
-        _customers = data;
+        _customers = List<Map<String, dynamic>>.from(data['customers'] ?? []);
+        _customerPage = data['page'] ?? 1;
+        _customerTotalPages = data['totalPages'] ?? 1;
         _loadingCustomers = false;
       });
     } catch (e) {
@@ -81,15 +197,16 @@ class _MaterialListScreenState extends State<MaterialListScreen>
   }
 
   Future<void> _openAddMaterial() async {
-    await Navigator.push(
+    final result = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) =>
-            const AddMaterialScreen(appBarColor: AppColors.primaryDark),
+        builder: (_) => const AddMaterialScreen(appBarColor: AppColors.indigo500),
       ),
     );
     if (!mounted) return;
-    await _loadMaterials();
+    if (result == true) {
+      await _loadMaterials();
+    }
   }
 
   Future<void> _openAddCustomer() async {
@@ -97,11 +214,11 @@ class _MaterialListScreenState extends State<MaterialListScreen>
       context,
       MaterialPageRoute(
         builder: (_) =>
-            const AddMaterialCustomerScreen(appBarColor: AppColors.primaryDark),
+            const AddMaterialCustomerScreen(appBarColor: AppColors.indigo500),
       ),
     );
     if (!mounted) return;
-    await _loadCustomers();
+    await _loadCustomers(page: 1);
   }
 
   Future<void> _openEditCustomer(Map<String, dynamic> customer) async {
@@ -109,13 +226,13 @@ class _MaterialListScreenState extends State<MaterialListScreen>
       context,
       MaterialPageRoute(
         builder: (_) => AddMaterialCustomerScreen(
-          appBarColor: AppColors.primaryDark,
+          appBarColor:   AppColors.indigo500,
           initialCustomer: customer,
         ),
       ),
     );
     if (!mounted) return;
-    await _loadCustomers();
+    await _loadCustomers(page: _customerPage);
   }
 
   Future<void> _openCustomerPipeline(Map<String, dynamic> customer) async {
@@ -131,7 +248,7 @@ class _MaterialListScreenState extends State<MaterialListScreen>
         builder: (_) => MaterialCustomerPipelineScreen(
           customerId: id,
           initialCustomer: customer,
-          appBarColor: AppColors.primaryDark,
+          appBarColor:   AppColors.indigo500,
         ),
       ),
     );
@@ -145,7 +262,7 @@ class _MaterialListScreenState extends State<MaterialListScreen>
       context,
       MaterialPageRoute(
         builder: (_) => AddMaterialScreen(
-          appBarColor: AppColors.primaryDark,
+          appBarColor:   AppColors.indigo500,
           initialMaterial: material,
         ),
       ),
@@ -189,8 +306,8 @@ class _MaterialListScreenState extends State<MaterialListScreen>
             ElevatedButton(
               onPressed: () => Navigator.pop(ctx, true),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.error,
-                foregroundColor: AppColors.surface,
+                backgroundColor:   AppColors.redError,
+                foregroundColor: Colors.white,
               ),
               child: const Text('Delete'),
             ),
@@ -237,8 +354,8 @@ class _MaterialListScreenState extends State<MaterialListScreen>
             ElevatedButton(
               onPressed: () => Navigator.pop(ctx, true),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.error,
-                foregroundColor: AppColors.surface,
+                backgroundColor:   AppColors.indigo500,
+                foregroundColor: Colors.white,
               ),
               child: const Text('Delete'),
             ),
@@ -252,9 +369,7 @@ class _MaterialListScreenState extends State<MaterialListScreen>
     try {
       await _apiService.deleteMaterialCustomer(id);
       if (!mounted) return;
-      setState(() {
-        _customers = _customers.where((e) => _customerId(e) != id).toList();
-      });
+      await _loadCustomers(page: _customerPage);
       AppFeedback.showSuccess(context, 'Customer deleted successfully');
     } catch (e) {
       if (!mounted) return;
@@ -262,9 +377,14 @@ class _MaterialListScreenState extends State<MaterialListScreen>
     }
   }
 
+  void _onMaterialPageChanged(int newPage) {
+    if (newPage < 1 || newPage > _materialTotalPages) return;
+    _loadMaterials(page: newPage);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final color = widget.appBarColor ?? AppColors.primaryDark;
+    final Color primaryColor = widget.appBarColor ??   AppColors.indigo500;
     final screenWidth = MediaQuery.of(context).size.width;
     final isDesktop = screenWidth >= 1024;
     final isExtraLarge = screenWidth >= 1600;
@@ -276,16 +396,18 @@ class _MaterialListScreenState extends State<MaterialListScreen>
         : 14.0;
     final isMaterialTab = _tabController.index == 0;
 
+    // Widget build
+    // (no stray return)
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor:   AppColors.slate50,
       appBar: AppBar(
-        backgroundColor: color,
-        foregroundColor: AppColors.surface,
-        title: const Row(
+        backgroundColor: primaryColor,
+        foregroundColor: Colors.white,
+        title: Row(
           children: [
             AppSvgIcon(
-              AppSvgAssets.packagePlus, // 👈 material/inventory icon
-              color: AppColors.surface,
+              AppSvgAssets.packagePlus,
+              color: Colors.white,
               size: 18,
             ),
             SizedBox(width: 8),
@@ -298,7 +420,7 @@ class _MaterialListScreenState extends State<MaterialListScreen>
         leading: IconButton(
           icon: AppSvgIcon(
             AppSvgAssets.chevronLeft,
-            color: AppColors.surface,
+            color: Colors.white,
             size: 20,
           ),
           onPressed: () => Navigator.pop(context),
@@ -306,11 +428,11 @@ class _MaterialListScreenState extends State<MaterialListScreen>
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: isMaterialTab ? _openAddMaterial : _openAddCustomer,
-        backgroundColor: color,
-        foregroundColor: AppColors.surface,
-        icon: const AppSvgIcon(
+        backgroundColor: primaryColor,
+        foregroundColor: Colors.white,
+        icon: AppSvgIcon(
           AppSvgAssets.plus,
-          color: AppColors.surface,
+          color: Colors.white,
           size: 18,
         ),
         label: Text(isMaterialTab ? 'Add Material' : 'Add Customer'),
@@ -318,193 +440,278 @@ class _MaterialListScreenState extends State<MaterialListScreen>
       body: Column(
         children: [
           Container(
-            color: AppColors.surface,
+            color: Colors.white,
             child: TabBar(
               controller: _tabController,
-              labelColor: color,
-              unselectedLabelColor: AppColors.textGray,
-              indicatorColor: color,
-              tabs: const [
+              labelColor: primaryColor,
+              unselectedLabelColor:   AppColors.slate500,
+              indicatorColor: primaryColor,
+              tabs: [
                 Tab(text: 'Materials'),
                 Tab(text: 'Customers'),
               ],
             ),
           ),
           Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                RefreshIndicator(
-                  color: color,
-                  onRefresh: _loadMaterials,
-                  child: _loadingMaterials
-                      ? const Center(child: CircularProgressIndicator())
-                      : _materials.isEmpty
-                      ? ListView(
-                          children: const [
-                            SizedBox(height: 180),
-                            Center(
-                              child: Text(
-                                'No materials found',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.textGray,
-                                ),
-                              ),
-                            ),
-                          ],
-                        )
-                      : ListView(
-                          padding: EdgeInsets.all(horizontalPadding),
-                          children: [
-                            SizedBox(
-                              width: double.infinity,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: AppColors.surface,
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(color: AppColors.divider),
-                                ),
-                                clipBehavior: Clip.antiAlias,
-                                child: LayoutBuilder(
-                                  builder: (context, constraints) {
-                                    return SingleChildScrollView(
-                                      scrollDirection: Axis.horizontal,
-                                      child: ConstrainedBox(
-                                        constraints: BoxConstraints(
-                                          minWidth: constraints.maxWidth,
-                                        ),
-                                        child: DataTable(
-                                          headingRowColor:
-                                              WidgetStatePropertyAll(
-                                                color.withValues(alpha: 0.14),
-                                              ),
-                                          headingTextStyle: TextStyle(
-                                            fontWeight: FontWeight.w600,
-                                            color: color,
+                    child: TabBarView(
+                      controller: _tabController,
+                      children: [
+                        RefreshIndicator(
+                          color: primaryColor,
+                          onRefresh: () => _loadMaterials(page: 1),
+                          child: _loadingMaterials
+                              ? const Center(child: CircularProgressIndicator())
+                              : _materials.isEmpty
+                                  ? ListView(
+                                      children: [
+                                        SizedBox(height: 180),
+                                        Center(
+                                          child: Text(
+                                            'No materials found',
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w600,
+                                              color: AppColors.slate500,
+                                            ),
                                           ),
-                                          columnSpacing: isDesktop ? 56 : 28,
-                                          columns: const [
-                                            DataColumn(label: Text('Material')),
-                                            DataColumn(label: Text('Brand')),
-                                            DataColumn(label: Text('Purchase')),
-                                            DataColumn(label: Text('Selling')),
-                                            DataColumn(label: Text('GST')),
-                                            DataColumn(label: Text('Created')),
-                                            DataColumn(label: Text('Actions')),
-                                          ],
-                                          rows: _materials.map((item) {
-                                            return DataRow(
-                                              cells: [
-                                                DataCell(
-                                                  Text(
-                                                    '${item['materialName'] ?? '-'}',
-                                                  ),
-                                                ),
-                                                DataCell(
-                                                  Text(
-                                                    '${item['brand'] ?? '-'}',
-                                                  ),
-                                                ),
-                                                DataCell(
-                                                  Text(
-                                                    _inr(item['purchasePrice']),
-                                                  ),
-                                                ),
-                                                DataCell(
-                                                  Text(
-                                                    _inr(item['sellingPrice']),
-                                                  ),
-                                                ),
-                                                DataCell(
-                                                  Text(
-                                                    '${item['gstRate'] ?? '-'}',
-                                                  ),
-                                                ),
-                                                DataCell(
-                                                  Text(
-                                                    _formatDate(
-                                                      item['createdAt'],
+                                        ),
+                                      ],
+                                    )
+                                  : ListView(
+                                      padding: EdgeInsets.all(horizontalPadding),
+                                      children: [
+                                        SizedBox(
+                                          width: double.infinity,
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              color: Colors.white,
+                                              borderRadius: BorderRadius.circular(12),
+                                              border: Border.all(
+                                                color: AppColors.slate200,
+                                              ),
+                                            ),
+                                            clipBehavior: Clip.antiAlias,
+                                            child: LayoutBuilder(
+                                              builder: (context, constraints) {
+                                                return SingleChildScrollView(
+                                                  scrollDirection: Axis.horizontal,
+                                                  child: ConstrainedBox(
+                                                    constraints: BoxConstraints(
+                                                      minWidth: constraints.maxWidth,
+                                                    ),
+                                                    child: DataTable(
+                                                      headingRowColor:
+                                                          WidgetStatePropertyAll(
+                                                            primaryColor.withOpacity(0.14),
+                                                          ),
+                                                      headingTextStyle: TextStyle(
+                                                        fontWeight: FontWeight.w600,
+                                                        color: primaryColor,
+                                                      ),
+                                                      columnSpacing: isDesktop ? 56 : 28,
+                                                      columns: const [
+                                                        DataColumn(label: Text('Material')),
+                                                        DataColumn(label: Text('Brand')),
+                                                        DataColumn(label: Text('Purchase')),
+                                                        DataColumn(label: Text('Selling')),
+                                                        DataColumn(label: Text('GST')),
+                                                        DataColumn(label: Text('Created')),
+                                                        DataColumn(label: Text('Actions')),
+                                                      ],
+                                                      rows: _materials.map((item) {
+                                                        return DataRow(
+                                                          cells: [
+                                                            DataCell(
+                                                              Text(
+                                                                '${item['materialName'] ?? '-'}',
+                                                              ),
+                                                            ),
+                                                            DataCell(
+                                                              Text(
+                                                                '${item['brand'] ?? '-'}',
+                                                              ),
+                                                            ),
+                                                            DataCell(
+                                                              Text(
+                                                                _inr(item['purchasePrice']),
+                                                              ),
+                                                            ),
+                                                            DataCell(
+                                                              Text(
+                                                                _inr(item['sellingPrice']),
+                                                              ),
+                                                            ),
+                                                            DataCell(
+                                                              Text(
+                                                                '${item['gstRate'] ?? '-'}',
+                                                              ),
+                                                            ),
+                                                            DataCell(
+                                                              Text(
+                                                                _formatDate(
+                                                                  item['createdAt'],
+                                                                ),
+                                                              ),
+                                                            ),
+                                                            DataCell(
+                                                              Row(
+                                                                children: [
+                                                                  IconButton(
+                                                                    tooltip: 'Edit',
+                                                                    onPressed: () => _openEditMaterial(item),
+                                                                    icon: Icon(
+                                                                      Icons.edit_outlined,
+                                                                      color: primaryColor,
+                                                                      size: 20,
+                                                                    ),
+                                                                  ),
+                                                                  IconButton(
+                                                                    tooltip: 'Delete',
+                                                                    onPressed: () => _confirmAndDeleteMaterial(item),
+                                                                    icon: Icon(
+                                                                      Icons.delete_outline,
+                                                                      color: AppColors.redError,
+                                                                      size: 20,
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        );
+                                                      }).toList(),
                                                     ),
                                                   ),
-                                                ),
-                                                DataCell(
-                                                  Row(
-                                                    children: [
-                                                      IconButton(
-                                                        tooltip: 'Edit',
-                                                        onPressed: () =>
-                                                            _openEditMaterial(
-                                                              item,
-                                                            ),
-                                                        icon: Icon(
-                                                          Icons.edit_outlined,
-                                                          color: color,
-                                                          size: 20,
-                                                        ),
-                                                      ),
-                                                      IconButton(
-                                                        tooltip: 'Delete',
-                                                        onPressed: () =>
-                                                            _confirmAndDeleteMaterial(
-                                                              item,
-                                                            ),
-                                                        icon: const Icon(
-                                                          Icons.delete_outline,
-                                                          color: Color(
-                                                            0xFFDC2626,
-                                                          ),
-                                                          size: 20,
-                                                        ),
-                                                      ),
-                                                    ],
+                                                );
+                                              },
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(height: 12),
+                                        // Modern Pagination Bar (styled as per image)
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(vertical: 8),
+                                          child: Row(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+                                              // Previous Button
+                                              GestureDetector(
+                                                onTap: _materialPage > 1 && !_loadingMaterials
+                                                    ? () => _onMaterialPageChanged(_materialPage - 1)
+                                                    : null,
+                                                child: Container(
+                                                  width: 40,
+                                                  height: 40,
+                                                  decoration: BoxDecoration(
+                                                    color: AppColors.slate50,
+                                                    borderRadius: BorderRadius.circular(10),
+                                                    border: Border.all(color: AppColors.slate200, width: 1.5),
+                                                  ),
+                                                  child: Icon(Icons.chevron_left,
+                                                    color: _materialPage > 1 && !_loadingMaterials ? AppColors.indigo500 : AppColors.slate300,
+                                                    size: 22,
                                                   ),
                                                 ),
-                                              ],
-                                            );
-                                          }).toList(),
+                                              ),
+                                              ..._buildPageNumbers(),
+                                              // Next Button
+                                              GestureDetector(
+                                                onTap: _materialPage < _materialTotalPages && !_loadingMaterials
+                                                    ? () => _onMaterialPageChanged(_materialPage + 1)
+                                                    : null,
+                                                child: Container(
+                                                  width: 40,
+                                                  height: 40,
+                                                  decoration: BoxDecoration(
+                                                    color: AppColors.slate50,
+                                                    borderRadius: BorderRadius.circular(10),
+                                                    border: Border.all(color: AppColors.slate200, width: 1.5),
+                                                  ),
+                                                  child: Icon(Icons.chevron_right,
+                                                    color: _materialPage < _materialTotalPages && !_loadingMaterials ? AppColors.indigo500 : AppColors.slate300,
+                                                    size: 22,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
                                         ),
+                                      ],
+                                    ),
+                        ),
+                        Column(
+                          children: [
+                            Expanded(
+                              child: MaterialCustomerListTab(
+                                loading: _loadingCustomers,
+                                customers: _customers,
+                                onRefresh: () => _loadCustomers(page: 1),
+                                color: primaryColor,
+                                horizontalPadding: horizontalPadding,
+                                isDesktop: isDesktop,
+                                formatDate: _formatDate,
+                                onOpenCustomer: _openCustomerPipeline,
+                                onEditCustomer: _openEditCustomer,
+                                onDeleteCustomer: _confirmAndDeleteCustomer,
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  // Previous Button
+                                  GestureDetector(
+                                    onTap: _customerPage > 1 && !_loadingCustomers
+                                        ? () => _onCustomerPageChanged(_customerPage - 1)
+                                        : null,
+                                    child: Container(
+                                      width: 40,
+                                      height: 40,
+                                      decoration: BoxDecoration(
+                                        color: AppColors.slate50,
+                                        borderRadius: BorderRadius.circular(10),
+                                        border: Border.all(color: AppColors.slate200, width: 1.5),
                                       ),
-                                    );
-                                  },
-                                ),
+                                      child: Icon(Icons.chevron_left,
+                                        color: _customerPage > 1 && !_loadingCustomers ? AppColors.indigo500 : AppColors.slate300,
+                                        size: 22,
+                                      ),
+                                    ),
+                                  ),
+                                  ..._buildCustomerPageNumbers(),
+                                  // Next Button
+                                  GestureDetector(
+                                    onTap: _customerPage < _customerTotalPages && !_loadingCustomers
+                                        ? () => _onCustomerPageChanged(_customerPage + 1)
+                                        : null,
+                                    child: Container(
+                                      width: 40,
+                                      height: 40,
+                                      decoration: BoxDecoration(
+                                        color: AppColors.slate50,
+                                        borderRadius: BorderRadius.circular(10),
+                                        border: Border.all(color: AppColors.slate200, width: 1.5),
+                                      ),
+                                      child: Icon(Icons.chevron_right,
+                                        color: _customerPage < _customerTotalPages && !_loadingCustomers ? AppColors.indigo500 : AppColors.slate300,
+                                        size: 22,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ],
                         ),
-                ),
-                MaterialCustomerListTab(
-                  loading: _loadingCustomers,
-                  customers: _customers,
-                  onRefresh: _loadCustomers,
-                  color: color,
-                  horizontalPadding: horizontalPadding,
-                  isDesktop: isDesktop,
-                  formatDate: _formatDate,
-                  onOpenCustomer: _openCustomerPipeline,
-                  onEditCustomer: _openEditCustomer,
-                  onDeleteCustomer: _confirmAndDeleteCustomer,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  String _inr(dynamic value) {
-    final numValue = value is num
-        ? value.toDouble()
-        : double.tryParse('$value') ?? 0;
-    return '₹${numValue.toStringAsFixed(2)}';
-  }
-
-  String _formatDate(dynamic value) {
-    final raw = value?.toString() ?? '';
-    final dt = DateTime.tryParse(raw);
-    if (dt == null) return '-';
-    return DateFormat('dd MMM yyyy').format(dt.toLocal());
-  }
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            );
 }
+}
+
+
+

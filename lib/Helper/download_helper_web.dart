@@ -12,7 +12,7 @@ Future<void> saveFile(List<int> bytes, String fileName) async {
     ),
   );
   final url = web.URL.createObjectURL(blob);
-  final anchor = web.document.createElement('a') as web.HTMLAnchorElement
+  (web.document.createElement('a') as web.HTMLAnchorElement)
     ..href = url
     ..setAttribute('download', fileName)
     ..click();

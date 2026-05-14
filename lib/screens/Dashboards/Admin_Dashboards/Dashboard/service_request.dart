@@ -1,5 +1,5 @@
 // lib/screens/Dashboards/Admin_Dashboards/Services/service_request_page.dart
-// Admin view — list all service requests + add new
+// Admin view — list all service requests + add new  [PROFESSIONAL REDESIGN]
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -9,36 +9,57 @@ import 'package:solar_project/Cubits/Auth/auth_cubit.dart';
 import 'package:solar_project/Cubits/Auth/auth_state.dart';
 import 'package:solar_project/Cubits/ServiceLeads/service_leads_cubit.dart';
 import 'package:solar_project/Cubits/ServiceLeads/service_leads_state.dart';
+import 'package:solar_project/core/app_colors.dart';
 import 'package:solar_project/data/Models/service_request_model.dart';
 import 'package:solar_project/data/Models/admin_user_model.dart';
 import 'package:solar_project/services/api_service.dart';
 import 'package:solar_project/Helper/app_feedback.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
 import 'package:solar_project/screens/Dashboards/Admin_Dashboards/Services/service_detail_screen.dart';
-import 'package:solar_project/core/app_colors.dart';
 
-// ── Brand colour for service ──────────────────────────────────────────────────
-const _kGreen = AppColors.success;
+// ── Design tokens ─────────────────────────────────────────────────────────────
+const _kGreen = AppColors.greenLight2;
+const _kGreenLight = AppColors.bgLight1;
+const _kBg = AppColors.veryLight7;
+const _kSurface = AppColors.veryLight7;
+const _kBorder = AppColors.bgLight2;
+const _kText = AppColors.grayDark3;
+const _kTextMuted = AppColors.textGray;
+const _kTextHint = AppColors.grayLight;
+
+// Status palette
+const _kStatusOpen = AppColors.orange5;
+const _kStatusAssigned = AppColors.blue;
+const _kStatusInProgress = AppColors.amber;
+const _kStatusCompleted = AppColors.success;
+const _kStatusResolved = AppColors.purpleDark;
 
 class ServiceRequestPage extends StatefulWidget {
-  final Color appBarColor;
-  const ServiceRequestPage({super.key, this.appBarColor = _kGreen});
+  const ServiceRequestPage({super.key});
   @override
   State<ServiceRequestPage> createState() => _State();
 }
 
-class _State extends State<ServiceRequestPage> {
+class _State extends State<ServiceRequestPage> with TickerProviderStateMixin {
   final _searchCtrl = TextEditingController();
   String _filter = 'All';
   String _searchText = '';
-  bool _showOlderServices = false;
-  bool _showCompletedServices = false;
+  int _tabIndex = 0;
+  final Map<int, int> _tabPages = {0: 1, 1: 1, 2: 1};
+
+  late AnimationController _fadeCtrl;
+  late Animation<double> _fadeAnim;
 
   @override
   void initState() {
     super.initState();
+    _fadeCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 320),
+    );
+    _fadeAnim = CurvedAnimation(parent: _fadeCtrl, curve: Curves.easeOut);
+    _fadeCtrl.forward();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
       context.read<ServiceLeadCubit>().fetchAllServices();
     });
   }
@@ -46,30 +67,50 @@ class _State extends State<ServiceRequestPage> {
   @override
   void dispose() {
     _searchCtrl.dispose();
+    _fadeCtrl.dispose();
     super.dispose();
   }
 
   // ── Helpers ───────────────────────────────────────────────────────────────
   void _refresh() {
-    if (mounted) context.read<ServiceLeadCubit>().fetchAllServices();
+    if (!mounted) return;
+    _fadeCtrl.reset();
+    setState(() {
+      _tabIndex = 0;
+      _tabPages.updateAll((_, __) => 1);
+    });
+    context.read<ServiceLeadCubit>().fetchAllServices(
+      search: _searchText.isNotEmpty ? _searchText : null,
+      status: _filter != 'All' ? _filter : null,
+      tabIndex: 0,
+    );
+    _fadeCtrl.forward();
+  }
+
+  void _onTabChanged(int i) {
+    if (!mounted) return;
+    _fadeCtrl.reset();
+    setState(() => _tabIndex = i);
+    context.read<ServiceLeadCubit>().setTabAndFetch(i);
+    _fadeCtrl.forward();
+  }
+
+  void _onPageChanged(int page) {
+    if (!mounted) return;
+    setState(() => _tabPages[_tabIndex] = page);
+    context.read<ServiceLeadCubit>().fetchPage(page, tabIndex: _tabIndex);
   }
 
   bool get _isAdmin {
-    final authState = context.read<AppStateCubit>().state;
-    return authState is Authenticated && authState.role == UserRole.admin;
+    final s = context.read<AppStateCubit>().state;
+    return s is Authenticated && s.role == UserRole.admin;
   }
 
-  DateTime get _recentCutoff {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    return today.subtract(const Duration(days: 6)); // last 7 days inclusive
-  }
-
-  // ── Filter for active services only (excludes completed) ──────────────────
   List<ServiceRequestModel> _filtered(List<ServiceRequestModel> all) {
+    final now = DateTime.now();
+    final recentCutoff = DateTime(now.year, now.month, now.day).subtract(const Duration(days: 6));
     return all.where((s) {
-      if (s.isComplete) return false; // Only active services
-
+      if (s.isComplete) return false;
       final q = _searchText.toLowerCase();
       final matchSearch =
           q.isEmpty ||
@@ -77,22 +118,26 @@ class _State extends State<ServiceRequestPage> {
           s.phone.contains(q) ||
           s.serviceId.toLowerCase().contains(q) ||
           (s.assignedToName ?? '').toLowerCase().contains(q);
-
       final matchFilter =
           _filter == 'All' ||
           (_filter == 'Free' && s.chargeType == 'Free') ||
           (_filter == 'Paid' && s.chargeType == 'Paid') ||
           s.status == _filter;
-
+      // Tab-wise date filter
+      if (_tabIndex == 0) {
+        // Recent: last 7 days
+        if (s.createdAt.isBefore(recentCutoff)) return false;
+      } else if (_tabIndex == 1) {
+        // Older: before last 7 days
+        if (!s.createdAt.isBefore(recentCutoff)) return false;
+      }
       return matchSearch && matchFilter;
     }).toList();
   }
 
-  // ── Filter for completed services only ───────────────────────────────────
   List<ServiceRequestModel> _filterCompleted(List<ServiceRequestModel> all) {
     return all.where((s) {
-      if (!s.isComplete) return false; // Only completed services
-
+      if (!s.isComplete) return false;
       final q = _searchText.toLowerCase();
       final matchSearch =
           q.isEmpty ||
@@ -100,168 +145,32 @@ class _State extends State<ServiceRequestPage> {
           s.phone.contains(q) ||
           s.serviceId.toLowerCase().contains(q) ||
           (s.assignedToName ?? '').toLowerCase().contains(q);
-
       final matchFilter =
           _filter == 'All' ||
           (_filter == 'Free' && s.chargeType == 'Free') ||
           (_filter == 'Paid' && s.chargeType == 'Paid') ||
           s.status == _filter;
-
       return matchSearch && matchFilter;
     }).toList();
   }
 
-  // ── Delete confirmation (admin only, any step) ────────────────────────────
+  // ── Delete ────────────────────────────────────────────────────────────────
   Future<void> _confirmDelete(ServiceRequestModel service) async {
     if (!_isAdmin) {
       AppFeedback.showInfo(context, 'Only admin can delete service requests.');
       return;
     }
-
-    // ── Step 1: warning dialog ────────────────────────────────────────────
     final confirmed = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
-      builder: (dialogContext) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-        contentPadding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
-        actionsPadding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: AppColors.errorLight,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const AppSvgIcon(
-                AppSvgAssets.trash2,
-                size: 20,
-                color: AppColors.error,
-              ),
-            ),
-            const SizedBox(width: 10),
-            const Text(
-              'Delete Service Request?',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: AppColors.textDark,
-              ),
-            ),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 4),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: AppColors.background,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: AppColors.divider),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    service.customerName,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textDark,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    service.phone,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: AppColors.textGray,
-                    ),
-                  ),
-                  Text(
-                    service.serviceId,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: AppColors.textGray,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 12),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: const Color(0xFFFFF7ED),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: const Color(0xFFFED7AA)),
-              ),
-              child: const Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  AppSvgIcon(
-                    AppSvgAssets.triangleAlert,
-                    size: 16,
-                    color: AppColors.warning,
-                  ),
-                  SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'This will permanently remove ALL data including '
-                      'service details, assignments, and records. '
-                      'This action cannot be undone.',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Color(0xFF9A3412),
-                        height: 1.4,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(color: AppColors.textGray),
-            ),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(
-              backgroundColor: AppColors.error,
-              foregroundColor: AppColors.surface,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            onPressed: () => Navigator.pop(dialogContext, true),
-            child: const Text(
-              'Yes, Delete Permanently',
-              style: TextStyle(fontWeight: FontWeight.w600),
-            ),
-          ),
-        ],
-      ),
+      builder: (dCtx) => _DeleteDialog(service: service),
     );
-
     if (confirmed != true || !mounted) return;
 
-    // ── Step 2: second confirmation ───────────────────────────────────────
     final doubleConfirmed = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
-      builder: (dialogContext) => AlertDialog(
+      builder: (dCtx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
         contentPadding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
@@ -271,38 +180,37 @@ class _State extends State<ServiceRequestPage> {
           style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w700,
-            color: AppColors.error,
+            color: AppColors.redDarker,
           ),
         ),
         content: Text(
-          'You are about to permanently delete the service request for '
-          '"${service.customerName}". All records will be gone forever.',
+          'You are about to permanently delete the service request for "${service.customerName}". All records will be gone forever.',
           style: const TextStyle(
             fontSize: 13,
-            color: AppColors.textDark,
+            color: AppColors.gray400,
             height: 1.5,
           ),
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(dialogContext, false),
+            onPressed: () => Navigator.pop(dCtx, false),
             child: const Text(
               'No, Keep It',
               style: TextStyle(
-                color: AppColors.textDark,
+                color: AppColors.gray400,
                 fontWeight: FontWeight.w600,
               ),
             ),
           ),
           FilledButton(
             style: FilledButton.styleFrom(
-              backgroundColor: const Color(0xFF7F1D1D),
-              foregroundColor: AppColors.surface,
+              backgroundColor:   AppColors.redDark,
+              foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
-            onPressed: () => Navigator.pop(dialogContext, true),
+            onPressed: () => Navigator.pop(dCtx, true),
             child: const Text(
               'Delete Forever',
               style: TextStyle(fontWeight: FontWeight.w700),
@@ -311,25 +219,18 @@ class _State extends State<ServiceRequestPage> {
         ],
       ),
     );
-
     if (doubleConfirmed != true || !mounted) return;
-
-    // deleteService() internally calls fetchAllServices() on success
-    // and emits ServiceLeadError on failure — the BlocConsumer listener
-    // already shows the error snackbar, so we only need to handle success.
     await context.read<ServiceLeadCubit>().deleteService(service.id);
-
     if (!mounted) return;
     final latestState = context.read<ServiceLeadCubit>().state;
     if (latestState is! ServiceLeadError) {
       AppFeedback.showSuccess(
         context,
-        '${service.customerName}\'s service request permanently deleted.',
+        '${service.customerName}\'s request deleted.',
       );
     }
   }
 
-  // ── Open detail ───────────────────────────────────────────────────────────
   Future<void> _openDetail(
     BuildContext ctx,
     ServiceRequestModel service,
@@ -347,411 +248,422 @@ class _State extends State<ServiceRequestPage> {
     cubit.fetchAllServices();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: widget.appBarColor,
-        elevation: 0,
-        leading: Navigator.canPop(context)
-            ? IconButton(
-                icon: const AppSvgIcon(
-                  AppSvgAssets.chevronLeft,
-                  color: AppColors.surface,
-                  size: 18,
-                ),
-                onPressed: () => Navigator.pop(context),
-              )
-            : null,
-        title: const Row(
-          children: [
-            AppSvgIcon(AppSvgAssets.cog, color: AppColors.surface, size: 18),
-            SizedBox(width: 8),
-            Text(
-              'Service Requests',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: AppColors.surface,
+  // ── Pagination bar ────────────────────────────────────────────────────────
+  Widget _buildPaginationBar({
+    required int currPage,
+    required int totalPages,
+    required int shownCount,
+  }) {
+    return Container(
+      height: 56,
+      decoration: BoxDecoration(
+        color: _kSurface,
+        border: Border(top: BorderSide(color: _kBorder)),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            '$shownCount results  ·  Page $currPage of $totalPages',
+            style: const TextStyle(
+              fontSize: 12,
+              color: _kTextMuted,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          Row(
+            children: [
+              _PaginationBtn(
+                icon: AppSvgAssets.chevronLeft,
+                enabled: currPage > 1,
+                onTap: () => _onPageChanged(currPage - 1),
               ),
-            ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            icon: const AppSvgIcon(
-              AppSvgAssets.refreshCw,
-              color: AppColors.surface,
-            ),
-            onPressed: _refresh,
+              const SizedBox(width: 4),
+              ...List.generate(totalPages, (i) {
+                final p = i + 1;
+                final isSel = p == currPage;
+                if (totalPages > 5) {
+                  if (p != 1 &&
+                      p != totalPages &&
+                      (p < currPage - 1 || p > currPage + 1)) {
+                    if (p == currPage - 2 || p == currPage + 2) {
+                      return const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 4),
+                        child: Text(
+                          '…',
+                          style: TextStyle(fontSize: 12, color: _kTextMuted),
+                        ),
+                      );
+                    }
+                    return const SizedBox.shrink();
+                  }
+                }
+                return GestureDetector(
+                  onTap: () => _onPageChanged(p),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 180),
+                    margin: const EdgeInsets.symmetric(horizontal: 2),
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: isSel ? _kGreen : Colors.transparent,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: isSel ? _kGreen : _kBorder),
+                    ),
+                    child: Center(
+                      child: Text(
+                        '$p',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: isSel ? Colors.white : _kText,
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              }),
+              const SizedBox(width: 4),
+              _PaginationBtn(
+                icon: AppSvgAssets.chevronRight,
+                enabled: currPage < totalPages,
+                onTap: () => _onPageChanged(currPage + 1),
+              ),
+            ],
           ),
         ],
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _openAddServicePage(context),
-        backgroundColor: _kGreen,
-        icon: const AppSvgIcon(AppSvgAssets.plus, color: AppColors.surface),
-        label: const Text(
-          'New Request',
-          style: TextStyle(
-            color: AppColors.surface,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
-      body: BlocConsumer<ServiceLeadCubit, ServiceLeadState>(
-        listener: (ctx, state) {
-          if (state is ServiceLeadError) {
-            ScaffoldMessenger.of(ctx).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: AppColors.error,
-              ),
-            );
-          }
-          if (state is ServiceLeadSaved) {
-            ScaffoldMessenger.of(ctx).showSnackBar(
-              const SnackBar(
-                content: Text('Service saved successfully'),
-                backgroundColor: AppColors.success,
-              ),
-            );
-          }
-        },
-        builder: (ctx, state) {
-          if (state is ServiceLeadLoading) {
-            return const Center(
-              child: CircularProgressIndicator(color: _kGreen),
-            );
-          }
-
-          if (state is ServiceLeadError) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  AppSvgIcon(
-                    AppSvgAssets.triangleAlert,
-                    size: 48,
-                    color: AppColors.error,
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    state.message,
-                    style: const TextStyle(color: Colors.grey),
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton.icon(
-                    onPressed: _refresh,
-                    icon: const AppSvgIcon(AppSvgAssets.refreshCw, size: 16),
-                    label: const Text('Retry'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _kGreen,
-                      foregroundColor: AppColors.surface,
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }
-
-          if (state is ServiceLeadsLoaded) {
-            final all = state.services;
-            final filtered = _filtered(all);
-            final open = all.where((s) => !s.isComplete).length;
-            final done = all.where((s) => s.isComplete).length;
-
-            return Column(
-              children: [
-                // ── Summary bar ──────────────────────────────────────────
-                if (all.isNotEmpty)
-                  Container(
-                    margin: const EdgeInsets.fromLTRB(12, 10, 12, 0),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 10,
-                    ),
-                    decoration: BoxDecoration(
-                      color: _kGreen.withValues(alpha: 0.07),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: _kGreen.withValues(alpha: 0.2)),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        _Stat('Total', '${all.length}', _kGreen),
-                        Container(
-                          width: 1,
-                          height: 24,
-                          color: AppColors.divider,
-                        ),
-                        _Stat('Open', '$open', AppColors.solar),
-                        Container(
-                          width: 1,
-                          height: 24,
-                          color: AppColors.divider,
-                        ),
-                        _Stat('Done', '$done', AppColors.primary),
-                      ],
-                    ),
-                  ),
-
-                // ── Search + filter row ──────────────────────────────────
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(12, 10, 12, 0),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        flex: 3,
-                        child: Container(
-                          height: 38,
-                          decoration: BoxDecoration(
-                            color: AppColors.surface,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: AppColors.divider),
-                          ),
-                          child: TextField(
-                            controller: _searchCtrl,
-                            onChanged: (v) => setState(() => _searchText = v),
-                            decoration: const InputDecoration(
-                              hintText: 'Search name / phone / ID / tech',
-                              hintStyle: TextStyle(
-                                fontSize: 12,
-                                color: AppColors.textLight,
-                              ),
-                              prefixIcon: Padding(
-                                padding: EdgeInsets.all(8.0),
-                                child: AppSvgIcon(
-                                  AppSvgAssets.search,
-                                  size: 16,
-                                  color: _kGreen,
-                                ),
-                              ),
-                              border: InputBorder.none,
-                              contentPadding: EdgeInsets.symmetric(
-                                vertical: 10,
-                              ),
-                            ),
-                            style: const TextStyle(fontSize: 13),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        flex: 2,
-                        child: Container(
-                          height: 38,
-                          padding: const EdgeInsets.symmetric(horizontal: 10),
-                          decoration: BoxDecoration(
-                            color: AppColors.surface,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: _filter == 'All'
-                                  ? AppColors.divider
-                                  : _kGreen.withValues(alpha: 0.5),
-                              width: _filter == 'All' ? 1 : 1.5,
-                            ),
-                          ),
-                          child: DropdownButtonHideUnderline(
-                            child: DropdownButton<String>(
-                              value: _filter,
-                              isExpanded: true,
-                              isDense: true,
-                              icon: const AppSvgIcon(
-                                AppSvgAssets.chevronDown,
-                                size: 16,
-                                color: _kGreen,
-                              ),
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: _filter == 'All'
-                                    ? AppColors.textGray
-                                    : _kGreen,
-                                fontWeight: _filter == 'All'
-                                    ? FontWeight.normal
-                                    : FontWeight.w600,
-                              ),
-                              items:
-                                  [
-                                        'All',
-                                        'Open',
-                                        'Assigned',
-                                        'In Progress',
-                                        'Completed',
-                                        'Free',
-                                        'Paid',
-                                      ]
-                                      .map(
-                                        (s) => DropdownMenuItem(
-                                          value: s,
-                                          child: Text(
-                                            s,
-                                            style: const TextStyle(
-                                              fontSize: 12,
-                                              color: AppColors.textDark,
-                                            ),
-                                          ),
-                                        ),
-                                      )
-                                      .toList(),
-                              onChanged: (v) {
-                                if (v != null) setState(() => _filter = v);
-                              },
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                // ── Result count ─────────────────────────────────────────
-                if (filtered.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(14, 6, 14, 0),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        '${filtered.length} request${filtered.length != 1 ? "s" : ""}',
-                        style: const TextStyle(
-                          fontSize: 11,
-                          color: AppColors.textLight,
-                        ),
-                      ),
-                    ),
-                  ),
-
-                // ── Table sections / empty state ─────────────────────────
-                Expanded(
-                  child: filtered.isEmpty
-                      ? Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              AppSvgIcon(
-                                AppSvgAssets.cog,
-                                size: 52,
-                                color: AppColors.divider,
-                              ),
-                              const SizedBox(height: 10),
-                              Text(
-                                all.isEmpty
-                                    ? 'No service requests yet'
-                                    : 'No requests match filter',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: AppColors.textLight,
-                                ),
-                              ),
-                            ],
-                          ),
-                        )
-                      : RefreshIndicator(
-                          color: _kGreen,
-                          onRefresh: () async => _refresh(),
-                          child: LayoutBuilder(
-                            builder: (context, constraints) {
-                              final sorted = [...filtered]
-                                ..sort(
-                                  (a, b) => b.createdAt.compareTo(a.createdAt),
-                                );
-                              final recent = sorted
-                                  .where(
-                                    (s) => !s.createdAt.isBefore(_recentCutoff),
-                                  )
-                                  .toList();
-                              final older = sorted
-                                  .where(
-                                    (s) => s.createdAt.isBefore(_recentCutoff),
-                                  )
-                                  .toList();
-                              final minW = constraints.maxWidth < 900
-                                  ? 980.0
-                                  : constraints.maxWidth;
-
-                              // Filter completed services
-                              final completed = _filterCompleted(all);
-                              final sortedCompleted = [...completed]
-                                ..sort(
-                                  (a, b) => b.createdAt.compareTo(a.createdAt),
-                                );
-
-                              return ListView(
-                                physics: const AlwaysScrollableScrollPhysics(),
-                                padding: const EdgeInsets.fromLTRB(
-                                  12,
-                                  8,
-                                  12,
-                                  120,
-                                ),
-                                children: [
-                                  _TableSection(
-                                    title: 'Last 7 Days',
-                                    subtitle:
-                                        'Service requests created in the last seven days',
-                                    services: recent,
-                                    isAdmin: _isAdmin,
-                                    minWidth: minW,
-                                    onTap: (s) => _openDetail(ctx, s),
-                                    onDelete: _confirmDelete,
-                                    showEmptyMessage: true,
-                                  ),
-                                  const SizedBox(height: 12),
-                                  _CollapsibleTableSection(
-                                    title: 'Older Requests',
-                                    subtitle:
-                                        'Older records are collapsed by default',
-                                    services: older,
-                                    isAdmin: _isAdmin,
-                                    minWidth: minW,
-                                    initiallyExpanded: _showOlderServices,
-                                    onExpansionChanged: (v) {
-                                      if (mounted)
-                                        setState(() => _showOlderServices = v);
-                                    },
-                                    onTap: (s) => _openDetail(ctx, s),
-                                    onDelete: _confirmDelete,
-                                  ),
-                                  // ────────────────────────────────────
-                                  // COMPLETED REQUESTS - SINGLE TABLE
-                                  // ────────────────────────────────────
-                                  if (sortedCompleted.isNotEmpty) ...[
-                                    const SizedBox(height: 12),
-                                    _CollapsibleTableSection(
-                                      title: 'Completed Requests',
-                                      subtitle:
-                                          'All completed service requests listed by newest first',
-                                      services: sortedCompleted,
-                                      isAdmin: _isAdmin,
-                                      minWidth: minW,
-                                      initiallyExpanded: _showCompletedServices,
-                                      onExpansionChanged: (v) {
-                                        if (mounted)
-                                          setState(
-                                            () => _showCompletedServices = v,
-                                          );
-                                      },
-                                      onTap: (s) => _openDetail(ctx, s),
-                                      onDelete: _confirmDelete,
-                                    ),
-                                  ],
-                                ],
-                              );
-                            },
-                          ),
-                        ),
-                ),
-              ],
-            );
-          }
-          return const SizedBox.shrink();
-        },
       ),
     );
   }
 
-  // ── Open Add Service as Full Page ──────────────────────────────────────────
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<ServiceLeadCubit, ServiceLeadState>(
+      builder: (ctx, state) {
+        int currPage = 1, totalPages = 0, shownCount = 0;
+        bool hasPagination = false;
+        if (state is ServiceLeadsLoaded) {
+          final filtered = _tabIndex == 2
+              ? _filterCompleted(state.services)
+              : _filtered(state.services);
+          currPage = state.page;
+          totalPages = state.pages;
+          shownCount = filtered.length;
+          hasPagination = state.services.isNotEmpty && totalPages > 0;
+        }
+
+        return Scaffold(
+          backgroundColor: _kBg,
+          bottomNavigationBar: hasPagination
+              ? _buildPaginationBar(
+                  currPage: currPage,
+                  totalPages: totalPages,
+                  shownCount: shownCount,
+                )
+              : null,
+          appBar: _buildAppBar(),
+          body: BlocConsumer<ServiceLeadCubit, ServiceLeadState>(
+            listener: (ctx, state) {
+              if (state is ServiceLeadError) {
+                ScaffoldMessenger.of(ctx).showSnackBar(
+                  SnackBar(
+                    content: Text(state.message),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+              if (state is ServiceLeadSaved) {
+                ScaffoldMessenger.of(ctx).showSnackBar(
+                  const SnackBar(
+                    content: Text('Service saved successfully'),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+              }
+            },
+            builder: (ctx, state) {
+              if (state is ServiceLeadLoading) {
+                return const Center(child: _LoadingIndicator());
+              }
+              if (state is ServiceLeadError) {
+                return _ErrorView(message: state.message, onRetry: _refresh);
+              }
+              if (state is ServiceLeadsLoaded) {
+                return FadeTransition(
+                  opacity: _fadeAnim,
+                  child: _buildBody(ctx, state),
+                );
+              }
+              return const SizedBox.shrink();
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  PreferredSizeWidget _buildAppBar() {
+    return AppBar(
+      backgroundColor: _kGreen,
+      elevation: 0,
+      surfaceTintColor: Colors.transparent,
+      systemOverlayStyle: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+      ),
+      leading: Navigator.canPop(context)
+          ? IconButton(
+              icon: const AppSvgIcon(
+                AppSvgAssets.chevronLeft,
+                color: Colors.white,
+                size: 18,
+              ),
+              onPressed: () => Navigator.pop(context),
+            )
+          : null,
+      title: Row(
+        children: [
+          const AppSvgIcon(AppSvgAssets.cog, color: Colors.white, size: 18),
+          const SizedBox(width: 8),
+          const Text(
+            'Service Requests',
+            style: TextStyle(
+              fontSize: 17,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
+              letterSpacing: -0.3,
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        IconButton(
+          icon: const AppSvgIcon(
+            AppSvgAssets.refreshCw,
+            color: Colors.white,
+            size: 18,
+          ),
+          onPressed: _refresh,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBody(BuildContext ctx, ServiceLeadsLoaded state) {
+    final cubit = context.read<ServiceLeadCubit>();
+
+    return Column(
+      children: [
+        // ── Top toolbar: search + new request ──────────────────────────────
+        Container(
+          color: _kSurface,
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+          child: Row(
+            children: [
+              Expanded(
+                child: _SearchField(
+                  controller: _searchCtrl,
+                  onChanged: (v) => setState(() => _searchText = v),
+                ),
+              ),
+              const SizedBox(width: 10),
+              _NewRequestButton(onTap: () => _openAddServicePage(context)),
+            ],
+          ),
+        ),
+
+        // ── Filter chips ────────────────────────────────────────────────────
+        Container(
+          color: _kSurface,
+          padding: const EdgeInsets.fromLTRB(0, 0, 0, 12),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              children:
+                  [
+                    'All',
+                    'Open',
+                    'Assigned',
+                    'In Progress',
+                    'Completed',
+                    'Free',
+                    'Paid',
+                  ].asMap().entries.map((e) {
+                    final label = e.value;
+                    final isSel = _filter == label;
+                    return Padding(
+                      padding: EdgeInsets.only(right: e.key == 6 ? 0 : 8),
+                      child: _FilterChip(
+                        label: label,
+                        selected: isSel,
+                        onTap: () => setState(() => _filter = label),
+                      ),
+                    );
+                  }).toList(),
+            ),
+          ),
+        ),
+
+        // ── Divider ─────────────────────────────────────────────────────────
+        Container(height: 1, color: _kBorder),
+
+        // ── Tabs ─────────────────────────────────────────────────────────────
+        Expanded(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final services = state.services;
+              final filtered = _tabIndex == 2
+                  ? _filterCompleted(services)
+                  : _filtered(services);
+              final sorted = [...filtered]
+                ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+              final minW = constraints.maxWidth < 900
+                  ? 980.0
+                  : constraints.maxWidth;
+
+              final tabData = [
+                (
+                  label: 'Recent',
+                  count: cubit.getTabTotal(0),
+                  leads: _tabIndex == 0 ? sorted : <ServiceRequestModel>[],
+                  emptyMsg: 'No requests in the last 7 days.',
+                  color: _kGreen,
+                ),
+                (
+                  label: 'Older',
+                  count: cubit.getTabTotal(1),
+                  leads: _tabIndex == 1 ? sorted : <ServiceRequestModel>[],
+                  emptyMsg: 'No older requests found.',
+                  color: _kStatusInProgress,
+                ),
+                (
+                  label: 'Completed',
+                  count: cubit.getTabTotal(2),
+                  leads: _tabIndex == 2 ? sorted : <ServiceRequestModel>[],
+                  emptyMsg: 'No completed requests yet.',
+                  color: _kStatusCompleted,
+                ),
+              ];
+
+              final currentLeads = tabData[_tabIndex].leads;
+              final currentEmpty = tabData[_tabIndex].emptyMsg;
+
+              return Column(
+                children: [
+                  // Tab bar
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: _kSurface,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: _kBorder),
+                      ),
+                      padding: const EdgeInsets.all(3),
+                      child: Row(
+                        children: List.generate(tabData.length, (i) {
+                          final tab = tabData[i];
+                          final isSel = _tabIndex == i;
+                          return Expanded(
+                            child: GestureDetector(
+                              onTap: () => _onTabChanged(i),
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 8,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: isSel ? _kGreen : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(7),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      tab.label,
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w600,
+                                        color: isSel
+                                            ? Colors.white
+                                            : _kTextMuted,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 7,
+                                        vertical: 2,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: isSel
+                                            ? Colors.white.withValues(
+                                                alpha: 0.25,
+                                              )
+                                            : _kBg,
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: Text(
+                                        '${tab.count}',
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w700,
+                                          color: isSel
+                                              ? Colors.white
+                                              : _kTextMuted,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        }),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  // Table / empty
+                  Expanded(
+                    child: RefreshIndicator(
+                      color: _kGreen,
+                      onRefresh: () async => _refresh(),
+                      child: currentLeads.isEmpty
+                          ? _EmptyView(
+                              message: currentEmpty,
+                              onRefresh: _refresh,
+                            )
+                          : ListView(
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+                              children: [
+                                _ServiceDataTable(
+                                  services: currentLeads,
+                                  isAdmin: _isAdmin,
+                                  minWidth: minW,
+                                  onTap: (s) => _openDetail(ctx, s),
+                                  onDelete: _confirmDelete,
+                                ),
+                              ],
+                            ),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ── Add service full page ─────────────────────────────────────────────────
   Future<void> _openAddServicePage(BuildContext ctx) async {
     await Navigator.push(
       ctx,
@@ -759,26 +671,26 @@ class _State extends State<ServiceRequestPage> {
         builder: (_) => BlocProvider.value(
           value: ctx.read<ServiceLeadCubit>(),
           child: Scaffold(
-            backgroundColor: AppColors.background,
+            backgroundColor: _kBg,
             appBar: AppBar(
               backgroundColor: _kGreen,
               elevation: 0,
               leading: IconButton(
                 icon: const AppSvgIcon(
                   AppSvgAssets.chevronLeft,
-                  color: AppColors.surface,
+                  color: Colors.white,
                 ),
                 onPressed: () => Navigator.pop(context),
               ),
               title: const Text(
                 'New Service Request',
                 style: TextStyle(
-                  color: AppColors.surface,
+                  color: Colors.white,
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                 ),
               ),
-              iconTheme: const IconThemeData(color: AppColors.surface),
+              iconTheme: const IconThemeData(color: Colors.white),
             ),
             body: const SafeArea(child: _AddServiceSheet()),
           ),
@@ -789,176 +701,411 @@ class _State extends State<ServiceRequestPage> {
   }
 }
 
-// ─────────────────────────────────────────────────────────────
-//  Table Section (always expanded — last 7 days)
-// ─────────────────────────────────────────────────────────────
-class _TableSection extends StatelessWidget {
-  final String title, subtitle;
-  final List<ServiceRequestModel> services;
-  final bool isAdmin, showEmptyMessage;
-  final double minWidth;
-  final ValueChanged<ServiceRequestModel> onTap;
-  final ValueChanged<ServiceRequestModel> onDelete;
+// ─────────────────────────────────────────────────────────────────────────────
+//  Small reusable UI components
+// ─────────────────────────────────────────────────────────────────────────────
 
-  const _TableSection({
-    required this.title,
-    required this.subtitle,
-    required this.services,
-    required this.isAdmin,
-    required this.minWidth,
-    required this.onTap,
-    required this.onDelete,
-    this.showEmptyMessage = false,
-  });
-
+class _SearchField extends StatelessWidget {
+  final TextEditingController controller;
+  final ValueChanged<String> onChanged;
+  const _SearchField({required this.controller, required this.onChanged});
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.divider),
+  Widget build(BuildContext context) => Container(
+    height: 44,
+    decoration: BoxDecoration(
+      color: _kBg,
+      borderRadius: BorderRadius.circular(10),
+      border: Border.all(color: _kBorder),
+    ),
+    child: TextField(
+      controller: controller,
+      onChanged: onChanged,
+      style: const TextStyle(fontSize: 13, color: _kText),
+      decoration: const InputDecoration(
+        hintText: 'Search name, phone, ID or technician…',
+        hintStyle: TextStyle(fontSize: 13, color: _kTextHint),
+        prefixIcon: Padding(
+          padding: EdgeInsets.all(12),
+          child: AppSvgIcon(AppSvgAssets.search, size: 16, color: _kTextMuted),
+        ),
+        border: InputBorder.none,
+        contentPadding: EdgeInsets.symmetric(vertical: 12),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    ),
+  );
+}
+
+class _NewRequestButton extends StatelessWidget {
+  final VoidCallback onTap;
+  const _NewRequestButton({required this.onTap});
+  @override
+  Widget build(BuildContext context) => GestureDetector(
+    onTap: onTap,
+    child: Container(
+      height: 44,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        color: _kGreen,
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+          BoxShadow(
+            color: _kGreen.withValues(alpha: 0.30),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: const Row(
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          Icon(Icons.add_rounded, color: Colors.white, size: 18),
+          SizedBox(width: 6),
+          Text(
+            'New Request',
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+              fontSize: 13,
+              letterSpacing: 0.2,
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+class _FilterChip extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+  const _FilterChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+  @override
+  Widget build(BuildContext context) => GestureDetector(
+    onTap: onTap,
+    child: AnimatedContainer(
+      duration: const Duration(milliseconds: 150),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+      decoration: BoxDecoration(
+        color: selected ? _kGreen : _kBg,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: selected ? _kGreen : _kBorder,
+          width: selected ? 1.5 : 1,
+        ),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          color: selected ? Colors.white : _kTextMuted,
+        ),
+      ),
+    ),
+  );
+}
+
+class _LoadingIndicator extends StatelessWidget {
+  const _LoadingIndicator();
+  @override
+  Widget build(BuildContext context) => const Column(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+      SizedBox(
+        width: 36,
+        height: 36,
+        child: CircularProgressIndicator(color: _kGreen, strokeWidth: 2.5),
+      ),
+      SizedBox(height: 12),
+      Text(
+        'Loading…',
+        style: TextStyle(
+          fontSize: 13,
+          color: _kTextMuted,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+    ],
+  );
+}
+
+class _ErrorView extends StatelessWidget {
+  final String message;
+  final VoidCallback onRetry;
+  const _ErrorView({required this.message, required this.onRetry});
+  @override
+  Widget build(BuildContext context) => Center(
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Container(
+          width: 64,
+          height: 64,
+          decoration: BoxDecoration(
+            color:   AppColors.lightPurple1,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: const Center(
+            child: AppSvgIcon(
+              AppSvgAssets.triangleAlert,
+              size: 28,
+              color: AppColors.error,
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        Text(
+          message,
+          style: const TextStyle(
+            fontSize: 14,
+            color: _kTextMuted,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 20),
+        GestureDetector(
+          onTap: onRetry,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            decoration: BoxDecoration(
+              color: _kGreen,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  '$title (${services.length})',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textDark,
-                  ),
+                AppSvgIcon(
+                  AppSvgAssets.refreshCw,
+                  size: 14,
+                  color: Colors.white,
                 ),
-                const SizedBox(height: 2),
+                SizedBox(width: 6),
                 Text(
-                  subtitle,
-                  style: const TextStyle(
-                    fontSize: 11,
-                    color: AppColors.textLight,
+                  'Retry',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
                   ),
                 ),
               ],
             ),
           ),
-          if (services.isEmpty && showEmptyMessage)
-            const Padding(
-              padding: EdgeInsets.fromLTRB(16, 0, 16, 14),
-              child: Text(
-                'No requests in the last 7 days.',
-                style: TextStyle(fontSize: 12, color: AppColors.textLight),
-              ),
-            )
-          else if (services.isNotEmpty)
-            _ServiceDataTable(
-              services: services,
-              isAdmin: isAdmin,
-              minWidth: minWidth,
-              onTap: onTap,
-              onDelete: onDelete,
-            ),
-        ],
-      ),
-    );
-  }
+        ),
+      ],
+    ),
+  );
 }
 
-// ─────────────────────────────────────────────────────────────
-//  Collapsible Table Section (older requests)
-// ─────────────────────────────────────────────────────────────
-class _CollapsibleTableSection extends StatelessWidget {
-  final String title, subtitle;
-  final List<ServiceRequestModel> services;
-  final bool isAdmin, initiallyExpanded;
-  final double minWidth;
-  final ValueChanged<bool> onExpansionChanged;
-  final ValueChanged<ServiceRequestModel> onTap;
-  final ValueChanged<ServiceRequestModel> onDelete;
-
-  const _CollapsibleTableSection({
-    required this.title,
-    required this.subtitle,
-    required this.services,
-    required this.isAdmin,
-    required this.minWidth,
-    required this.initiallyExpanded,
-    required this.onExpansionChanged,
-    required this.onTap,
-    required this.onDelete,
-  });
-
+class _EmptyView extends StatelessWidget {
+  final String message;
+  final VoidCallback onRefresh;
+  const _EmptyView({required this.message, required this.onRefresh});
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.divider),
-      ),
-      child: Theme(
-        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-        child: ExpansionTile(
-          key: const ValueKey('service_older'),
-          initiallyExpanded: initiallyExpanded,
-          onExpansionChanged: onExpansionChanged,
-          tilePadding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
-          childrenPadding: const EdgeInsets.only(bottom: 12),
-          title: Text(
-            '$title (${services.length})',
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-              color: AppColors.textDark,
-            ),
-          ),
-          subtitle: Text(
-            subtitle,
-            style: const TextStyle(fontSize: 11, color: AppColors.textLight),
-          ),
+  Widget build(BuildContext context) => ListView(
+    physics: const AlwaysScrollableScrollPhysics(),
+    children: [
+      SizedBox(
+        height: 280,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            if (services.isEmpty)
-              const Padding(
-                padding: EdgeInsets.fromLTRB(16, 0, 16, 4),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'No older requests found.',
-                    style: TextStyle(fontSize: 12, color: AppColors.textLight),
+            Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                color: _kGreenLight,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: const Center(
+                child: AppSvgIcon(AppSvgAssets.cog, size: 28, color: _kGreen),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: _kText,
+              ),
+            ),
+            const SizedBox(height: 6),
+            const Text(
+              'Pull down to refresh the list',
+              style: TextStyle(fontSize: 12, color: _kTextMuted),
+            ),
+            const SizedBox(height: 20),
+            GestureDetector(
+              onTap: onRefresh,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: _kBg,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: _kBorder),
+                ),
+                child: const Text(
+                  'Refresh',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: _kTextMuted,
                   ),
                 ),
-              )
-            else
-              _ServiceDataTable(
-                services: services,
-                isAdmin: isAdmin,
-                minWidth: minWidth,
-                onTap: onTap,
-                onDelete: onDelete,
               ),
+            ),
           ],
         ),
       ),
-    );
-  }
+    ],
+  );
 }
 
-// ─────────────────────────────────────────────────────────────
-//  Service Data Table
-// ─────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+//  Delete dialog
+// ─────────────────────────────────────────────────────────────────────────────
+class _DeleteDialog extends StatelessWidget {
+  final ServiceRequestModel service;
+  const _DeleteDialog({required this.service});
+  @override
+  Widget build(BuildContext context) => AlertDialog(
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+    titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+    contentPadding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
+    actionsPadding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
+    title: Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color:   AppColors.lightPurple1,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: const AppSvgIcon(
+            AppSvgAssets.trash2,
+            size: 20,
+            color: AppColors.redDarker,
+          ),
+        ),
+        const SizedBox(width: 10),
+        const Text(
+          'Delete Request?',
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w700,
+            color: _kText,
+          ),
+        ),
+      ],
+    ),
+    content: Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 4),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: _kBg,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: _kBorder),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                service.customerName,
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: _kText,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                service.phone,
+                style: const TextStyle(fontSize: 12, color: _kTextMuted),
+              ),
+              Text(
+                service.serviceId,
+                style: const TextStyle(fontSize: 12, color: _kTextMuted),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 10),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color:   AppColors.lightBg2,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color:   AppColors.bgLight4),
+          ),
+          child: const Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              AppSvgIcon(
+                AppSvgAssets.triangleAlert,
+                size: 15,
+                color: AppColors.orange600,
+              ),
+              SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'This will permanently remove ALL data. This action cannot be undone.',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: AppColors.orange800,
+                    height: 1.4,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
+    actions: [
+      TextButton(
+        onPressed: () => Navigator.pop(context, false),
+        child: const Text('Cancel', style: TextStyle(color: _kTextMuted)),
+      ),
+      FilledButton(
+        style: FilledButton.styleFrom(
+          backgroundColor:   AppColors.redDarker,
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        ),
+        onPressed: () => Navigator.pop(context, true),
+        child: const Text(
+          'Yes, Delete',
+          style: TextStyle(fontWeight: FontWeight.w600),
+        ),
+      ),
+    ],
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Data Table
+// ─────────────────────────────────────────────────────────────────────────────
 class _ServiceDataTable extends StatelessWidget {
   final List<ServiceRequestModel> services;
   final bool isAdmin;
   final double minWidth;
   final ValueChanged<ServiceRequestModel> onTap;
   final ValueChanged<ServiceRequestModel> onDelete;
-
   const _ServiceDataTable({
     required this.services,
     required this.isAdmin,
@@ -970,34 +1117,34 @@ class _ServiceDataTable extends StatelessWidget {
   Color _statusColor(String s) {
     switch (s) {
       case 'Open':
-        return Colors.grey;
+        return _kStatusOpen;
       case 'Assigned':
-        return AppColors.primary;
+        return _kStatusAssigned;
       case 'In Progress':
-        return AppColors.solar;
+        return _kStatusInProgress;
       case 'Completed':
-        return AppColors.success;
+        return _kStatusCompleted;
       case 'Resolved':
-        return Colors.teal;
+        return _kStatusResolved;
       default:
-        return Colors.grey;
+        return _kTextMuted;
     }
   }
 
   Widget _statusBadge(String status) {
     final color = _statusColor(status);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: color.withValues(alpha: 0.35)),
+        color: color.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withValues(alpha: 0.25)),
       ),
       child: Text(
         status,
         style: TextStyle(
-          fontSize: 10,
-          fontWeight: FontWeight.w700,
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
           color: color,
         ),
       ),
@@ -1006,21 +1153,21 @@ class _ServiceDataTable extends StatelessWidget {
 
   Widget _chargeBadge(ServiceRequestModel s) {
     final isPaid = s.chargeType == 'Paid';
-    final color = isPaid ? AppColors.solar : AppColors.success;
+    final color = isPaid ? _kStatusInProgress : _kGreen;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
+        color: color.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withValues(alpha: 0.25)),
       ),
       child: Text(
         isPaid && s.amount > 0
             ? '₹${s.amount.toStringAsFixed(0)}'
             : s.chargeType,
         style: TextStyle(
-          fontSize: 10,
-          fontWeight: FontWeight.w700,
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
           color: color,
         ),
       ),
@@ -1028,124 +1175,185 @@ class _ServiceDataTable extends StatelessWidget {
   }
 
   String _formatDate(DateTime dt) =>
-      '${DateFormat('dd MMM yyyy').format(dt)}\n'
-      '${DateFormat('hh:mm a').format(dt)}';
+      '${DateFormat('dd MMM yyyy').format(dt)}\n${DateFormat('hh:mm a').format(dt)}';
 
   @override
   Widget build(BuildContext context) {
     final isDesktop = MediaQuery.sizeOf(context).width >= 1000;
-    const rowStyle = TextStyle(fontSize: 12, color: AppColors.textDark);
+    const rowStyle = TextStyle(fontSize: 12, color: _kText);
 
-    return SizedBox(
-      width: double.infinity,
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: SizedBox(
-          width: minWidth,
-          child: DataTable(
-            showCheckboxColumn: false,
-            headingRowHeight: 44,
-            dataRowMinHeight: 56,
-            dataRowMaxHeight: 70,
-            horizontalMargin: isDesktop ? 18 : 12,
-            columnSpacing: isDesktop ? 24 : 14,
-            headingRowColor: WidgetStateProperty.all(
-              _kGreen.withValues(alpha: 0.08),
-            ),
-            dataRowColor: WidgetStateProperty.resolveWith((states) {
-              if (states.contains(WidgetState.selected)) {
-                return _kGreen.withValues(alpha: 0.05);
-              }
-              return null;
-            }),
-            border: TableBorder(
-              horizontalInside: BorderSide(color: AppColors.primary),
-              bottom: BorderSide(color: AppColors.primary),
-              top: BorderSide(color: AppColors.primary),
-            ),
-            columns: [
-              _buildColumn('Customer'),
-              _buildColumn('Phone'),
-              _buildColumn('Issue'),
-              _buildColumn('Technician'),
-              _buildColumn('Status'),
-              _buildColumn('Charge'),
-              _buildColumn('Service Date & Time'),
-              if (isAdmin) _buildColumn('Actions'),
-            ],
-            rows: services.map((s) {
-              // Admin can delete services at any step
-              final canDelete = isAdmin;
-
-              return DataRow(
-                onSelectChanged: (_) => onTap(s),
-                cells: [
-                  // Customer
-                  DataCell(
-                    Text(
-                      s.customerName,
-                      style: rowStyle.copyWith(fontWeight: FontWeight.w600),
-                    ),
-                  ),
-                  // Phone
-                  DataCell(Text(s.phone, style: rowStyle)),
-                  // Issue
-                  DataCell(
-                    SizedBox(
-                      width: isDesktop ? 180 : 140,
-                      child: Text(
-                        s.issueType?.isNotEmpty == true ? s.issueType! : '-',
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 2,
-                        style: rowStyle,
-                      ),
-                    ),
-                  ),
-                  // Technician
-                  DataCell(Text(s.assignedToName ?? '-', style: rowStyle)),
-                  // Status badge
-                  DataCell(_statusBadge(s.status)),
-                  // Charge badge
-                  DataCell(_chargeBadge(s)),
-                  // Service date and time
-                  DataCell(
-                    s.serviceDate != null
-                        ? Text(
-                            _formatDate(s.serviceDate!),
-                            style: rowStyle.copyWith(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: _kGreen,
-                            ),
-                          )
-                        : Text(
-                            '-',
-                            style: rowStyle.copyWith(
-                              fontSize: 11,
-                              color: AppColors.textLight,
-                            ),
-                          ),
-                  ),
-                  // Actions (admin only)
-                  if (isAdmin)
-                    DataCell(
-                      Tooltip(
-                        message: canDelete ? 'Delete Request' : 'No permission',
-                        child: IconButton(
-                          onPressed: canDelete ? () => onDelete(s) : null,
-                          icon: AppSvgIcon(
-                            AppSvgAssets.trash2,
-                            size: 18,
-                            color: canDelete
-                                ? AppColors.error
-                                : Colors.grey.shade300,
+    return Container(
+      decoration: BoxDecoration(
+        color: _kSurface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: _kBorder),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: SizedBox(
+        width: double.infinity,
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: SizedBox(
+            width: minWidth,
+            child: DataTable(
+              showCheckboxColumn: false,
+              headingRowHeight: 42,
+              dataRowMinHeight: 58,
+              dataRowMaxHeight: 72,
+              horizontalMargin: isDesktop ? 16 : 12,
+              columnSpacing: isDesktop ? 20 : 12,
+              dividerThickness: 1,
+              headingRowColor: WidgetStateProperty.all(  AppColors.gray100),
+              dataRowColor: WidgetStateProperty.resolveWith((states) {
+                if (states.contains(WidgetState.hovered))
+                  return   AppColors.bgLight3;
+                return _kSurface;
+              }),
+              border: TableBorder(
+                horizontalInside: BorderSide(color: _kBorder, width: 0.8),
+              ),
+              columns: [
+                _col('Customer'),
+                _col('Phone'),
+                _col('Issue'),
+                _col('Technician'),
+                _col('Status'),
+                _col('Charge'),
+                _col('Service Date & Time'),
+                if (isAdmin) _col(''),
+              ],
+              rows: services
+                  .map(
+                    (s) => DataRow(
+                      onSelectChanged: (_) => onTap(s),
+                      cells: [
+                        DataCell(
+                          Row(
+                            children: [
+                              Container(
+                                width: 30,
+                                height: 30,
+                                decoration: BoxDecoration(
+                                  color: _kGreenLight,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    s.customerName.isNotEmpty
+                                        ? s.customerName[0].toUpperCase()
+                                        : '?',
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w700,
+                                      color: _kGreen,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                s.customerName,
+                                style: rowStyle.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      ),
+                        DataCell(
+                          Text(
+                            s.phone,
+                            style: rowStyle.copyWith(color: _kTextMuted),
+                          ),
+                        ),
+                        DataCell(
+                          SizedBox(
+                            width: isDesktop ? 180 : 140,
+                            child: Text(
+                              s.issueType?.isNotEmpty == true
+                                  ? s.issueType!
+                                  : '—',
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 2,
+                              style: rowStyle,
+                            ),
+                          ),
+                        ),
+                        DataCell(
+                          s.assignedToName != null
+                              ? Row(
+                                  children: [
+                                    Container(
+                                      width: 24,
+                                      height: 24,
+                                      decoration: BoxDecoration(
+                                        color:   AppColors.lightBg5,
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Center(
+                                        child: Text(
+                                          s.assignedToName![0].toUpperCase(),
+                                          style: const TextStyle(
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.w700,
+                                            color: AppColors.indigo600,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(s.assignedToName!, style: rowStyle),
+                                  ],
+                                )
+                              : Text(
+                                  '—',
+                                  style: rowStyle.copyWith(color: _kTextHint),
+                                ),
+                        ),
+                        DataCell(_statusBadge(s.status)),
+                        DataCell(_chargeBadge(s)),
+                        DataCell(
+                          s.serviceDate != null
+                              ? Text(
+                                  _formatDate(s.serviceDate!),
+                                  style: rowStyle.copyWith(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    color: _kGreen,
+                                    height: 1.5,
+                                  ),
+                                )
+                              : Text(
+                                  '—',
+                                  style: rowStyle.copyWith(color: _kTextHint),
+                                ),
+                        ),
+                        if (isAdmin)
+                          DataCell(
+                            GestureDetector(
+                              onTap: () => onDelete(s),
+                              child: Container(
+                                width: 30,
+                                height: 30,
+                                decoration: BoxDecoration(
+                                  color:   AppColors.lightPurple1,
+                                  borderRadius: BorderRadius.circular(7),
+                                ),
+                                child: const Center(
+                                  child: AppSvgIcon(
+                                    AppSvgAssets.trash2,
+                                    size: 14,
+                                    color: AppColors.error,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
-                ],
-              );
-            }).toList(),
+                  )
+                  .toList(),
+            ),
           ),
         ),
       ),
@@ -1153,19 +1361,51 @@ class _ServiceDataTable extends StatelessWidget {
   }
 }
 
-DataColumn _buildColumn(String title) => DataColumn(
+DataColumn _col(String title) => DataColumn(
   label: Text(
     title,
     style: const TextStyle(
-      fontWeight: FontWeight.bold,
-      color: AppColors.success,
+      fontSize: 11,
+      fontWeight: FontWeight.w700,
+      color: _kTextMuted,
+      letterSpacing: 0.5,
     ),
   ),
 );
 
-// ─────────────────────────────────────────────────────────────
-//  Add Service Bottom Sheet (unchanged)
-// ─────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+//  Pagination button
+// ─────────────────────────────────────────────────────────────────────────────
+class _PaginationBtn extends StatelessWidget {
+  final String icon;
+  final bool enabled;
+  final VoidCallback onTap;
+  const _PaginationBtn({
+    required this.icon,
+    required this.enabled,
+    required this.onTap,
+  });
+  @override
+  Widget build(BuildContext context) => GestureDetector(
+    onTap: enabled ? onTap : null,
+    child: Container(
+      width: 32,
+      height: 32,
+      decoration: BoxDecoration(
+        color: enabled ? _kSurface : _kBg,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: _kBorder),
+      ),
+      child: Center(
+        child: AppSvgIcon(icon, size: 13, color: enabled ? _kText : _kTextHint),
+      ),
+    ),
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Add Service Sheet  (unchanged logic, refreshed visuals)
+// ─────────────────────────────────────────────────────────────────────────────
 class _AddServiceSheet extends StatefulWidget {
   const _AddServiceSheet();
   @override
@@ -1234,7 +1474,6 @@ class _AddState extends State<_AddServiceSheet> {
       AppFeedback.showInfo(context, 'Please select service time');
       return;
     }
-
     final scheduledAt = DateTime(
       _serviceDate!.year,
       _serviceDate!.month,
@@ -1242,7 +1481,6 @@ class _AddState extends State<_AddServiceSheet> {
       _serviceTime!.hour,
       _serviceTime!.minute,
     );
-
     setState(() => _saving = true);
     try {
       await context.read<ServiceLeadCubit>().createService({
@@ -1296,25 +1534,20 @@ class _AddState extends State<_AddServiceSheet> {
   }
 
   String _fmtDate(DateTime d) => DateFormat('dd/MM/yyyy').format(d);
-
   String _fmtTime(TimeOfDay t) {
     final h = t.hourOfPeriod == 0 ? 12 : t.hourOfPeriod;
     final m = t.minute.toString().padLeft(2, '0');
-    final p = t.period == DayPeriod.am ? 'AM' : 'PM';
-    return '$h:$m $p';
+    return '$h:$m ${t.period == DayPeriod.am ? 'AM' : 'PM'}';
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
+      color: _kSurface,
       padding: EdgeInsets.only(
         left: 16,
         right: 16,
-        top: 16,
+        top: 20,
         bottom: MediaQuery.of(context).viewInsets.bottom + 20,
       ),
       child: SingleChildScrollView(
@@ -1322,31 +1555,12 @@ class _AddState extends State<_AddServiceSheet> {
           key: _form,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
             children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'New Service Request',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textDark,
-                ),
-              ),
-              const SizedBox(height: 16),
+              _sectionLabel('Customer Details'),
+              const SizedBox(height: 10),
               _field(
                 _name,
-                'Customer Name',
+                'Full Name',
                 AppSvgAssets.userRound,
                 required: true,
               ),
@@ -1360,195 +1574,94 @@ class _AddState extends State<_AddServiceSheet> {
               ),
               const SizedBox(height: 10),
               _field(_address, 'Address', AppSvgAssets.mapPin, required: true),
+              const SizedBox(height: 16),
+              _sectionLabel('Issue Details'),
               const SizedBox(height: 10),
               _field(_issue, 'Issue Type', AppSvgAssets.triangleAlert),
               const SizedBox(height: 10),
-              _field(
-                _desc,
-                'Issue Description',
-                AppSvgAssets.fileText,
-                maxLines: 2,
-              ),
+              _field(_desc, 'Description', AppSvgAssets.fileText, maxLines: 2),
+              const SizedBox(height: 16),
+              _sectionLabel('Schedule'),
               const SizedBox(height: 10),
-
-              const Text(
-                'Service Date & Time',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textDark,
-                ),
-              ),
-              const SizedBox(height: 6),
               Row(
                 children: [
                   Expanded(
-                    child: GestureDetector(
+                    child: _DateTimePicker(
+                      label: _serviceDate != null
+                          ? _fmtDate(_serviceDate!)
+                          : 'Select date *',
+                      icon: AppSvgAssets.calendarDays,
+                      active: _serviceDate != null,
                       onTap: _pickServiceDate,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 12,
-                        ),
-                        decoration: BoxDecoration(
-                          color: _serviceDate != null
-                              ? _kGreen.withValues(alpha: 0.08)
-                              : AppColors.background,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: _serviceDate != null
-                                ? _kGreen
-                                : Colors.grey.shade300,
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            AppSvgIcon(
-                              AppSvgAssets.calendarDays,
-                              size: 16,
-                              color: _serviceDate != null
-                                  ? _kGreen
-                                  : Colors.grey,
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                _serviceDate != null
-                                    ? _fmtDate(_serviceDate!)
-                                    : 'Select date *',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: _serviceDate != null
-                                      ? AppColors.textDark
-                                      : AppColors.textLight,
-                                  fontWeight: _serviceDate != null
-                                      ? FontWeight.w600
-                                      : FontWeight.normal,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 10),
                   Expanded(
-                    child: GestureDetector(
+                    child: _DateTimePicker(
+                      label: _serviceTime != null
+                          ? _fmtTime(_serviceTime!)
+                          : 'Select time *',
+                      icon: AppSvgAssets.clock,
+                      active: _serviceTime != null,
                       onTap: _pickServiceTime,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 12,
-                        ),
-                        decoration: BoxDecoration(
-                          color: _serviceTime != null
-                              ? _kGreen.withValues(alpha: 0.08)
-                              : AppColors.background,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: _serviceTime != null
-                                ? _kGreen
-                                : Colors.grey.shade300,
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            AppSvgIcon(
-                              AppSvgAssets.clock,
-                              size: 16,
-                              color: _serviceTime != null
-                                  ? _kGreen
-                                  : Colors.grey,
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                _serviceTime != null
-                                    ? _fmtTime(_serviceTime!)
-                                    : 'Select time *',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: _serviceTime != null
-                                      ? AppColors.textDark
-                                      : AppColors.textLight,
-                                  fontWeight: _serviceTime != null
-                                      ? FontWeight.w600
-                                      : FontWeight.normal,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
                     ),
                   ),
                 ],
               ),
+              const SizedBox(height: 16),
+              _sectionLabel('Charge Type'),
               const SizedBox(height: 10),
-
-              // Charge type
               Row(
                 children: [
-                  const Text(
-                    'Charge Type',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textDark,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  _chip(
-                    'Free',
-                    _chargeType == 'Free',
-                    AppColors.success,
-                    () => setState(() => _chargeType = 'Free'),
+                  _ChargeChip(
+                    label: 'Free',
+                    selected: _chargeType == 'Free',
+                    color: _kGreen,
+                    onTap: () => setState(() => _chargeType = 'Free'),
                   ),
                   const SizedBox(width: 8),
-                  _chip(
-                    'Paid',
-                    _chargeType == 'Paid',
-                    AppColors.solar,
-                    () => setState(() => _chargeType = 'Paid'),
+                  _ChargeChip(
+                    label: 'Paid',
+                    selected: _chargeType == 'Paid',
+                    color: _kStatusInProgress,
+                    onTap: () => setState(() => _chargeType = 'Paid'),
                   ),
                 ],
               ),
-
               if (_chargeType == 'Paid') ...[
                 const SizedBox(height: 10),
                 _field(
                   _amount,
-                  'Charge Amount (₹)',
+                  'Amount (₹)',
                   AppSvgAssets.indianRupee,
                   keyboardType: TextInputType.number,
                   required: true,
                 ),
               ],
-
+              const SizedBox(height: 16),
+              _sectionLabel('Assign Technician'),
               const SizedBox(height: 10),
-              const Text(
-                'Assign Technician',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textDark,
-                ),
-              ),
-              const SizedBox(height: 6),
               _loadingTech
-                  ? const Center(child: CircularProgressIndicator())
+                  ? const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(12),
+                        child: CircularProgressIndicator(
+                          color: _kGreen,
+                          strokeWidth: 2,
+                        ),
+                      ),
+                    )
                   : _techList.isEmpty
                   ? const Text(
-                      'No service technicians found',
-                      style: TextStyle(color: Colors.grey),
+                      'No service technicians found.',
+                      style: TextStyle(color: _kTextMuted, fontSize: 13),
                     )
                   : Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       decoration: BoxDecoration(
-                        color: AppColors.background,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.grey.shade300),
+                        color: _kBg,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: _kBorder),
                       ),
                       child: DropdownButtonHideUnderline(
                         child: DropdownButton<String>(
@@ -1556,7 +1669,7 @@ class _AddState extends State<_AddServiceSheet> {
                           isExpanded: true,
                           hint: const Text(
                             'Select technician',
-                            style: TextStyle(fontSize: 13),
+                            style: TextStyle(fontSize: 13, color: _kTextHint),
                           ),
                           items: _techList
                               .map(
@@ -1575,33 +1688,41 @@ class _AddState extends State<_AddServiceSheet> {
                         ),
                       ),
                     ),
-
               const SizedBox(height: 10),
-              _field(_note, 'Notes', AppSvgAssets.fileText, maxLines: 3),
-
-              const SizedBox(height: 20),
+              _field(
+                _note,
+                'Notes (optional)',
+                AppSvgAssets.fileText,
+                maxLines: 3,
+              ),
+              const SizedBox(height: 24),
               SizedBox(
                 width: double.infinity,
-                height: 48,
+                height: 50,
                 child: ElevatedButton(
                   onPressed: _saving ? null : _save,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: _kGreen,
+                    elevation: 0,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
                   child: _saving
-                      ? const CircularProgressIndicator(
-                          color: AppColors.surface,
-                          strokeWidth: 2,
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
                         )
                       : const Text(
                           'Create Service Request',
                           style: TextStyle(
-                            fontSize: 15,
+                            fontSize: 14,
                             fontWeight: FontWeight.w700,
-                            color: AppColors.surface,
+                            color: Colors.white,
                           ),
                         ),
                 ),
@@ -1612,6 +1733,16 @@ class _AddState extends State<_AddServiceSheet> {
       ),
     );
   }
+
+  Widget _sectionLabel(String text) => Text(
+    text,
+    style: const TextStyle(
+      fontSize: 11,
+      fontWeight: FontWeight.w700,
+      color: _kTextMuted,
+      letterSpacing: 0.8,
+    ),
+  );
 
   Widget _field(
     TextEditingController ctrl,
@@ -1635,97 +1766,141 @@ class _AddState extends State<_AddServiceSheet> {
               LengthLimitingTextInputFormatter(10),
             ]
           : null,
-      style: const TextStyle(fontSize: 13),
+      style: const TextStyle(fontSize: 13, color: _kText),
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: const TextStyle(fontSize: 13),
+        labelStyle: const TextStyle(fontSize: 13, color: _kTextMuted),
         prefixIcon: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(10),
           child: AppSvgIcon(svgAsset, size: 16, color: _kGreen),
         ),
         counterStyle: isPhone
-            ? const TextStyle(fontSize: 11, color: AppColors.textLight)
+            ? const TextStyle(fontSize: 11, color: _kTextHint)
             : const TextStyle(fontSize: 0, height: 0),
         filled: true,
-        fillColor: AppColors.background,
+        fillColor: _kBg,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: Colors.grey.shade300),
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: _kBorder),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: Colors.grey.shade300),
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: _kBorder),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: _kGreen),
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: _kGreen, width: 1.5),
         ),
       ),
       validator: required
           ? (v) {
               if (v == null || v.trim().isEmpty) return '$label is required';
               if (isPhone) {
-                final p = v.trim();
-                if (p.length != 10)
-                  return 'Phone number must be exactly 10 digits';
-                if (!RegExp(r'^[6-9]\d{9}$').hasMatch(p))
-                  return 'Enter a valid mobile number (must start with 6-9)';
+                if (v.trim().length != 10) return 'Must be exactly 10 digits';
+                if (!RegExp(r'^[6-9]\d{9}$').hasMatch(v.trim()))
+                  return 'Enter a valid mobile number';
               }
               return null;
             }
           : null,
     );
   }
-
-  Widget _chip(String label, bool selected, Color color, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-        decoration: BoxDecoration(
-          color: selected ? color.withValues(alpha: 0.15) : AppColors.divider,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: selected ? color : Colors.grey.shade300,
-            width: selected ? 1.5 : 1,
-          ),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            color: selected ? color : AppColors.textGray,
-          ),
-        ),
-      ),
-    );
-  }
 }
 
-// ─────────────────────────────────────────────────────────────
-//  Stat Widget
-// ─────────────────────────────────────────────────────────────
-class _Stat extends StatelessWidget {
-  final String label, value;
-  final Color color;
-  const _Stat(this.label, this.value, this.color);
-
+class _DateTimePicker extends StatelessWidget {
+  final String label;
+  final String icon;
+  final bool active;
+  final VoidCallback onTap;
+  const _DateTimePicker({
+    required this.label,
+    required this.icon,
+    required this.active,
+    required this.onTap,
+  });
   @override
-  Widget build(BuildContext context) => Column(
-    children: [
-      Text(
-        value,
-        style: TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w700,
-          color: color,
+  Widget build(BuildContext context) => GestureDetector(
+    onTap: onTap,
+    child: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      decoration: BoxDecoration(
+        color: active ? _kGreenLight : _kBg,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: active ? _kGreen : _kBorder,
+          width: active ? 1.5 : 1,
         ),
       ),
-      Text(
-        label,
-        style: const TextStyle(fontSize: 10, color: AppColors.textLight),
+      child: Row(
+        children: [
+          AppSvgIcon(icon, size: 15, color: active ? _kGreen : _kTextMuted),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                color: active ? _kText : _kTextHint,
+                fontWeight: active ? FontWeight.w600 : FontWeight.normal,
+              ),
+            ),
+          ),
+        ],
       ),
-    ],
+    ),
   );
 }
+
+class _ChargeChip extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final Color color;
+  final VoidCallback onTap;
+  const _ChargeChip({
+    required this.label,
+    required this.selected,
+    required this.color,
+    required this.onTap,
+  });
+  @override
+  Widget build(BuildContext context) => GestureDetector(
+    onTap: onTap,
+    child: AnimatedContainer(
+      duration: const Duration(milliseconds: 150),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      decoration: BoxDecoration(
+        color: selected ? color.withValues(alpha: 0.12) : _kBg,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: selected ? color : _kBorder,
+          width: selected ? 1.5 : 1,
+        ),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+          color: selected ? color : _kTextMuted,
+        ),
+      ),
+    ),
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// All unused classes and widgets have been removed.
+// ─────────────────────────────────────────────────────────────────────────────
+
+
+
+
+
+
+
+
+
+
+
+
+

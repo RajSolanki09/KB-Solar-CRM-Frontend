@@ -71,13 +71,36 @@ class ServiceRepository {
   }
 
   // ── GET ALL ────────────────────────────────────────────────────────────────
-  Future<List<ServiceRequestModel>> getAllServices() async {
+
+  Future<Map<String, dynamic>> getAllServices({
+    int page = 1,
+    int limit = 10,
+    String? search,
+    String? status,
+    int tabIndex = 0, // 0=recent, 1=older, 2=completed
+  }) async {
     try {
-      final res = await _dio.get(ApiConstants.apiPath(ApiEndpoints.service));
+      final params = <String, dynamic>{
+        'page': page,
+        'limit': limit,
+        if (search != null && search.isNotEmpty) 'search': search,
+        if (status != null && status.isNotEmpty) 'status': status,
+        'tab': tabIndex, // backend uses this to filter recent/older/completed
+      };
+      final res = await _dio.get(
+        ApiConstants.apiPath(ApiEndpoints.service),
+        queryParameters: params,
+      );
       final list = res.data['services'] as List? ?? [];
-      return list
-          .map((e) => ServiceRequestModel.fromJson(e as Map<String, dynamic>))
-          .toList();
+      return {
+        'services': list
+            .map((e) => ServiceRequestModel.fromJson(e as Map<String, dynamic>))
+            .toList(),
+        'total': res.data['total'] ?? 0,
+        'page': res.data['page'] ?? 1,
+        'pages': res.data['pages'] ?? 1,
+        'tabCounts': res.data['tabCounts'] ?? {},
+      };
     } catch (e) {
       throw _error(e);
     }

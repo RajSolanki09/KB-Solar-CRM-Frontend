@@ -12,7 +12,11 @@ class ApiService {
 
   static void clearCache([String? key]) {
     if (key != null) {
-      _cache.remove(key);
+      // Remove all cache keys that start with the given key (prefix match)
+      final keysToRemove = _cache.keys.where((k) => k.startsWith(key)).toList();
+      for (final k in keysToRemove) {
+        _cache.remove(k);
+      }
     } else {
       _cache.clear();
     }
@@ -116,7 +120,9 @@ class ApiService {
 
   Future<Map<String, dynamic>?> getProfile() async {
     try {
-      final data = await _cachedGet(ApiConstants.apiPath(ApiEndpoints.authProfile));
+      final data = await _cachedGet(
+        ApiConstants.apiPath(ApiEndpoints.authProfile),
+      );
       if (data['success'] == true) {
         final user = Map<String, dynamic>.from(data['user']);
         await TokenStorage.writeUser(jsonEncode(user));
@@ -232,7 +238,10 @@ class ApiService {
 
   Future<void> updateUser(String id, Map<String, dynamic> data) async {
     try {
-      await _dio.put(ApiConstants.apiPath(ApiEndpoints.adminById(id)), data: data);
+      await _dio.put(
+        ApiConstants.apiPath(ApiEndpoints.adminById(id)),
+        data: data,
+      );
       clearCache(ApiConstants.apiPath(ApiEndpoints.admin));
     } on DioException catch (e) {
       throw Exception(e.response?.data['message'] ?? 'Failed to update user');
@@ -379,9 +388,12 @@ class ApiService {
   // 📦 MATERIAL APIs
   // =============================
 
-  static String get _materialApiPath => ApiConstants.apiPath(ApiEndpoints.material);
-  static String get _materialCustomerApiPath => ApiConstants.apiPath(ApiEndpoints.materialCustomer);
-  static String get _materialSalesApiPath => ApiConstants.apiPath(ApiEndpoints.materialSalesStaff);
+  static String get _materialApiPath =>
+      ApiConstants.apiPath(ApiEndpoints.material);
+  static String get _materialCustomerApiPath =>
+      ApiConstants.apiPath(ApiEndpoints.materialCustomer);
+  static String get _materialSalesApiPath =>
+      ApiConstants.apiPath(ApiEndpoints.materialSalesStaff);
 
   Future<Map<String, dynamic>> getMaterialFormSchema() async {
     try {
@@ -397,14 +409,24 @@ class ApiService {
     }
   }
 
-  Future<List<Map<String, dynamic>>> getMaterials() async {
+  Future<Map<String, dynamic>> getMaterials({
+    int page = 1,
+    int limit = 10,
+  }) async {
     try {
-      final data = await _cachedGet(_materialApiPath);
+      final params = {'page': page, 'limit': limit};
+      final data = await _cachedGet(_materialApiPath, params: params);
       final raw = (data['materials'] as List?) ?? const [];
-      return raw
-          .whereType<Map>()
-          .map((e) => Map<String, dynamic>.from(e))
-          .toList();
+      return {
+        'materials': raw
+            .whereType<Map>()
+            .map((e) => Map<String, dynamic>.from(e))
+            .toList(),
+        'total': data['total'] ?? 0,
+        'page': data['page'] ?? page,
+        'limit': data['limit'] ?? limit,
+        'totalPages': data['totalPages'] ?? 1,
+      };
     } on DioException catch (e) {
       throw Exception(
         e.response?.data?['message'] ?? 'Failed to fetch materials',
@@ -412,7 +434,9 @@ class ApiService {
     }
   }
 
-  Future<Map<String, dynamic>> createMaterial(Map<String, dynamic> payload) async {
+  Future<Map<String, dynamic>> createMaterial(
+    Map<String, dynamic> payload,
+  ) async {
     try {
       final resp = await _dio.post(_materialApiPath, data: payload);
       if (resp.statusCode == 201 || resp.data['success'] == true) {
@@ -480,14 +504,24 @@ class ApiService {
     }
   }
 
-  Future<List<Map<String, dynamic>>> getMaterialCustomers() async {
+  Future<Map<String, dynamic>> getMaterialCustomers({
+    int page = 1,
+    int limit = 10,
+  }) async {
     try {
-      final data = await _cachedGet(_materialCustomerApiPath);
+      final params = {'page': page, 'limit': limit};
+      final data = await _cachedGet(_materialCustomerApiPath, params: params);
       final raw = (data['customers'] as List?) ?? const [];
-      return raw
-          .whereType<Map>()
-          .map((e) => Map<String, dynamic>.from(e))
-          .toList();
+      return {
+        'customers': raw
+            .whereType<Map>()
+            .map((e) => Map<String, dynamic>.from(e))
+            .toList(),
+        'total': data['total'] ?? 0,
+        'page': data['page'] ?? page,
+        'limit': data['limit'] ?? limit,
+        'totalPages': data['totalPages'] ?? 1,
+      };
     } on DioException catch (e) {
       throw Exception(
         e.response?.data?['message'] ?? 'Failed to fetch material customers',
@@ -549,18 +583,50 @@ class ApiService {
     Map<String, dynamic> payload,
   ) async {
     try {
-      final resp = await _dio.put('$_materialCustomerApiPath/$id', data: payload);
+      final resp = await _dio.put(
+        '$_materialCustomerApiPath/$id',
+        data: payload,
+      );
       if (resp.statusCode == 200 || resp.data['success'] == true) {
         clearCache(_materialCustomerApiPath);
         clearCache('$_materialCustomerApiPath/schema');
         return Map<String, dynamic>.from(resp.data['customer'] ?? {});
       }
-      throw Exception(resp.data['message'] ?? 'Failed to update material customer');
+      throw Exception(
+        resp.data['message'] ?? 'Failed to update material customer',
+      );
     } on DioException catch (e) {
       throw Exception(
         e.response?.data?['message'] ?? 'Failed to update material customer',
       );
     }
+  }
+
+  /// Helper to fetch all paginated material customers
+  Future<List<Map<String, dynamic>>> fetchAllMaterialCustomers({
+    ApiService? apiService,
+    int pageSize = 100,
+    int maxPages = 100,
+  }) async {
+    final service = apiService ?? ApiService();
+    final all = <Map<String, dynamic>>[];
+    var page = 1;
+    while (true) {
+      final response = await service.getMaterialCustomers(
+        page: page,
+        limit: pageSize,
+      );
+      final batch = List<Map<String, dynamic>>.from(
+        response['customers'] ?? [],
+      );
+      if (batch.isEmpty) break;
+      all.addAll(batch);
+      if (batch.length < pageSize) break;
+      if (page >= (response['totalPages'] ?? page)) break;
+      page += 1;
+      if (page > maxPages) break;
+    }
+    return all;
   }
 
   Future<Map<String, dynamic>> updateMaterialCustomerPipeline(
@@ -589,11 +655,39 @@ class ApiService {
     }
   }
 
+  /// Returns the count of active (not completed) material customers, paginated fetch.
+Future<int> getActiveMaterialLeadCount({
+  required bool Function(Map<String, dynamic>) isCompleted,
+  ApiService? apiService,
+  int pageSize = 100,
+  int maxPages = 100,
+}) async {
+  final service = apiService ?? ApiService();
+  int count = 0;
+  var page = 1;
+  while (true) {
+    final response = await service.getMaterialCustomers(
+      page: page,
+      limit: pageSize,
+    );
+    final batch = List<Map<String, dynamic>>.from(response['customers'] ?? []);
+    if (batch.isEmpty) break;
+    count += batch.where((c) => !isCompleted(c)).length;
+    if (batch.length < pageSize) break;
+    if (page >= (response['totalPages'] ?? page)) break;
+    page += 1;
+    if (page > maxPages) break;
+  }
+  return count;
+}
+
   Future<Map<String, dynamic>> markMaterialCustomerFollowupDone(
     String id,
   ) async {
     try {
-      final resp = await _dio.put('$_materialCustomerApiPath/$id/followup-done');
+      final resp = await _dio.put(
+        '$_materialCustomerApiPath/$id/followup-done',
+      );
       if (resp.statusCode == 200 || resp.data['success'] == true) {
         clearCache(_materialCustomerApiPath);
         clearCache('$_materialCustomerApiPath/$id');
@@ -615,7 +709,9 @@ class ApiService {
         clearCache('$_materialCustomerApiPath/schema');
         return;
       }
-      throw Exception(resp.data['message'] ?? 'Failed to delete material customer');
+      throw Exception(
+        resp.data['message'] ?? 'Failed to delete material customer',
+      );
     } on DioException catch (e) {
       throw Exception(
         e.response?.data?['message'] ?? 'Failed to delete material customer',

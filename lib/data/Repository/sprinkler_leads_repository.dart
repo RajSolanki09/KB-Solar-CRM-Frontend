@@ -46,24 +46,36 @@ class SprinklerLeadRepository {
   }
 
   // ── GET ALL ───────────────────────────────────────────────────────────────
-  Future<List<SprinklerLeadModel>> getAllLeads({
+  Future<({List<SprinklerLeadModel> leads, int total, int page, int pages})>
+    getAllLeads({
     String? status,
     String? search,
     int page = 1,
+    int limit = 10,
+    DateTime? fromDate,
+    DateTime? toDate,
   }) async {
     final res = await client.dio.get(
       ApiEndpoints.sprinklerLead,
       queryParameters: {
         'page': page,
-        'limit': 20,
+        'limit': limit,
         if (status != null && status.isNotEmpty) 'status': status,
         if (search != null && search.isNotEmpty) 'search': search,
+        if (fromDate != null) 'fromDate': fromDate.toIso8601String(),
+        if (toDate != null) 'toDate': toDate.toIso8601String(),
       },
     );
     final body = res.data as Map<String, dynamic>;
-    return (body['leads'] as List? ?? [])
+    final leads = (body['leads'] as List? ?? [])
         .map((e) => SprinklerLeadModel.fromJson(e as Map<String, dynamic>))
         .toList();
+    return (
+      leads: leads,
+      total: (body['total'] as num?)?.toInt() ?? leads.length,
+      page: (body['page'] as num?)?.toInt() ?? page,
+      pages: (body['pages'] as num?)?.toInt() ?? 1,
+    );
   }
 
   // ── GET SINGLE ────────────────────────────────────────────────────────────

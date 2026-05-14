@@ -23,12 +23,202 @@ class SolarLeadCubit extends Cubit<SolarLeadState> {
   }
 
   // ── GET ALL ───────────────────────────────────────────────────────────────
-  Future<void> fetchAllLeads({String? status, String? search}) async {
+  // Per-tab pagination tracking
+  // Tab indices: 0 = Recent, 1 = Older, 2 = Completed
+  final Map<int, int> _tabCurrentPage = {0: 1, 1: 1, 2: 1};
+  final Map<int, int> _tabTotalPages = {0: 1, 1: 1, 2: 1};
+  final Map<int, int> _tabTotalLeads = {0: 0, 1: 0, 2: 0};
+
+  // Installation pending count tracking
+  int _installationPendingCount = 0;
+
+  String? _lastStatus;
+  String? _lastSearch;
+  DateTime? _lastSelectedDate;
+  int _currentTab = 0; // 0=Recent, 1=Older, 2=Completed
+
+  // Getters for current tab pagination
+  int get currentPage => _tabCurrentPage[_currentTab] ?? 1;
+  int get totalPages => _tabTotalPages[_currentTab] ?? 1;
+  int get totalLeads => _tabTotalLeads[_currentTab] ?? 0;
+
+  // Getters for specific tab pagination
+  int getTabPage(int tabIndex) => _tabCurrentPage[tabIndex] ?? 1;
+  int getTabTotalPages(int tabIndex) => _tabTotalPages[tabIndex] ?? 1;
+  int getTabTotalLeads(int tabIndex) => _tabTotalLeads[tabIndex] ?? 0;
+
+  // Getter for installation pending count
+  int getInstallationPendingCount() => _installationPendingCount;
+
+  // Main fetch for all tabs - pre-loads counts for all 3 tabs
+  Future<void> fetchAllLeads({
+    String? status,
+    String? search,
+    DateTime? selectedDate,
+  }) async {
+    _lastStatus = status;
+    _lastSearch = search;
+    _lastSelectedDate = selectedDate;
+    // Reset pagination for all tabs
+    _tabCurrentPage.clear();
+    _tabTotalPages.clear();
+    _tabTotalLeads.clear();
+    _tabCurrentPage.addAll({0: 1, 1: 1, 2: 1});
+    _tabTotalPages.addAll({0: 1, 1: 1, 2: 1});
+    _tabTotalLeads.addAll({0: 0, 1: 0, 2: 0});
+    _currentTab = 0;
+
+    // Pre-load all tabs to populate their counts before user clicks
+    // Start with tab 0 and display it, then load tabs 1 and 2 in background
+    await _doFetchTab(tabIndex: 0);
+
+    // Load other tabs silently to populate counts
+    try {
+      await _doFetchTab(tabIndex: 1);
+      await _doFetchTab(tabIndex: 2);
+      // After loading all tabs, emit tab 0 again to display it in UI
+      await _doFetchTab(tabIndex: 0);
+    } catch (e) {
+      // If any tab fails, just continue - tab 0 is still valid
+      print('Error pre-loading tab counts: $e');
+    }
+
+    // Fetch installation pending count separately (without date filtering)
+    await _fetchAndUpdateInstallationPendingCount();
+  }
+
+  // Fetch all leads to count installation pending (no date filtering)
+  Future<void> _fetchAndUpdateInstallationPendingCount() async {
+    try {
+      final result = await _repo.getAllLeads(
+        status: 'all',
+        search: null,
+        page: 1,
+        limit: 9999, // Get all leads
+        fromDate: null, // NO date filtering
+        toDate: null,
+      );
+
+      // Filter for installation pending leads
+      _installationPendingCount = result.leads
+          .where(
+            (l) =>
+                l.currentStep.index >= SolarStep.dealDone.index &&
+                l.currentStep.index <= SolarStep.installationStarted.index,
+          )
+          .length;
+    } catch (e) {
+      print('Error fetching installation pending count: $e');
+      _installationPendingCount = 0;
+    }
+  }
+
+  // Fetch specific page of current tab
+  Future<void> fetchPage(int page, {int tabIndex = -1}) async {
+    final tab = tabIndex >= 0 ? tabIndex : _currentTab;
+    if (page < 1 || page > (_tabTotalPages[tab] ?? 1)) return;
+    _tabCurrentPage[tab] = page;
+    _currentTab = tab;
+    await _doFetchTab(tabIndex: tab);
+  }
+
+  // Set current tab and fetch first page
+  Future<void> setTabAndFetch(int tabIndex, {bool forceRefresh = false}) async {
+    _currentTab = tabIndex;
+    final isFirstLoad = (_tabTotalLeads[tabIndex] ?? 0) == 0;
+
+    if (forceRefresh || isFirstLoad) {
+      // First time loading this tab or force refresh
+      _tabCurrentPage[tabIndex] = 1;
+      await _doFetchTab(tabIndex: tabIndex);
+    } else {
+      // Tab was already loaded, fetch current page
+      await _doFetchTab(tabIndex: tabIndex);
+    }
+  }
+
+  Future<void> _doFetchTab({required int tabIndex}) async {
     emit(SolarLeadLoading());
     try {
-      final leads = await _repo.getAllLeads(status: status, search: search);
+      String? status = _lastStatus;
+      String? search = _lastSearch;
+
+      // Calculate date ranges based on tabIndex OR use selected date if provided
+      DateTime? fromDate;
+      DateTime? toDate;
+
+      if (_lastSelectedDate != null) {
+        // User picked a specific date - filter to only that date
+        final selectedDay = DateTime(
+          _lastSelectedDate!.year,
+          _lastSelectedDate!.month,
+          _lastSelectedDate!.day,
+        );
+        fromDate = selectedDay;
+        toDate = selectedDay.add(const Duration(days: 1));
+      } else {
+        // No specific date picked - use automatic tab date ranges
+        if (tabIndex == 0) {
+          // Recent: last 7 days
+          final now = DateTime.now();
+          final today = DateTime(now.year, now.month, now.day);
+          fromDate = today.subtract(
+            Duration(days: 6),
+          ); // 7 days including today
+          toDate = today.add(Duration(days: 1)); // End of today
+        } else if (tabIndex == 1) {
+          // Older: before 7 days
+          final now = DateTime.now();
+          final today = DateTime(now.year, now.month, now.day);
+          toDate = today.subtract(Duration(days: 7)); // Start of 7 days ago
+          // fromDate is null to get all older leads
+        }
+      }
+
+      // Apply tab-specific status filters
+      if (tabIndex == 0 || tabIndex == 1) {
+        // Recent (0) and Older (1): both fetch only ACTIVE leads from API
+        // Only override if current filter is 'Completed' or specific status
+        if (_lastStatus == 'all' ||
+            _lastStatus == 'All' ||
+            _lastStatus == 'Pending Payment') {
+          // If 'all' or 'Pending Payment' status requested, keep it to fetch all leads regardless of completion
+          status = _lastStatus;
+        } else if (_lastStatus == 'Completed' ||
+            (_lastStatus != 'All' &&
+                _lastStatus != 'Active' &&
+                _lastStatus != null)) {
+          // If we're in a specific status filter, keep it for both tabs
+          status = _lastStatus;
+        } else {
+          // Otherwise, fetch only active leads for pagination to work correctly
+          status = 'Active';
+        }
+      } else if (tabIndex == 2) {
+        // Completed leads - always fetch completed regardless of filter
+        status = 'Completed'; // Use capitalized 'Completed' to match API
+      }
+
+      final result = await _repo.getAllLeads(
+        status: status,
+        search: search,
+        page: _tabCurrentPage[tabIndex] ?? 1,
+        limit: 10,
+        fromDate: fromDate,
+        toDate: toDate,
+      );
+
+      _tabTotalPages[tabIndex] = result.pages;
+      _tabTotalLeads[tabIndex] = result.total;
+
       emit(
-        SolarLeadsLoaded(leads: leads, total: leads.length, page: 1, pages: 1),
+        SolarLeadsLoaded(
+          leads: result.leads,
+          total: result.total,
+          page: result.page,
+          pages: result.pages,
+          tabIndex: tabIndex,
+        ),
       );
     } catch (e) {
       emit(SolarLeadError(_msg(e)));
@@ -41,6 +231,97 @@ class SolarLeadCubit extends Cubit<SolarLeadState> {
       emit(SolarLeadDetailLoaded(await _repo.getSingleLead(id)));
     } catch (e) {
       emit(SolarLeadError(_msg(e)));
+    }
+  }
+
+  // ── FETCH FOR INSTALLATION PENDING (NO DATE FILTERING) ──────────────────
+  Future<void> fetchInstallationPending({String? status}) async {
+    emit(SolarLeadLoading());
+    try {
+      final result = await _repo.getAllLeads(
+        status: status ?? 'all',
+        search: null,
+        page: 1,
+        limit: 1000, // High limit to get all leads
+        fromDate: null, // NO date filtering
+        toDate: null,
+      );
+      emit(
+        SolarLeadsLoaded(
+          leads: result.leads,
+          total: result.total,
+          page: result.page,
+          pages: result.pages,
+          tabIndex: 0,
+        ),
+      );
+    } catch (e) {
+      emit(SolarLeadError(_msg(e)));
+    }
+  }
+
+  // ── FETCH INSTALLATION PENDING PAGE (SERVER-SIDE PAGINATION) ─────────────
+  Future<Map<String, dynamic>> fetchInstallationPendingPage({
+    required int page,
+    required int limit,
+    String? search,
+  }) async {
+    emit(SolarLeadLoading());
+    try {
+      // Saari leads fetch karo
+      final result = await _repo.getAllLeads(
+        status: 'all',
+        search: search,
+        page: 1, // ← page 1 fix
+        limit: 9999, // ← sab fetch karo
+        fromDate: null,
+        toDate: null,
+      );
+
+      // Sirf dealDone (5) se installationStarted (7) tak
+      final filtered = result.leads.where((l) {
+        return l.currentStep.index >= SolarStep.dealDone.index &&
+            l.currentStep.index <= SolarStep.installationStarted.index;
+      }).toList()..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+
+      // Search apply karo
+      final searched = (search == null || search.trim().isEmpty)
+          ? filtered
+          : filtered.where((l) {
+              final q = search.toLowerCase();
+              return l.customerName.toLowerCase().contains(q) ||
+                  l.mobile.contains(search) ||
+                  l.address.toLowerCase().contains(q);
+            }).toList();
+
+      // Paginate
+      final total = searched.length;
+      final totalPages = total == 0 ? 1 : (total / limit).ceil();
+      final startIndex = (page - 1) * limit;
+      final endIndex = (startIndex + limit).clamp(0, total);
+      final paginatedLeads = startIndex >= total
+          ? <SolarLeadsModel>[]
+          : searched.sublist(startIndex, endIndex);
+
+      emit(
+        SolarLeadsLoaded(
+          leads: paginatedLeads,
+          total: total,
+          page: page,
+          pages: totalPages,
+          tabIndex: 0,
+        ),
+      );
+
+      return {
+        'page': page,
+        'pages': totalPages,
+        'total': total,
+        'leads': paginatedLeads,
+      };
+    } catch (e) {
+      emit(SolarLeadError(_msg(e)));
+      rethrow;
     }
   }
 
@@ -456,6 +737,85 @@ class SolarLeadCubit extends Cubit<SolarLeadState> {
     }
   }
 
+  // Pending payment
+
+  Future<void> fetchAllLeadsForPendingPayment() async {
+    emit(SolarLeadLoading());
+    try {
+      final result = await _repo.getAllLeads(
+        status: 'all',
+        page: 1,
+        limit: 9999,
+      );
+
+      final filtered = result.leads.where((l) {
+        if (l.currentStep.index < SolarStep.dealDone.index) return false;
+        if (l.currentStep == SolarStep.projectCompleted) return false;
+        if (l.isCompleted) return false;
+
+        final remaining = l.paymentSummary.remainingBalance > 0
+            ? l.paymentSummary.remainingBalance
+            : ((l.finalAmount ?? l.totalAmount) - (l.advancePayment ?? 0))
+                  .clamp(0, double.infinity)
+                  .toDouble();
+        return remaining > 0;
+      }).toList();
+
+      emit(
+        SolarLeadsLoaded(
+          leads: filtered,
+          total: filtered.length,
+          page: 1,
+          pages: 1,
+          tabIndex: 0,
+        ),
+      );
+    } catch (e) {
+      emit(SolarLeadError(_msg(e)));
+    }
+  }
+
+  // Pending Payment Count
+
+  Future<int> getPendingPaymentCount() async {
+  try {
+    final result = await _repo.getAllLeads(
+      status: 'all',
+      page: 1,
+      limit: 9999,
+    );
+    return result.leads.where((l) {
+      if (l.isCompleted) return false;
+      if (l.currentStep == SolarStep.projectCompleted) return false;
+      if (l.currentStep.index < SolarStep.dealDone.index) return false;
+      final remaining = l.paymentSummary.remainingBalance > 0
+          ? l.paymentSummary.remainingBalance
+          : ((l.finalAmount ?? l.totalAmount) - (l.advancePayment ?? 0))
+                .clamp(0, double.infinity);
+      return remaining > 0;
+    }).length;
+  } catch (_) {
+    return 0;
+  }
+}
+
+// Installation Pending Count 
+
+Future<int> getInstallationPendingCountAsync() async {
+  try {
+    final result = await _repo.getAllLeads(
+      status: 'all',
+      page: 1,
+      limit: 9999,
+    );
+    return result.leads.where((l) {
+      return l.currentStep.index >= SolarStep.dealDone.index &&
+          l.currentStep.index <= SolarStep.installationStarted.index;
+    }).length;
+  } catch (_) {
+    return 0;
+  }
+}
   // ── DELETE ────────────────────────────────────────────────────────────────
   Future<void> deleteLead(String id) async {
     emit(SolarLeadLoading());

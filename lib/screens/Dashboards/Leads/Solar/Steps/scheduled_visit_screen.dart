@@ -4,11 +4,12 @@ import 'package:solar_project/Cubits/SolarLeads/solar_leads_cubit.dart';
 import 'package:solar_project/Cubits/SolarLeads/solar_leads_state.dart';
 import 'package:solar_project/Helper/app_feedback.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
+import 'package:solar_project/Helper/lead_form_widgets.dart';
 import 'package:solar_project/Helper/lead_themes.dart';
+import 'package:solar_project/core/app_colors.dart';
 import 'package:solar_project/core/constants/api_constants.dart';
 import 'package:solar_project/core/network/dio_client.dart';
 import 'package:solar_project/data/Models/solar_leads_model.dart';
-import 'package:solar_project/core/app_colors.dart';
 
 // ── Sales person fetched from backend ────────────────────────────────────────
 class _SalesPerson {
@@ -244,10 +245,10 @@ class _State extends State<SolarVisitScheduledScreen> {
         }
       },
       child: Scaffold(
-        backgroundColor:  AppColors.background,
+        backgroundColor:    AppColors.lightBg,
         appBar: AppBar(
           backgroundColor: LeadTheme.primary,
-          foregroundColor: AppColors.surface,
+          foregroundColor: Colors.white,
           elevation: 0,
           title: Text(
             widget.isEditing ? 'Edit Visit Schedule' : 'Schedule Site Visit',
@@ -256,7 +257,7 @@ class _State extends State<SolarVisitScheduledScreen> {
           leading: IconButton(
             icon: const AppSvgIcon(
               AppSvgAssets.chevronLeft,
-              color: AppColors.surface,
+              color: Colors.white,
               size: 18,
             ),
             onPressed: () => Navigator.pop(context),
@@ -279,50 +280,31 @@ class _State extends State<SolarVisitScheduledScreen> {
                   // Visit Date
                   _buildLabel('Visit Date', required: false),
                   const SizedBox(height: 6),
-                  TextFormField(
+                  LeadTextFormField(
+                    controller: _visitDateCtrl,
+                    svgIcon: AppSvgAssets.calendarDays,
+                    accentColor: LeadTheme.orange,
+                    required: false,
                     readOnly: true,
                     onTap: _pickDate,
-                    controller: _visitDateCtrl,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.textDark,
-                    ),
-                    decoration: _inputDecoration(
-                      hint: 'Select visit date',
-                      suffixIcon: AppSvgIcon(
-                        AppSvgAssets.calendarDays,
-                        size: 18,
-                        color: visitDate != null
-                            ? AppColors.success
-                            :  AppColors.textGray,
-                      ),
-                    ),
+                    
+                    hintText: 'Select visit date',
+                    bottomSpacing: 0,
                   ),
                   const SizedBox(height: 14),
 
                   // Visit Time
                   _buildLabel('Visit Time', required: false),
                   const SizedBox(height: 6),
-                  TextFormField(
+                  LeadTextFormField(
+                    controller: _visitTimeCtrl,
+                    svgIcon: AppSvgAssets.clock,
+                    accentColor: LeadTheme.orange,
+                    required: false,
                     readOnly: true,
                     onTap: _pickTime,
-                    controller: _visitTimeCtrl,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.textDark,
-                    ),
-                    decoration: _inputDecoration(
-                      hint: 'Select visit time (optional)',
-                      suffixIcon: Icon(
-                        Icons.access_time_rounded,
-                        size: 18,
-                        color: visitTime != null
-                            ? LeadTheme.primary
-                            :  AppColors.textGray,
-                      ),
-                    ),
+                    hintText: 'Select visit time',
+                    bottomSpacing: 0,
                   ),
                   const SizedBox(height: 14),
 
@@ -341,25 +323,25 @@ class _State extends State<SolarVisitScheduledScreen> {
                 children: [
                   _buildLabel('Notes', required: false),
                   const SizedBox(height: 6),
-                  TextFormField(
+                  LeadTextFormField(
                     controller: notesC,
+                    svgIcon: AppSvgAssets.fileText,
+                    accentColor: LeadTheme.orange,
+                    required: false,
                     maxLines: 3,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: AppColors.textDark,
-                    ),
                     validator: (value) {
                       if (value != null && value.trim().isNotEmpty) {
-                        if (value.trim().length < 3)
+                        if (value.trim().length < 3) {
                           return 'Notes must be at least 3 characters';
-                        if (value.trim().length > 500)
+                        }
+                        if (value.trim().length > 500) {
                           return 'Notes cannot exceed 500 characters';
+                        }
                       }
                       return null;
                     },
-                    decoration: _inputDecoration(
-                      hint: 'Any remarks about this visit…',
-                    ),
+                    hintText: 'Any remarks about this visit…',
+                    bottomSpacing: 0,
                   ),
                 ],
               ),
@@ -381,7 +363,7 @@ class _State extends State<SolarVisitScheduledScreen> {
         MediaQuery.of(context).padding.bottom + 12,
       ),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: Colors.white,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.08),
@@ -397,7 +379,7 @@ class _State extends State<SolarVisitScheduledScreen> {
           onPressed: _saving ? null : _save,
           style: ElevatedButton.styleFrom(
             backgroundColor: LeadTheme.primary,
-            foregroundColor: AppColors.surface,
+            foregroundColor: Colors.white,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
@@ -408,7 +390,7 @@ class _State extends State<SolarVisitScheduledScreen> {
                   width: 20,
                   height: 20,
                   child: CircularProgressIndicator(
-                    color: AppColors.surface,
+                    color: Colors.white,
                     strokeWidth: 2,
                   ),
                 )
@@ -434,7 +416,7 @@ class _State extends State<SolarVisitScheduledScreen> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -496,13 +478,13 @@ class _State extends State<SolarVisitScheduledScreen> {
       style: const TextStyle(
         fontSize: 12.5,
         fontWeight: FontWeight.w600,
-        color: AppColors.textDark,
+        color: AppColors.gray400,
       ),
       children: required
           ? const [
               TextSpan(
                 text: ' *',
-                style: TextStyle(color: AppColors.error),
+                style: TextStyle(color: Colors.red),
               ),
             ]
           : [],
@@ -518,7 +500,7 @@ class _State extends State<SolarVisitScheduledScreen> {
     hintText: hint,
     hintStyle: const TextStyle(fontSize: 13, color: AppColors.textLight),
     filled: true,
-    fillColor: AppColors.surface,
+    fillColor: Colors.white,
     prefixIcon: prefixIcon != null
         ? Padding(padding: const EdgeInsets.all(13), child: prefixIcon)
         : null,
@@ -540,11 +522,11 @@ class _State extends State<SolarVisitScheduledScreen> {
     ),
     errorBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(10),
-      borderSide: const BorderSide(color: AppColors.error),
+      borderSide: const BorderSide(color: Colors.red),
     ),
     focusedErrorBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(10),
-      borderSide: const BorderSide(color: AppColors.error, width: 1.5),
+      borderSide: const BorderSide(color: Colors.red, width: 1.5),
     ),
   );
 
@@ -555,9 +537,9 @@ class _State extends State<SolarVisitScheduledScreen> {
       return Container(
         height: 50,
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: Colors.white,
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color:  AppColors.divider),
+          border: Border.all(color:   AppColors.divider),
         ),
         child: Row(
           children: [
@@ -573,7 +555,7 @@ class _State extends State<SolarVisitScheduledScreen> {
             const SizedBox(width: 10),
             Text(
               'Loading sales persons…',
-              style: TextStyle(fontSize: 13, color: AppColors.background),
+              style: TextStyle(fontSize: 13, color: Colors.grey.shade500),
             ),
           ],
         ),
@@ -585,9 +567,9 @@ class _State extends State<SolarVisitScheduledScreen> {
       return Container(
         height: 50,
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: Colors.white,
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color:  AppColors.divider),
+          border: Border.all(color:   AppColors.divider),
         ),
         padding: const EdgeInsets.symmetric(horizontal: 14),
         child: Row(
@@ -595,12 +577,12 @@ class _State extends State<SolarVisitScheduledScreen> {
             AppSvgIcon(
               AppSvgAssets.userRound,
               size: 16,
-              color: AppColors.textLight,
+              color: Colors.grey.shade400,
             ),
             const SizedBox(width: 8),
             Text(
               'No sales persons found',
-              style: TextStyle(fontSize: 13, color: AppColors.background),
+              style: TextStyle(fontSize: 13, color: Colors.grey.shade500),
             ),
           ],
         ),
@@ -609,20 +591,20 @@ class _State extends State<SolarVisitScheduledScreen> {
 
     // Dropdown
     return DropdownButtonFormField<_SalesPerson?>(
-      value: _selectedSalesPerson,
+      initialValue: _selectedSalesPerson,
       decoration: _inputDecoration(
         hint: 'Select sales person (optional)',
         prefixIcon: AppSvgIcon(
           AppSvgAssets.userRound,
           size: 16,
-          color: AppColors.background,
+          color: Colors.grey.shade500,
         ),
       ),
       isExpanded: true,
       icon: AppSvgIcon(
         AppSvgAssets.arrowRight, // swap to chevronDown if you have it
         size: 16,
-        color: AppColors.background,
+        color: Colors.grey.shade500,
       ),
       items: [
         // "None" option
@@ -632,7 +614,7 @@ class _State extends State<SolarVisitScheduledScreen> {
             'None',
             style: TextStyle(
               fontSize: 13,
-              color: AppColors.background,
+              color: Colors.grey.shade500,
               fontStyle: FontStyle.italic,
             ),
           ),
@@ -672,7 +654,7 @@ class _State extends State<SolarVisitScheduledScreen> {
           'None',
           style: TextStyle(
             fontSize: 13,
-            color: AppColors.background,
+            color: Colors.grey.shade500,
             fontStyle: FontStyle.italic,
           ),
         ),
@@ -737,3 +719,6 @@ Widget _infoBanner(SolarLeadsModel lead) {
     ),
   );
 }
+
+
+

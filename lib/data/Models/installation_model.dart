@@ -154,7 +154,7 @@ class InstallationModel {
     final ia = json['installationAssign'] as Map<String, dynamic>?;
 
     // Parse multi-member arrays (new) with legacy single fallback
-    String? _parseId(dynamic raw) {
+    String? parseId(dynamic raw) {
       if (raw == null) return null;
       if (raw is Map) return raw['\$oid']?.toString();
       return raw.toString();
@@ -164,12 +164,12 @@ class InstallationModel {
     final List<String> installationTeamMemberIds;
     if (rawIds is List && rawIds.isNotEmpty) {
       installationTeamMemberIds = rawIds
-          .map(_parseId)
+          .map(parseId)
           .whereType<String>()
           .where((s) => s.isNotEmpty)
           .toList();
     } else {
-      final legacyId = _parseId(ia?['installationTeamMemberId']);
+      final legacyId = parseId(ia?['installationTeamMemberId']);
       installationTeamMemberIds = legacyId != null ? [legacyId] : [];
     }
 
@@ -257,8 +257,9 @@ class InstallationModel {
 
     // ── meter stage — derived from which date fields are set ───────────────
     MeterStage? meterStage;
-    if      (meter?['installedDate']   != null) meterStage = MeterStage.installed;
-    else if (meter?['inspectionDate']  != null) meterStage = MeterStage.inspection;
+    if      (meter?['installedDate']   != null) {
+      meterStage = MeterStage.installed;
+    } else if (meter?['inspectionDate']  != null) meterStage = MeterStage.inspection;
     else if (meter?['applicationDate'] != null) meterStage = MeterStage.applied;
 
     // ── status — parse backend string, then refine with meter sub-doc ──────

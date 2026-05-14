@@ -75,7 +75,13 @@ class _MaterialCustomerPipelineScreenState
       if (!mounted) return;
 
       _customer = Map<String, dynamic>.from(results[0] as Map<String, dynamic>);
-      _materials = List<Map<String, dynamic>>.from(results[1] as List);
+      
+      // getMaterials() returns a Map with 'materials' key
+      final materialsResponse = results[1] as Map<String, dynamic>;
+      _materials = List<Map<String, dynamic>>.from(
+        (materialsResponse['materials'] as List?) ?? [],
+      );
+      
       _salesPeople = List<Map<String, dynamic>>.from(results[2] as List);
 
       _hydrateFormFromCustomer();
@@ -210,11 +216,16 @@ class _MaterialCustomerPipelineScreenState
 
   Future<void> _submitSource() async {
     if (!(_sourceFormKey.currentState?.validate() ?? false)) return;
+    final amount = double.tryParse(_materialAmountCtrl.text.trim());
+    if (amount == null) {
+      if (mounted) AppFeedback.showError(context, 'Invalid material amount');
+      return;
+    }
     await _saveStep(
       step: 'source',
       payload: {
         'materialId': _selectedMaterialId,
-        'materialAmount': double.parse(_materialAmountCtrl.text.trim()),
+        'materialAmount': amount,
       },
       successMessage: 'Source step updated',
     );
@@ -247,9 +258,14 @@ class _MaterialCustomerPipelineScreenState
 
   Future<void> _submitDealDone() async {
     if (!(_dealFormKey.currentState?.validate() ?? false)) return;
+    final amount = double.tryParse(_finalAmountCtrl.text.trim());
+    if (amount == null) {
+      if (mounted) AppFeedback.showError(context, 'Invalid final amount');
+      return;
+    }
     await _saveStep(
       step: 'dealDone',
-      payload: {'finalAmount': double.parse(_finalAmountCtrl.text.trim())},
+      payload: {'finalAmount': amount},
       successMessage: 'Deal Done step updated',
     );
   }
@@ -341,9 +357,9 @@ class _MaterialCustomerPipelineScreenState
   }
 
   Color _dotColor(int index) {
-    if (_doneFor(index)) return AppColors.success;
+    if (_doneFor(index)) return   AppColors.greenSuccess;
     if (_activeStep == index) return LeadTheme.primary;
-    return  AppColors.divider;
+    return   AppColors.slate300;
   }
 
   String _materialNameById(String? id) {
@@ -440,7 +456,7 @@ class _MaterialCustomerPipelineScreenState
           Expanded(
             child: Text(
               label,
-              style: const TextStyle(fontSize: 12, color: AppColors.textGray),
+              style: const TextStyle(fontSize: 12, color: AppColors.slate500),
             ),
           ),
           Text(
@@ -448,7 +464,7 @@ class _MaterialCustomerPipelineScreenState
             style: const TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: AppColors.textDark,
+              color: AppColors.slate900,
             ),
           ),
         ],
@@ -461,20 +477,20 @@ class _MaterialCustomerPipelineScreenState
       width: double.infinity,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color:  AppColors.background,
+        color:   AppColors.slate50,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color:  AppColors.divider),
+        border: Border.all(color:   AppColors.slate200),
       ),
       child: const Row(
         children: [
-          Icon(Icons.lock_outline_rounded, size: 18, color: AppColors.textGray),
+          Icon(Icons.lock_outline_rounded, size: 18, color: AppColors.slate500),
           SizedBox(width: 8),
           Expanded(
             child: Text(
               'Is step ko unlock karne ke liye previous step complete karein.',
               style: TextStyle(
                 fontSize: 12,
-                color: AppColors.textGray,
+                color: AppColors.slate600,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -492,10 +508,10 @@ class _MaterialCustomerPipelineScreenState
     final showSummary = done && !isActive && summary.isNotEmpty;
 
     final titleColor = done
-        ?  AppColors.success
+        ?   AppColors.green800
         : isActive
         ? LeadTheme.primary
-        :  AppColors.textLight;
+        :   AppColors.slate300;
 
     return IntrinsicHeight(
       child: Row(
@@ -527,7 +543,7 @@ class _MaterialCustomerPipelineScreenState
                         ? const Icon(
                             Icons.check_rounded,
                             size: 14,
-                            color: AppColors.surface,
+                            color: Colors.white,
                           )
                         : Text(
                             '${index + 1}',
@@ -535,8 +551,8 @@ class _MaterialCustomerPipelineScreenState
                               fontSize: 11,
                               fontWeight: FontWeight.w700,
                               color: isActive
-                                  ? AppColors.surface
-                                  :  AppColors.textGray,
+                                  ? Colors.white
+                                  :   AppColors.slate700,
                             ),
                           ),
                   ),
@@ -548,8 +564,8 @@ class _MaterialCustomerPipelineScreenState
                       margin: const EdgeInsets.symmetric(vertical: 4),
                       decoration: BoxDecoration(
                         color: done
-                            ? const Color(0xFFBBF7D0)
-                            :  AppColors.divider,
+                            ?  AppColors.greenLight1
+                            :   AppColors.slate200,
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -615,9 +631,9 @@ class _MaterialCustomerPipelineScreenState
                       width: double.infinity,
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color:  AppColors.background,
+                        color:   AppColors.slate50,
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color:  AppColors.divider),
+                        border: Border.all(color:   AppColors.slate200),
                       ),
                       child: Column(
                         children: summary
@@ -632,9 +648,9 @@ class _MaterialCustomerPipelineScreenState
                       width: double.infinity,
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: AppColors.surface,
+                        color: Colors.white,
                         borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color:  AppColors.divider),
+                        border: Border.all(color:   AppColors.slate200),
                       ),
                       child: content,
                     ),
@@ -665,10 +681,10 @@ class _MaterialCustomerPipelineScreenState
     final progress = doneCount / totalSteps;
 
     return Scaffold(
-      backgroundColor:  AppColors.background,
+      backgroundColor:   AppColors.slate50,
       appBar: AppBar(
         backgroundColor: color,
-        foregroundColor: AppColors.surface,
+        foregroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
@@ -716,7 +732,7 @@ class _MaterialCustomerPipelineScreenState
                                   const Text(
                                     'Material Customer',
                                     style: TextStyle(
-                                      color: AppColors.surface,
+                                      color: Colors.white70,
                                       fontSize: 12,
                                       fontWeight: FontWeight.w600,
                                     ),
@@ -725,7 +741,7 @@ class _MaterialCustomerPipelineScreenState
                                   Text(
                                     customerName,
                                     style: const TextStyle(
-                                      color: AppColors.surface,
+                                      color: Colors.white,
                                       fontSize: 18,
                                       fontWeight: FontWeight.w800,
                                     ),
@@ -734,7 +750,7 @@ class _MaterialCustomerPipelineScreenState
                                   Text(
                                     mobile,
                                     style: const TextStyle(
-                                      color: AppColors.surface,
+                                      color: Colors.white70,
                                       fontSize: 13,
                                       fontWeight: FontWeight.w500,
                                     ),
@@ -748,20 +764,16 @@ class _MaterialCustomerPipelineScreenState
                                 vertical: 5,
                               ),
                               decoration: BoxDecoration(
-                                color: AppColors.surface.withValues(
-                                  alpha: 0.18,
-                                ),
+                                color: Colors.white.withValues(alpha: 0.18),
                                 borderRadius: BorderRadius.circular(999),
                                 border: Border.all(
-                                  color: AppColors.surface.withValues(
-                                    alpha: 0.24,
-                                  ),
+                                  color: Colors.white.withValues(alpha: 0.24),
                                 ),
                               ),
                               child: Text(
                                 status,
                                 style: const TextStyle(
-                                  color: AppColors.surface,
+                                  color: Colors.white,
                                   fontWeight: FontWeight.w700,
                                   fontSize: 12,
                                 ),
@@ -775,11 +787,11 @@ class _MaterialCustomerPipelineScreenState
                           child: LinearProgressIndicator(
                             value: progress,
                             minHeight: 7,
-                            backgroundColor: AppColors.surface.withValues(
+                            backgroundColor: Colors.white.withValues(
                               alpha: 0.25,
                             ),
                             valueColor: const AlwaysStoppedAnimation<Color>(
-                              AppColors.surface,
+                              Colors.white,
                             ),
                           ),
                         ),
@@ -787,7 +799,7 @@ class _MaterialCustomerPipelineScreenState
                         Text(
                           '$doneCount / $totalSteps steps completed',
                           style: const TextStyle(
-                            color: AppColors.surface,
+                            color: Colors.white,
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                           ),
@@ -814,7 +826,7 @@ class _MaterialCustomerPipelineScreenState
                     width: double.infinity,
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      color: AppColors.surface,
+                      color: Colors.white,
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: [
                         BoxShadow(
@@ -872,8 +884,9 @@ class _MaterialCustomerPipelineScreenState
                                     final val = double.tryParse(
                                       (v ?? '').trim(),
                                     );
-                                    if (val == null || val < 0)
+                                    if (val == null || val < 0) {
                                       return 'Enter valid amount';
+                                    }
                                     return null;
                                   },
                                 ),
@@ -1038,10 +1051,10 @@ class _MaterialCustomerPipelineScreenState
                               vertical: 10,
                             ),
                             decoration: BoxDecoration(
-                              color:  AppColors.background,
+                              color:   AppColors.slate50,
                               borderRadius: BorderRadius.circular(8),
                               border: Border.all(
-                                color:  AppColors.divider,
+                                color:   AppColors.slate200,
                               ),
                             ),
                             child: Text(
@@ -1050,7 +1063,7 @@ class _MaterialCustomerPipelineScreenState
                                   : 'Project completion pending.',
                               style: const TextStyle(
                                 fontSize: 12,
-                                color: AppColors.textGray,
+                                color: AppColors.slate600,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -1071,10 +1084,10 @@ class _MaterialCustomerPipelineScreenState
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
           elevation: 0,
-          backgroundColor:  AppColors.primary,
-          foregroundColor: AppColors.surface,
-          disabledBackgroundColor:  AppColors.divider,
-          disabledForegroundColor: AppColors.textLight,
+          backgroundColor:   AppColors.indigo600,
+          foregroundColor: Colors.white,
+          disabledBackgroundColor:   AppColors.slate200,
+          disabledForegroundColor:   AppColors.slate300,
           padding: const EdgeInsets.symmetric(vertical: 12),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
@@ -1087,7 +1100,7 @@ class _MaterialCustomerPipelineScreenState
                 height: 18,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.surface),
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                 ),
               )
             : const Text('Save Step'),
@@ -1095,3 +1108,10 @@ class _MaterialCustomerPipelineScreenState
     );
   }
 }
+
+
+
+
+
+
+

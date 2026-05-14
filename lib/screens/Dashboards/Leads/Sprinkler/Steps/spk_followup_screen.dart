@@ -6,10 +6,11 @@ import 'package:solar_project/Cubits/SprinklerLeads/sprinkler_leads_cubit.dart';
 import 'package:solar_project/Cubits/SprinklerLeads/sprinkler_leads_state.dart';
 import 'package:solar_project/Helper/app_feedback.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
+import 'package:solar_project/Helper/lead_form_widgets.dart';
 import 'package:solar_project/Helper/lead_themes.dart';
 import 'package:solar_project/Helper/lead_widgets.dart';
-import 'package:solar_project/data/Models/sprinkler_lead_model.dart';
 import 'package:solar_project/core/app_colors.dart';
+import 'package:solar_project/data/Models/sprinkler_lead_model.dart';
 
 class SprinklerFollowupScreen extends StatefulWidget {
   final SprinklerLeadModel lead;
@@ -38,19 +39,19 @@ class _State extends State<SprinklerFollowupScreen> {
     _DropOption(
       value: 'cold',
       label: 'Cold',
-      color: AppColors.primary,
+      color: AppColors.blue,
       icon: AppSvgAssets.thermometer,
     ),
     _DropOption(
       value: 'medium',
       label: 'Medium',
-      color: AppColors.warning,
+      color: AppColors.amber,
       icon: AppSvgAssets.activity,
     ),
     _DropOption(
       value: 'hot',
       label: 'Hot',
-      color: AppColors.error,
+      color: AppColors.redError,
       icon: AppSvgAssets.sunMedium,
     ),
   ];
@@ -60,25 +61,25 @@ class _State extends State<SprinklerFollowupScreen> {
     _DropOption(
       value: 'thinking',
       label: 'Thinking',
-      color: AppColors.warning,
+      color: AppColors.amber,
       icon: AppSvgAssets.clock,
     ),
     _DropOption(
       value: 'negotiation',
       label: 'Negotiation',
-      color: AppColors.primary,
+      color: AppColors.purple,
       icon: AppSvgAssets.handshake,
     ),
     _DropOption(
       value: 'revisionNeeded',
       label: 'Revision Needed',
-      color: LeadTheme.secondary,
+      color: AppColors.cyan600,
       icon: AppSvgAssets.pencil,
     ),
     _DropOption(
       value: 'rejected',
       label: 'Rejected',
-      color: AppColors.error,
+      color: AppColors.redError,
       icon: AppSvgAssets.x,
     ),
   ];
@@ -223,7 +224,7 @@ class _State extends State<SprinklerFollowupScreen> {
           leading: IconButton(
             icon: const AppSvgIcon(
               AppSvgAssets.chevronLeft,
-              color: AppColors.surface,
+              color: Colors.white,
               size: 18,
             ),
             onPressed: () => Navigator.pop(context),
@@ -233,7 +234,7 @@ class _State extends State<SprinklerFollowupScreen> {
             style: const TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w600,
-              color: AppColors.surface,
+              color: Colors.white,
             ),
           ),
           actions: [
@@ -348,7 +349,7 @@ class _State extends State<SprinklerFollowupScreen> {
     final selColor = sel?.color;
 
     return DropdownButtonFormField<String>(
-      value: value,
+      initialValue: value,
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: const TextStyle(fontSize: 13, color: AppColors.textLight),
@@ -388,7 +389,7 @@ class _State extends State<SprinklerFollowupScreen> {
       icon: AppSvgIcon(
         AppSvgAssets.chevronDown,
         size: 16,
-        color: AppColors.background,
+        color: Colors.grey.shade500,
       ),
       // ── Items list ────────────────────────────────────────────────────────
       items: [
@@ -398,7 +399,7 @@ class _State extends State<SprinklerFollowupScreen> {
             'None',
             style: TextStyle(
               fontSize: 13,
-              color: AppColors.background,
+              color: Colors.grey.shade500,
               fontStyle: FontStyle.italic,
             ),
           ),
@@ -439,7 +440,7 @@ class _State extends State<SprinklerFollowupScreen> {
           'None',
           style: TextStyle(
             fontSize: 13,
-            color: AppColors.background,
+            color: Colors.grey.shade500,
             fontStyle: FontStyle.italic,
           ),
         ),
@@ -587,7 +588,7 @@ class _State extends State<SprinklerFollowupScreen> {
             AppSvgIcon(
               has ? AppSvgAssets.circleCheckBig : AppSvgAssets.chevronRight,
               size: 14,
-              color: has ? Colors.teal : AppColors.textLight,
+              color: has ? Colors.teal : Colors.grey.shade400,
             ),
           ],
         ),
@@ -638,7 +639,7 @@ class _State extends State<SprinklerFollowupScreen> {
             AppSvgIcon(
               has ? AppSvgAssets.circleCheckBig : AppSvgAssets.chevronRight,
               size: 14,
-              color: has ? Colors.teal : AppColors.textLight,
+              color: has ? Colors.teal : Colors.grey.shade400,
             ),
           ],
         ),
@@ -652,26 +653,14 @@ class _State extends State<SprinklerFollowupScreen> {
     required String label,
     required String icon,
     int maxLines = 1,
-  }) => TextField(
+  }) => LeadTextFormField(
     controller: controller,
+    label: label,
+    svgIcon: icon,
+    accentColor: LeadTheme.secondary,
+    required: false,
     maxLines: maxLines,
-    style: const TextStyle(fontSize: 13, color: LeadTheme.textPrimary),
-    decoration: InputDecoration(
-      labelText: label,
-      labelStyle: const TextStyle(fontSize: 12, color: LeadTheme.textSecondary),
-      prefixIcon: Padding(
-        padding: const EdgeInsets.only(left: 10, right: 6),
-        child: AppSvgIcon(icon, size: 16, color: LeadTheme.textSecondary),
-      ),
-      prefixIconConstraints: const BoxConstraints(minWidth: 36),
-      filled: true,
-      fillColor: LeadTheme.surface,
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: BorderSide.none,
-      ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-    ),
+    bottomSpacing: 0,
   );
 
   // ── Small label ───────────────────────────────────────────────────────────
@@ -680,7 +669,7 @@ class _State extends State<SprinklerFollowupScreen> {
     style: const TextStyle(
       fontSize: 12.5,
       fontWeight: FontWeight.w600,
-      color: AppColors.textDark,
+      color: AppColors.gray400,
     ),
   );
 
@@ -692,7 +681,7 @@ class _State extends State<SprinklerFollowupScreen> {
       onPressed: _saving ? null : _save,
       style: ElevatedButton.styleFrom(
         backgroundColor: LeadTheme.secondary,
-        foregroundColor: AppColors.surface,
+        foregroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
       child: _saving
@@ -701,7 +690,7 @@ class _State extends State<SprinklerFollowupScreen> {
               height: 20,
               child: CircularProgressIndicator(
                 strokeWidth: 2,
-                color: AppColors.surface,
+                color: Colors.white,
               ),
             )
           : const Text(
@@ -723,3 +712,8 @@ class _DropOption {
     required this.icon,
   });
 }
+
+
+
+
+

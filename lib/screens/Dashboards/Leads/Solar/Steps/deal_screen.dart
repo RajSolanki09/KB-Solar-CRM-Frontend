@@ -4,9 +4,9 @@ import 'package:solar_project/Cubits/SolarLeads/solar_leads_cubit.dart';
 import 'package:solar_project/Cubits/SolarLeads/solar_leads_state.dart';
 import 'package:solar_project/Helper/app_feedback.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
+import 'package:solar_project/Helper/lead_form_widgets.dart';
 import 'package:solar_project/Helper/lead_themes.dart';
 import 'package:solar_project/Helper/lead_widgets.dart';
-import 'package:solar_project/core/app_colors.dart';
 import 'package:solar_project/data/Models/solar_leads_model.dart';
 
 class SolarDealScreen extends StatefulWidget {
@@ -309,11 +309,7 @@ Widget _infoBanner(SolarLeadsModel lead) => Container(
   ),
   child: Row(
     children: [
-      const AppSvgIcon(
-        AppSvgAssets.userRound,
-        size: 16,
-        color: LeadTheme.primary,
-      ),
+      const AppSvgIcon(AppSvgAssets.userRound, size: 16, color: LeadTheme.primary),
       const SizedBox(width: 8),
       Expanded(
         child: Column(
@@ -346,26 +342,14 @@ Widget _field(
   String label,
   String svgAsset, {
   int maxLines = 1,
-}) => TextField(
+}) => LeadTextFormField(
   controller: c,
+  label: label,
+  svgIcon: svgAsset,
+  accentColor: LeadTheme.orange,
+  required: false,
   maxLines: maxLines,
-  style: const TextStyle(fontSize: 13, color: LeadTheme.textPrimary),
-  decoration: InputDecoration(
-    labelText: label,
-    labelStyle: const TextStyle(fontSize: 12, color: LeadTheme.textSecondary),
-    prefixIcon: Padding(
-      padding: const EdgeInsets.only(left: 10, right: 6),
-      child: AppSvgIcon(svgAsset, size: 16, color: LeadTheme.textSecondary),
-    ),
-    prefixIconConstraints: const BoxConstraints(minWidth: 36),
-    filled: true,
-    fillColor: LeadTheme.surface,
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(8),
-      borderSide: BorderSide.none,
-    ),
-    contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-  ),
+  bottomSpacing: 0,
 );
 
 Widget _numField(
@@ -373,33 +357,15 @@ Widget _numField(
   String label, {
   String? svgAsset,
   void Function(String)? onChange,
-}) => TextField(
+}) => LeadTextFormField(
   controller: c,
+  label: label,
+  svgIcon: svgAsset ?? AppSvgAssets.fileText,
+  accentColor: LeadTheme.orange,
+  required: false,
   keyboardType: TextInputType.number,
   onChanged: onChange,
-  style: const TextStyle(fontSize: 13, color: LeadTheme.textPrimary),
-  decoration: InputDecoration(
-    labelText: label,
-    labelStyle: const TextStyle(fontSize: 12, color: LeadTheme.textSecondary),
-    prefixIcon: svgAsset != null
-        ? Padding(
-            padding: const EdgeInsets.only(left: 10, right: 6),
-            child: AppSvgIcon(
-              svgAsset,
-              size: 16,
-              color: LeadTheme.textSecondary,
-            ),
-          )
-        : null,
-    prefixIconConstraints: const BoxConstraints(minWidth: 36),
-    filled: true,
-    fillColor: LeadTheme.surface,
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(8),
-      borderSide: BorderSide.none,
-    ),
-    contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-  ),
+  bottomSpacing: 0,
 );
 
 Widget _saveBtn(bool saving, VoidCallback onPressed, String label) => SizedBox(
@@ -409,7 +375,7 @@ Widget _saveBtn(bool saving, VoidCallback onPressed, String label) => SizedBox(
     onPressed: saving ? null : onPressed,
     style: ElevatedButton.styleFrom(
       backgroundColor: LeadTheme.primary,
-      foregroundColor: AppColors.surface,
+      foregroundColor: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
     ),
     child: saving
@@ -418,7 +384,7 @@ Widget _saveBtn(bool saving, VoidCallback onPressed, String label) => SizedBox(
             height: 20,
             child: CircularProgressIndicator(
               strokeWidth: 2,
-              color: AppColors.surface,
+              color: Colors.white,
             ),
           )
         : Text(

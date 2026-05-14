@@ -2,11 +2,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
+import 'package:solar_project/core/app_colors.dart';
 import 'package:solar_project/Cubits/SolarLeads/solar_leads_cubit.dart';
 import 'package:solar_project/Cubits/SolarLeads/solar_leads_state.dart';
 import 'package:solar_project/Cubits/SprinklerLeads/sprinkler_leads_cubit.dart';
 import 'package:solar_project/Cubits/SprinklerLeads/sprinkler_leads_state.dart';
-import 'package:solar_project/core/app_colors.dart';
 import 'package:solar_project/services/api_service.dart';
 
 /// Universal add-followup screen — works for both Solar and Sprinkler leads.
@@ -56,7 +56,7 @@ class _AddFollowupScreenState extends State<AddFollowupScreen> {
       lastDate: DateTime.now().add(const Duration(days: 365)),
       builder: (ctx, child) => Theme(
         data: Theme.of(ctx).copyWith(
-          colorScheme: const ColorScheme.light(primary: AppColors.primary),
+          colorScheme: const ColorScheme.light(primary: AppColors.blue),
         ),
         child: child!,
       ),
@@ -158,15 +158,15 @@ class _AddFollowupScreenState extends State<AddFollowupScreen> {
     }
 
     return Scaffold(
-      backgroundColor:  AppColors.background,
+      backgroundColor:   AppColors.slate50,
       appBar: AppBar(
-        backgroundColor: AppColors.surface,
+        backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
           icon: const AppSvgIcon(
             AppSvgAssets.chevronLeft,
             size: 20,
-            color: AppColors.textDark,
+            color: AppColors.slate800,
           ),
           onPressed: () => Navigator.pop(context),
         ),
@@ -178,12 +178,12 @@ class _AddFollowupScreenState extends State<AddFollowupScreen> {
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
-                color: AppColors.textDark,
+                color: AppColors.slate800,
               ),
             ),
             Text(
               widget.customerName,
-              style: const TextStyle(fontSize: 12, color: AppColors.textGray),
+              style: const TextStyle(fontSize: 12, color: AppColors.slate500),
             ),
           ],
         ),
@@ -193,9 +193,9 @@ class _AddFollowupScreenState extends State<AddFollowupScreen> {
   }
 
   void _showError(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg), backgroundColor: AppColors.error),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(msg), backgroundColor: Colors.red));
   }
 
   Widget _buildForm() {
@@ -276,23 +276,23 @@ class _AddFollowupScreenState extends State<AddFollowupScreen> {
                   vertical: 14,
                 ),
                 decoration: BoxDecoration(
-                  color: AppColors.surface,
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color:  AppColors.divider),
+                  border: Border.all(color:   AppColors.slate200),
                 ),
                 child: Row(
                   children: [
                     const AppSvgIcon(
                       AppSvgAssets.calendarDays,
                       size: 18,
-                      color: AppColors.primary,
+                      color: AppColors.blue,
                     ),
                     const SizedBox(width: 12),
                     Text(
                       _formatDate(_nextFollowupDate),
                       style: const TextStyle(
                         fontSize: 14,
-                        color: AppColors.textDark,
+                        color: AppColors.slate800,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -326,7 +326,7 @@ class _AddFollowupScreenState extends State<AddFollowupScreen> {
             child: ElevatedButton(
               onPressed: _saving ? null : _save,
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
+                backgroundColor:   AppColors.blue,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -337,14 +337,14 @@ class _AddFollowupScreenState extends State<AddFollowupScreen> {
                       width: 22,
                       height: 22,
                       child: CircularProgressIndicator(
-                        color: AppColors.surface,
+                        color: Colors.white,
                         strokeWidth: 2,
                       ),
                     )
                   : const Text(
                       'Save Follow-up',
                       style: TextStyle(
-                        color: AppColors.surface,
+                        color: Colors.white,
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
                       ),
@@ -362,21 +362,21 @@ class _AddFollowupScreenState extends State<AddFollowupScreen> {
 
   InputDecoration _inputDec(String hint) => InputDecoration(
     hintText: hint,
-    hintStyle: const TextStyle(color: AppColors.divider, fontSize: 13),
+    hintStyle: const TextStyle(color: AppColors.slate300, fontSize: 13),
     filled: true,
-    fillColor: AppColors.surface,
+    fillColor: Colors.white,
     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
     border: OutlineInputBorder(
       borderRadius: BorderRadius.circular(10),
-      borderSide: const BorderSide(color: AppColors.divider),
+      borderSide: const BorderSide(color: AppColors.slate200),
     ),
     enabledBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(10),
-      borderSide: const BorderSide(color: AppColors.divider),
+      borderSide: const BorderSide(color: AppColors.slate200),
     ),
     focusedBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(10),
-      borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+      borderSide: const BorderSide(color: AppColors.blue, width: 1.5),
     ),
   );
 }
@@ -405,7 +405,7 @@ class _Section extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
-                color: AppColors.textDark,
+                color: AppColors.gray400,
               ),
             ),
             if (required)
@@ -444,10 +444,10 @@ class _TypeChip extends StatelessWidget {
         duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
         decoration: BoxDecoration(
-          color: selected ? AppColors.primary : AppColors.surface,
+          color: selected ?   AppColors.blue : Colors.white,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: selected ? AppColors.primary :  AppColors.divider,
+            color: selected ?   AppColors.blue :   AppColors.slate200,
           ),
         ),
         child: Text(
@@ -455,10 +455,12 @@ class _TypeChip extends StatelessWidget {
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w500,
-            color: selected ? AppColors.surface :  AppColors.textGray,
+            color: selected ? Colors.white :   AppColors.slate500,
           ),
         ),
       ),
     );
   }
 }
+
+

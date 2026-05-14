@@ -1,4 +1,4 @@
-﻿import 'dart:math';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
@@ -70,9 +70,9 @@ class ResponsiveLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (isDesktop(context))
+    if (isDesktop(context)) {
       return desktop ?? tablet ?? mobile;
-    else if (isTablet(context))
+    } else if (isTablet(context))
       return tablet ?? mobile;
     else
       return mobile;
@@ -104,10 +104,10 @@ class DashboardCard extends StatefulWidget {
 }
 
 class _DashboardCardState extends State<DashboardCard>
-    with SingleTickerProviderStateMixin { // ← TickerProviderStateMixin se change karo
+    with TickerProviderStateMixin {
   late AnimationController _scaleController;
   late Animation<double> _scaleAnim;
-  // ← _ripples list hata do
+  final List<_RippleData> _ripples = [];
 
   @override
   void initState() {
@@ -126,24 +126,37 @@ class _DashboardCardState extends State<DashboardCard>
   @override
   void dispose() {
     _scaleController.dispose();
+    for (final r in _ripples) {
+      r.controller.dispose();
+    }
+    _ripples.clear();
     super.dispose();
   }
 
   void _onTapDown(TapDownDetails details) {
-    if (!mounted) return;
     _scaleController.forward();
+    final ripple = _RippleData(
+      offset: details.localPosition,
+      controller: AnimationController(
+        vsync: this,
+        duration: const Duration(milliseconds: 550),
+      ),
+    );
+    ripple.controller.forward().whenComplete(() {
+      if (mounted) {
+        setState(() => _ripples.remove(ripple));
+      }
+      ripple.controller.dispose();
+    });
+    if (mounted) setState(() => _ripples.add(ripple));
   }
 
   void _onTapUp(TapUpDetails _) {
-    if (!mounted) return;
     _scaleController.reverse();
     widget.onTap?.call();
   }
 
-  void _onTapCancel() {
-    if (!mounted) return;
-    _scaleController.reverse();
-  }
+  void _onTapCancel() => _scaleController.reverse();
 
   @override
   Widget build(BuildContext context) {
@@ -151,10 +164,7 @@ class _DashboardCardState extends State<DashboardCard>
     final double iconSize = responsiveFont(context, 18);
     final double valueSize = responsiveFont(context, 30);
     final double titleSize = responsiveFont(context, 13);
-
-    final Color textColor = widget.cardColor.computeLuminance() > 0.5
-        ? AppColors.textDark
-        : AppColors.surface;
+    // final double cardHeight = responsivePadding(context, 130);
 
     return GestureDetector(
       onTapDown: _onTapDown,
@@ -184,18 +194,25 @@ class _DashboardCardState extends State<DashboardCard>
           clipBehavior: Clip.hardEdge,
           child: Stack(
             children: [
+              // ── Sun rays ───────────────────────────────────
               Positioned.fill(
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(responsivePadding(context, 18)),
+                  borderRadius: BorderRadius.circular(
+                    responsivePadding(context, 18),
+                  ),
                   child: CustomPaint(painter: _SunRaysPainter()),
                 ),
               ),
+
+              // ── Bottom bar ─────────────────────────────────
               Positioned(
-                left: 0, right: 0, bottom: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
                 child: Container(
                   height: 3,
                   decoration: const BoxDecoration(
-                    color: Color(0x38FFFFFF),
+                    color: AppColors.textGray,
                     borderRadius: BorderRadius.only(
                       bottomLeft: Radius.circular(18),
                       bottomRight: Radius.circular(18),
@@ -203,7 +220,11 @@ class _DashboardCardState extends State<DashboardCard>
                   ),
                 ),
               ),
-              // ← Ripple layer hata do (_ripples.map(...) wali line)
+
+              // ── Ripple layer ───────────────────────────────
+              ..._ripples.map((r) => _RipplePainterWidget(ripple: r)),
+
+              // ── Content ────────────────────────────────────
               Padding(
                 padding: EdgeInsets.all(pad),
                 child: Column(
@@ -220,7 +241,7 @@ class _DashboardCardState extends State<DashboardCard>
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              color: textColor,
+                              color: Colors.white,
                               fontSize: titleSize,
                               fontWeight: FontWeight.w800,
                               letterSpacing: 0.1,
@@ -233,18 +254,28 @@ class _DashboardCardState extends State<DashboardCard>
                           height: responsivePadding(context, 32),
                           child: DecoratedBox(
                             decoration: BoxDecoration(
-                              color: AppColors.surface.withValues(alpha: 0.18),
-                              borderRadius: BorderRadius.circular(responsivePadding(context, 12)),
+                              color: Colors.white.withValues(alpha: 0.18),
+                              borderRadius: BorderRadius.circular(
+                                responsivePadding(context, 12),
+                              ),
                               border: Border.all(
-                                color: AppColors.surface.withValues(alpha: 0.12),
+                                color: Colors.white.withValues(alpha: 0.12),
                                 width: 1,
                               ),
                             ),
                             child: Center(
                               child: widget.svgAsset != null
-                                  ? AppSvgIcon(widget.svgAsset!, size: iconSize, color: textColor)
+                                  ? AppSvgIcon(
+                                      widget.svgAsset!,
+                                      size: iconSize,
+                                      color: Colors.white,
+                                    )
                                   : widget.icon != null
-                                  ? Icon(widget.icon!, color: textColor, size: iconSize)
+                                  ? Icon(
+                                      widget.icon!,
+                                      color: Colors.white,
+                                      size: iconSize,
+                                    )
                                   : const SizedBox.shrink(),
                             ),
                           ),
@@ -258,7 +289,7 @@ class _DashboardCardState extends State<DashboardCard>
                       child: Text(
                         widget.value,
                         style: TextStyle(
-                          color: textColor,
+                          color: Colors.white,
                           fontSize: valueSize,
                           fontWeight: FontWeight.w900,
                           letterSpacing: -1.5,
@@ -276,17 +307,18 @@ class _DashboardCardState extends State<DashboardCard>
     );
   }
 }
+
 // ── Sun Rays Painter ──────────────────────────────────────────────────────────
 
 class _SunRaysPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = AppColors.surface.withValues(alpha: 0.06)
+      ..color = Colors.white.withValues(alpha: 0.06)
       ..style = PaintingStyle.fill;
 
     final paint2 = Paint()
-      ..color = AppColors.surface.withValues(alpha: 0.04)
+      ..color = Colors.white.withValues(alpha: 0.04)
       ..style = PaintingStyle.fill;
 
     final origin = Offset(-size.width * 0.05, -size.height * 0.05);
@@ -340,6 +372,74 @@ class _SunRaysPainter extends CustomPainter {
   bool shouldRepaint(_SunRaysPainter old) => false;
 }
 
+// ── Ripple internals ──────────────────────────────────────────────────────────
+
+class _RippleData {
+  final Offset offset;
+  final AnimationController controller;
+  _RippleData({required this.offset, required this.controller});
+}
+
+class _RipplePainterWidget extends StatefulWidget {
+  final _RippleData ripple;
+  const _RipplePainterWidget({required this.ripple});
+
+  @override
+  State<_RipplePainterWidget> createState() => _RipplePainterWidgetState();
+}
+
+class _RipplePainterWidgetState extends State<_RipplePainterWidget> {
+  @override
+  void initState() {
+    super.initState();
+    widget.ripple.controller.addListener(() {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final t = widget.ripple.controller.value;
+    final radius = 200.0 * Curves.easeOut.transform(t);
+    final opacity = (1.0 - Curves.easeIn.transform(t)).clamp(0.0, 1.0);
+
+    return Positioned.fill(
+      child: CustomPaint(
+        painter: _RipplePainter(
+          center: widget.ripple.offset,
+          radius: radius,
+          opacity: opacity,
+        ),
+      ),
+    );
+  }
+}
+
+class _RipplePainter extends CustomPainter {
+  final Offset center;
+  final double radius;
+  final double opacity;
+
+  _RipplePainter({
+    required this.center,
+    required this.radius,
+    required this.opacity,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas.drawCircle(
+      center,
+      radius,
+      Paint()..color = Colors.white.withValues(alpha: opacity * 0.30),
+    );
+  }
+
+  @override
+  bool shouldRepaint(_RipplePainter old) =>
+      old.radius != radius || old.opacity != opacity;
+}
+
 /// ---------------- STATUS CHIP ----------------
 
 class StatusChip extends StatelessWidget {
@@ -350,13 +450,13 @@ class StatusChip extends StatelessWidget {
     switch (status.toLowerCase()) {
       case 'active':
       case 'green':
-        return AppColors.success;
+        return Colors.green.shade600;
       case 'grey':
         return Colors.grey;
       case 'crash':
-        return AppColors.error;
+        return Colors.red;
       default:
-        return AppColors.primary;
+        return Colors.blueGrey;
     }
   }
 
@@ -371,7 +471,7 @@ class StatusChip extends StatelessWidget {
       child: Text(
         status,
         style: const TextStyle(
-          color: AppColors.surface,
+          color: Colors.white,
           fontSize: 12,
           fontWeight: FontWeight.w600,
         ),
@@ -405,7 +505,6 @@ Widget inputField(
 }
 
 /// ---------------- GLOW ICON ----------------
-
 class GlowIcon extends StatelessWidget {
   final IconData? icon;
   final String? svgAsset;
@@ -422,28 +521,39 @@ class GlowIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     return TweenAnimationBuilder<double>(
       tween: Tween<double>(begin: 0, end: isSelected ? 1 : 0),
-      duration: const Duration(milliseconds: 350),
+      duration: const Duration(milliseconds: 400),
       curve: Curves.easeOutCubic,
       builder: (context, value, child) {
-        return Container(
-          padding: const EdgeInsets.all(6),
+        return AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
             shape: BoxShape.circle,
+            // Brand purple fill when selected
+            color: isSelected
+                ? AppColors.primary.withValues(alpha: value)
+                : Colors.transparent,
             boxShadow: isSelected
                 ? [
+                    // Inner glow — brand primary
                     BoxShadow(
-                      color: AppColors.primaryDark.withValues(alpha: 0.6 * value),
+                      color: AppColors.primary
+                          .withValues(alpha: 0.6 * value),
                       blurRadius: 14 * value,
                       spreadRadius: 2 * value,
                     ),
+                    // Mid glow — primaryLight
                     BoxShadow(
-                      color: AppColors.primary.withValues(alpha: 0.6 * value),
-                      blurRadius: 20 * value,
+                      color: AppColors.primaryLight
+                          .withValues(alpha: 0.5 * value),
+                      blurRadius: 22 * value,
                       spreadRadius: 4 * value,
                     ),
+                    // Outer soft glow — primaryDark
                     BoxShadow(
-                      color: AppColors.primaryLight.withValues(alpha: 0.6 * value),
-                      blurRadius: 26 * value,
+                      color: AppColors.primaryDark
+                          .withValues(alpha: 0.35 * value),
+                      blurRadius: 32 * value,
                       spreadRadius: 6 * value,
                     ),
                   ]
@@ -456,13 +566,17 @@ class GlowIcon extends StatelessWidget {
                 AppSvgIcon(
                   svgAsset!,
                   size: 24,
-                  color: isSelected ? AppColors.surface : Colors.black,
+                  color: isSelected
+                      ? Colors.white
+                      : AppColors.textGray,
                 )
               else if (icon != null)
                 Icon(
                   icon!,
                   size: 24,
-                  color: isSelected ? AppColors.surface : Colors.black,
+                  color: isSelected
+                      ? Colors.white
+                      : AppColors.textGray,
                 ),
             ],
           ),
@@ -471,7 +585,6 @@ class GlowIcon extends StatelessWidget {
     );
   }
 }
-
 /// ---------------- APP SCAFFOLD ----------------
 
 class AppScaffold extends StatelessWidget {
@@ -486,7 +599,7 @@ class AppScaffold extends StatelessWidget {
       appBar: AppBar(
         title: Text(title),
         elevation: 0,
-        backgroundColor: AppColors.primary,
+        backgroundColor: Colors.blue.shade300,
       ),
       body: SafeArea(child: child),
     );
@@ -584,11 +697,11 @@ class _ModernDropdown<T> extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
         decoration: BoxDecoration(
-          color: AppColors.divider,
+          color: Colors.grey.shade100,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: hasValue
-                ? AppColors.primary.withValues(alpha: 0.6)
+                ? Colors.blue.withValues(alpha: 0.6)
                 : Colors.grey.shade300,
             width: hasValue ? 1.5 : 1,
           ),
@@ -605,8 +718,8 @@ class _ModernDropdown<T> extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 11,
                       color: hasValue
-                          ? AppColors.primary
-                          : AppColors.background,
+                          ? Colors.blue.shade700
+                          : Colors.grey.shade500,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -616,7 +729,9 @@ class _ModernDropdown<T> extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: hasValue ? AppColors.primary : AppColors.textDark,
+                      color: hasValue
+                          ? Colors.blue.shade800
+                          :  AppColors.textGray,
                     ),
                   ),
                 ],
@@ -629,20 +744,20 @@ class _ModernDropdown<T> extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.1),
+                    color: Colors.blue.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
                   child: AppSvgIcon(
                     AppSvgAssets.x,
                     size: 14,
-                    color: AppColors.primary,
+                    color: Colors.blue.shade700,
                   ),
                 ),
               )
             else
               AppSvgIcon(
                 AppSvgAssets.chevronDown,
-                color: AppColors.background,
+                color: Colors.grey.shade500,
                 size: 20,
               ),
           ],
@@ -690,7 +805,7 @@ class _DropdownSheetState<T> extends State<_DropdownSheet<T>> {
     return Container(
       margin: const EdgeInsets.fromLTRB(12, 0, 12, 24),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(20),
       ),
       // Cap height at 55% of screen
@@ -723,7 +838,7 @@ class _DropdownSheetState<T> extends State<_DropdownSheet<T>> {
                   style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textDark,
+                    color: AppColors.textGray,
                   ),
                 ),
                 const Spacer(),
@@ -732,7 +847,7 @@ class _DropdownSheetState<T> extends State<_DropdownSheet<T>> {
                   child: Container(
                     padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
-                      color: AppColors.divider,
+                      color: Colors.grey.shade100,
                       shape: BoxShape.circle,
                     ),
                     child: const AppSvgIcon(
@@ -746,7 +861,7 @@ class _DropdownSheetState<T> extends State<_DropdownSheet<T>> {
             ),
           ),
 
-          Divider(height: 1, color: AppColors.divider),
+          Divider(height: 1, color: Colors.grey.shade100),
 
           // ── Scrollable items ─────────────────────────────────
           Flexible(
@@ -772,7 +887,7 @@ class _DropdownSheetState<T> extends State<_DropdownSheet<T>> {
                       ),
                       decoration: BoxDecoration(
                         color: isSelected
-                            ? AppColors.primary.withValues(alpha: 0.06)
+                            ? Colors.blue.withValues(alpha: 0.06)
                             : Colors.transparent,
                       ),
                       child: Row(
@@ -785,8 +900,8 @@ class _DropdownSheetState<T> extends State<_DropdownSheet<T>> {
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               color: isSelected
-                                  ? AppColors.primary
-                                  : AppColors.divider,
+                                  ? Colors.blue
+                                  : Colors.grey.shade200,
                             ),
                           ),
                           Expanded(
@@ -798,8 +913,8 @@ class _DropdownSheetState<T> extends State<_DropdownSheet<T>> {
                                     ? FontWeight.w700
                                     : FontWeight.w400,
                                 color: isSelected
-                                    ? AppColors.primary
-                                    : AppColors.textDark,
+                                    ? Colors.blue.shade700
+                                    :  AppColors.textGray,
                               ),
                             ),
                           ),
@@ -807,7 +922,7 @@ class _DropdownSheetState<T> extends State<_DropdownSheet<T>> {
                             AppSvgIcon(
                               AppSvgAssets.check,
                               size: 18,
-                              color: AppColors.primary,
+                              color: Colors.blue.shade600,
                             ),
                         ],
                       ),
@@ -825,22 +940,8 @@ class _DropdownSheetState<T> extends State<_DropdownSheet<T>> {
   }
 }
 
-class KeepAlivePage extends StatefulWidget {
-  final Widget child;
-  const KeepAlivePage({super.key, required this.child});
 
-  @override
-  State<KeepAlivePage> createState() => _KeepAlivePageState();
-}
 
-class _KeepAlivePageState extends State<KeepAlivePage>
-    with AutomaticKeepAliveClientMixin {
-  @override
-  bool get wantKeepAlive => true;
 
-  @override
-  Widget build(BuildContext context) {
-    super.build(context);
-    return widget.child;
-  }
-}
+
+

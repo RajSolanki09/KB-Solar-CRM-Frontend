@@ -49,26 +49,37 @@ class SolarLeadRepository {
   }
 
   // ── GET ALL ───────────────────────────────────────────────────────────────
-  Future<List<SolarLeadsModel>> getAllLeads({
-    String? status,
-    String? search,
-    int page = 1,
-    int limit = 20,
-  }) async {
-    final res = await client.dio.get(
-      ApiEndpoints.solarLead,
-      queryParameters: {
-        'page': page,
-        'limit': limit,
-        if (status != null && status.isNotEmpty) 'status': status,
-        if (search != null && search.isNotEmpty) 'search': search,
-      },
-    );
-    final body = res.data as Map<String, dynamic>;
-    return (body['leads'] as List? ?? [])
-        .map((e) => SolarLeadsModel.fromJson(e as Map<String, dynamic>))
-        .toList();
-  }
+  Future<({List<SolarLeadsModel> leads, int total, int page, int pages})>
+    getAllLeads({
+  String? status,
+  String? search,
+  int page = 1,
+  int limit = 10,
+  DateTime? fromDate,
+  DateTime? toDate,
+}) async {
+  final res = await client.dio.get(
+    ApiEndpoints.solarLead,
+    queryParameters: {
+      'page': page,
+      'limit': limit,
+      if (status != null && status.isNotEmpty) 'status': status,
+      if (search != null && search.isNotEmpty) 'search': search,
+      if (fromDate != null) 'fromDate': fromDate.toIso8601String(),
+      if (toDate != null) 'toDate': toDate.toIso8601String(),
+    },
+  );
+  final body = res.data as Map<String, dynamic>;
+  final leads = (body['leads'] as List? ?? [])
+      .map((e) => SolarLeadsModel.fromJson(e as Map<String, dynamic>))
+      .toList();
+  return (
+    leads: leads,
+    total: (body['total'] as num?)?.toInt() ?? leads.length,
+    page:  (body['page']  as num?)?.toInt() ?? page,
+    pages: (body['pages'] as num?)?.toInt() ?? 1,
+  );
+}
 
   // ── GET SINGLE ────────────────────────────────────────────────────────────
   Future<SolarLeadsModel> getSingleLead(String id) async {
@@ -317,10 +328,12 @@ class SolarLeadRepository {
     List<PickedPhoto> beforePhotos = const [],
   }) async {
     final form = FormData();
-    if (teamAssigned != null)
+    if (teamAssigned != null) {
       form.fields.add(MapEntry('teamAssigned', teamAssigned));
-    if (startDate != null)
+    }
+    if (startDate != null) {
       form.fields.add(MapEntry('startDate', startDate.toIso8601String()));
+    }
     if (notes != null) form.fields.add(MapEntry('notes', notes));
     for (final p in beforePhotos) {
       form.files.add(
@@ -359,8 +372,9 @@ class SolarLeadRepository {
     List<PickedPhoto> afterPhotos = const [],
   }) async {
     final form = FormData();
-    if (teamAssigned != null)
+    if (teamAssigned != null) {
       form.fields.add(MapEntry('teamAssigned', teamAssigned));
+    }
     form.fields.add(MapEntry('systemTested', systemTested.toString()));
     form.fields.add(MapEntry('customerSigned', customerSigned.toString()));
     form.fields.add(MapEntry('structureDone', structureDone.toString()));
@@ -368,16 +382,21 @@ class SolarLeadRepository {
     form.fields.add(MapEntry('plumeDone', plumeDone.toString()));
     form.fields.add(MapEntry('inverterAcDone', inverterAcDone.toString()));
     form.fields.add(MapEntry('fullyComplete', fullyComplete.toString()));
-    if (completedDate != null)
+    if (completedDate != null) {
       form.fields.add(MapEntry('completedDate', completedDate.toIso8601String()));
-    if (structureVendorName != null)
+    }
+    if (structureVendorName != null) {
       form.fields.add(MapEntry('structureVendorName', structureVendorName));
-    if (structureVendorCo != null)
+    }
+    if (structureVendorCo != null) {
       form.fields.add(MapEntry('structureVendorCo', structureVendorCo));
-    if (wiringVendorName != null)
+    }
+    if (wiringVendorName != null) {
       form.fields.add(MapEntry('wiringVendorName', wiringVendorName));
-    if (wiringVendorCo != null)
+    }
+    if (wiringVendorCo != null) {
       form.fields.add(MapEntry('wiringVendorCo', wiringVendorCo));
+    }
     if (notes != null) form.fields.add(MapEntry('notes', notes));
     for (final p in beforePhotos) {
       form.files.add(
@@ -460,8 +479,9 @@ class SolarLeadRepository {
     Map<String, PickedPhoto> documents = const {},
   }) async {
     final form = FormData();
-    if (applicationId != null)
+    if (applicationId != null) {
       form.fields.add(MapEntry('applicationId', applicationId));
+    }
     if (status != null) form.fields.add(MapEntry('status', status));
     if (notes != null) form.fields.add(MapEntry('notes', notes));
     for (final e in documents.entries) {
@@ -777,32 +797,45 @@ class SolarLeadRepository {
     List<PickedPhoto> afterPhotos = const [],
   }) async {
     final form = FormData();
-    if (teamAssigned != null)
+    if (teamAssigned != null) {
       form.fields.add(MapEntry('teamAssigned', teamAssigned));
-    if (systemTested != null)
+    }
+    if (systemTested != null) {
       form.fields.add(MapEntry('systemTested', systemTested.toString()));
-    if (customerSigned != null)
+    }
+    if (customerSigned != null) {
       form.fields.add(MapEntry('customerSigned', customerSigned.toString()));
-    if (structureDone != null)
+    }
+    if (structureDone != null) {
       form.fields.add(MapEntry('structureDone', structureDone.toString()));
-    if (wiringDone != null)
+    }
+    if (wiringDone != null) {
       form.fields.add(MapEntry('wiringDone', wiringDone.toString()));
-    if (plumeDone != null)
+    }
+    if (plumeDone != null) {
       form.fields.add(MapEntry('plumeDone', plumeDone.toString()));
-    if (inverterAcDone != null)
+    }
+    if (inverterAcDone != null) {
       form.fields.add(MapEntry('inverterAcDone', inverterAcDone.toString()));
-    if (fullyComplete != null)
+    }
+    if (fullyComplete != null) {
       form.fields.add(MapEntry('fullyComplete', fullyComplete.toString()));
-    if (completedDate != null)
+    }
+    if (completedDate != null) {
       form.fields.add(MapEntry('completedDate', completedDate.toIso8601String()));
-    if (structureVendorName != null)
+    }
+    if (structureVendorName != null) {
       form.fields.add(MapEntry('structureVendorName', structureVendorName));
-    if (structureVendorCo != null)
+    }
+    if (structureVendorCo != null) {
       form.fields.add(MapEntry('structureVendorCo', structureVendorCo));
-    if (wiringVendorName != null)
+    }
+    if (wiringVendorName != null) {
       form.fields.add(MapEntry('wiringVendorName', wiringVendorName));
-    if (wiringVendorCo != null)
+    }
+    if (wiringVendorCo != null) {
       form.fields.add(MapEntry('wiringVendorCo', wiringVendorCo));
+    }
     if (notes != null) form.fields.add(MapEntry('notes', notes));
     for (final p in beforePhotos) {
       form.files.add(
@@ -883,8 +916,9 @@ class SolarLeadRepository {
     Map<String, PickedPhoto> documents = const {},
   }) async {
     final form = FormData();
-    if (applicationId != null)
+    if (applicationId != null) {
       form.fields.add(MapEntry('applicationId', applicationId));
+    }
     if (status != null) form.fields.add(MapEntry('status', status));
     if (notes != null) form.fields.add(MapEntry('notes', notes));
     for (final e in documents.entries) {

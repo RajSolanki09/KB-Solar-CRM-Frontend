@@ -4,13 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:solar_project/Cubits/ServiceLeads/service_leads_cubit.dart';
 import 'package:solar_project/Cubits/ServiceLeads/service_leads_state.dart';
+import 'package:solar_project/core/app_colors.dart';
 import 'package:solar_project/core/constants/api_constants.dart';
 import 'package:solar_project/Helper/app_feedback.dart';
 import 'package:solar_project/data/Models/service_request_model.dart';
 import 'package:solar_project/screens/Dashboards/Admin_Dashboards/Services/assign_technician_screen.dart';
 import 'package:solar_project/screens/Dashboards/Admin_Dashboards/Services/service_visit_screen.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
-import 'package:solar_project/core/app_colors.dart';
 
 class ServiceDetailScreen extends StatefulWidget {
   final ServiceRequestModel service;
@@ -47,12 +47,12 @@ class _State extends State<ServiceDetailScreen> {
       case 'Open':
         return Colors.grey;
       case 'Assigned':
-        return AppColors.primary;
+        return Colors.blue;
       case 'In Progress':
-        return AppColors.solar;
+        return Colors.orange;
       case 'Completed':
       case 'Resolved':
-        return AppColors.success;
+        return Colors.green;
       default:
         return Colors.grey;
     }
@@ -136,9 +136,9 @@ class _State extends State<ServiceDetailScreen> {
         }
       },
       child: Scaffold(
-        backgroundColor:  AppColors.background,
+        backgroundColor:   AppColors.lightBg,
         appBar: AppBar(
-          backgroundColor: AppColors.surface,
+          backgroundColor: Colors.white,
           elevation: 0,
           leading: IconButton(
             icon: const AppSvgIcon(
@@ -306,8 +306,8 @@ class _State extends State<ServiceDetailScreen> {
                           icon: const AppSvgIcon(AppSvgAssets.plus, size: 16),
                           label: const Text('Add Payment'),
                           style: OutlinedButton.styleFrom(
-                            foregroundColor: AppColors.success,
-                            side: const BorderSide(color: AppColors.success),
+                            foregroundColor: Colors.green,
+                            side: const BorderSide(color: Colors.green),
                           ),
                         ),
                       ),
@@ -360,8 +360,8 @@ class _State extends State<ServiceDetailScreen> {
                             : 'Assign Technician',
                       ),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.success,
-                        side: const BorderSide(color: AppColors.success),
+                        foregroundColor:   AppColors.green,
+                        side: const BorderSide(color: AppColors.green),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
@@ -395,17 +395,17 @@ class _State extends State<ServiceDetailScreen> {
                       icon: const AppSvgIcon(
                         AppSvgAssets.cog,
                         size: 18,
-                        color: AppColors.surface,
+                        color: Colors.white,
                       ),
                       label: const Text(
                         'Open Service Visit',
                         style: TextStyle(
-                          color: AppColors.surface,
+                          color: Colors.white,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
+                        backgroundColor: Colors.blue,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
@@ -419,7 +419,7 @@ class _State extends State<ServiceDetailScreen> {
                 if (_service.status == 'Assigned')
                   _ActionBtn(
                     'Start Service',
-                    AppColors.solar,
+                    Colors.orange,
                     AppSvgAssets.play,
                     _saving,
                     () => _updateStatus('In Progress'),
@@ -427,7 +427,7 @@ class _State extends State<ServiceDetailScreen> {
                 if (_service.status == 'In Progress')
                   _ActionBtn(
                     'Mark as Done',
-                    AppColors.success,
+                    Colors.green,
                     AppSvgAssets.circleCheckBig,
                     _saving,
                     () => _updateStatus('Completed'),
@@ -437,10 +437,10 @@ class _State extends State<ServiceDetailScreen> {
                   width: double.infinity,
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: AppColors.success.withValues(alpha: 0.1),
+                    color: Colors.green.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: AppColors.success.withValues(alpha: 0.3),
+                      color: Colors.green.withValues(alpha: 0.3),
                     ),
                   ),
                   child: const Row(
@@ -448,7 +448,7 @@ class _State extends State<ServiceDetailScreen> {
                     children: [
                       AppSvgIcon(
                         AppSvgAssets.circleCheckBig,
-                        color: AppColors.success,
+                        color: Colors.green,
                         size: 20,
                       ),
                       SizedBox(width: 8),
@@ -457,7 +457,7 @@ class _State extends State<ServiceDetailScreen> {
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
-                          color: AppColors.success,
+                          color: Colors.green,
                         ),
                       ),
                     ],
@@ -474,7 +474,7 @@ class _State extends State<ServiceDetailScreen> {
     showModalBottomSheet(
       context: ctx,
       isScrollControlled: true,
-      backgroundColor: AppColors.surface,
+      backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -518,7 +518,7 @@ class _State extends State<ServiceDetailScreen> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 filled: true,
-                fillColor: AppColors.background,
+                fillColor: Colors.grey.shade50,
               ),
             ),
             const SizedBox(height: 10),
@@ -531,7 +531,7 @@ class _State extends State<ServiceDetailScreen> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 filled: true,
-                fillColor: AppColors.background,
+                fillColor: Colors.grey.shade50,
               ),
               items: [
                 'Cash',
@@ -550,14 +550,14 @@ class _State extends State<ServiceDetailScreen> {
               child: ElevatedButton(
                 onPressed: _saving ? null : _addPayment,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.success,
+                  backgroundColor: Colors.green,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
                 child: _saving
                     ? const CircularProgressIndicator(
-                        color: AppColors.surface,
+                        color: Colors.white,
                         strokeWidth: 2,
                       )
                     : const Text(
@@ -565,7 +565,7 @@ class _State extends State<ServiceDetailScreen> {
                         style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w700,
-                          color: AppColors.surface,
+                          color: Colors.white,
                         ),
                       ),
               ),
@@ -595,17 +595,17 @@ class _ActionBtn extends StatelessWidget {
               width: 16,
               height: 16,
               child: CircularProgressIndicator(
-                color: AppColors.surface,
+                color: Colors.white,
                 strokeWidth: 2,
               ),
             )
-          : AppSvgIcon(icon, size: 18, color: AppColors.surface),
+          : AppSvgIcon(icon, size: 18, color: Colors.white),
       label: Text(
         label,
         style: const TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w700,
-          color: AppColors.surface,
+          color: Colors.white,
         ),
       ),
       style: ElevatedButton.styleFrom(
@@ -631,7 +631,7 @@ class _Card extends StatelessWidget {
     margin: const EdgeInsets.only(bottom: 10),
     padding: const EdgeInsets.all(14),
     decoration: BoxDecoration(
-      color: AppColors.surface,
+      color: Colors.white,
       borderRadius: BorderRadius.circular(12),
       boxShadow: [
         BoxShadow(
@@ -646,7 +646,7 @@ class _Card extends StatelessWidget {
       children: [
         Row(
           children: [
-            AppSvgIcon(icon, size: 14, color: AppColors.success),
+            AppSvgIcon(icon, size: 14, color:   AppColors.green),
             const SizedBox(width: 6),
             Text(
               title,
@@ -675,7 +675,7 @@ class _Row extends StatelessWidget {
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        AppSvgIcon(icon, size: 12, color: AppColors.background),
+        AppSvgIcon(icon, size: 12, color: Colors.grey.shade500),
         const SizedBox(width: 6),
         Text(
           '$label: ',
@@ -705,9 +705,11 @@ class _NotePanel extends StatelessWidget {
     width: double.infinity,
     padding: const EdgeInsets.all(12),
     decoration: BoxDecoration(
-      color: AppColors.success.withValues(alpha: 0.08),
+      color:   AppColors.green.withValues(alpha: 0.08),
       borderRadius: BorderRadius.circular(10),
-      border: Border.all(color: AppColors.success.withValues(alpha: 0.25)),
+      border: Border.all(
+        color:   AppColors.green.withValues(alpha: 0.25),
+      ),
     ),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -726,7 +728,7 @@ class _NotePanel extends StatelessWidget {
           style: const TextStyle(
             fontSize: 12,
             height: 1.4,
-            color: AppColors.textDark,
+            color: AppColors.gray400,
           ),
         ),
       ],
@@ -772,13 +774,13 @@ class _PhotoStrip extends StatelessWidget {
             child: Container(
               width: 96,
               height: 96,
-              color: AppColors.divider,
+              color: Colors.grey.shade100,
               child: Image.network(
                 imageUrl,
                 fit: BoxFit.cover,
                 errorBuilder: (_, __, ___) => AppSvgIcon(
                   AppSvgAssets.imageOff,
-                  color: AppColors.textLight,
+                  color: Colors.grey.shade400,
                 ),
                 loadingBuilder: (context, child, loadingProgress) {
                   if (loadingProgress == null) return child;
@@ -798,3 +800,7 @@ class _PhotoStrip extends StatelessWidget {
     ),
   );
 }
+
+
+
+

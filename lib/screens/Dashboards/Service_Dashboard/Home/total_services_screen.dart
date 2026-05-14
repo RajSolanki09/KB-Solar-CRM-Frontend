@@ -60,19 +60,19 @@
 //   Color get color {
 //     switch (this) {
 //       case all:
-//         return const AppColors.primary;
+//         return const AppColors.textGray;
 //       case today:
-//         return const AppColors.primaryLight;
+//         return const AppColors.textGray;
 //       case pending:
-//         return const AppColors.solar;
+//         return const AppColors.textGray;
 //       case inProgress:
-//         return const AppColors.primaryDark;
+//         return const AppColors.textGray;
 //       case completed:
-//         return const AppColors.success;
+//         return const AppColors.textGray;
 //       case free:
-//         return const AppColors.error;
+//         return const AppColors.textGray;
 //       case paid:
-//         return const AppColors.success;
+//         return const AppColors.textGray;
 //     }
 //   }
 // }
@@ -177,7 +177,7 @@
 //         data: Theme.of(ctx).copyWith(
 //           colorScheme: ColorScheme.light(
 //             primary: widget.initialFilter.color,
-//             onPrimary: AppColors.surface,
+//             onPrimary: Colors.white,
 //           ),
 //         ),
 //         child: child!,
@@ -200,15 +200,15 @@
 //   Color _statusColor(String s) {
 //     switch (s) {
 //       case 'Assigned':
-//         return const AppColors.primaryLight;
+//         return const AppColors.textGray;
 //       case 'In Progress':
-//         return const AppColors.solar;
+//         return const AppColors.textGray;
 //       case 'Completed':
 //       case 'Resolved':
-//         return const AppColors.success;
+//         return const AppColors.textGray;
 //       case 'Open':
 //       case 'Pending':
-//         return AppColors.solar;
+//         return Colors.orange;
 //       default:
 //         return Colors.grey;
 //     }
@@ -220,14 +220,14 @@
 //     final color = f.color;
 
 //     return Scaffold(
-//       backgroundColor: const AppColors.background,
+//       backgroundColor: const AppColors.textGray,
 //       appBar: AppBar(
 //         backgroundColor: color,
 //         elevation: 0,
 //         leading: IconButton(
 //           icon: const AppSvgIcon(
 //             AppSvgAssets.chevronLeft,
-//             color: AppColors.surface,
+//             color: Colors.white,
 //             size: 18,
 //           ),
 //           onPressed: () => Navigator.pop(context),
@@ -235,14 +235,14 @@
 //         title: Text(
 //           f.label,
 //           style: const TextStyle(
-//             color: AppColors.surface,
+//             color: Colors.white,
 //             fontSize: 16,
 //             fontWeight: FontWeight.w700,
 //           ),
 //         ),
 //         actions: [
 //           IconButton(
-//             icon: const AppSvgIcon(AppSvgAssets.refreshCw, color: AppColors.surface),
+//             icon: const AppSvgIcon(AppSvgAssets.refreshCw, color: Colors.white),
 //             onPressed: () =>
 //                 context.read<ServiceLeadCubit>().fetchAllServices(),
 //           ),
@@ -297,9 +297,9 @@
 //                         child: Container(
 //                           height: 42,
 //                           decoration: BoxDecoration(
-//                             color: AppColors.surface,
+//                             color: Colors.white,
 //                             borderRadius: BorderRadius.circular(10),
-//                             border: Border.all(color: AppColors.divider),
+//                             border: Border.all(color: Colors.grey.shade200),
 //                           ),
 //                           child: TextField(
 //                             controller: _searchCtrl,
@@ -309,7 +309,7 @@
 //                               hintText: 'Search name / phone / ID',
 //                               hintStyle: TextStyle(
 //                                 fontSize: 12,
-//                                 color: AppColors.textLight,
+//                                 color: Colors.grey.shade400,
 //                               ),
 //                               prefixIcon: Padding(
 //                                 padding: const EdgeInsets.all(8.0),
@@ -328,7 +328,7 @@
 //                                       child: AppSvgIcon(
 //                                         AppSvgAssets.x,
 //                                         size: 16,
-//                                         color: AppColors.textLight,
+//                                         color: Colors.grey.shade400,
 //                                       ),
 //                                     )
 //                                   : null,
@@ -350,12 +350,12 @@
 //                           height: 42,
 //                           padding: const EdgeInsets.symmetric(horizontal: 14),
 //                           decoration: BoxDecoration(
-//                             color: _date != null ? color : AppColors.surface,
+//                             color: _date != null ? color : Colors.white,
 //                             borderRadius: BorderRadius.circular(10),
 //                             border: Border.all(
 //                               color: _date != null
 //                                   ? color
-//                                   : AppColors.divider,
+//                                   : Colors.grey.shade200,
 //                             ),
 //                           ),
 //                           child: Row(
@@ -365,7 +365,7 @@
 //                                 AppSvgAssets.calendarDays,
 //                                 size: 17,
 //                                 color: _date != null
-//                                     ? AppColors.surface
+//                                     ? Colors.white
 //                                     : Colors.grey,
 //                               ),
 //                               const SizedBox(width: 8),
@@ -374,7 +374,7 @@
 //                                 style: TextStyle(
 //                                   fontSize: 13,
 //                                   color: _date != null
-//                                       ? AppColors.surface
+//                                       ? Colors.white
 //                                       : const AppColors.textGray,
 //                                   fontWeight: _date != null
 //                                       ? FontWeight.w600
@@ -388,7 +388,7 @@
 //                                   child: const AppSvgIcon(
 //                                     AppSvgAssets.x,
 //                                     size: 18,
-//                                     color: AppColors.surface,
+//                                     color: Colors.white,
 //                                   ),
 //                                 ),
 //                               ],
@@ -633,9 +633,9 @@
 //     return Container(
 //       width: double.infinity,
 //       decoration: BoxDecoration(
-//         color: AppColors.surface,
+//         color: Colors.white,
 //         borderRadius: BorderRadius.circular(12),
-//         border: Border.all(color: const AppColors.divider),
+//         border: Border.all(color: AppColors.border)),
 //       ),
 //       child: Column(
 //         crossAxisAlignment: CrossAxisAlignment.start,
@@ -650,13 +650,13 @@
 //                   style: const TextStyle(
 //                     fontSize: 14,
 //                     fontWeight: FontWeight.w700,
-//                     color: AppColors.textDark,
+//                     color: AppColors.textGray,
 //                   ),
 //                 ),
 //                 const SizedBox(height: 2),
 //                 Text(
 //                   subtitle,
-//                   style: TextStyle(fontSize: 11, color: AppColors.background0),
+//                   style: TextStyle(fontSize: 11, color: Colors.grey.shade500),
 //                 ),
 //               ],
 //             ),
@@ -666,7 +666,7 @@
 //               padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
 //               child: Text(
 //                 'No services in this section.',
-//                 style: TextStyle(fontSize: 12, color: AppColors.textLight),
+//                 style: TextStyle(fontSize: 12, color: Colors.grey.shade400),
 //               ),
 //             )
 //           else if (items.isNotEmpty)
@@ -709,9 +709,9 @@
 //     return Container(
 //       width: double.infinity,
 //       decoration: BoxDecoration(
-//         color: AppColors.surface,
+//         color: Colors.white,
 //         borderRadius: BorderRadius.circular(12),
-//         border: Border.all(color: const AppColors.divider),
+//         border: Border.all(color: AppColors.border)),
 //       ),
 //       child: Theme(
 //         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
@@ -728,12 +728,12 @@
 //             style: const TextStyle(
 //               fontSize: 14,
 //               fontWeight: FontWeight.w700,
-//               color: AppColors.textDark,
+//               color: AppColors.textGray,
 //             ),
 //           ),
 //           subtitle: Text(
 //             subtitle,
-//             style: TextStyle(fontSize: 11, color: AppColors.background0),
+//             style: TextStyle(fontSize: 11, color: Colors.grey.shade500),
 //           ),
 //           children: [
 //             if (items.isEmpty)
@@ -743,7 +743,7 @@
 //                   alignment: Alignment.centerLeft,
 //                   child: Text(
 //                     'No older services found.',
-//                     style: TextStyle(fontSize: 12, color: AppColors.textLight),
+//                     style: TextStyle(fontSize: 12, color: Colors.grey.shade400),
 //                   ),
 //                 ),
 //               )
@@ -805,20 +805,20 @@
 //   Color _priorityColor(String p) {
 //     switch (p) {
 //       case 'Urgent':
-//         return AppColors.error;
+//         return Colors.red;
 //       case 'High':
-//         return AppColors.solar;
+//         return Colors.orange;
 //       case 'Low':
-//         return AppColors.success;
+//         return Colors.green;
 //       default:
-//         return const AppColors.primaryDark;
+//         return const AppColors.textGray;
 //     }
 //   }
 
 //   @override
 //   Widget build(BuildContext context) {
 //     final isDesktop = MediaQuery.sizeOf(context).width >= 1000;
-//     const rowStyle = TextStyle(fontSize: 12, color: AppColors.textDark);
+//     const rowStyle = TextStyle(fontSize: 12, color: AppColors.border);
 
 //     return SizedBox(
 //       width: double.infinity,
@@ -843,9 +843,9 @@
 //               return null;
 //             }),
 //             border: TableBorder(
-//               horizontalInside: BorderSide(color: AppColors.primaryGrey.shade50),
-//               bottom: BorderSide(color: AppColors.primaryGrey.shade100),
-//               top: BorderSide(color: AppColors.primaryGrey.shade100),
+//               horizontalInside: BorderSide(color: Colors.blueGrey.shade50),
+//               bottom: BorderSide(color: Colors.blueGrey.shade100),
+//               top: BorderSide(color: Colors.blueGrey.shade100),
 //             ),
 //             columns: [
 //               const DataColumn(label: Text('Customer')),
@@ -896,7 +896,7 @@
 //                         _chip(
 //                           item.chargeType,
 //                           item.chargeType == 'Paid'
-//                               ? AppColors.solar
+//                               ? Colors.orange
 //                               : Colors.teal,
 //                         ),
 //                       ),
@@ -922,13 +922,13 @@
 //                                     AppSvgIcon(
 //                                       AppSvgAssets.indianRupee,
 //                                       size: 11,
-//                                       color: AppColors.solar,
+//                                       color: Colors.orange,
 //                                     ),
 //                                     Text(
 //                                       item.amount!.toStringAsFixed(0),
 //                                       style: rowStyle.copyWith(
 //                                         fontWeight: FontWeight.w700,
-//                                         color: AppColors.solar,
+//                                         color: Colors.orange,
 //                                       ),
 //                                     ),
 //                                   ],
@@ -979,10 +979,10 @@
 //         mainAxisAlignment: MainAxisAlignment.spaceAround,
 //         children: [
 //           _Stat('Total', '$total', color),
-//           Container(width: 1, height: 28, color: AppColors.divider),
-//           _Stat('Pending', '$pending', AppColors.solar),
-//           Container(width: 1, height: 28, color: AppColors.divider),
-//           _Stat('Completed', '$completed', AppColors.success),
+//           Container(width: 1, height: 28, color: Colors.grey.shade200),
+//           _Stat('Pending', '$pending', Colors.orange),
+//           Container(width: 1, height: 28, color: Colors.grey.shade200),
+//           _Stat('Completed', '$completed', Colors.green),
 //         ],
 //       ),
 //     );
@@ -1025,20 +1025,20 @@
 //     child: Column(
 //       mainAxisAlignment: MainAxisAlignment.center,
 //       children: [
-//         AppSvgIcon(filter.icon, size: 60, color: AppColors.divider),
+//         AppSvgIcon(filter.icon, size: 60, color: Colors.grey.shade200),
 //         const SizedBox(height: 14),
 //         Text(
 //           'No ${filter.label}',
 //           style: TextStyle(
 //             fontSize: 15,
 //             fontWeight: FontWeight.w600,
-//             color: AppColors.textLight,
+//             color: Colors.grey.shade400,
 //           ),
 //         ),
 //         const SizedBox(height: 6),
 //         Text(
 //           hasDateFilter ? 'No data for selected date' : 'Pull down to refresh',
-//           style: TextStyle(fontSize: 12, color: AppColors.textLight),
+//           style: TextStyle(fontSize: 12, color: Colors.grey.shade400),
 //         ),
 //         if (hasDateFilter) ...[
 //           const SizedBox(height: 14),
@@ -1046,7 +1046,7 @@
 //             onPressed: onClear,
 //             icon: const AppSvgIcon(AppSvgAssets.x, size: 14),
 //             label: const Text('Clear date'),
-//             style: TextButton.styleFrom(foregroundColor: AppColors.background0),
+//             style: TextButton.styleFrom(foregroundColor: Colors.grey.shade500),
 //           ),
 //         ],
 //       ],
@@ -1069,7 +1069,7 @@
 //     child: Column(
 //       mainAxisAlignment: MainAxisAlignment.center,
 //       children: [
-//         AppSvgIcon(AppSvgAssets.triangleAlert, size: 52, color: AppColors.error.shade300),
+//         AppSvgIcon(AppSvgAssets.triangleAlert, size: 52, color: Colors.red.shade300),
 //         const SizedBox(height: 12),
 //         Text(message, style: const TextStyle(color: Colors.grey)),
 //         const SizedBox(height: 16),
@@ -1114,3 +1114,14 @@
 //   const PaidServicesPage({super.key})
 //     : super(initialFilter: ServiceFilter.paid);
 // }
+
+
+
+
+
+
+
+
+
+
+

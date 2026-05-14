@@ -11,18 +11,17 @@ import 'package:solar_project/Cubits/InstallationNavigation/installation_nav_cub
 import 'package:solar_project/Cubits/InstallationNavigation/installation_nav_state.dart';
 import 'package:solar_project/Cubits/SolarLeads/solar_leads_cubit.dart';
 import 'package:solar_project/Cubits/SprinklerLeads/sprinkler_leads_cubit.dart';
+import 'package:solar_project/core/app_colors.dart';
 import 'package:solar_project/core/network/dio_client.dart';
 import 'package:solar_project/data/Models/installation_model.dart';
 import 'package:solar_project/data/Repository/sprinkler_leads_repository.dart';
 import 'package:solar_project/screens/Dashboards/Installation_Dashboard/MyInstallations/solar_installation_detail_screen.dart';
 import 'package:solar_project/screens/Dashboards/Installation_Dashboard/MyInstallations/sprinkler_installation_detail_screen.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
-import 'package:solar_project/core/app_colors.dart';
 
-// ─── accent colour ────────────────────────────────────────────────────────────
-const _kPurple = AppColors.primary;
-const _kAssignedCard = AppColors.primary;
-const _kTeal = Colors.teal;
+// ─── Brand accent colours (all from AppColors) ───────────────────────────────
+const _kAccent    = AppColors.primary;       // #5B4FCF  — brand purple (badges, icons, accents)
+const _kAccentBg  = AppColors.purple100;     // #EDE9FC  — very light purple for header row tint
 
 class AssignedInstallationsScreen extends StatefulWidget {
   const AssignedInstallationsScreen({super.key});
@@ -33,16 +32,12 @@ class AssignedInstallationsScreen extends StatefulWidget {
 }
 
 class _AssignedInstallationsScreenState
-    extends State<AssignedInstallationsScreen>
-    with WidgetsBindingObserver {
+    extends State<AssignedInstallationsScreen> with WidgetsBindingObserver {
   final _searchCtrl = TextEditingController();
   String _search = '';
   Timer? _midnightRefreshTimer;
-
-  // collapsible state for older assignments section
   bool _showOlder = false;
 
-  // 7-day cutoff
   DateTime get _recentCutoff {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
@@ -82,11 +77,9 @@ class _AssignedInstallationsScreenState
 
   void _scheduleMidnightRefresh() {
     _midnightRefreshTimer?.cancel();
-
     final now = DateTime.now();
     final nextMidnight = DateTime(now.year, now.month, now.day + 1);
     final delay = nextMidnight.difference(now);
-
     _midnightRefreshTimer = Timer(delay, () {
       if (!mounted) return;
       context.read<InstallationCubit>().fetchInstallations();
@@ -98,7 +91,6 @@ class _AssignedInstallationsScreenState
   bool _isNextDayInstallation(InstallationModel m) {
     final scheduled = m.scheduledDate;
     if (scheduled == null) return false;
-
     final now = DateTime.now();
     final tomorrow = DateTime(now.year, now.month, now.day + 1);
     return scheduled.year == tomorrow.year &&
@@ -110,7 +102,6 @@ class _AssignedInstallationsScreenState
     InstallationNavPage.dashboard,
   );
 
-  // ── Filtering ─────────────────────────────────────────────────────────────
   List<InstallationModel> _base(List<InstallationModel> all) =>
       all
           .where(
@@ -129,12 +120,8 @@ class _AssignedInstallationsScreenState
   ) {
     final items = _base(all);
     if (projectType == null || projectType.isEmpty) return items;
-
-    final byProjectType = items
-        .where((m) => m.projectType.toLowerCase() == projectType)
-        .toList();
-
-    // Card navigation (solar/sprinkler) should display only tomorrow's jobs.
+    final byProjectType =
+        items.where((m) => m.projectType.toLowerCase() == projectType).toList();
     return byProjectType.where(_isNextDayInstallation).toList();
   }
 
@@ -146,7 +133,6 @@ class _AssignedInstallationsScreenState
         m.address.toLowerCase().contains(q);
   }
 
-  // ── Navigation ────────────────────────────────────────────────────────────
   Future<void> _openDetail(BuildContext ctx, InstallationModel m) async {
     if (m.projectType.toLowerCase() == 'sprinkler') {
       try {
@@ -171,7 +157,8 @@ class _AssignedInstallationsScreenState
           ScaffoldMessenger.of(ctx).showSnackBar(
             SnackBar(
               content: Text('Could not load lead: $e'),
-              backgroundColor: AppColors.error,
+              // ✅ brand color instead of raw Colors.red
+              backgroundColor: AppColors.primary,
             ),
           );
         }
@@ -195,7 +182,6 @@ class _AssignedInstallationsScreenState
     if (mounted) context.read<InstallationCubit>().fetchInstallations();
   }
 
-  // ── Build ─────────────────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<InstallationCubit, InstallationState>(
@@ -217,15 +203,17 @@ class _AssignedInstallationsScreenState
             : 'My Installations';
 
         return Scaffold(
-          backgroundColor:  AppColors.background,
+          // ✅ White/off-white body — clearly different from purple AppBar
+          backgroundColor: AppColors.purple50,
           appBar: AppBar(
-            backgroundColor: _kAssignedCard,
+            // ✅ Brand purple AppBar — solid, clear contrast
+            backgroundColor: AppColors.primary,
             elevation: 0,
             leading: IconButton(
               icon: const AppSvgIcon(
                 AppSvgAssets.chevronLeft,
                 size: 18,
-                color: AppColors.surface,
+                color: Colors.white,
               ),
               onPressed: _handleBack,
             ),
@@ -234,7 +222,7 @@ class _AssignedInstallationsScreenState
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
-                color: AppColors.surface,
+                color: Colors.white,
               ),
             ),
             actions: [
@@ -246,7 +234,7 @@ class _AssignedInstallationsScreenState
                     height: 18,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: AppColors.surface,
+                      color: Colors.white,
                     ),
                   ),
                 )
@@ -254,7 +242,7 @@ class _AssignedInstallationsScreenState
                 IconButton(
                   icon: const AppSvgIcon(
                     AppSvgAssets.refreshCw,
-                    color: AppColors.surface,
+                    color: Colors.white,
                   ),
                   onPressed: () =>
                       ctx.read<InstallationCubit>().fetchInstallations(),
@@ -263,63 +251,80 @@ class _AssignedInstallationsScreenState
           ),
           body: Column(
             children: [
-              Container(height: 1, color: AppColors.divider),
-
+              // ✅ Info strip — white card, clear text
               Container(
-                color: AppColors.surface,
+                color: Colors.white,
                 width: double.infinity,
-                padding: const EdgeInsets.fromLTRB(14, 8, 14, 4),
+                padding: const EdgeInsets.fromLTRB(16, 10, 16, 4),
                 child: Text(
                   projectTypeFilter == 'solar'
                       ? 'Showing next-day Solar leads (${visibleItems.length})'
                       : projectTypeFilter == 'sprinkler'
                       ? 'Showing next-day Sprinkler leads (${visibleItems.length})'
                       : 'Showing all leads (${allItems.length})',
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.grey.shade700,
+                    fontWeight: FontWeight.w600,
+                    // ✅ Brand purple text — not grey
+                    color: AppColors.primary,
                   ),
                 ),
               ),
 
-              // ── Search bar ───────────────────────────────────────────
+              // ✅ Search bar — white bg, clear placeholder
               Container(
-                color: AppColors.surface,
+                color: Colors.white,
                 padding: const EdgeInsets.fromLTRB(14, 8, 14, 10),
                 child: TextField(
                   controller: _searchCtrl,
-                  style: const TextStyle(fontSize: 13),
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: AppColors.textDark,
+                  ),
                   decoration: InputDecoration(
                     hintText: 'Search customer, phone, address...',
-                    hintStyle: TextStyle(
+                    hintStyle: const TextStyle(
                       fontSize: 12,
                       color: AppColors.textLight,
                     ),
-                    prefixIcon: Padding(
-                      padding: const EdgeInsets.all(8.0),
+                    prefixIcon: const Padding(
+                      padding: EdgeInsets.all(8.0),
                       child: AppSvgIcon(
                         AppSvgAssets.search,
-                        size: 12,
-                        color: AppColors.background,
+                        size: 16,
+                        color: AppColors.primary,
                       ),
                     ),
                     filled: true,
-                    fillColor: AppColors.divider,
-                    border: OutlineInputBorder(
+                    // ✅ Very light purple fill — on-brand, not raw grey
+                    fillColor: AppColors.purple50,
+                    enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide.none,
+                      borderSide: const BorderSide(
+                        color: AppColors.purple200,
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: const BorderSide(
+                        color: AppColors.primary,
+                        width: 1.5,
+                      ),
                     ),
                     contentPadding: const EdgeInsets.symmetric(vertical: 10),
                   ),
                 ),
               ),
 
-              // ── Tab views ────────────────────────────────────────────
+              // ✅ Thin divider between white header zone and content
+              Container(height: 1, color: AppColors.purple200),
+
               Expanded(
                 child: loading
                     ? const Center(
-                        child: CircularProgressIndicator(color: _kPurple),
+                        child: CircularProgressIndicator(
+                          color: AppColors.primary,
+                        ),
                       )
                     : _buildTableView(ctx, visibleItems),
               ),
@@ -330,8 +335,10 @@ class _AssignedInstallationsScreenState
     );
   }
 
-  // ── Table view builder ────────────────────────────────────────────────────
-  Widget _buildTableView(BuildContext ctx, List<InstallationModel> items) {
+  Widget _buildTableView(
+    BuildContext ctx,
+    List<InstallationModel> items,
+  ) {
     if (items.isEmpty) {
       return Center(
         child: Column(
@@ -340,12 +347,16 @@ class _AssignedInstallationsScreenState
             AppSvgIcon(
               AppSvgAssets.clipboardList,
               size: 52,
-              color: Colors.grey.shade300,
+              // ✅ Brand purple (light) — not raw grey
+              color: AppColors.purple300,
             ),
             const SizedBox(height: 10),
-            Text(
+            const Text(
               'No installations found',
-              style: TextStyle(fontSize: 14, color: AppColors.textLight),
+              style: TextStyle(
+                fontSize: 14,
+                color: AppColors.textLight,
+              ),
             ),
           ],
         ),
@@ -360,7 +371,7 @@ class _AssignedInstallationsScreenState
         .toList();
 
     return RefreshIndicator(
-      color: _kPurple,
+      color: AppColors.primary,
       onRefresh: () async => ctx.read<InstallationCubit>().fetchInstallations(),
       child: LayoutBuilder(
         builder: (context, constraints) {
@@ -370,7 +381,7 @@ class _AssignedInstallationsScreenState
 
           return ListView(
             physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.fromLTRB(12, 8, 12, 40),
+            padding: const EdgeInsets.fromLTRB(12, 12, 12, 40),
             children: [
               _TableSection(
                 title: 'Last 7 Days',
@@ -424,32 +435,59 @@ class _TableSection extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color:  AppColors.divider),
+        border: Border.all(color: AppColors.purple200),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withValues(alpha: 0.06),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          // ✅ Section header with subtle brand tint
+          Container(
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
+            decoration: const BoxDecoration(
+              color: _kAccentBg,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+            ),
+            child: Row(
               children: [
-                Text(
-                  '$title (${items.length})',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textDark,
+                Container(
+                  width: 3,
+                  height: 14,
+                  decoration: BoxDecoration(
+                    color: _kAccent,
+                    borderRadius: BorderRadius.circular(2),
                   ),
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  subtitle,
-                  style: const TextStyle(
-                    fontSize: 11,
-                    color: AppColors.textLight,
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '$title (${items.length})',
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle,
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: AppColors.textGray,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -457,7 +495,7 @@ class _TableSection extends StatelessWidget {
           ),
           if (items.isEmpty && showEmptyMessage)
             const Padding(
-              padding: EdgeInsets.fromLTRB(16, 0, 16, 14),
+              padding: EdgeInsets.fromLTRB(16, 12, 16, 14),
               child: Text(
                 'No assignments in the last 7 days.',
                 style: TextStyle(fontSize: 12, color: AppColors.textLight),
@@ -497,9 +535,16 @@ class _CollapsibleTableSection extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color:  AppColors.divider),
+        border: Border.all(color: AppColors.purple200),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withValues(alpha: 0.06),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
@@ -509,22 +554,30 @@ class _CollapsibleTableSection extends StatelessWidget {
           onExpansionChanged: onExpansionChanged,
           tilePadding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
           childrenPadding: const EdgeInsets.only(bottom: 12),
+          // ✅ Icon color matches brand
+          iconColor: AppColors.primary,
+          collapsedIconColor: AppColors.textGray,
+          backgroundColor: _kAccentBg,
+          collapsedBackgroundColor: _kAccentBg,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+          ),
           title: Text(
             '$title (${items.length})',
             style: const TextStyle(
-              fontSize: 14,
+              fontSize: 13,
               fontWeight: FontWeight.w700,
-              color: AppColors.textDark,
+              color: AppColors.primary,
             ),
           ),
           subtitle: Text(
             subtitle,
-            style: const TextStyle(fontSize: 11, color: AppColors.textLight),
+            style: const TextStyle(fontSize: 11, color: AppColors.textGray),
           ),
           children: [
             if (items.isEmpty)
               const Padding(
-                padding: EdgeInsets.fromLTRB(16, 0, 16, 4),
+                padding: EdgeInsets.fromLTRB(16, 8, 16, 4),
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
@@ -560,23 +613,20 @@ class _InstallDataTable extends StatelessWidget {
       items.any((m) => m.projectType.toLowerCase() == 'solar') &&
       items.any((m) => m.projectType.toLowerCase() == 'sprinkler');
 
-  Color _typeColor(InstallationModel m) =>
-      m.projectType.toLowerCase() == 'sprinkler' ? _kTeal : _kPurple;
-
+  // ✅ Both types use brand purple shades — no random teal/green
   Widget _typeBadge(InstallationModel m) {
-    final color = _typeColor(m);
-    final label = m.projectType.toLowerCase() == 'sprinkler'
-        ? 'Sprinkler'
-        : 'Solar';
-    final icon = m.projectType.toLowerCase() == 'sprinkler'
-        ? AppSvgAssets.droplet
-        : AppSvgAssets.sun;
+    final isSprinkler = m.projectType.toLowerCase() == 'sprinkler';
+    final color = isSprinkler ? AppColors.primaryLight : AppColors.primary;
+    final bgColor = isSprinkler ? AppColors.purple200 : AppColors.purple100;
+    final label = isSprinkler ? 'Sprinkler' : 'Solar';
+    final icon = isSprinkler ? AppSvgAssets.droplet : AppSvgAssets.sun;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
+        color: bgColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.4)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -596,18 +646,19 @@ class _InstallDataTable extends StatelessWidget {
     );
   }
 
+  // ✅ Status colors from brand purple scale
   Color _statusColor(InstallationModel m) {
     switch (m.status) {
       case InstallationStatus.projectCompleted:
       case InstallationStatus.installationCompleted:
       case InstallationStatus.meterInstalled:
-        return AppColors.success;
+        return AppColors.primary;       // completed = solid brand purple
       case InstallationStatus.installationStarted:
       case InstallationStatus.meterApplied:
       case InstallationStatus.meterInspection:
-        return AppColors.solar;
+        return AppColors.primaryLight;  // in-progress = lighter purple
       case InstallationStatus.installationAssigned:
-        return AppColors.primary;
+        return AppColors.purple400;     // assigned = mid purple
     }
   }
 
@@ -616,9 +667,9 @@ class _InstallDataTable extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
+        color: AppColors.purple100,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withValues(alpha: 0.35)),
+        border: Border.all(color: color.withValues(alpha: 0.4)),
       ),
       child: Text(
         m.statusLabel,
@@ -633,12 +684,11 @@ class _InstallDataTable extends StatelessWidget {
 
   Widget _scheduledCell(DateTime? dt) {
     if (dt == null) {
-      return Text(
+      return const Text(
         'Date TBD',
         style: TextStyle(fontSize: 11, color: AppColors.textLight),
       );
     }
-
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -648,14 +698,14 @@ class _InstallDataTable extends StatelessWidget {
           style: const TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w600,
-            color: _kPurple,
+            color: AppColors.primary,
           ),
         ),
         Text(
           DateFormat('hh:mm a').format(dt),
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 10,
-            color: _kPurple.withValues(alpha: 0.85),
+            color: AppColors.primaryLight,
           ),
         ),
       ],
@@ -680,22 +730,28 @@ class _InstallDataTable extends StatelessWidget {
             dataRowMaxHeight: 64,
             horizontalMargin: isDesktop ? 18 : 12,
             columnSpacing: isDesktop ? 24 : 14,
-            headingRowColor: WidgetStateProperty.all(
-              _kPurple.withValues(alpha: 0.07),
+            // ✅ Header row — brand purple light tint
+            headingRowColor: WidgetStateProperty.all(AppColors.purple100),
+            // ✅ Heading text style
+            headingTextStyle: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: AppColors.primary,
             ),
             dataRowColor: WidgetStateProperty.resolveWith((states) {
               if (states.contains(WidgetState.selected)) {
-                return _kPurple.withValues(alpha: 0.05);
+                return AppColors.purple50;
               }
               return null;
             }),
             border: TableBorder(
-              horizontalInside: BorderSide(color: AppColors.primary),
-              bottom: BorderSide(color: AppColors.primary),
-              top: BorderSide(color: AppColors.primary),
+              horizontalInside: BorderSide(
+                color: AppColors.purple200.withValues(alpha: 0.5),
+              ),
+              bottom: const BorderSide(color: AppColors.purple200),
+              top: const BorderSide(color: AppColors.purple200),
             ),
             columns: [
-              // Show Type column only when the list is mixed
               if (_mixed) const DataColumn(label: Text('Type')),
               const DataColumn(label: Text('Customer')),
               const DataColumn(label: Text('Phone')),
@@ -705,7 +761,6 @@ class _InstallDataTable extends StatelessWidget {
               const DataColumn(label: Text('Scheduled')),
             ],
             rows: items.map((m) {
-              // Join multiple team member names
               final teamLabel = m.installationTeamMemberNames.isNotEmpty
                   ? m.installationTeamMemberNames.join(', ')
                   : (m.installationTeamName ?? '—');
@@ -717,7 +772,10 @@ class _InstallDataTable extends StatelessWidget {
                   DataCell(
                     Text(
                       m.customerName,
-                      style: rowStyle.copyWith(fontWeight: FontWeight.w600),
+                      style: rowStyle.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textDark,
+                      ),
                     ),
                   ),
                   DataCell(Text(m.phone, style: rowStyle)),

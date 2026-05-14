@@ -6,6 +6,7 @@ import 'package:solar_project/Cubits/Installation/installation_cubit.dart';
 import 'package:solar_project/Cubits/Installation/installation_state.dart';
 import 'package:solar_project/Cubits/InstallationNavigation/installation_nav_cubit.dart';
 import 'package:solar_project/Cubits/InstallationNavigation/installation_nav_state.dart';
+import 'package:solar_project/core/app_colors.dart';
 import 'package:solar_project/data/Models/installation_model.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
 import 'package:solar_project/Helper/common_widgets.dart';
@@ -13,7 +14,6 @@ import 'package:solar_project/Helper/ui_helper.dart';
 import 'package:solar_project/screens/Dashboards/Installation_Dashboard/Dashboard/todays-jobs_screen.dart';
 import 'package:solar_project/screens/Dashboards/Installation_Dashboard/Dashboard/pending_installation.dart';
 import 'package:solar_project/services/api_service.dart';
-import 'package:solar_project/core/app_colors.dart';
 
 class InstallationDashboardScreen extends StatefulWidget {
   const InstallationDashboardScreen({super.key});
@@ -132,12 +132,12 @@ class _InstallationDashboardScreenState
         children: [
           Positioned.fill(
             child: CircleAvatar(
-              backgroundColor: AppColors.primaryTint,
+              backgroundColor: AppColors.purpleLight1,
               backgroundImage: imageUrl != null ? NetworkImage(imageUrl) : null,
               child: imageUrl == null
                   ? AppSvgIcon(
                       AppSvgAssets.userRound,
-                      color: AppColors.primary,
+                      color: AppColors.purple500,
                       size: size * 0.52,
                     )
                   : null,
@@ -150,9 +150,9 @@ class _InstallationDashboardScreenState
               width: size * 0.26,
               height: size * 0.26,
               decoration: BoxDecoration(
-                color: AppColors.success,
+                color: AppColors.successGreen,
                 shape: BoxShape.circle,
-                border: Border.all(color: AppColors.surface, width: 1.4),
+                border: Border.all(color: Colors.white, width: 1.4),
               ),
             ),
           ),
@@ -172,7 +172,7 @@ class _InstallationDashboardScreenState
 
     if (_showTodaysJobs) {
       return TodaysJobsScreen(
-        appBarColor: AppColors.primary,
+        appBarColor: AppColors.purpleDark,
         onBack: () => setState(() => _showTodaysJobs = false),
       );
     }
@@ -204,65 +204,63 @@ class _InstallationDashboardScreenState
         }
 
         return Scaffold(
-          backgroundColor: AppColors.background,
+          backgroundColor: AppColors.veryLight3,
           appBar: AppBar(
-            backgroundColor: AppColors.background,
+            backgroundColor: AppColors.veryLight3,
             elevation: 0,
             scrolledUnderElevation: 0,
-            centerTitle: true,
             automaticallyImplyLeading: false,
-            // ── "Installation Dashboard" title — centered, never overflows ──
+            centerTitle: true, // ✅ FIX: title ab center mein
+            // ✅ FIX: Profile avatar + name/greeting leading mein move kiya
+            leading: Padding(
+              padding: const EdgeInsets.only(left: 12),
+              child: Row(
+                children: [
+                  _buildProfileAvatar(size: 36),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          _profileUser != null
+                              ? (_profileUser!['name'] ??
+                                        _profileUser!['fullName'] ??
+                                        'Team Member')
+                                    .toString()
+                              : 'Team Member',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 13,
+                            color: AppColors.grayDark2,
+                            letterSpacing: -0.3,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
+                        Text(
+                          _getGreeting(),
+                          style: const TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w400,
+                            color: AppColors.indigoVariant4,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            leadingWidth: 180, // ✅ FIX: left side ke liye fixed space
+            // ✅ FIX: Sirf title text — koi Spacer nahi
             title: const Text(
               'Installation Dashboard',
               style: TextStyle(
                 fontWeight: FontWeight.w800,
-                fontSize: 17,
-                color: AppColors.primary,
-                letterSpacing: -0.4,
-              ),
-            ),
-            // ── Profile + Greeting on the left ───────────────────────────
-            leading: Padding(
-              padding: const EdgeInsets.only(left: 12),
-              child: _buildProfileAvatar(size: 34),
-            ),
-            leadingWidth: 52,
-            // ── Subtitle row (greeting + name) below title ────────────────
-            bottom: PreferredSize(
-              preferredSize: const Size.fromHeight(22),
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 6, left: 12, right: 12),
-                child: Row(
-                  children: [
-                    Flexible(
-                      child: Text(
-                        _profileUser != null
-                            ? (_profileUser!['name'] ??
-                                      _profileUser!['fullName'] ??
-                                      'Team Member')
-                                  .toString()
-                            : 'Team Member',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 12,
-                          color: AppColors.textDark,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      '· ${_getGreeting()}',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 11,
-                        color: AppColors.textGray,
-                      ),
-                    ),
-                  ],
-                ),
+                fontSize: 18,
+                color: AppColors.purple500,
               ),
             ),
             actions: [
@@ -274,7 +272,7 @@ class _InstallationDashboardScreenState
                     height: 18,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: AppColors.primary,
+                      color: AppColors.purple500,
                     ),
                   ),
                 )
@@ -282,7 +280,7 @@ class _InstallationDashboardScreenState
                 Container(
                   margin: const EdgeInsets.only(right: 12, top: 8, bottom: 8),
                   child: Material(
-                    color: AppColors.surface,
+                    color: Colors.white,
                     borderRadius: BorderRadius.circular(10),
                     child: InkWell(
                       borderRadius: BorderRadius.circular(10),
@@ -292,11 +290,11 @@ class _InstallationDashboardScreenState
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: AppColors.primaryTint),
+                          border: Border.all(color: AppColors.indigoLight),
                         ),
                         child: const AppSvgIcon(
                           AppSvgAssets.refreshCw,
-                          color: AppColors.primary,
+                          color: AppColors.purple500,
                           size: 18,
                         ),
                       ),
@@ -308,7 +306,7 @@ class _InstallationDashboardScreenState
           body: SafeArea(
             child: loading
                 ? const Center(
-                    child: CircularProgressIndicator(color: AppColors.primary),
+                    child: CircularProgressIndicator(color: AppColors.purple500),
                   )
                 : state is InstallationError
                 ? Center(
@@ -318,12 +316,12 @@ class _InstallationDashboardScreenState
                         AppSvgIcon(
                           AppSvgAssets.triangleAlert,
                           size: 48,
-                          color: AppColors.errorLight,
+                          color: Colors.red.shade300,
                         ),
                         const SizedBox(height: 12),
                         Text(
                           state.message,
-                          style: const TextStyle(color: AppColors.textGray),
+                          style: const TextStyle(color: Colors.grey),
                         ),
                         const SizedBox(height: 16),
                         ElevatedButton.icon(
@@ -333,15 +331,15 @@ class _InstallationDashboardScreenState
                           icon: const AppSvgIcon(AppSvgAssets.refreshCw),
                           label: const Text('Retry'),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            foregroundColor: AppColors.surface,
+                            backgroundColor: AppColors.purple500,
+                            foregroundColor: Colors.white,
                           ),
                         ),
                       ],
                     ),
                   )
                 : RefreshIndicator(
-                    color: AppColors.primary,
+                    color: AppColors.purple500,
                     onRefresh: () async =>
                         ctx.read<InstallationCubit>().fetchInstallations(),
                     child: SingleChildScrollView(
@@ -365,19 +363,19 @@ class _InstallationDashboardScreenState
                                 vertical: 7,
                               ),
                               decoration: BoxDecoration(
-                                color: AppColors.primaryTint,
+                                color: AppColors.veryLight5,
                                 borderRadius: BorderRadius.circular(8),
                                 border: Border.all(
-                                  color: AppColors.primary.withValues(
-                                    alpha: 0.20,
-                                  ),
+                                  color: const Color(
+                                    0xFF7B2FF7,
+                                  ).withValues(alpha: 0.20),
                                 ),
                               ),
                               child: Row(
                                 children: [
                                   const AppSvgIcon(
                                     AppSvgAssets.idCard,
-                                    color: AppColors.primary,
+                                    color: AppColors.purple500,
                                     size: 14,
                                   ),
                                   const SizedBox(width: 6),
@@ -385,7 +383,7 @@ class _InstallationDashboardScreenState
                                     '$_totalAssigned job${_totalAssigned == 1 ? '' : 's'} assigned',
                                     style: const TextStyle(
                                       fontWeight: FontWeight.w800,
-                                      color: AppColors.primary,
+                                      color: AppColors.purple500,
                                       fontSize: 12,
                                     ),
                                   ),
@@ -393,7 +391,7 @@ class _InstallationDashboardScreenState
                                   Text(
                                     '☀ $_solarLeads  💧 $_sprinklerLeads',
                                     style: TextStyle(
-                                      color: AppColors.textGray,
+                                      color: Colors.grey.shade500,
                                       fontSize: 11,
                                     ),
                                   ),
@@ -418,7 +416,7 @@ class _InstallationDashboardScreenState
                                 title: 'Solar Installation',
                                 value: '$_solarLeads',
                                 svgAsset: AppSvgAssets.hammer,
-                                cardColor: AppColors.solar,
+                                cardColor: AppColors.indigo500,
                                 onTap: () => ctx
                                     .read<InstallationNavCubit>()
                                     .openMyInstallations(projectType: 'solar'),
@@ -427,7 +425,7 @@ class _InstallationDashboardScreenState
                                 title: 'Sprinkler Installation',
                                 value: '$_sprinklerLeads',
                                 svgAsset: AppSvgAssets.idCard,
-                                cardColor: AppColors.primary,
+                                cardColor: AppColors.indigo500,
                                 onTap: () => ctx
                                     .read<InstallationNavCubit>()
                                     .openMyInstallations(
@@ -438,7 +436,7 @@ class _InstallationDashboardScreenState
                                 title: "Today's Jobs",
                                 value: '$_todayJobsCount',
                                 svgAsset: AppSvgAssets.calendarDays,
-                                cardColor: AppColors.primary,
+                                cardColor: AppColors.indigo500,
                                 onTap: () => setState(() {
                                   _showPendingJobs = false;
                                   _showTodaysJobs = true;
@@ -448,14 +446,14 @@ class _InstallationDashboardScreenState
                                 title: 'Pending',
                                 value: '$_pendingCount',
                                 svgAsset: AppSvgAssets.triangleAlert,
-                                cardColor: AppColors.error,
+                                cardColor: AppColors.indigo500,
                                 onTap: _openPending,
                               ),
                               DashboardCard(
                                 title: 'Completed',
                                 value: '$_completedCount',
                                 svgAsset: AppSvgAssets.circleCheckBig,
-                                cardColor: AppColors.success,
+                                cardColor: AppColors.indigo500,
                                 onTap: () => ctx
                                     .read<InstallationNavCubit>()
                                     .changePage(InstallationNavPage.history),
@@ -488,7 +486,7 @@ class _SectionHeading extends StatelessWidget {
           width: 3,
           height: 15,
           decoration: BoxDecoration(
-            color: AppColors.primary,
+            color: AppColors.indigo500,
             borderRadius: BorderRadius.circular(2),
           ),
         ),
@@ -498,7 +496,7 @@ class _SectionHeading extends StatelessWidget {
           style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w700,
-            color: AppColors.textDark,
+            color: AppColors.grayDark2,
             letterSpacing: -0.2,
           ),
         ),

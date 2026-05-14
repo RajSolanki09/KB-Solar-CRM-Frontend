@@ -5,11 +5,11 @@ import 'package:solar_project/Cubits/SolarLeads/solar_leads_cubit.dart';
 import 'package:solar_project/Cubits/SolarLeads/solar_leads_state.dart';
 import 'package:solar_project/Helper/app_feedback.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
+import 'package:solar_project/Helper/lead_form_widgets.dart';
 import 'package:solar_project/Helper/lead_themes.dart';
 import 'package:solar_project/Helper/lead_widgets.dart';
 import 'package:solar_project/Helper/spk_photo_picker.dart';
 import 'package:solar_project/data/Models/solar_leads_model.dart';
-import 'package:solar_project/core/app_colors.dart';
 
 import '../../../../../Helper/picked_photo.dart';
 
@@ -88,9 +88,7 @@ class _CompletedState extends State<SolarInstallationScreen> {
   }
 
   Future<void> _pickVendorCompletedDate({required bool isStructure}) async {
-    final current = isStructure
-        ? _structureCompletedDate
-        : _wiringCompletedDate;
+    final current = isStructure ? _structureCompletedDate : _wiringCompletedDate;
     final d = await showDatePicker(
       context: context,
       initialDate: current ?? DateTime.now(),
@@ -295,7 +293,7 @@ class _CompletedState extends State<SolarInstallationScreen> {
                       AppSvgAssets.calendarCheck,
                       'Structure Completed Date',
                       _structureCompletedDate,
-                      color: AppColors.primary,
+                      color: Colors.blue,
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -311,7 +309,7 @@ class _CompletedState extends State<SolarInstallationScreen> {
                       AppSvgAssets.calendarCheck,
                       'Wiring Completed Date',
                       _wiringCompletedDate,
-                      color: AppColors.primary,
+                      color: Colors.blue,
                     ),
                   ),
                 ],
@@ -324,7 +322,7 @@ class _CompletedState extends State<SolarInstallationScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _photoSectionHeader(
-                    color: AppColors.success,
+                    color: Colors.green,
                     title: 'After Installation Photos',
                     subtitle:
                         'Capture after completion — panels on roof, inverter, wiring done',
@@ -353,7 +351,7 @@ class _CompletedState extends State<SolarInstallationScreen> {
                       AppSvgAssets.circleCheckBig,
                       'Installation Completed On',
                       _completedDate,
-                      color: AppColors.success,
+                      color: Colors.green,
                     ),
                   ),
                 ],
@@ -440,11 +438,7 @@ Widget _infoBanner(SolarLeadsModel lead) => Container(
   ),
   child: Row(
     children: [
-      const AppSvgIcon(
-        AppSvgAssets.userRound,
-        size: 16,
-        color: LeadTheme.primary,
-      ),
+      const AppSvgIcon(AppSvgAssets.userRound, size: 16, color: LeadTheme.primary),
       const SizedBox(width: 8),
       Expanded(
         child: Column(
@@ -476,7 +470,7 @@ Widget _dateTile(
   String svgAsset,
   String label,
   DateTime? date, {
-  Color color = AppColors.success,
+  Color color = Colors.green,
 }) {
   final c = date != null ? color : LeadTheme.textSecondary;
   return Container(
@@ -520,7 +514,7 @@ Widget _dateTile(
         AppSvgIcon(
           date != null ? AppSvgAssets.circleCheckBig : AppSvgAssets.arrowRight,
           size: 14,
-          color: date != null ? color : AppColors.textLight,
+          color: date != null ? color : Colors.grey.shade400,
         ),
       ],
     ),
@@ -536,7 +530,9 @@ Widget _checkTile(
   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
   decoration: BoxDecoration(
     color: LeadTheme.surface,
-    border: Border.all(color: value ? AppColors.success : AppColors.divider),
+    border: Border.all(
+      color: value ? Colors.green.shade300 : Colors.grey.shade200,
+    ),
     borderRadius: BorderRadius.circular(8),
   ),
   child: Column(
@@ -547,7 +543,7 @@ Widget _checkTile(
           AppSvgIcon(
             svgAsset,
             size: 18,
-            color: value ? AppColors.success : LeadTheme.textSecondary,
+            color: value ? Colors.green : LeadTheme.textSecondary,
           ),
           const SizedBox(width: 10),
           Expanded(
@@ -556,7 +552,7 @@ Widget _checkTile(
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
-                color: value ? AppColors.success : LeadTheme.textPrimary,
+                color: value ? Colors.green.shade700 : LeadTheme.textPrimary,
               ),
             ),
           ),
@@ -570,7 +566,7 @@ Widget _checkTile(
               label: 'Yes',
               selected: value,
               onTap: () => onChanged(true),
-              activeColor: AppColors.success,
+              activeColor: Colors.green,
             ),
           ),
           const SizedBox(width: 8),
@@ -579,7 +575,7 @@ Widget _checkTile(
               label: 'No',
               selected: !value,
               onTap: () => onChanged(false),
-              activeColor: AppColors.error,
+              activeColor: Colors.red,
             ),
           ),
         ],
@@ -598,12 +594,10 @@ Widget _yesNoButton({
   child: Container(
     padding: const EdgeInsets.symmetric(vertical: 8),
     decoration: BoxDecoration(
-      color: selected ? activeColor.withValues(alpha: 0.12) : AppColors.surface,
+      color: selected ? activeColor.withValues(alpha: 0.12) : Colors.white,
       borderRadius: BorderRadius.circular(8),
       border: Border.all(
-        color: selected
-            ? activeColor.withValues(alpha: 0.65)
-            : Colors.grey.shade300,
+        color: selected ? activeColor.withValues(alpha: 0.65) : Colors.grey.shade300,
       ),
     ),
     alignment: Alignment.center,
@@ -623,26 +617,14 @@ Widget _field(
   String label,
   String svgAsset, {
   int maxLines = 1,
-}) => TextField(
+}) => LeadTextFormField(
   controller: c,
+  label: label,
+  svgIcon: svgAsset,
+  accentColor: LeadTheme.orange,
+  required: false,
   maxLines: maxLines,
-  style: const TextStyle(fontSize: 13, color: LeadTheme.textPrimary),
-  decoration: InputDecoration(
-    labelText: label,
-    labelStyle: const TextStyle(fontSize: 12, color: LeadTheme.textSecondary),
-    prefixIcon: Padding(
-      padding: const EdgeInsets.only(left: 10, right: 6),
-      child: AppSvgIcon(svgAsset, size: 16, color: LeadTheme.textSecondary),
-    ),
-    prefixIconConstraints: const BoxConstraints(minWidth: 36),
-    filled: true,
-    fillColor: LeadTheme.surface,
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(8),
-      borderSide: BorderSide.none,
-    ),
-    contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-  ),
+  bottomSpacing: 0,
 );
 
 Widget _saveBtn(bool saving, VoidCallback onPressed, String label) => SizedBox(
@@ -651,7 +633,7 @@ Widget _saveBtn(bool saving, VoidCallback onPressed, String label) => SizedBox(
     onPressed: saving ? null : onPressed,
     style: ElevatedButton.styleFrom(
       backgroundColor: LeadTheme.primary,
-      foregroundColor: AppColors.surface,
+      foregroundColor: Colors.white,
       padding: const EdgeInsets.symmetric(vertical: 12),
       minimumSize: const Size.fromHeight(52),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -662,7 +644,7 @@ Widget _saveBtn(bool saving, VoidCallback onPressed, String label) => SizedBox(
             height: 20,
             child: CircularProgressIndicator(
               strokeWidth: 2,
-              color: AppColors.surface,
+              color: Colors.white,
             ),
           )
         : Text(

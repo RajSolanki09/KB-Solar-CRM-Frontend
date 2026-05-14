@@ -7,11 +7,12 @@ import 'package:solar_project/Cubits/SprinklerLeads/sprinkler_leads_cubit.dart';
 import 'package:solar_project/Cubits/SprinklerLeads/sprinkler_leads_state.dart';
 import 'package:solar_project/Helper/app_feedback.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
+import 'package:solar_project/Helper/lead_form_widgets.dart';
 import 'package:solar_project/Helper/lead_themes.dart';
 import 'package:solar_project/Helper/picked_photo.dart';
 import 'package:solar_project/Helper/spk_photo_picker.dart';
-import 'package:solar_project/data/Models/sprinkler_lead_model.dart';
 import 'package:solar_project/core/app_colors.dart';
+import 'package:solar_project/data/Models/sprinkler_lead_model.dart';
 
 class SpkVisitDataScreen extends StatefulWidget {
   final SprinklerLeadModel lead;
@@ -52,10 +53,12 @@ class _SpkVisitDataScreenState extends State<SpkVisitDataScreen> {
     final d = widget.lead.visitData;
     if (d.noOfPanels != null) _noOfPanelsCtrl.text = d.noOfPanels.toString();
     if (d.pumpCapacity != null) _pumpCapacityCtrl.text = d.pumpCapacity!;
-    if (d.deliveryPipeLength != null)
+    if (d.deliveryPipeLength != null) {
       _deliveryPipeLenCtrl.text = d.deliveryPipeLength.toString();
-    if (d.noOfSprinklers != null)
+    }
+    if (d.noOfSprinklers != null) {
       _noOfSprinklersCtrl.text = d.noOfSprinklers.toString();
+    }
     if (d.cableLength != null) _cableLengthCtrl.text = d.cableLength.toString();
     if (d.notes != null) _notesCtrl.text = d.notes!;
     _typeOfPump = d.typeOfPump;
@@ -109,15 +112,15 @@ class _SpkVisitDataScreenState extends State<SpkVisitDataScreen> {
         }
       },
       child: Scaffold(
-        backgroundColor:   AppColors.background,
+        backgroundColor:   AppColors.lightBg,
         appBar: AppBar(
           backgroundColor: LeadTheme.secondary,
-          foregroundColor: AppColors.surface,
+          foregroundColor: Colors.white,
           elevation: 0,
           leading: IconButton(
             icon: const AppSvgIcon(
               AppSvgAssets.chevronLeft,
-              color: AppColors.surface,
+              color: Colors.white,
               size: 18,
             ),
             onPressed: () => Navigator.pop(context),
@@ -139,33 +142,29 @@ class _SpkVisitDataScreenState extends State<SpkVisitDataScreen> {
                 children: [
                   _buildLabel('No of Panels', required: false),
                   const SizedBox(height: 6),
-                  TextFormField(
+                  LeadTextFormField(
                     controller: _noOfPanelsCtrl,
+                    label: 'No of Panels',
+                    svgIcon: AppSvgAssets.maximize,
+                    accentColor: LeadTheme.secondary,
+                    required: false,
                     keyboardType: TextInputType.number,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    decoration: _inputDeco(
-                      hint: 'Enter number of panels',
-                      prefixIcon: AppSvgIcon(
-                        AppSvgAssets.maximize,
-                        size: 16,
-                        color: AppColors.background,
-                      ),
-                    ),
+                    hintText: 'Enter number of panels',
+                    bottomSpacing: 0,
                   ),
                   const SizedBox(height: 14),
 
                   _buildLabel('Pump Capacity', required: false),
                   const SizedBox(height: 6),
-                  TextFormField(
+                  LeadTextFormField(
                     controller: _pumpCapacityCtrl,
-                    decoration: _inputDeco(
-                      hint: 'e.g. 5 HP, 2.2 kW',
-                      prefixIcon: AppSvgIcon(
-                        AppSvgAssets.droplet,
-                        size: 16,
-                        color: AppColors.background,
-                      ),
-                    ),
+                    label: 'Pump Capacity',
+                    svgIcon: AppSvgAssets.droplet,
+                    accentColor: LeadTheme.secondary,
+                    required: false,
+                    hintText: 'e.g. 5 HP, 2.2 kW',
+                    bottomSpacing: 0,
                   ),
                   const SizedBox(height: 14),
 
@@ -189,8 +188,12 @@ class _SpkVisitDataScreenState extends State<SpkVisitDataScreen> {
                 children: [
                   _buildLabel('Delivery Pipe Length (feet)', required: false),
                   const SizedBox(height: 6),
-                  TextFormField(
+                  LeadTextFormField(
                     controller: _deliveryPipeLenCtrl,
+                    label: 'Delivery Pipe Length (feet)',
+                    svgIcon: AppSvgAssets.maximize,
+                    accentColor: LeadTheme.secondary,
+                    required: false,
                     keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
                     ),
@@ -199,39 +202,35 @@ class _SpkVisitDataScreenState extends State<SpkVisitDataScreen> {
                         RegExp(r'^\d+\.?\d{0,2}'),
                       ),
                     ],
-                    decoration: _inputDeco(
-                      hint: 'Enter pipe length in metres',
-                      suffixText: 'm',
-                      prefixIcon: AppSvgIcon(
-                        AppSvgAssets.maximize,
-                        size: 16,
-                        color: AppColors.background,
-                      ),
-                    ),
+                    suffixText: 'm',
+                    hintText: 'Enter pipe length in metres',
+                    bottomSpacing: 0,
                   ),
                   const SizedBox(height: 14),
 
                   _buildLabel('No of Sprinklers', required: false),
                   const SizedBox(height: 6),
-                  TextFormField(
+                  LeadTextFormField(
                     controller: _noOfSprinklersCtrl,
+                    label: 'No of Sprinklers',
+                    svgIcon: AppSvgAssets.droplet,
+                    accentColor: LeadTheme.secondary,
+                    required: false,
                     keyboardType: TextInputType.number,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    decoration: _inputDeco(
-                      hint: 'Enter number of sprinklers',
-                      prefixIcon: AppSvgIcon(
-                        AppSvgAssets.droplet,
-                        size: 16,
-                        color: AppColors.background,
-                      ),
-                    ),
+                    hintText: 'Enter number of sprinklers',
+                    bottomSpacing: 0,
                   ),
                   const SizedBox(height: 14),
 
                   _buildLabel('Cable Length (m)', required: false),
                   const SizedBox(height: 6),
-                  TextFormField(
+                  LeadTextFormField(
                     controller: _cableLengthCtrl,
+                    label: 'Cable Length (m)',
+                    svgIcon: AppSvgAssets.maximize,
+                    accentColor: LeadTheme.secondary,
+                    required: false,
                     keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
                     ),
@@ -240,15 +239,9 @@ class _SpkVisitDataScreenState extends State<SpkVisitDataScreen> {
                         RegExp(r'^\d+\.?\d{0,2}'),
                       ),
                     ],
-                    decoration: _inputDeco(
-                      hint: 'Enter cable length in metres',
-                      suffixText: 'm',
-                      prefixIcon: AppSvgIcon(
-                        AppSvgAssets.maximize,
-                        size: 16,
-                        color: AppColors.background,
-                      ),
-                    ),
+                    suffixText: 'm',
+                    hintText: 'Enter cable length in metres',
+                    bottomSpacing: 0,
                   ),
                 ],
               ),
@@ -273,6 +266,7 @@ class _SpkVisitDataScreenState extends State<SpkVisitDataScreen> {
               const SizedBox(height: 14),
 
               // ── Technical Photos ← YEH NAYA ADD KARO ────────────────
+              
               _buildCard(
                 title: 'Site Photos',
                 icon: AppSvgAssets.camera,
@@ -300,12 +294,15 @@ class _SpkVisitDataScreenState extends State<SpkVisitDataScreen> {
                 children: [
                   _buildLabel('Notes', required: false),
                   const SizedBox(height: 6),
-                  TextFormField(
+                  LeadTextFormField(
                     controller: _notesCtrl,
+                    label: 'Notes',
+                    svgIcon: AppSvgAssets.fileText,
+                    accentColor: LeadTheme.secondary,
+                    required: false,
                     maxLines: 3,
-                    decoration: _inputDeco(
-                      hint: 'Any additional observations…',
-                    ),
+                    hintText: 'Any additional observations…',
+                    bottomSpacing: 0,
                   ),
                 ],
               ),
@@ -325,7 +322,7 @@ class _SpkVisitDataScreenState extends State<SpkVisitDataScreen> {
       MediaQuery.of(context).padding.bottom + 12,
     ),
     decoration: BoxDecoration(
-      color: AppColors.surface,
+      color: Colors.white,
       boxShadow: [
         BoxShadow(
           color: Colors.black.withValues(alpha: 0.08),
@@ -341,7 +338,7 @@ class _SpkVisitDataScreenState extends State<SpkVisitDataScreen> {
         onPressed: _saving ? null : _submit,
         style: ElevatedButton.styleFrom(
           backgroundColor: LeadTheme.secondary,
-          foregroundColor: AppColors.surface,
+          foregroundColor: Colors.white,
           disabledBackgroundColor: LeadTheme.secondary.withValues(alpha: 0.6),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -353,7 +350,7 @@ class _SpkVisitDataScreenState extends State<SpkVisitDataScreen> {
                 width: 20,
                 height: 20,
                 child: CircularProgressIndicator(
-                  color: AppColors.surface,
+                  color: Colors.white,
                   strokeWidth: 2,
                 ),
               )
@@ -372,7 +369,7 @@ class _SpkVisitDataScreenState extends State<SpkVisitDataScreen> {
     required List<Widget> children,
   }) => Container(
     decoration: BoxDecoration(
-      color: AppColors.surface,
+      color: Colors.white,
       borderRadius: BorderRadius.circular(12),
       boxShadow: [
         BoxShadow(
@@ -428,13 +425,13 @@ class _SpkVisitDataScreenState extends State<SpkVisitDataScreen> {
       style: const TextStyle(
         fontSize: 12.5,
         fontWeight: FontWeight.w600,
-        color: AppColors.textDark,
+        color: AppColors.gray400,
       ),
       children: required
           ? const [
               TextSpan(
                 text: ' *',
-                style: TextStyle(color: AppColors.error),
+                style: TextStyle(color: Colors.red),
               ),
             ]
           : [],
@@ -448,16 +445,16 @@ class _SpkVisitDataScreenState extends State<SpkVisitDataScreen> {
     required String icon,
     required ValueChanged<String?> onChanged,
   }) => DropdownButtonFormField<String>(
-    value: value,
+    initialValue: value,
     decoration: _inputDeco(
       hint: hint,
-      prefixIcon: AppSvgIcon(icon, size: 16, color: AppColors.background),
+      prefixIcon: AppSvgIcon(icon, size: 16, color: Colors.grey.shade500),
     ),
     isExpanded: true,
     icon: AppSvgIcon(
       AppSvgAssets.chevronDown,
       size: 16,
-      color: AppColors.background,
+      color: Colors.grey.shade500,
     ),
     items: [
       DropdownMenuItem<String>(
@@ -466,7 +463,7 @@ class _SpkVisitDataScreenState extends State<SpkVisitDataScreen> {
           'None',
           style: TextStyle(
             fontSize: 13,
-            color: AppColors.background,
+            color: Colors.grey.shade500,
             fontStyle: FontStyle.italic,
           ),
         ),
@@ -496,7 +493,7 @@ class _SpkVisitDataScreenState extends State<SpkVisitDataScreen> {
     hintText: hint,
     hintStyle: const TextStyle(fontSize: 13, color: AppColors.textLight),
     filled: true,
-    fillColor: AppColors.surface,
+    fillColor: Colors.white,
     suffixText: suffixText,
     suffixStyle: const TextStyle(fontSize: 12, color: AppColors.textGray),
     prefixIcon: prefixIcon != null
@@ -517,11 +514,14 @@ class _SpkVisitDataScreenState extends State<SpkVisitDataScreen> {
     ),
     errorBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(10),
-      borderSide: const BorderSide(color: AppColors.error),
+      borderSide: const BorderSide(color: Colors.red),
     ),
     focusedErrorBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(10),
-      borderSide: const BorderSide(color: AppColors.error, width: 1.5),
+      borderSide: const BorderSide(color: Colors.red, width: 1.5),
     ),
   );
 }
+
+
+

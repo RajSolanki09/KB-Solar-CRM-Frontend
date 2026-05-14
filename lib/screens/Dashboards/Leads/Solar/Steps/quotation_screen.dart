@@ -5,9 +5,9 @@ import 'package:solar_project/Cubits/SolarLeads/solar_leads_cubit.dart';
 import 'package:solar_project/Cubits/SolarLeads/solar_leads_state.dart';
 import 'package:solar_project/Helper/app_feedback.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
+import 'package:solar_project/Helper/lead_form_widgets.dart';
 import 'package:solar_project/Helper/lead_themes.dart';
 import 'package:solar_project/Helper/lead_widgets.dart';
-import 'package:solar_project/core/app_colors.dart';
 import 'package:solar_project/data/Models/solar_leads_model.dart';
 
 class SolarQuotationScreen extends StatefulWidget {
@@ -126,7 +126,7 @@ class _State extends State<SolarQuotationScreen> {
     setState(() => _saving = true);
     final cubit = context.read<SolarLeadCubit>();
     final id = widget.lead.id;
-    final t = (String? v) => v == null || v.trim().isEmpty ? null : v.trim();
+    String? t(String? v) => v == null || v.trim().isEmpty ? null : v.trim();
 
     if (widget.isEditing) {
       cubit.editQuotation(
@@ -222,45 +222,52 @@ class _State extends State<SolarQuotationScreen> {
                 children: [
                   const SectionTitle('Cost Breakdown'),
                   const SizedBox(height: 14),
-                  _numField(
-                    rooftopSystemCostC,
-                    'Solar Rooftop System Total Cost (સોલર રૂફટોપ સિસ્ટમ નો ટોટલ ખર્ચ)',
-                    onChange: (_) => _autoCalc(),
+                  buildLabel(
+                    'Solar Rooftop System Total Cost (સોલર રૂફટોપ સિસ્ટમ નો ટોટલ ખર્ચ',
+                    required: true,
                   ),
+                  
+                  _numField(rooftopSystemCostC, onChange: (_) => _autoCalc()),
                   const SizedBox(height: 12),
+                  buildLabel(
+                    'Heighted/Elevated Structure Cost (એલિવેટેડ ફ્રેબિકેશન નો ખર્ચ)',
+                    required: true,
+                  ),
                   _numField(
                     elevatedStructureCostC,
-                    'Heighted/Elevated Structure Cost (એલિવેટેડ ફ્રેબિકેશન નો ખર્ચ)',
                     onChange: (_) => _autoCalc(),
                   ),
                   const SizedBox(height: 12),
-                  _numField(
-                    netMeterCostC,
+                  buildLabel(
                     'GEB/Torrent Net Meter Cost (મીટર ખર્ચ)',
-                    onChange: (_) => _autoCalc(),
+                    required: true,
                   ),
+                  _numField(netMeterCostC, onChange: (_) => _autoCalc()),
                   const SizedBox(height: 12),
+                  buildLabel(
+                    'Solar Panel Premium Charge / Other Cost (સોલર પેનલ પ્રીમિયમ ચાર્જ/અન્ય ખર્ચ)',
+                    required: true,
+                  ),
                   _numField(
                     premiumOtherCostC,
-                    'Solar Panel Premium Charge / Other Cost (સોલર પેનલ પ્રીમિયમ ચાર્જ/અન્ય ખર્ચ)',
                     onChange: (_) => _autoCalc(),
                   ),
                   const SizedBox(height: 12),
+                  buildLabel('Total Net Payable (ટોટલ ભરવા પાત્ર રકમ)',required: true),
                   _numField(
                     totalC,
-                    'Total Net Payable (ટોટલ ભરવા પાત્ર રકમ)',
                     readOnly: true,
                   ),
                   const SizedBox(height: 12),
+                  buildLabel('Subsidy (સબસિડી – મીટર લાગ્યા પછી ૩૦ દિવસમાં ગ્રાહકના બેંક ખાતામાં જમા થશે)',required: true),
                   _numField(
                     subsidyC,
-                    'Subsidy (સબસિડી – મીટર લાગ્યા પછી ૩૦ દિવસમાં ગ્રાહકના બેંક ખાતામાં જમા થશે)',
                     onChange: (_) => _autoCalc(),
                   ),
                   const SizedBox(height: 12),
+                  buildLabel('System Cost After Subsidy (સિસ્ટમ નો સબસિડી બાદ કર્યા પછી નો ખર્ચ)',required: true),
                   _numField(
                     systemAfterSubsidyC,
-                    'System Cost After Subsidy (સિસ્ટમ નો સબસિડી બાદ કર્યા પછી નો ખર્ચ)',
                     readOnly: true,
                   ),
                   // const SizedBox(height: 4),
@@ -351,7 +358,7 @@ class _State extends State<SolarQuotationScreen> {
                 onPressed: _saving ? null : _save,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: LeadTheme.primary,
-                  foregroundColor: AppColors.surface,
+                  foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
@@ -362,7 +369,7 @@ class _State extends State<SolarQuotationScreen> {
                         height: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: AppColors.surface,
+                          color: Colors.white,
                         ),
                       )
                     : Text(
@@ -464,59 +471,27 @@ Widget _field(
   String label,
   String svgAsset, {
   int maxLines = 1,
-}) => TextField(
+}) => LeadTextFormField(
   controller: c,
+  label: label,
+  svgIcon: svgAsset,
+  accentColor: LeadTheme.orange,
+  required: false,
   maxLines: maxLines,
-  style: const TextStyle(fontSize: 13, color: LeadTheme.textPrimary),
-  decoration: InputDecoration(
-    labelText: label,
-    labelStyle: const TextStyle(fontSize: 12, color: LeadTheme.textSecondary),
-    prefixIcon: Padding(
-      padding: const EdgeInsets.only(left: 10, right: 6),
-      child: AppSvgIcon(svgAsset, size: 16, color: LeadTheme.textSecondary),
-    ),
-    prefixIconConstraints: const BoxConstraints(minWidth: 36),
-    filled: true,
-    fillColor: LeadTheme.surface,
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(8),
-      borderSide: BorderSide.none,
-    ),
-    contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 16),
-  ),
+  bottomSpacing: 0,
 );
 
 Widget _numField(
-  TextEditingController c,
-  String label, {
+  TextEditingController c, {
   void Function(String)? onChange,
   bool readOnly = false,
-}) => Column(
-  crossAxisAlignment: CrossAxisAlignment.start,
-  children: [
-    TextField(
-      controller: c,
-      keyboardType: TextInputType.number,
-      readOnly: readOnly,
-      onChanged: onChange,
-      style: const TextStyle(fontSize: 13, color: LeadTheme.textPrimary),
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: const TextStyle(
-          fontSize: 12,
-          color: LeadTheme.textSecondary,
-        ),
-        filled: true,
-        fillColor: LeadTheme.surface,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide.none,
-        ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 10,
-          vertical: 16,
-        ),
-      ),
-    ),
-  ],
+}) => LeadTextFormField(
+  controller: c,
+  svgIcon: AppSvgAssets.indianRupee,
+  accentColor: LeadTheme.orange,
+  required: false,
+  keyboardType: TextInputType.number,
+  readOnly: readOnly,
+  onChanged: onChange,
+  bottomSpacing: 0,
 );

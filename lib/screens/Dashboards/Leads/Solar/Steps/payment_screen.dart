@@ -4,10 +4,10 @@ import 'package:solar_project/Cubits/SolarLeads/solar_leads_cubit.dart';
 import 'package:solar_project/Cubits/SolarLeads/solar_leads_state.dart';
 import 'package:solar_project/Helper/app_feedback.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
+import 'package:solar_project/Helper/lead_form_widgets.dart';
 import 'package:solar_project/Helper/lead_themes.dart';
 import 'package:solar_project/Helper/lead_widgets.dart';
 import 'package:solar_project/data/Models/solar_leads_model.dart';
-import 'package:solar_project/core/app_colors.dart';
 
 class SolarPaymentScreen extends StatefulWidget {
   final SolarLeadsModel lead;
@@ -94,19 +94,12 @@ class _State extends State<SolarPaymentScreen> {
             selectedMode = null;
           });
           if (state.lead.isCompleted) {
-            AppFeedback.showSuccess(
-              context,
-              '🎉 Payment fully completed! Project Completed!',
-            );
+            AppFeedback.showSuccess(context, '🎉 Payment fully completed! Project Completed!');
             Navigator.pop(context, state.lead);
           } else {
             // Stay on screen — user can add more payments and see the history
-            final rem =
-                (state.lead.finalAmount ?? state.lead.totalAmount) -
-                state.lead.paidAmount;
-            amountC.text = rem > 0
-                ? rem.clamp(0, double.infinity).toStringAsFixed(0)
-                : '';
+            final rem = (state.lead.finalAmount ?? state.lead.totalAmount) - state.lead.paidAmount;
+            amountC.text = rem > 0 ? rem.clamp(0, double.infinity).toStringAsFixed(0) : '';
             AppFeedback.showSuccess(context, 'Payment recorded ✓');
           }
         }
@@ -156,13 +149,13 @@ class _State extends State<SolarPaymentScreen> {
                   _summaryRow(
                     'Paid So Far',
                     '₹${alreadyPaid.toStringAsFixed(0)}',
-                    AppColors.success,
+                    Colors.green,
                   ),
                   const Divider(height: 16),
                   _summaryRow(
                     'Remaining',
                     '₹${remaining.toStringAsFixed(0)}',
-                    remaining > 0 ? AppColors.solar : AppColors.success,
+                    remaining > 0 ? Colors.orange : Colors.green,
                     large: true,
                   ),
                 ],
@@ -175,24 +168,20 @@ class _State extends State<SolarPaymentScreen> {
                 padding: const EdgeInsets.all(14),
                 margin: const EdgeInsets.only(bottom: 10),
                 decoration: BoxDecoration(
-                  color: AppColors.success,
-                  border: Border.all(color: AppColors.success),
+                  color: Colors.green.shade50,
+                  border: Border.all(color: Colors.green.shade300),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Row(
                   children: [
-                    AppSvgIcon(
-                      AppSvgAssets.circleCheckBig,
-                      color: AppColors.success,
-                      size: 22,
-                    ),
+                    AppSvgIcon(AppSvgAssets.circleCheckBig, color: Colors.green, size: 22),
                     SizedBox(width: 10),
                     Text(
                       'Payment Fully Completed! 🎉',
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.success,
+                        color: Colors.green,
                       ),
                     ),
                   ],
@@ -252,13 +241,13 @@ class _State extends State<SolarPaymentScreen> {
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                AppSvgIcon(
-                                  modeIcons[m]!,
-                                  size: 13,
-                                  color: selected
-                                      ? LeadTheme.primary
-                                      : LeadTheme.textSecondary,
-                                ),
+                              AppSvgIcon(
+                                modeIcons[m]!,
+                                size: 13,
+                                color: selected
+                                    ? LeadTheme.primary
+                                    : LeadTheme.textSecondary,
+                              ),
                                 const SizedBox(width: 5),
                                 Text(
                                   m,
@@ -293,7 +282,11 @@ class _State extends State<SolarPaymentScreen> {
                 ),
               ),
 
-              _saveBtn(_saving, _addPayment, 'Record Payment'),
+              _saveBtn(
+                _saving,
+                _addPayment,
+                'Record Payment',
+              ),
             ],
 
             // ── Payment history ────────────────────────────────────────
@@ -316,7 +309,7 @@ class _State extends State<SolarPaymentScreen> {
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
                           color: LeadTheme.bg,
-                          border: Border.all(color: AppColors.divider),
+                          border: Border.all(color: Colors.grey.shade200),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Row(
@@ -325,7 +318,7 @@ class _State extends State<SolarPaymentScreen> {
                               width: 28,
                               height: 28,
                               decoration: BoxDecoration(
-                                color: AppColors.success,
+                                color: Colors.green.shade100,
                                 shape: BoxShape.circle,
                               ),
                               child: Center(
@@ -334,7 +327,7 @@ class _State extends State<SolarPaymentScreen> {
                                   style: const TextStyle(
                                     fontSize: 11,
                                     fontWeight: FontWeight.w700,
-                                    color: AppColors.success,
+                                    color: Colors.green,
                                   ),
                                 ),
                               ),
@@ -375,7 +368,7 @@ class _State extends State<SolarPaymentScreen> {
                               style: const TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w700,
-                                color: AppColors.success,
+                                color: Colors.green,
                               ),
                             ),
                           ],
@@ -438,11 +431,7 @@ Widget _infoBanner(SolarLeadsModel lead) => Container(
   ),
   child: Row(
     children: [
-      const AppSvgIcon(
-        AppSvgAssets.userRound,
-        size: 16,
-        color: LeadTheme.primary,
-      ),
+      const AppSvgIcon(AppSvgAssets.userRound, size: 16, color: LeadTheme.primary),
       const SizedBox(width: 8),
       Expanded(
         child: Column(
@@ -475,26 +464,14 @@ Widget _field(
   String label,
   String svgAsset, {
   int maxLines = 1,
-}) => TextField(
+}) => LeadTextFormField(
   controller: c,
+  label: label,
+  svgIcon: svgAsset,
+  accentColor: LeadTheme.orange,
+  required: false,
   maxLines: maxLines,
-  style: const TextStyle(fontSize: 13, color: LeadTheme.textPrimary),
-  decoration: InputDecoration(
-    labelText: label,
-    labelStyle: const TextStyle(fontSize: 12, color: LeadTheme.textSecondary),
-    prefixIcon: Padding(
-      padding: const EdgeInsets.only(left: 10, right: 6),
-      child: AppSvgIcon(svgAsset, size: 16, color: LeadTheme.textSecondary),
-    ),
-    prefixIconConstraints: const BoxConstraints(minWidth: 36),
-    filled: true,
-    fillColor: LeadTheme.surface,
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(8),
-      borderSide: BorderSide.none,
-    ),
-    contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-  ),
+  bottomSpacing: 0,
 );
 
 Widget _numField(
@@ -502,33 +479,15 @@ Widget _numField(
   String label, {
   String? svgAsset,
   void Function(String)? onChange,
-}) => TextField(
+}) => LeadTextFormField(
   controller: c,
+  label: label,
+  svgIcon: svgAsset ?? AppSvgAssets.fileText,
+  accentColor: LeadTheme.orange,
+  required: false,
   keyboardType: TextInputType.number,
   onChanged: onChange,
-  style: const TextStyle(fontSize: 13, color: LeadTheme.textPrimary),
-  decoration: InputDecoration(
-    labelText: label,
-    labelStyle: const TextStyle(fontSize: 12, color: LeadTheme.textSecondary),
-    prefixIcon: svgAsset != null
-        ? Padding(
-            padding: const EdgeInsets.only(left: 10, right: 6),
-            child: AppSvgIcon(
-              svgAsset,
-              size: 16,
-              color: LeadTheme.textSecondary,
-            ),
-          )
-        : null,
-    prefixIconConstraints: const BoxConstraints(minWidth: 36),
-    filled: true,
-    fillColor: LeadTheme.surface,
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(8),
-      borderSide: BorderSide.none,
-    ),
-    contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-  ),
+  bottomSpacing: 0,
 );
 
 Widget _saveBtn(bool saving, VoidCallback onPressed, String label) => SizedBox(
@@ -538,7 +497,7 @@ Widget _saveBtn(bool saving, VoidCallback onPressed, String label) => SizedBox(
     onPressed: saving ? null : onPressed,
     style: ElevatedButton.styleFrom(
       backgroundColor: LeadTheme.primary,
-      foregroundColor: AppColors.surface,
+      foregroundColor: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
     ),
     child: saving
@@ -547,7 +506,7 @@ Widget _saveBtn(bool saving, VoidCallback onPressed, String label) => SizedBox(
             height: 20,
             child: CircularProgressIndicator(
               strokeWidth: 2,
-              color: AppColors.surface,
+              color: Colors.white,
             ),
           )
         : Text(

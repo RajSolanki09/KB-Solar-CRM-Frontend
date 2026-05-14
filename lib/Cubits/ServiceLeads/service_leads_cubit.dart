@@ -8,22 +8,73 @@ import 'package:solar_project/data/Repository/service_repository.dart';
 class ServiceLeadCubit extends Cubit<ServiceLeadState> {
   final ServiceRepository _repo;
 
-  ServiceLeadCubit({ServiceRepository? repo})
-      : _repo = repo ?? ServiceRepository(),
-        super(ServiceLeadInitial());
+  // Tab-wise total counts (for tab badge numbers)
+  final Map<int, int> _tabTotals = {0: 0, 1: 0, 2: 0};
 
-  // ── Fetch all services (role-filtered by backend) ──────────────────────────
-  Future<void> fetchAllServices() async {
+  ServiceLeadCubit({ServiceRepository? repo})
+    : _repo = repo ?? ServiceRepository(),
+      super(ServiceLeadInitial());
+
+  int getTabTotal(int tabIndex) => _tabTotals[tabIndex] ?? 0;
+
+  // ── Fetch all services ─────────────────────────────────────────────────────
+  Future<void> fetchAllServices({
+    int page = 1,
+    String? search,
+    String? status,
+    int tabIndex = 0,
+  }) async {
     emit(ServiceLeadLoading());
     try {
-      final list = await _repo.getAllServices();
-      emit(ServiceLeadsLoaded(list));
+      final result = await _repo.getAllServices(
+        page: page,
+        search: search,
+        status: status,
+        tabIndex: tabIndex,
+      );
+
+      final services = result['services'] as List<dynamic>;
+      final total = result['total'] as int;
+      final pages = result['pages'] as int;
+
+      // ✅ Store all 3 tab counts at once from backend response
+      final tabCounts = result['tabCounts'] as Map<String, dynamic>?;
+      if (tabCounts != null) {
+        _tabTotals[0] =
+            (tabCounts['recent'] as num?)?.toInt() ?? _tabTotals[0] ?? 0;
+        _tabTotals[1] =
+            (tabCounts['older'] as num?)?.toInt() ?? _tabTotals[1] ?? 0;
+        _tabTotals[2] =
+            (tabCounts['completed'] as num?)?.toInt() ?? _tabTotals[2] ?? 0;
+      } else {
+        _tabTotals[tabIndex] = total;
+      }
+
+      emit(
+        ServiceLeadsLoaded(
+          services: services.cast(),
+          total: total,
+          page: page,
+          pages: pages,
+          tabIndex: tabIndex,
+        ),
+      );
     } catch (e) {
       emit(ServiceLeadError(e.toString().replaceFirst('Exception: ', '')));
     }
   }
 
-  // ── Create new service request (admin only) ────────────────────────────────
+  // ── Tab switch ─────────────────────────────────────────────────────────────
+  Future<void> setTabAndFetch(int tabIndex) async {
+    await fetchAllServices(page: 1, tabIndex: tabIndex);
+  }
+
+  // ── Page change ────────────────────────────────────────────────────────────
+  Future<void> fetchPage(int page, {required int tabIndex}) async {
+    await fetchAllServices(page: page, tabIndex: tabIndex);
+  }
+
+  // ── Create ─────────────────────────────────────────────────────────────────
   Future<void> createService(Map<String, dynamic> data) async {
     try {
       final service = await _repo.createService(data);
@@ -34,7 +85,7 @@ class ServiceLeadCubit extends Cubit<ServiceLeadState> {
     }
   }
 
-  // ── Update service (status, notes, etc.) ──────────────────────────────────
+  // ── Update ─────────────────────────────────────────────────────────────────
   Future<void> updateService(String id, Map<String, dynamic> data) async {
     try {
       final service = await _repo.updateService(id, data);
@@ -56,7 +107,7 @@ class ServiceLeadCubit extends Cubit<ServiceLeadState> {
     }
   }
 
-  // ── Upload service photos ─────────────────────────────────────────────────
+  // ── Upload photos ──────────────────────────────────────────────────────────
   Future<void> uploadPhotos(
     String id, {
     List<PickedPhoto> beforePhotos = const [],
@@ -75,7 +126,7 @@ class ServiceLeadCubit extends Cubit<ServiceLeadState> {
     }
   }
 
-  // ── Delete service (admin only) ────────────────────────────────────────────
+  // ── Delete ─────────────────────────────────────────────────────────────────
   Future<void> deleteService(String id) async {
     try {
       await _repo.deleteService(id);

@@ -22,11 +22,13 @@ class SolarLeadSuccess extends SolarLeadState {
 class SolarLeadsLoaded extends SolarLeadState {
   final List<SolarLeadsModel> leads;
   final int total, page, pages;
+  final int tabIndex; // New field for per-tab pagination
   SolarLeadsLoaded({
     required this.leads,
     required this.total,
     required this.page,
     required this.pages,
+    this.tabIndex = 0,
   });
 }
 

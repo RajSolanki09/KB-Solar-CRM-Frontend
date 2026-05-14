@@ -5,10 +5,11 @@ import 'package:solar_project/Cubits/SprinklerLeads/sprinkler_leads_cubit.dart';
 import 'package:solar_project/Cubits/SprinklerLeads/sprinkler_leads_state.dart';
 import 'package:solar_project/Helper/app_feedback.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
+import 'package:solar_project/Helper/lead_form_widgets.dart';
 import 'package:solar_project/Helper/lead_themes.dart';
 import 'package:solar_project/Helper/lead_widgets.dart';
-import 'package:solar_project/data/Models/sprinkler_lead_model.dart';
 import 'package:solar_project/core/app_colors.dart';
+import 'package:solar_project/data/Models/sprinkler_lead_model.dart';
 
 class SprinklerQuotationScreen extends StatefulWidget {
   final SprinklerLeadModel lead;
@@ -29,8 +30,7 @@ class _SpkQuotationState extends State<SprinklerQuotationScreen> {
   final advancePercentC = TextEditingController(text: '60');
   final balancePercentC = TextEditingController(text: '40');
   final warrantyNoteC = TextEditingController(
-    text:
-        'Above quotation fully auto cleaning system with 1 year service warranty',
+    text: 'Above quotation fully auto cleaning system with 1 year service warranty',
   );
   final notesC = TextEditingController();
   final List<_QuotationLineItemDraft> _lineItems = [];
@@ -40,17 +40,12 @@ class _SpkQuotationState extends State<SprinklerQuotationScreen> {
   void initState() {
     super.initState();
     final q = widget.lead.quotationData;
-    totalAmountC.text = q.totalAmount > 0
-        ? q.totalAmount.toStringAsFixed(0)
-        : '';
+    totalAmountC.text = q.totalAmount > 0 ? q.totalAmount.toStringAsFixed(0) : '';
     discountC.text = q.discount > 0 ? q.discount.toStringAsFixed(0) : '';
-    finalAmountC.text = q.finalAmount > 0
-        ? q.finalAmount.toStringAsFixed(0)
-        : '';
+    finalAmountC.text = q.finalAmount > 0 ? q.finalAmount.toStringAsFixed(0) : '';
     advancePercentC.text = q.advancePercent?.toStringAsFixed(0) ?? '60';
     balancePercentC.text = q.balancePercent?.toStringAsFixed(0) ?? '40';
-    if (q.warrantyNote?.isNotEmpty == true)
-      warrantyNoteC.text = q.warrantyNote!;
+    if (q.warrantyNote?.isNotEmpty == true) warrantyNoteC.text = q.warrantyNote!;
     notesC.text = q.notes ?? '';
     _seedLineItems(q);
     _calcFinal();
@@ -62,15 +57,11 @@ class _SpkQuotationState extends State<SprinklerQuotationScreen> {
       item.dispose();
     }
     for (final c in [
-      totalAmountC,
-      discountC,
-      finalAmountC,
-      advancePercentC,
-      balancePercentC,
-      warrantyNoteC,
-      notesC,
-    ])
+      totalAmountC, discountC, finalAmountC,
+      advancePercentC, balancePercentC, warrantyNoteC, notesC,
+    ]) {
       c.dispose();
+    }
     super.dispose();
   }
 
@@ -81,9 +72,7 @@ class _SpkQuotationState extends State<SprinklerQuotationScreen> {
           _QuotationLineItemDraft(
             description: item.description,
             quantity: item.quantity,
-            unitPrice: item.unitPrice > 0
-                ? item.unitPrice.toStringAsFixed(0)
-                : '',
+            unitPrice: item.unitPrice > 0 ? item.unitPrice.toStringAsFixed(0) : '',
             total: item.total > 0 ? item.total.toStringAsFixed(0) : '',
           ),
         );
@@ -129,19 +118,14 @@ class _SpkQuotationState extends State<SprinklerQuotationScreen> {
     final disc = double.tryParse(discountC.text) ?? 0;
     setState(() {
       totalAmountC.text = total.toStringAsFixed(0);
-      finalAmountC.text = (total - disc)
-          .clamp(0, double.infinity)
-          .toStringAsFixed(0);
+      finalAmountC.text = (total - disc).clamp(0, double.infinity).toStringAsFixed(0);
     });
     _calcPayment();
   }
 
   void _calcPayment() {
     final advP = double.tryParse(advancePercentC.text) ?? 60;
-    setState(
-      () =>
-          balancePercentC.text = (100 - advP).clamp(0, 100).toStringAsFixed(0),
-    );
+    setState(() => balancePercentC.text = (100 - advP).clamp(0, 100).toStringAsFixed(0));
   }
 
   void _save() {
@@ -184,23 +168,19 @@ class _SpkQuotationState extends State<SprinklerQuotationScreen> {
         backgroundColor: LeadTheme.bg,
         appBar: AppBar(
           backgroundColor: LeadTheme.secondary,
-          foregroundColor: AppColors.surface,
+          foregroundColor: Colors.white,
           elevation: 0,
           leading: IconButton(
             icon: const AppSvgIcon(
               AppSvgAssets.chevronLeft,
-              color: AppColors.surface,
+              color: Colors.white,
               size: 18,
             ),
             onPressed: () => Navigator.pop(context),
           ),
           title: Text(
             widget.isEditing ? 'Edit Quotation' : 'Quotation',
-            style: const TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w600,
-              color: AppColors.surface,
-            ),
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.white),
           ),
         ),
         bottomNavigationBar: _buildSaveBar(),
@@ -241,47 +221,25 @@ class _SpkQuotationState extends State<SprinklerQuotationScreen> {
                               ),
                               IconButton(
                                 onPressed: () => _removeLineItem(index),
-                                icon: const Icon(
-                                  Icons.delete_outline,
-                                  size: 18,
-                                ),
-                                color: AppColors.error,
+                                icon: const Icon(Icons.delete_outline, size: 18),
+                                color: Colors.red.shade400,
                                 tooltip: 'Remove Item',
                               ),
                             ],
                           ),
-                          _spkTextField(
-                            item.descriptionC,
-                            'Description',
-                            AppSvgAssets.fileText,
-                          ),
+                          _spkTextField(item.descriptionC, 'Description', AppSvgAssets.fileText),
                           const SizedBox(height: 8),
-                          _spkTextField(
-                            item.quantityC,
-                            'Quantity (e.g. 10 sets)',
-                            AppSvgAssets.activity,
-                            onChange: (_) {
-                              _recomputeLineTotal(item);
-                              _calcFinal();
-                            },
-                          ),
+                          _spkTextField(item.quantityC, 'Quantity (e.g. 10 sets)', AppSvgAssets.activity, onChange: (_) {
+                            _recomputeLineTotal(item);
+                            _calcFinal();
+                          }),
                           const SizedBox(height: 8),
-                          _spkNumField(
-                            item.unitPriceC,
-                            'Unit Price (Rs.)',
-                            decimal: true,
-                            onChange: (_) {
-                              _recomputeLineTotal(item);
-                              _calcFinal();
-                            },
-                          ),
+                          _spkNumField(item.unitPriceC, 'Unit Price (Rs.)', decimal: true, onChange: (_) {
+                            _recomputeLineTotal(item);
+                            _calcFinal();
+                          }),
                           const SizedBox(height: 8),
-                          _spkNumField(
-                            item.totalC,
-                            'Line Total (Rs.)',
-                            decimal: true,
-                            onChange: (_) => _calcFinal(),
-                          ),
+                          _spkNumField(item.totalC, 'Line Total (Rs.)', decimal: true, onChange: (_) => _calcFinal()),
                         ],
                       ),
                     );
@@ -304,25 +262,11 @@ class _SpkQuotationState extends State<SprinklerQuotationScreen> {
                 children: [
                   const SectionTitle('Cost'),
                   const SizedBox(height: 10),
-                  _spkNumField(
-                    totalAmountC,
-                    'Total Amount (Rs.)',
-                    decimal: true,
-                    readOnly: true,
-                  ),
+                  _spkNumField(totalAmountC, 'Total Amount (Rs.)', decimal: true, readOnly: true),
                   const SizedBox(height: 8),
-                  _spkNumField(
-                    discountC,
-                    'Discount (Rs.)',
-                    decimal: true,
-                    onChange: (_) => _calcFinal(),
-                  ),
+                  _spkNumField(discountC, 'Discount (Rs.)', decimal: true, onChange: (_) => _calcFinal()),
                   const SizedBox(height: 8),
-                  _spkNumField(
-                    finalAmountC,
-                    'Final Amount (Rs.)',
-                    readOnly: true,
-                  ),
+                  _spkNumField(finalAmountC, 'Final Amount (Rs.)', readOnly: true),
                 ],
               ),
             ),
@@ -333,28 +277,13 @@ class _SpkQuotationState extends State<SprinklerQuotationScreen> {
                 children: [
                   const SectionTitle('Payment Terms'),
                   const SizedBox(height: 10),
-                  _spkNumField(
-                    advancePercentC,
-                    'Advance %',
-                    decimal: true,
-                    onChange: (_) => _calcPayment(),
-                  ),
+                  _spkNumField(advancePercentC, 'Advance %', decimal: true, onChange: (_) => _calcPayment()),
                   const SizedBox(height: 8),
                   _spkNumField(balancePercentC, 'Balance %', readOnly: true),
                   const SizedBox(height: 8),
-                  _spkTextField(
-                    warrantyNoteC,
-                    'Warranty Note',
-                    AppSvgAssets.fileText,
-                    maxLines: 2,
-                  ),
+                  _spkTextField(warrantyNoteC, 'Warranty Note', AppSvgAssets.fileText, maxLines: 2),
                   const SizedBox(height: 8),
-                  _spkTextField(
-                    notesC,
-                    'Notes',
-                    AppSvgAssets.fileText,
-                    maxLines: 3,
-                  ),
+                  _spkTextField(notesC, 'Notes', AppSvgAssets.fileText, maxLines: 3),
                 ],
               ),
             ),
@@ -368,13 +297,10 @@ class _SpkQuotationState extends State<SprinklerQuotationScreen> {
   Widget _buildSaveBar() {
     return Container(
       padding: EdgeInsets.fromLTRB(
-        16,
-        12,
-        16,
-        MediaQuery.of(context).padding.bottom + 12,
+        16, 12, 16, MediaQuery.of(context).padding.bottom + 12,
       ),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: Colors.white,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.08),
@@ -390,11 +316,9 @@ class _SpkQuotationState extends State<SprinklerQuotationScreen> {
           onPressed: _saving ? null : _save,
           style: ElevatedButton.styleFrom(
             backgroundColor: LeadTheme.secondary,
-            foregroundColor: AppColors.surface,
+            foregroundColor: Colors.white,
             disabledBackgroundColor: LeadTheme.secondary.withOpacity(0.6),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             elevation: 0,
           ),
           child: _saving
@@ -402,7 +326,7 @@ class _SpkQuotationState extends State<SprinklerQuotationScreen> {
                   width: 20,
                   height: 20,
                   child: CircularProgressIndicator(
-                    color: AppColors.surface,
+                    color: Colors.white,
                     strokeWidth: 2,
                   ),
                 )
@@ -427,17 +351,10 @@ Widget _infoBanner(SprinklerLeadModel lead) => Container(
     children: [
       Text(
         lead.customerName,
-        style: const TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.w600,
-          color: LeadTheme.textPrimary,
-        ),
+        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: LeadTheme.textPrimary),
       ),
       const SizedBox(width: 8),
-      Text(
-        lead.village,
-        style: const TextStyle(fontSize: 12, color: LeadTheme.textSecondary),
-      ),
+      Text(lead.village, style: const TextStyle(fontSize: 12, color: LeadTheme.textSecondary)),
     ],
   ),
 );
@@ -448,27 +365,15 @@ Widget _spkTextField(
   String svgAsset, {
   int maxLines = 1,
   void Function(String)? onChange,
-}) => TextField(
+}) => LeadTextFormField(
   controller: c,
+  label: label,
+  svgIcon: svgAsset,
+  accentColor: LeadTheme.secondary,
+  required: false,
   maxLines: maxLines,
   onChanged: onChange,
-  style: const TextStyle(fontSize: 13, color: LeadTheme.textPrimary),
-  decoration: InputDecoration(
-    labelText: label,
-    labelStyle: const TextStyle(fontSize: 12, color: LeadTheme.textSecondary),
-    prefixIcon: Padding(
-      padding: const EdgeInsets.only(left: 10, right: 6),
-      child: AppSvgIcon(svgAsset, size: 16, color: LeadTheme.textSecondary),
-    ),
-    prefixIconConstraints: const BoxConstraints(minWidth: 36),
-    filled: true,
-    fillColor: LeadTheme.surface,
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(8),
-      borderSide: BorderSide.none,
-    ),
-    contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 16),
-  ),
+  bottomSpacing: 0,
 );
 
 class _QuotationLineItemDraft {
@@ -508,26 +413,21 @@ Widget _spkNumField(
   void Function(String)? onChange,
   bool readOnly = false,
   bool decimal = false,
-}) => TextField(
+}) => LeadTextFormField(
   controller: c,
+  label: label,
+  svgIcon: AppSvgAssets.indianRupee,
+  accentColor: LeadTheme.secondary,
+  required: false,
   readOnly: readOnly,
   keyboardType: decimal
       ? const TextInputType.numberWithOptions(decimal: true)
       : TextInputType.number,
   onChanged: onChange,
-  style: TextStyle(
-    fontSize: 13,
-    color: readOnly ? LeadTheme.textSecondary : LeadTheme.textPrimary,
-  ),
-  decoration: InputDecoration(
-    labelText: label,
-    labelStyle: const TextStyle(fontSize: 12, color: LeadTheme.textSecondary),
-    filled: true,
-    fillColor: readOnly ? AppColors.background : LeadTheme.surface,
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(8),
-      borderSide: BorderSide.none,
-    ),
-    contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 16),
-  ),
+  fillColor: readOnly ?  AppColors.textGray : LeadTheme.surface,
+  bottomSpacing: 0,
 );
+
+
+
+

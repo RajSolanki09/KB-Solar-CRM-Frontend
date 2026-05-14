@@ -7,7 +7,11 @@ import 'package:solar_project/services/api_service.dart';
 class AddMaterialScreen extends StatefulWidget {
   final Color? appBarColor;
   final Map<String, dynamic>? initialMaterial;
-  const AddMaterialScreen({super.key, this.appBarColor, this.initialMaterial});
+  const AddMaterialScreen({
+    super.key,
+    this.appBarColor,
+    this.initialMaterial,
+  });
 
   @override
   State<AddMaterialScreen> createState() => _AddMaterialScreenState();
@@ -56,7 +60,9 @@ class _AddMaterialScreenState extends State<AddMaterialScreen> {
           .map((e) => Map<String, dynamic>.from(e))
           .toList();
 
-      _options = {'gstOptions': gstOptions};
+      _options = {
+        'gstOptions': gstOptions,
+      };
 
       _prepareFieldState();
     } catch (_) {
@@ -79,7 +85,12 @@ class _AddMaterialScreenState extends State<AddMaterialScreen> {
             'type': 'text',
             'required': true,
           },
-          {'key': 'brand', 'label': 'Brand', 'type': 'text', 'required': false},
+          {
+            'key': 'brand',
+            'label': 'Brand',
+            'type': 'text',
+            'required': false,
+          },
         ],
       },
       {
@@ -173,7 +184,9 @@ class _AddMaterialScreenState extends State<AddMaterialScreen> {
   Map<String, dynamic> _extractCustomFields(Map<String, dynamic> source) {
     final raw = source['customFields'];
     if (raw is Map) {
-      return raw.map((k, v) => MapEntry(k.toString(), v));
+      return raw.map(
+        (k, v) => MapEntry(k.toString(), v),
+      );
     }
     return const <String, dynamic>{};
   }
@@ -264,13 +277,13 @@ class _AddMaterialScreenState extends State<AddMaterialScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final color = widget.appBarColor ?? AppColors.primaryDark;
+    final color = widget.appBarColor ??   AppColors.indigo500;
 
     return Scaffold(
-      backgroundColor:  AppColors.background,
+      backgroundColor:   AppColors.slate50,
       appBar: AppBar(
         backgroundColor: color,
-        foregroundColor: AppColors.surface,
+        foregroundColor: Colors.white,
         title: Text(_isEditMode ? 'Edit Material' : 'Add Material'),
       ),
       body: _loadingSchema
@@ -287,14 +300,14 @@ class _AddMaterialScreenState extends State<AddMaterialScreen> {
         child: Container(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 14),
           decoration: const BoxDecoration(
-            color: AppColors.surface,
-            border: Border(top: BorderSide(color: AppColors.divider)),
+            color: Colors.white,
+            border: Border(top: BorderSide(color: AppColors.slate200)),
           ),
           child: ElevatedButton(
             onPressed: _saving ? null : _saveMaterial,
             style: ElevatedButton.styleFrom(
               backgroundColor: color,
-              foregroundColor: AppColors.surface,
+              foregroundColor: Colors.white,
               minimumSize: const Size.fromHeight(48),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -306,11 +319,11 @@ class _AddMaterialScreenState extends State<AddMaterialScreen> {
                     height: 20,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: AppColors.surface,
+                      color: Colors.white,
                     ),
                   )
                 : Text(
-                    _isEditMode ? 'Update Material' : 'Save Material',
+                  _isEditMode ? 'Update Material' : 'Save Material',
                     style: TextStyle(fontWeight: FontWeight.w700),
                   ),
           ),
@@ -327,9 +340,9 @@ class _AddMaterialScreenState extends State<AddMaterialScreen> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color:  AppColors.divider),
+        border: Border.all(color:   AppColors.slate200),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -339,7 +352,7 @@ class _AddMaterialScreenState extends State<AddMaterialScreen> {
             style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w700,
-              color: AppColors.textGray,
+              color: AppColors.slate700,
             ),
           ),
           const SizedBox(height: 12),
@@ -366,7 +379,7 @@ class _AddMaterialScreenState extends State<AddMaterialScreen> {
       final options = _options[optionsFrom] ?? const [];
       final selectedValue = _dropdownValues[key];
       return DropdownButtonFormField<String>(
-        value: options.contains(selectedValue) ? selectedValue : null,
+        initialValue: options.contains(selectedValue) ? selectedValue : null,
         isExpanded: true,
         decoration: _inputDecoration(label, required),
         items: options
@@ -415,19 +428,22 @@ class _AddMaterialScreenState extends State<AddMaterialScreen> {
     return InputDecoration(
       labelText: required ? '$label *' : label,
       filled: true,
-      fillColor:  AppColors.background,
+      fillColor:   AppColors.slate50,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: AppColors.divider),
+        borderSide: const BorderSide(color: AppColors.slate200),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: AppColors.divider),
+        borderSide: const BorderSide(color: AppColors.slate200),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: AppColors.primaryDark, width: 1.3),
+        borderSide: const BorderSide(color: AppColors.indigo500, width: 1.3),
       ),
     );
   }
 }
+
+
+

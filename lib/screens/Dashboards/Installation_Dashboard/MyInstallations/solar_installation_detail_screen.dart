@@ -43,12 +43,12 @@ import 'package:solar_project/screens/Dashboards/Leads/Solar/Steps/installation_
 // ─────────────────────────────────────────────────────────────────────────────
 // Palette
 // ─────────────────────────────────────────────────────────────────────────────
-const _kPurple = AppColors.primary;
-const _kBlue = AppColors.primaryLight;
-const _kGreen = AppColors.primary;
-const _kAmber = AppColors.primary;
+const _kPurple = AppColors.purple500;
+const _kBlue = AppColors.cyan;
+const _kGreen = AppColors.success;
+const _kAmber = AppColors.amber;
 const _kRed = AppColors.error;
-const _kBg = AppColors.background;
+const _kBg = AppColors.slate50;
 const _kText = AppColors.textDark;
 const _kTextSec = AppColors.textGray;
 const _kTextMut = AppColors.textLight;
@@ -227,7 +227,10 @@ class InstallationDetailScreen extends StatefulWidget {
         systemKw: l.requiredKW,
         electricityConnection: l.electricityConnection,
         assignedByName: l.createdBy,
-        assignmentNotes: l.installationAssignData.notes,
+        assignmentNotes:
+            (l.installationAssignData.notes?.trim().isEmpty ?? true)
+            ? null
+            : l.installationAssignData.notes!.trim(),
         initialStatus: InstallationStatus.installationAssigned,
         totalAmount: l.finalAmount?.toDouble() ?? 0,
         paidAmount: l.advancePayment?.toDouble() ?? 0,
@@ -248,7 +251,10 @@ class InstallationDetailScreen extends StatefulWidget {
         waterSource: l.waterSource,
         cropType: l.cropType,
         assignedByName: l.createdByName,
-        assignmentNotes: l.installationAssignData.notes,
+        assignmentNotes:
+            (l.installationAssignData.notes?.trim().isEmpty ?? true)
+            ? null
+            : l.installationAssignData.notes!.trim(),
         initialStatus: InstallationStatus.installationAssigned,
         totalAmount: 0,
         paidAmount: 0,
@@ -265,7 +271,7 @@ class InstallationDetailScreen extends StatefulWidget {
         isSolar: m.projectType == 'solar',
         systemKw: m.systemSize > 0 ? m.systemSize : null,
         assignedByName: m.assignedByName,
-        assignmentNotes: m.notes,
+        assignmentNotes: m.notes?.trim().isEmpty == true ? null : m.notes?.trim(),
         initialStatus: m.status,
         totalAmount: m.totalAmount,
         paidAmount: m.paidAmount,
@@ -517,7 +523,7 @@ class _InstallationDetailScreenState extends State<InstallationDetailScreen> {
                   leading: IconButton(
                     icon: const AppSvgIcon(
                       AppSvgAssets.chevronLeft,
-                      color: AppColors.surface,
+                      color: Colors.white,
                       size: 18,
                     ),
                     onPressed: () => Navigator.pop(context),
@@ -567,7 +573,7 @@ class _InstallationDetailScreenState extends State<InstallationDetailScreen> {
     padding: const EdgeInsets.all(16),
     decoration: BoxDecoration(
       gradient: const LinearGradient(
-        colors: [AppColors.primary, AppColors.success],
+        colors: [AppColors.success, AppColors.green900],
       ),
       borderRadius: BorderRadius.circular(14),
       boxShadow: [
@@ -589,7 +595,7 @@ class _InstallationDetailScreenState extends State<InstallationDetailScreen> {
               Text(
                 'Project Completed!',
                 style: TextStyle(
-                  color: AppColors.surface,
+                  color: Colors.white,
                   fontSize: 15,
                   fontWeight: FontWeight.w800,
                 ),
@@ -597,7 +603,7 @@ class _InstallationDetailScreenState extends State<InstallationDetailScreen> {
               SizedBox(height: 2),
               Text(
                 'All steps done. Completed projects are locked for editing.',
-                style: TextStyle(color: AppColors.surface, fontSize: 11.5),
+                style: TextStyle(color: Colors.white70, fontSize: 11.5),
               ),
             ],
           ),
@@ -624,7 +630,7 @@ class _InstallationDetailScreenState extends State<InstallationDetailScreen> {
             height: 140,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: AppColors.surface.withValues(alpha: 0.07),
+              color: Colors.white.withValues(alpha: 0.07),
             ),
           ),
         ),
@@ -647,7 +653,7 @@ class _InstallationDetailScreenState extends State<InstallationDetailScreen> {
                   Text(
                     widget.customerName,
                     style: const TextStyle(
-                      color: AppColors.surface,
+                      color: Colors.white,
                       fontSize: 22,
                       fontWeight: FontWeight.w800,
                     ),
@@ -658,13 +664,13 @@ class _InstallationDetailScreenState extends State<InstallationDetailScreen> {
                       const AppSvgIcon(
                         AppSvgAssets.phone,
                         size: 13,
-                        color: AppColors.surface,
+                        color: Colors.white70,
                       ),
                       const SizedBox(width: 4),
                       Text(
                         widget.phone,
                         style: const TextStyle(
-                          color: AppColors.surface,
+                          color: Colors.white70,
                           fontSize: 12,
                         ),
                       ),
@@ -672,7 +678,7 @@ class _InstallationDetailScreenState extends State<InstallationDetailScreen> {
                       const AppSvgIcon(
                         AppSvgAssets.mapPin,
                         size: 13,
-                        color: AppColors.surface,
+                        color: Colors.white70,
                       ),
                       const SizedBox(width: 4),
                       Expanded(
@@ -681,7 +687,7 @@ class _InstallationDetailScreenState extends State<InstallationDetailScreen> {
                               ? '${widget.address}, ${widget.village}'
                               : widget.address,
                           style: const TextStyle(
-                            color: AppColors.surface,
+                            color: Colors.white70,
                             fontSize: 12,
                           ),
                           overflow: TextOverflow.ellipsis,
@@ -721,16 +727,16 @@ class _InstallationDetailScreenState extends State<InstallationDetailScreen> {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.surface.withValues(alpha: 0.2),
+                      color: Colors.white.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
-                        color: AppColors.surface.withValues(alpha: 0.35),
+                        color: Colors.white.withValues(alpha: 0.35),
                       ),
                     ),
                     child: Text(
                       '${_kMeta[_currentStatus]!.emoji}  ${_statusLabel(_currentStatus)}',
                       style: const TextStyle(
-                        color: AppColors.surface,
+                        color: Colors.white,
                         fontSize: 11.5,
                         fontWeight: FontWeight.w700,
                       ),
@@ -748,13 +754,13 @@ class _InstallationDetailScreenState extends State<InstallationDetailScreen> {
   Widget _heroBadge(String text) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
     decoration: BoxDecoration(
-      color: AppColors.surface.withValues(alpha: 0.18),
+      color: Colors.white.withValues(alpha: 0.18),
       borderRadius: BorderRadius.circular(20),
     ),
     child: Text(
       text,
       style: const TextStyle(
-        color: AppColors.surface,
+        color: Colors.white,
         fontSize: 10.5,
         fontWeight: FontWeight.w700,
       ),
@@ -765,9 +771,9 @@ class _InstallationDetailScreenState extends State<InstallationDetailScreen> {
     width: double.infinity,
     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
     decoration: BoxDecoration(
-      color: AppColors.surface.withValues(alpha: 0.14),
+      color: Colors.white.withValues(alpha: 0.14),
       borderRadius: BorderRadius.circular(14),
-      border: Border.all(color: AppColors.surface.withValues(alpha: 0.22)),
+      border: Border.all(color: Colors.white.withValues(alpha: 0.22)),
     ),
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -781,7 +787,7 @@ class _InstallationDetailScreenState extends State<InstallationDetailScreen> {
               const Text(
                 'Assignment Note',
                 style: TextStyle(
-                  color: AppColors.surface,
+                  color: Colors.white,
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
                 ),
@@ -790,7 +796,7 @@ class _InstallationDetailScreenState extends State<InstallationDetailScreen> {
               Text(
                 text,
                 style: const TextStyle(
-                  color: AppColors.surface,
+                  color: Colors.white70,
                   fontSize: 12,
                   height: 1.4,
                 ),
@@ -832,7 +838,7 @@ class _InstallationDetailScreenState extends State<InstallationDetailScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -896,7 +902,7 @@ class _PipelineRow extends StatelessWidget {
         : isActive
         ? m.color
         : _kBorder;
-    final lineColor = isDone ? AppColors.successLight : _kBorder;
+    final lineColor = isDone ?   AppColors.greenAccent2 : _kBorder;
     final stepNum = _kAllSteps.indexOf(step) + 1;
 
     return IntrinsicHeight(
@@ -943,7 +949,7 @@ class _PipelineRow extends StatelessWidget {
                         child: isDone
                             ? const AppSvgIcon(
                                 AppSvgAssets.check,
-                                color: AppColors.surface,
+                                color: Colors.white,
                                 size: 14,
                               )
                             : isActive
@@ -990,7 +996,7 @@ class _PipelineRow extends StatelessWidget {
                   ),
                   decoration: BoxDecoration(
                     color: isDone
-                        ? AppColors.successLight.withValues(alpha: 0.55)
+                        ?   AppColors.successLight.withValues(alpha: 0.55)
                         : isActive
                         ? m.color.withValues(alpha: 0.05)
                         : Colors.transparent,
@@ -1021,7 +1027,7 @@ class _PipelineRow extends StatelessWidget {
                                           ? FontWeight.w800
                                           : FontWeight.w600,
                                       color: isDone
-                                          ?  AppColors.success
+                                          ?   AppColors.greenDarker
                                           : isActive
                                           ? m.color
                                           : _kTextMut,
@@ -1126,7 +1132,7 @@ class _StepFormScreenState extends State<_StepFormScreen> {
   final Map<String, bool?> _yesno = {};
 
   final _picker = ImagePicker();
-  bool _uploadingPhotos = false;
+  final bool _uploadingPhotos = false;
 
   TextEditingController _c(String k) => _ctrls.putIfAbsent(k, () {
     final controller = TextEditingController();
@@ -1145,7 +1151,9 @@ class _StepFormScreenState extends State<_StepFormScreen> {
 
   @override
   void dispose() {
-    for (final c in _ctrls.values) c.dispose();
+    for (final c in _ctrls.values) {
+      c.dispose();
+    }
     super.dispose();
   }
 
@@ -1155,8 +1163,9 @@ class _StepFormScreenState extends State<_StepFormScreen> {
     String? errorKey,
   }) async {
     if (target.length >= max) {
-      if (mounted)
+      if (mounted) {
         AppFeedback.showError(context, 'Maximum $max photos allowed');
+      }
       return;
     }
     showModalBottomSheet(
@@ -1460,9 +1469,9 @@ class _StepFormScreenState extends State<_StepFormScreen> {
     final m = _kMeta[widget.step]!;
 
     return Scaffold(
-      backgroundColor: AppColors.surface,
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: AppColors.surface,
+        backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
           icon: const AppSvgIcon(
@@ -1970,7 +1979,7 @@ class _StepFormScreenState extends State<_StepFormScreen> {
                 ),
                 child: const AppSvgIcon(
                   AppSvgAssets.x,
-                  color: AppColors.surface,
+                  color: Colors.white,
                   size: 14,
                 ),
               ),
@@ -1987,7 +1996,7 @@ class _StepFormScreenState extends State<_StepFormScreen> {
               ),
               child: const AppSvgIcon(
                 AppSvgAssets.camera,
-                color: AppColors.surface,
+                color: Colors.white,
                 size: 10,
               ),
             ),
@@ -2084,7 +2093,7 @@ class _StepFormScreenState extends State<_StepFormScreen> {
               decoration: BoxDecoration(
                 color: picked != null
                     ? color.withValues(alpha: 0.05)
-                    :  AppColors.background,
+                    :   AppColors.surface,
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(
                   color: errorText != null
@@ -2196,7 +2205,7 @@ class _StepFormScreenState extends State<_StepFormScreen> {
                 fontWeight: FontWeight.w600,
               ),
               filled: true,
-              fillColor:  AppColors.background,
+              fillColor:   AppColors.surface,
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 12,
                 vertical: 11,
@@ -2280,7 +2289,7 @@ class _StepFormScreenState extends State<_StepFormScreen> {
                     decoration: BoxDecoration(
                       color: value == true
                           ? _kGreen.withValues(alpha: 0.1)
-                          : AppColors.background,
+                          :   AppColors.gray100,
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(
                         color: value == true
@@ -2328,7 +2337,7 @@ class _StepFormScreenState extends State<_StepFormScreen> {
                     decoration: BoxDecoration(
                       color: value == false
                           ? _kRed.withValues(alpha: 0.08)
-                          : AppColors.background,
+                          :   AppColors.gray100,
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(
                         color: value == false
@@ -2429,27 +2438,27 @@ class _SubmitBtn extends StatelessWidget {
                     width: 18,
                     height: 18,
                     child: CircularProgressIndicator(
-                      color: AppColors.surface,
+                      color: Colors.white,
                       strokeWidth: 2,
                     ),
                   )
                 else if (success)
                   const AppSvgIcon(
                     AppSvgAssets.check,
-                    color: AppColors.surface,
+                    color: Colors.white,
                     size: 20,
                   )
                 else
                   const AppSvgIcon(
                     AppSvgAssets.chevronRight,
-                    color: AppColors.surface,
+                    color: Colors.white,
                     size: 18,
                   ),
                 const SizedBox(width: 8),
                 Text(
                   success ? 'Updated!' : label,
                   style: const TextStyle(
-                    color: AppColors.surface,
+                    color: Colors.white,
                     fontSize: 15,
                     fontWeight: FontWeight.w800,
                     letterSpacing: 0.2,
@@ -2539,7 +2548,7 @@ class _UpdateStatusBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: Colors.white,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.10),
@@ -2620,12 +2629,12 @@ class _UpdateStatusBar extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  AppSvgIcon(_icon, color: AppColors.surface, size: 20),
+                  AppSvgIcon(_icon, color: Colors.white, size: 20),
                   const SizedBox(width: 10),
                   Text(
                     _nextLabel,
                     style: const TextStyle(
-                      color: AppColors.surface,
+                      color: Colors.white,
                       fontSize: 14,
                       fontWeight: FontWeight.w800,
                       letterSpacing: 0.2,
@@ -2634,7 +2643,7 @@ class _UpdateStatusBar extends StatelessWidget {
                   const SizedBox(width: 8),
                   const AppSvgIcon(
                     AppSvgAssets.chevronRight,
-                    color: AppColors.surface,
+                    color: Colors.white,
                     size: 16,
                   ),
                 ],
@@ -2646,3 +2655,11 @@ class _UpdateStatusBar extends StatelessWidget {
     );
   }
 }
+
+
+
+
+
+
+
+

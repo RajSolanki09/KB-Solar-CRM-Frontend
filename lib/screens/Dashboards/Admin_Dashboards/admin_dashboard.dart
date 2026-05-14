@@ -4,12 +4,10 @@ import 'package:solar_project/Cubits/AdminNavigation/admin_nav_cubit.dart';
 import 'package:solar_project/Cubits/AdminNavigation/admin_nav_state.dart';
 import 'package:solar_project/Cubits/Revenue/revenue_cubit.dart';
 import 'package:solar_project/Cubits/ServiceLeads/service_leads_cubit.dart';
-import 'package:solar_project/Cubits/SolarLeads/solar_leads_cubit.dart';
-import 'package:solar_project/Cubits/SprinklerLeads/sprinkler_leads_cubit.dart';
+import 'package:solar_project/core/app_colors.dart';
 import 'package:solar_project/core/network/dio_client.dart';
 import 'package:solar_project/data/Repository/revenue_repository.dart';
 import 'package:solar_project/data/Repository/service_repository.dart';
-import 'package:solar_project/data/Repository/solar_leads_repository.dart';
 import 'package:solar_project/screens/Dashboards/Admin_Dashboards/Dashboard/admin_sidebar.dart';
 import 'package:solar_project/screens/Dashboards/Admin_Dashboards/Dashboard/admin_dashboard_screen.dart';
 import 'package:solar_project/screens/Dashboards/Admin_Dashboards/Dashboard/business_report.dart';
@@ -33,43 +31,34 @@ class _AdminDashboardState extends State<AdminDashboard> {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (_) => AdminNavCubit()),
+        // ✅ Single shared ServiceLeadCubit for ALL admin screens
+        // AdminDashboardScreen + ServiceRequestPage now share the same data
         BlocProvider(
           create: (_) => ServiceLeadCubit(repo: ServiceRepository()),
         ),
-        BlocProvider(
-          create: (_) => RevenueCubit(RevenueRepository(DioClient())),
-        ),
-        BlocProvider(
-          create: (_) => SolarLeadCubit(SolarLeadRepository(DioClient())),
-        ),
-        BlocProvider(create: (_) => SprinklerLeadCubit()),
       ],
       child: Builder(
         builder: (context) {
-          // ← yeh context use karo
           final compactLayout = !Responsive.isDesktop(context);
           return WillPopScope(
             onWillPop: () async {
               final navCubit = context.read<AdminNavCubit>();
-              if (navCubit.state != AdminNavPage.dashboard) {
+              final currentPage = navCubit.state;
+              if (currentPage != AdminNavPage.dashboard) {
                 navCubit.changePage(AdminNavPage.dashboard);
                 return false;
               }
               return true;
             },
             child: Scaffold(
-              bottomNavigationBar: compactLayout
-                  ? _bottomNav(context)
-                  : null, // ← context pass karo
+              bottomNavigationBar: compactLayout ? _bottomNav() : null,
               body: SafeArea(
                 child: compactLayout
-                    ? _mobileLayout(context) // ← context pass karo
+                    ? _mobileLayout(context)
                     : Row(
                         children: [
                           const Sidebar(),
-                          Expanded(
-                            child: _desktopLayout(context),
-                          ), // ← context pass karo
+                          Expanded(child: _desktopLayout(context)),
                         ],
                       ),
               ),
@@ -80,40 +69,70 @@ class _AdminDashboardState extends State<AdminDashboard> {
     );
   }
 
- Widget _desktopLayout(BuildContext context) {
-  return Container(
-    decoration: BoxDecoration(
-      border: Border.all(color: const Color(0xFFCBC4CF)),
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [Expanded(child: _pageBody(context))],
-    ),
-  );
-}
+  Widget _desktopLayout(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color:    AppColors.grayCustom),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [Expanded(child: _pageBody())],
+      ),
+    );
+  }
 
-Widget _mobileLayout(BuildContext context) {
-  return Column(children: [Expanded(child: _pageBody(context))]);
-}
+  Widget _pageBody() {
+    return BlocBuilder<AdminNavCubit, AdminNavPage>(
+      builder: (context, page) {
+        switch (page) {
+          case AdminNavPage.dashboard:
+            return AdminDashboardScreen();
+          case AdminNavPage.leads:
+            return SalesLeadScreen();
+          case AdminNavPage.service:
+            return ServiceRequestPage();
+          case AdminNavPage.reports:
+            return BlocProvider(
+              // 👈 yahan replace karo
+              create: (_) => RevenueCubit(RevenueRepository(DioClient())),
+              child: const AdminRevenueSummaryPage(),
+            );
+          case AdminNavPage.profile:
+            return OwnerProfilePage();
+        }
+      },
+    );
+  }
 
-Widget _pageBody(BuildContext context) {
-  return BlocBuilder<AdminNavCubit, AdminNavPage>(
-    builder: (context, page) {   // ← BlocBuilder ka apna context sahi hai
-      return IndexedStack(
-        index: page.index,
-        children: const [
-          KeepAlivePage(child: AdminDashboardScreen()),
-          KeepAlivePage(child: SalesLeadScreen()),
-          KeepAlivePage(child: ServiceRequestPage()),
-          KeepAlivePage(child: AdminRevenueSummaryPage()),
-          KeepAlivePage(child: OwnerProfilePage()),
-        ],
-      );
-    },
-  );
-}
+  Widget _mobileLayout(BuildContext context) {
+    return Column(
+      children: [
+        Expanded(
+          child: BlocBuilder<AdminNavCubit, AdminNavPage>(
+            builder: (context, page) {
+              switch (page) {
+                case AdminNavPage.dashboard:
+                  return AdminDashboardScreen();
+                case AdminNavPage.leads:
+                  return SalesLeadScreen();
+                case AdminNavPage.service:
+                  return ServiceRequestPage();
+                case AdminNavPage.reports:
+                  return BlocProvider(
+                    create: (_) => RevenueCubit(RevenueRepository(DioClient())),
+                    child: const AdminRevenueSummaryPage(),
+                  );
+                case AdminNavPage.profile:
+                  return OwnerProfilePage();
+              }
+            },
+          ),
+        ),
+      ],
+    );
+  }
 
-  Widget _bottomNav(BuildContext context) {
+  Widget _bottomNav() {
     return BlocBuilder<AdminNavCubit, AdminNavPage>(
       builder: (context, page) {
         return NavigationBar(
@@ -132,7 +151,7 @@ Widget _pageBody(BuildContext context) {
               ),
               selectedIcon: GlowIcon(
                 svgAsset: AppSvgAssets.dashboard,
-                isSelected: true,
+                isSelected: page.index == 0,
               ),
               label: 'DashBoard',
             ),
@@ -143,7 +162,7 @@ Widget _pageBody(BuildContext context) {
               ),
               selectedIcon: GlowIcon(
                 svgAsset: AppSvgAssets.sun,
-                isSelected: true,
+                isSelected: page.index == 1,
               ),
               label: 'Leads',
             ),
@@ -154,7 +173,7 @@ Widget _pageBody(BuildContext context) {
               ),
               selectedIcon: GlowIcon(
                 svgAsset: AppSvgAssets.cog,
-                isSelected: true,
+                isSelected: page.index == 2,
               ),
               label: 'Services',
             ),
@@ -165,7 +184,7 @@ Widget _pageBody(BuildContext context) {
               ),
               selectedIcon: GlowIcon(
                 svgAsset: AppSvgAssets.chartNoAxisCombined,
-                isSelected: true,
+                isSelected: page.index == 3,
               ),
               label: 'Reports',
             ),
@@ -176,7 +195,7 @@ Widget _pageBody(BuildContext context) {
               ),
               selectedIcon: GlowIcon(
                 svgAsset: AppSvgAssets.userRound,
-                isSelected: true,
+                isSelected: page.index == 4,
               ),
               label: 'Profile',
             ),
@@ -186,3 +205,4 @@ Widget _pageBody(BuildContext context) {
     );
   }
 }
+

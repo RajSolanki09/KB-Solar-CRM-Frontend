@@ -39,15 +39,16 @@ class _InstallationDashboardState extends State<InstallationDashboard> {
         builder: (context) {
           final compactLayout = !Responsive.isDesktop(context);
           return Scaffold(
-            bottomNavigationBar:
-                compactLayout ? _bottomNav(context) : null,
+            bottomNavigationBar: compactLayout ? _bottomNav(context) : null,
             body: SafeArea(
               child: compactLayout
-                  ? _mobileLayout()
+                  ? _mobileLayout(context)
                   : Row(
                       children: [
                         const InstallationSidebar(),
-                        Expanded(child: _desktopLayout()),
+                        Expanded(
+                          child: _desktopLayout(context),
+                        ),
                       ],
                     ),
             ),
@@ -57,10 +58,11 @@ class _InstallationDashboardState extends State<InstallationDashboard> {
     );
   }
 
-  Widget _desktopLayout() {
+  // ── Desktop ────────────────────────────────────────────────────────────────
+  Widget _desktopLayout(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        border: Border.all(color: AppColors.divider),
+        border: Border.all(color:   AppColors.grayCustom),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -69,27 +71,30 @@ class _InstallationDashboardState extends State<InstallationDashboard> {
     );
   }
 
-  Widget _mobileLayout() {
+  // ── Mobile ─────────────────────────────────────────────────────────────────
+  Widget _mobileLayout(BuildContext context) {
     return Column(children: [Expanded(child: _pageBody())]);
   }
 
-  // ── KEY FIX: IndexedStack keeps pages alive ───────────────────────────────
+  // ── Page Router ────────────────────────────────────────────────────────────
   Widget _pageBody() {
     return BlocBuilder<InstallationNavCubit, InstallationNavPage>(
       builder: (context, page) {
-        return IndexedStack(
-          index: page.index,
-          children: const [
-            KeepAlivePage(child: InstallationDashboardScreen()),
-            KeepAlivePage(child: AssignedInstallationsScreen()),
-            KeepAlivePage(child: CompletedInstallationsScreen()),
-            KeepAlivePage(child: InstallationProfileScreen()),
-          ],
-        );
+        switch (page) {
+          case InstallationNavPage.dashboard:
+            return const InstallationDashboardScreen();
+          case InstallationNavPage.myInstallations:
+            return const AssignedInstallationsScreen();
+          case InstallationNavPage.history:
+            return const CompletedInstallationsScreen();
+          case InstallationNavPage.profile:
+            return const InstallationProfileScreen();
+        }
       },
     );
   }
 
+  // ── Bottom Navigation Bar (mobile) ────────────────────────────────────────
   Widget _bottomNav(BuildContext context) {
     return BlocBuilder<InstallationNavCubit, InstallationNavPage>(
       builder: (context, page) {
@@ -97,41 +102,53 @@ class _InstallationDashboardState extends State<InstallationDashboard> {
           indicatorColor: Colors.transparent,
           selectedIndex: page.index,
           onDestinationSelected: (index) {
-            context
-                .read<InstallationNavCubit>()
-                .changePage(InstallationNavPage.values[index]);
+            context.read<InstallationNavCubit>().changePage(
+              InstallationNavPage.values[index],
+            );
           },
           destinations: [
             NavigationDestination(
               icon: GlowIcon(
-                  svgAsset: AppSvgAssets.dashboard,
-                  isSelected: page.index == 0),
-              selectedIcon:
-                  GlowIcon(svgAsset: AppSvgAssets.dashboard, isSelected: true),
+                svgAsset: AppSvgAssets.dashboard,
+                isSelected: page.index == 0,
+              ),
+              selectedIcon: GlowIcon(
+                svgAsset: AppSvgAssets.dashboard,
+                isSelected: page.index == 0,
+              ),
               label: 'Dashboard',
             ),
             NavigationDestination(
               icon: GlowIcon(
-                  svgAsset: AppSvgAssets.hammer,
-                  isSelected: page.index == 1),
-              selectedIcon:
-                  GlowIcon(svgAsset: AppSvgAssets.hammer, isSelected: true),
+                svgAsset: AppSvgAssets.hammer,
+                isSelected: page.index == 1,
+              ),
+              selectedIcon: GlowIcon(
+                svgAsset: AppSvgAssets.hammer,
+                isSelected: page.index == 1,
+              ),
               label: 'My Jobs',
             ),
             NavigationDestination(
               icon: GlowIcon(
-                  svgAsset: AppSvgAssets.history,
-                  isSelected: page.index == 2),
-              selectedIcon:
-                  GlowIcon(svgAsset: AppSvgAssets.history, isSelected: true),
+                svgAsset: AppSvgAssets.history,
+                isSelected: page.index == 2,
+              ),
+              selectedIcon: GlowIcon(
+                svgAsset: AppSvgAssets.history,
+                isSelected: page.index == 2,
+              ),
               label: 'History',
             ),
             NavigationDestination(
               icon: GlowIcon(
-                  svgAsset: AppSvgAssets.userRound,
-                  isSelected: page.index == 3),
+                svgAsset: AppSvgAssets.userRound,
+                isSelected: page.index == 3,
+              ),
               selectedIcon: GlowIcon(
-                  svgAsset: AppSvgAssets.userRound, isSelected: true),
+                svgAsset: AppSvgAssets.userRound,
+                isSelected: page.index == 3,
+              ),
               label: 'Profile',
             ),
           ],
@@ -140,3 +157,4 @@ class _InstallationDashboardState extends State<InstallationDashboard> {
     );
   }
 }
+

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:solar_project/core/app_colors.dart';
 
-class MaterialCustomerListTab extends StatelessWidget {
+class MaterialCustomerListTab extends StatefulWidget {
   final bool loading;
   final List<Map<String, dynamic>> customers;
   final Future<void> Function() onRefresh;
@@ -12,6 +12,7 @@ class MaterialCustomerListTab extends StatelessWidget {
   final Future<void> Function(Map<String, dynamic> customer) onOpenCustomer;
   final Future<void> Function(Map<String, dynamic> customer) onEditCustomer;
   final Future<void> Function(Map<String, dynamic> customer) onDeleteCustomer;
+  final VoidCallback? onAddCustomer;
 
   const MaterialCustomerListTab({
     super.key,
@@ -25,7 +26,38 @@ class MaterialCustomerListTab extends StatelessWidget {
     required this.onOpenCustomer,
     required this.onEditCustomer,
     required this.onDeleteCustomer,
+    this.onAddCustomer,
   });
+
+  @override
+  State<MaterialCustomerListTab> createState() =>
+      _MaterialCustomerListTabState();
+}
+
+class _MaterialCustomerListTabState extends State<MaterialCustomerListTab>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+  int _currentTabIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+    _tabController.addListener(() {
+      if (_tabController.indexIsChanging ||
+          _tabController.index != _currentTabIndex) {
+        setState(() => _currentTabIndex = _tabController.index);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  // ─── Helpers ────────────────────────────────────────────────────────────────
 
   Map<String, dynamic> _pipelineOf(Map<String, dynamic> customer) {
     final raw = customer['pipeline'];
@@ -61,48 +93,48 @@ class MaterialCustomerListTab extends StatelessWidget {
   Color _statusBackgroundColor(String status) {
     switch (status.toLowerCase()) {
       case 'new':
-        return const Color(0xFFE0F2FE);
+        return   AppColors.cyanLight;
       case 'follow up':
       case 'follow-up':
-        return const Color(0xFFFEF3C7);
+        return  AppColors.yellowAccent;
       case 'quoted':
       case 'quotation sent':
-        return  AppColors.primaryTint;
+        return   AppColors.purpleLight1;
       case 'won':
       case 'completed':
       case 'project completed':
       case 'payment':
       case 'payment completed':
-        return  AppColors.successLight;
+        return   AppColors.greenLight;
       case 'lost':
       case 'cancelled':
         return  AppColors.errorLight;
       default:
-        return  AppColors.divider;
+        return   AppColors.slate200;
     }
   }
 
   Color _statusTextColor(String status) {
     switch (status.toLowerCase()) {
       case 'new':
-        return const Color(0xFF0369A1);
+        return   AppColors.cyanLight;
       case 'follow up':
       case 'follow-up':
-        return  Color(0xFFB45309);
+        return  AppColors.orange900;
       case 'quoted':
       case 'quotation sent':
-        return  AppColors.primary;
+        return   AppColors.purple1;
       case 'won':
       case 'completed':
       case 'project completed':
       case 'payment':
       case 'payment completed':
-        return  AppColors.success;
+        return   AppColors.greenDark;
       case 'lost':
       case 'cancelled':
-        return  AppColors.error;
+        return   AppColors.redDarker;
       default:
-        return  AppColors.textGray;
+        return   AppColors.slate700;
     }
   }
 
@@ -118,17 +150,30 @@ class MaterialCustomerListTab extends StatelessWidget {
     }
   }
 
+  // ─── Widgets ─────────────────────────────────────────────────────────────────
+
   Widget _buildEmptyMessage(String message) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 28),
-        child: Text(
-          message,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: AppColors.textGray,
-          ),
+        padding: const EdgeInsets.symmetric(vertical: 60),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.inbox_outlined,
+              size: 48,
+              color:   AppColors.slate300,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              message,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: AppColors.slate500,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -144,13 +189,16 @@ class MaterialCustomerListTab extends StatelessWidget {
             child: DataTable(
               showCheckboxColumn: false,
               headingRowColor: WidgetStatePropertyAll(
-                color.withValues(alpha: 0.14),
+                widget.color.withValues(alpha: 0.10),
               ),
               headingTextStyle: TextStyle(
                 fontWeight: FontWeight.w600,
-                color: color,
+                color: widget.color,
+                fontSize: 13,
               ),
-              columnSpacing: isDesktop ? 56 : 28,
+              columnSpacing: widget.isDesktop ? 56 : 28,
+              dataRowMinHeight: 52,
+              dataRowMaxHeight: 52,
               columns: const [
                 DataColumn(label: Text('Customer Name')),
                 DataColumn(label: Text('Mobile')),
@@ -186,25 +234,25 @@ class MaterialCustomerListTab extends StatelessWidget {
                         ),
                       ),
                     ),
-                    DataCell(Text(formatDate(item['createdAt']))),
+                    DataCell(Text(widget.formatDate(item['createdAt']))),
                     DataCell(
                       Row(
                         children: [
                           IconButton(
                             tooltip: 'Edit',
-                            onPressed: () => onEditCustomer(item),
+                            onPressed: () => widget.onEditCustomer(item),
                             icon: Icon(
                               Icons.edit_outlined,
-                              color: color,
+                              color: widget.color,
                               size: 20,
                             ),
                           ),
                           IconButton(
                             tooltip: 'Delete',
-                            onPressed: () => onDeleteCustomer(item),
+                            onPressed: () => widget.onDeleteCustomer(item),
                             icon: const Icon(
                               Icons.delete_outline,
-                              color: AppColors.error,
+                              color: AppColors.redError,
                               size: 20,
                             ),
                           ),
@@ -212,7 +260,7 @@ class MaterialCustomerListTab extends StatelessWidget {
                       ),
                     ),
                   ],
-                  onSelectChanged: (_) => onOpenCustomer(item),
+                  onSelectChanged: (_) => widget.onOpenCustomer(item),
                 );
               }).toList(),
             ),
@@ -222,136 +270,200 @@ class MaterialCustomerListTab extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionCard({required Widget child}) {
-    return Container(
-      width: double.infinity,
-      clipBehavior: Clip.antiAlias, // 👈 rounded corners ke liye
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(12), // 👈 rounded
-        border: Border.all(color:  AppColors.divider),
-      ),
-      child: child,
+  /// Tab content — wraps table or empty state inside a scrollable + RefreshIndicator
+  Widget _buildTabContent({
+    required List<Map<String, dynamic>> items,
+    required String emptyMessage,
+  }) {
+    return RefreshIndicator(
+      color: widget.color,
+      onRefresh: widget.onRefresh,
+      child: items.isEmpty
+          ? ListView(
+              // ListView needed so RefreshIndicator works even when empty
+              children: [_buildEmptyMessage(emptyMessage)],
+            )
+          : SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: EdgeInsets.all(widget.horizontalPadding),
+              child: Container(
+                width: double.infinity,
+                clipBehavior: Clip.antiAlias,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color:   AppColors.slate200),
+                ),
+                child: _buildCustomerTable(items),
+              ),
+            ),
     );
   }
 
-  Widget _buildExpansionSection({
-    required String title,
-    required int count,
-    required Color badgeColor,
-    required Color badgeTextColor,
-    required bool initiallyExpanded,
-    required List<Map<String, dynamic>> items,
-    required String emptyMessage,
-    required BuildContext context,
-  }) {
-    return _buildSectionCard(
-      child: Theme(
-        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-        child: ExpansionTile(
-          tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-          childrenPadding: EdgeInsets.zero,
-          initiallyExpanded: initiallyExpanded,
-          title: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textDark,
-                  ),
+  // ─── Build ────────────────────────────────────────────────────────────────────
+
+  @override
+  @override
+  Widget build(BuildContext context) {
+    if (widget.loading) {
+      return Center(child: CircularProgressIndicator(color: widget.color));
+    }
+
+    final activeCustomers = widget.customers
+        .where((c) => !_isCompletedCustomer(c))
+        .toList();
+    final completedCustomers = widget.customers
+        .where(_isCompletedCustomer)
+        .toList();
+
+    const double fabH = 36.0;
+
+    return Column(
+      children: [
+        // ── TabBar ───────────────────────────────────────────────────────────
+        Container(
+          color: Colors.white,
+          child: TabBar(
+            controller: _tabController,
+            indicatorColor: widget.color,
+            indicatorWeight: 3,
+            labelColor: widget.color,
+            unselectedLabelColor:   AppColors.slate300,
+            labelStyle: const TextStyle(
+              fontWeight: FontWeight.w700,
+              fontSize: 14,
+            ),
+            unselectedLabelStyle: const TextStyle(
+              fontWeight: FontWeight.w500,
+              fontSize: 14,
+            ),
+            tabs: [
+              Tab(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text('Active'),
+                    const SizedBox(width: 6),
+                    _buildTabBadge(
+                      count: activeCustomers.length,
+                      bgColor: widget.color.withValues(alpha: 0.12),
+                      textColor: widget.color,
+                    ),
+                  ],
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
+              Tab(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text('Completed'),
+                    const SizedBox(width: 6),
+                    _buildTabBadge(
+                      count: completedCustomers.length,
+                      bgColor:   AppColors.greenLight,
+                      textColor:   AppColors.greenDark,
+                    ),
+                  ],
                 ),
-                decoration: BoxDecoration(
-                  color: badgeColor,
-                  borderRadius: BorderRadius.circular(999),
+              ),
+            ],
+          ),
+        ),
+
+        // ── Divider with FAB centered on it ─────────────────────────────────
+        SizedBox(
+          height: fabH,
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              // Divider in the vertical center of this SizedBox
+              Positioned.fill(
+                child: Align(
+                  alignment: Alignment.center,
+                  child: Container(height: 1, color:   AppColors.slate200),
                 ),
-                child: Text(
-                  '$count',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: badgeTextColor,
+              ),
+              // FAB pinned to right, centered vertically
+              Positioned(
+                top: 0,
+                bottom: 0,
+                right: 16,
+                child: Center(
+                  child: SizedBox(
+                    height: fabH,
+                    child: FloatingActionButton.extended(
+                      heroTag: 'material_customer_fab',
+                      onPressed: widget.onAddCustomer,
+                      backgroundColor: widget.color,
+                      foregroundColor: Colors.white,
+                      elevation: 4,
+                      extendedPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                      ),
+                      icon: const Icon(Icons.add, size: 16),
+                      label: const Text(
+                        'Add Customer',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ),
             ],
           ),
-          children: [
-            if (items.isEmpty)
-              _buildEmptyMessage(emptyMessage)
-            else
-              _buildCustomerTable(items),
-          ],
+        ),
+
+        // ── Tab Views ────────────────────────────────────────────────────────
+        Expanded(
+          child: TabBarView(
+            controller: _tabController,
+            children: [
+              _buildTabContent(
+                items: activeCustomers,
+                emptyMessage: 'No active leads found',
+              ),
+              _buildTabContent(
+                items: completedCustomers,
+                emptyMessage: 'No completed leads found',
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTabBadge({
+    required int count,
+    required Color bgColor,
+    required Color textColor,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        '$count',
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
+          color: textColor,
         ),
       ),
     );
   }
-
-  @override
-  Widget build(BuildContext context) {
-    final completedCustomers = customers.where(_isCompletedCustomer).toList();
-    final activeCustomers = customers
-        .where((c) => !_isCompletedCustomer(c))
-        .toList();
-
-    Widget content;
-    if (loading) {
-      content = const Center(child: CircularProgressIndicator());
-    } else if (customers.isEmpty) {
-      content = ListView(
-        children: const [
-          SizedBox(height: 180),
-          Center(
-            child: Text(
-              'No customers found',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textGray,
-              ),
-            ),
-          ),
-        ],
-      );
-    } else {
-      content = ListView(
-        padding: EdgeInsets.all(horizontalPadding),
-        children: [
-          // Active Leads
-          _buildExpansionSection(
-            context: context,
-            title: 'Active Leads',
-            count: activeCustomers.length,
-            badgeColor: const Color(0xFFE0E7FF),
-            badgeTextColor: const Color(0xFF4338CA),
-            initiallyExpanded: true, // 👈 default open
-            items: activeCustomers,
-            emptyMessage: 'No active leads found',
-          ),
-          const SizedBox(height: 16),
-          // Completed Leads
-          _buildExpansionSection(
-            context: context,
-            title: 'Completed Leads',
-            count: completedCustomers.length,
-            badgeColor:  AppColors.successLight,
-            badgeTextColor:  AppColors.success,
-            initiallyExpanded: false,
-            items: completedCustomers,
-            emptyMessage: 'No completed leads found',
-          ),
-        ],
-      );
-    }
-
-    return RefreshIndicator(color: color, onRefresh: onRefresh, child: content);
-  }
 }
+
+
+
+
+
+
+
+
+

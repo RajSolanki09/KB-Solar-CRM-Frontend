@@ -4,9 +4,9 @@ import 'package:solar_project/Cubits/SprinklerLeads/sprinkler_leads_cubit.dart';
 import 'package:solar_project/Cubits/SprinklerLeads/sprinkler_leads_state.dart';
 import 'package:solar_project/Helper/app_feedback.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
+import 'package:solar_project/Helper/lead_form_widgets.dart';
 import 'package:solar_project/Helper/lead_themes.dart';
 import 'package:solar_project/Helper/lead_widgets.dart';
-import 'package:solar_project/core/app_colors.dart';
 import 'package:solar_project/data/Models/sprinkler_lead_model.dart';
 
 class SprinklerDealScreen extends StatefulWidget {
@@ -110,7 +110,7 @@ class _State extends State<SprinklerDealScreen> {
           leading: IconButton(
             icon: const AppSvgIcon(
               AppSvgAssets.chevronLeft,
-              color: AppColors.surface,
+              color: Colors.white,
               size: 18,
             ),
             onPressed: () => Navigator.pop(context),
@@ -120,7 +120,7 @@ class _State extends State<SprinklerDealScreen> {
             style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w600,
-              color: AppColors.surface,
+              color: Colors.white
             ),
           ),
           actions: [
@@ -342,27 +342,15 @@ class _State extends State<SprinklerDealScreen> {
     String svgAsset, {
     int maxLines = 1,
     TextInputType? type,
-  }) => TextField(
+  }) => LeadTextFormField(
     controller: c,
+    label: label,
+    svgIcon: svgAsset,
+    accentColor: LeadTheme.secondary,
+    required: false,
     maxLines: maxLines,
-    keyboardType: type,
-    style: const TextStyle(fontSize: 13, color: LeadTheme.textPrimary),
-    decoration: InputDecoration(
-      labelText: label,
-      labelStyle: const TextStyle(fontSize: 12, color: LeadTheme.textSecondary),
-      prefixIcon: Padding(
-        padding: const EdgeInsets.only(left: 10, right: 6),
-        child: AppSvgIcon(svgAsset, size: 16, color: LeadTheme.textSecondary),
-      ),
-      prefixIconConstraints: const BoxConstraints(minWidth: 36),
-      filled: true,
-      fillColor: LeadTheme.surface,
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: BorderSide.none,
-      ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-    ),
+    keyboardType: type ?? TextInputType.text,
+    bottomSpacing: 0,
   );
 
   Widget _spkNumField(
@@ -370,29 +358,15 @@ class _State extends State<SprinklerDealScreen> {
     String label, {
     String? icon,
     void Function(String)? onChange,
-  }) => TextField(
+  }) => LeadTextFormField(
     controller: c,
+    label: label,
+    svgIcon: icon ?? AppSvgAssets.fileText,
+    accentColor: LeadTheme.secondary,
+    required: false,
     keyboardType: TextInputType.number,
     onChanged: onChange,
-    style: const TextStyle(fontSize: 13, color: LeadTheme.textPrimary),
-    decoration: InputDecoration(
-      labelText: label,
-      labelStyle: const TextStyle(fontSize: 12, color: LeadTheme.textSecondary),
-      prefixIcon: icon != null
-          ? Padding(
-              padding: const EdgeInsets.only(left: 10, right: 6),
-              child: AppSvgIcon(icon, size: 16, color: LeadTheme.textSecondary),
-            )
-          : null,
-      prefixIconConstraints: const BoxConstraints(minWidth: 36),
-      filled: true,
-      fillColor: LeadTheme.surface,
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: BorderSide.none,
-      ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-    ),
+    bottomSpacing: 0,
   );
 
   Widget _spkSaveBtn(
@@ -406,7 +380,7 @@ class _State extends State<SprinklerDealScreen> {
       onPressed: saving ? null : onPressed,
       style: ElevatedButton.styleFrom(
         backgroundColor: LeadTheme.secondary,
-        foregroundColor: AppColors.surface,
+        foregroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
       child: saving
@@ -415,7 +389,7 @@ class _State extends State<SprinklerDealScreen> {
               height: 20,
               child: CircularProgressIndicator(
                 strokeWidth: 2,
-                color: AppColors.surface,
+                color: Colors.white,
               ),
             )
           : Text(

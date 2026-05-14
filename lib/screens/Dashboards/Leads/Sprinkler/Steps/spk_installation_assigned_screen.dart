@@ -5,12 +5,13 @@ import 'package:solar_project/Cubits/SprinklerLeads/sprinkler_leads_cubit.dart';
 import 'package:solar_project/Cubits/SprinklerLeads/sprinkler_leads_state.dart';
 import 'package:solar_project/Helper/app_feedback.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
+import 'package:solar_project/Helper/lead_form_widgets.dart';
 import 'package:solar_project/Helper/lead_themes.dart';
 import 'package:solar_project/Helper/lead_widgets.dart';
+import 'package:solar_project/core/app_colors.dart';
 import 'package:solar_project/core/constants/api_constants.dart';
 import 'package:solar_project/core/network/dio_client.dart';
 import 'package:solar_project/data/Models/sprinkler_lead_model.dart';
-import 'package:solar_project/core/app_colors.dart';
 
 class _InstallMember {
   final String id;
@@ -83,13 +84,13 @@ class _SpkInstallationAssignedScreenState
 
     final candidates = <Future<dynamic> Function()>[
       () => DioClient().dio.get<dynamic>(
-        ApiEndpoints.adminStaff,
-        queryParameters: {'role': 'installation', 'limit': 100},
-      ),
+            ApiEndpoints.adminStaff,
+            queryParameters: {'role': 'installation', 'limit': 100},
+          ),
       () => DioClient().dio.get<dynamic>(
-        ApiEndpoints.adminUsers,
-        queryParameters: {'role': 'installation', 'limit': 100},
-      ),
+            ApiEndpoints.adminUsers,
+            queryParameters: {'role': 'installation', 'limit': 100},
+          ),
     ];
 
     for (final attempt in candidates) {
@@ -148,8 +149,7 @@ class _SpkInstallationAssignedScreenState
   Future<void> _pickDate() async {
     final d = await showDatePicker(
       context: context,
-      initialDate:
-          _scheduledDate ?? DateTime.now().add(const Duration(days: 1)),
+      initialDate: _scheduledDate ?? DateTime.now().add(const Duration(days: 1)),
       firstDate: DateTime.now().subtract(const Duration(days: 1)),
       lastDate: DateTime.now().add(const Duration(days: 365)),
       builder: (ctx, child) => Theme(
@@ -182,10 +182,7 @@ class _SpkInstallationAssignedScreenState
 
   void _save() {
     if (_selectedIds.isEmpty) {
-      AppFeedback.showError(
-        context,
-        'Please select at least one installation team member.',
-      );
+      AppFeedback.showError(context, 'Please select at least one installation team member.');
       return;
     }
 
@@ -204,14 +201,14 @@ class _SpkInstallationAssignedScreenState
 
     final notes = _notesC.text.trim().isEmpty ? null : _notesC.text.trim();
 
-    final installerIds = _selectedMembers.map((m) => m.id).toList();
+        final installerIds = _selectedMembers.map((m) => m.id).toList();
 
     context.read<SprinklerLeadCubit>().assignInstaller(
-      widget.lead.id,
-      installerIds: installerIds,
-      scheduledDate: finalDateTime,
-      notes: notes,
-    );
+          widget.lead.id,
+          installerIds: installerIds,
+          scheduledDate: finalDateTime,
+          notes: notes,
+        );
   }
 
   @override
@@ -225,14 +222,14 @@ class _SpkInstallationAssignedScreenState
         }
       },
       child: Scaffold(
-        backgroundColor:   AppColors.background,
+        backgroundColor:   AppColors.lightBg,
         appBar: AppBar(
           backgroundColor: LeadTheme.secondary,
           elevation: 0,
           leading: IconButton(
             icon: const AppSvgIcon(
               AppSvgAssets.chevronLeft,
-              color: AppColors.surface,
+              color: Colors.white,
               size: 18,
             ),
             onPressed: () => Navigator.pop(context),
@@ -319,10 +316,7 @@ class _SpkInstallationAssignedScreenState
                     ),
                   ),
                   const SizedBox(height: 8),
-                  GestureDetector(
-                    onTap: _pickTime,
-                    child: _timeTile(_scheduledTime),
-                  ),
+                  GestureDetector(onTap: _pickTime, child: _timeTile(_scheduledTime)),
                 ],
               ),
             ),
@@ -332,27 +326,15 @@ class _SpkInstallationAssignedScreenState
                 children: [
                   const SectionTitle('Notes'),
                   const SizedBox(height: 8),
-                  TextField(
+                  LeadTextFormField(
                     controller: _notesC,
+                    label: 'Assignment notes...',
+                    hintText: 'Assignment notes...',
+                    svgIcon: AppSvgAssets.fileText,
+                    accentColor: LeadTheme.secondary,
+                    required: false,
                     maxLines: 3,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: LeadTheme.textPrimary,
-                    ),
-                    decoration: InputDecoration(
-                      hintText: 'Assignment notes...',
-                      hintStyle: TextStyle(
-                        fontSize: 12,
-                        color: AppColors.textLight,
-                      ),
-                      filled: true,
-                      fillColor: LeadTheme.surface,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide.none,
-                      ),
-                      contentPadding: const EdgeInsets.all(10),
-                    ),
+                    bottomSpacing: 0,
                   ),
                 ],
               ),
@@ -447,13 +429,11 @@ class _SpkInstallationAssignedScreenState
                   AppSvgIcon(
                     AppSvgAssets.userPlus,
                     size: 16,
-                    color: AppColors.background,
+                    color: Colors.grey.shade500,
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    hasSelection
-                        ? 'Add another member...'
-                        : 'Select team member(s)',
+                    hasSelection ? 'Add another member...' : 'Select team member(s)',
                     style: const TextStyle(
                       fontSize: 13,
                       color: LeadTheme.textSecondary,
@@ -535,11 +515,7 @@ class _SpkInstallationAssignedScreenState
       ),
       child: Row(
         children: [
-          const AppSvgIcon(
-            AppSvgAssets.droplet,
-            size: 16,
-            color: LeadTheme.secondary,
-          ),
+          const AppSvgIcon(AppSvgAssets.droplet, size: 16, color: LeadTheme.secondary),
           const SizedBox(width: 8),
           Expanded(
             child: Column(
@@ -573,9 +549,7 @@ class _SpkInstallationAssignedScreenState
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
       decoration: BoxDecoration(
-        color: selected
-            ? LeadTheme.secondary.withOpacity(0.08)
-            : LeadTheme.surface,
+        color: selected ? LeadTheme.secondary.withOpacity(0.08) : LeadTheme.surface,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: selected
@@ -585,11 +559,7 @@ class _SpkInstallationAssignedScreenState
       ),
       child: Row(
         children: [
-          AppSvgIcon(
-            svgAsset,
-            size: 16,
-            color: selected ? LeadTheme.secondary : Colors.grey,
-          ),
+          AppSvgIcon(svgAsset, size: 16, color: selected ? LeadTheme.secondary : Colors.grey),
           const SizedBox(width: 8),
           Expanded(
             child: Column(
@@ -632,9 +602,7 @@ class _SpkInstallationAssignedScreenState
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
       decoration: BoxDecoration(
-        color: selected
-            ? LeadTheme.secondary.withOpacity(0.08)
-            : LeadTheme.surface,
+        color: selected ? LeadTheme.secondary.withOpacity(0.08) : LeadTheme.surface,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: selected
@@ -656,10 +624,7 @@ class _SpkInstallationAssignedScreenState
               children: [
                 const Text(
                   'Installation Time',
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: LeadTheme.textSecondary,
-                  ),
+                  style: TextStyle(fontSize: 11, color: LeadTheme.textSecondary),
                 ),
                 Text(
                   selected ? time.format(context) : 'Tap to select time',
@@ -688,17 +653,17 @@ class _SpkInstallationAssignedScreenState
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: AppColors.primary,
+        color: Colors.blue.shade50,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
         children: [
-          AppSvgIcon(AppSvgAssets.circle, size: 14, color: AppColors.primary),
+          AppSvgIcon(AppSvgAssets.circle, size: 14, color: Colors.blue.shade700),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               text,
-              style: TextStyle(fontSize: 12, color: AppColors.primary),
+              style: TextStyle(fontSize: 12, color: Colors.blue.shade900),
             ),
           ),
         ],
@@ -710,22 +675,18 @@ class _SpkInstallationAssignedScreenState
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: AppColors.solar,
+        color: Colors.orange.shade50,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppColors.solar),
+        border: Border.all(color: Colors.orange.shade200),
       ),
       child: Row(
         children: [
-          AppSvgIcon(
-            AppSvgAssets.triangleAlert,
-            size: 14,
-            color: AppColors.solar,
-          ),
+          AppSvgIcon(AppSvgAssets.triangleAlert, size: 14, color: Colors.orange.shade700),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               text,
-              style: TextStyle(fontSize: 12, color: AppColors.solar),
+              style: TextStyle(fontSize: 12, color: Colors.orange.shade900),
             ),
           ),
         ],
@@ -741,10 +702,8 @@ class _SpkInstallationAssignedScreenState
         onPressed: saving ? null : onTap,
         style: ElevatedButton.styleFrom(
           backgroundColor: LeadTheme.secondary,
-          foregroundColor: AppColors.surface,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ),
         child: saving
             ? const SizedBox(
@@ -752,17 +711,16 @@ class _SpkInstallationAssignedScreenState
                 height: 20,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  color: AppColors.surface,
+                  color: Colors.white,
                 ),
               )
             : Text(
                 label,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
               ),
       ),
     );
   }
 }
+
+

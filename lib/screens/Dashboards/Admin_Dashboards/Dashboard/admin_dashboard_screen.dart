@@ -1,8 +1,7 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:solar_project/Cubits/ServiceLeads/service_leads_cubit.dart';
 import 'package:solar_project/Helper/common_widgets.dart';
-import 'package:solar_project/Helper/lead_themes.dart';
 import 'package:solar_project/core/app_colors.dart';
 import 'package:solar_project/data/Models/sprinkler_lead_model.dart';
 import 'package:solar_project/Cubits/ServiceLeads/service_leads_state.dart';
@@ -23,7 +22,7 @@ import 'package:solar_project/screens/Dashboards/Admin_Dashboards/Dashboard/toda
 import 'package:solar_project/Cubits/Revenue/revenue_cubit.dart';
 import 'package:solar_project/Cubits/Revenue/revenue_state.dart';
 import 'package:intl/intl.dart';
-import 'package:solar_project/screens/Dashboards/Admin_Dashboards/Reports/owner_reports.dart';
+import 'package:solar_project/screens/Dashboards/Admin_Dashboards/Reports/revenue_summary.dart';
 import 'package:solar_project/screens/Dashboards/Followups/followup_list_screen.dart';
 import 'package:solar_project/screens/Dashboards/Leads/Solar/solar_leads_list_screen.dart';
 import 'package:solar_project/screens/Dashboards/Leads/Sprinkler/sprinkler_leads_list_screen.dart';
@@ -45,36 +44,73 @@ class _State extends State<AdminDashboardScreen> {
   int _activeMaterialLeadCount = 0;
   List<Map<String, dynamic>> _materialCustomers = const [];
 
+  int _pendingSolarCount = 0;
+  int _pendingSpkCount = 0;
+
+  int _installSolarCount = 0;
+  int _installSpkCount = 0;
+
   @override
   void initState() {
     super.initState();
     _loadProfilePreview();
     _loadActiveMaterialLeadCount();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      context.read<SolarLeadCubit>().fetchAllLeads();
-      context.read<SprinklerLeadCubit>().fetchAllLeads();
-      final svcState = context.read<ServiceLeadCubit>().state;
-      if (svcState is! ServiceLeadsLoaded) {
-        context.read<ServiceLeadCubit>().fetchAllServices();
-      }
-      final revState = context.read<RevenueCubit>().state;
-      if (revState is! RevenueLoaded) {
-        context.read<RevenueCubit>().fetchRevenue();
-      }
+
+    // Fetch data immediately - don't wait for frame callback
+    final solarCubit = context.read<SolarLeadCubit>();
+    final spkCubit = context.read<SprinklerLeadCubit>();
+    final svcCubit = context.read<ServiceLeadCubit>();
+    final revCubit = context.read<RevenueCubit>();
+
+    solarCubit.fetchAllLeads();
+    spkCubit.fetchAllLeads();
+
+    Future.delayed(const Duration(milliseconds: 500), () {
+      _updatePendingCount();
     });
+
+    if (svcCubit.state is! ServiceLeadsLoaded) {
+      svcCubit.fetchAllServices();
+    }
+    if (revCubit.state is! RevenueLoaded) {
+      revCubit.fetchRevenue();
+    }
   }
 
- Future<void> _loadProfilePreview() async {
-  try {
-    final user = await _apiService.getProfile();
-    if (!mounted) return; 
-    setState(() {
-      _profileUser = user;
-      _profileImagePath = user?['image'] as String?;
-    });
-  } catch (_) {}
-}
+  Future<void> _updatePendingCount() async {
+    if (!mounted) return;
+    try {
+      final solarCubit = context.read<SolarLeadCubit>();
+      final spkCubit = context.read<SprinklerLeadCubit>();
+
+      final solar = await solarCubit.getPendingPaymentCount();
+      final spk = await spkCubit.getPendingPaymentCount();
+
+      // Installation pending count fetch karo
+      final installSolar = await solarCubit.getInstallationPendingCountAsync();
+      final installSpk = await spkCubit.getInstallationPendingCountAsync();
+
+      if (!mounted) return;
+      setState(() {
+        _pendingSolarCount = solar;
+        _pendingSpkCount = spk;
+        _installSolarCount = installSolar;
+        _installSpkCount = installSpk;
+      });
+    } catch (_) {}
+  }
+
+  Future<void> _loadProfilePreview() async {
+    try {
+      final user = await _apiService.getProfile();
+      if (!mounted) return;
+      setState(() {
+        _profileUser = user;
+        _profileImagePath = user?['image'] as String?;
+      });
+    } catch (_) {}
+  }
+
   Map<String, dynamic> _materialPipelineOf(Map<String, dynamic> customer) {
     final raw = customer['pipeline'];
     if (raw is Map) return Map<String, dynamic>.from(raw);
@@ -90,10 +126,13 @@ class _State extends State<AdminDashboardScreen> {
     final pipeline = _materialPipelineOf(customer);
     final status = _materialStatusOf(customer).trim().toLowerCase();
     final dispatch = pipeline['dispatch'];
-    final dispatchDate =
-        dispatch is Map ? dispatch['dispatchDate']?.toString() ?? '' : '';
+    final dispatchDate = dispatch is Map
+        ? dispatch['dispatchDate']?.toString() ?? ''
+        : '';
+
     if (pipeline['isCompleted'] == true) return true;
     if (dispatchDate.isNotEmpty) return true;
+
     return {
       'completed',
       'project completed',
@@ -105,12 +144,13 @@ class _State extends State<AdminDashboardScreen> {
 
   Future<void> _loadActiveMaterialLeadCount({bool showError = false}) async {
     try {
-      final customers = await _apiService.getMaterialCustomers();
+      final all = await fetchAllMaterialCustomers(apiService: _apiService);
       if (!mounted) return;
       setState(() {
-        _materialCustomers = customers;
-        _activeMaterialLeadCount =
-            customers.where((c) => !_isCompletedMaterialCustomer(c)).length;
+        _materialCustomers = all;
+        _activeMaterialLeadCount = all
+            .where((customer) => !_isCompletedMaterialCustomer(customer))
+            .length;
       });
     } catch (e) {
       if (!mounted || !showError) return;
@@ -118,12 +158,46 @@ class _State extends State<AdminDashboardScreen> {
     }
   }
 
+  /// Helper to fetch all paginated material customers
+  Future<List<Map<String, dynamic>>> fetchAllMaterialCustomers({
+    ApiService? apiService,
+    int pageSize = 100,
+    int maxPages = 100,
+  }) async {
+    final service = apiService ?? ApiService();
+    final all = <Map<String, dynamic>>[];
+    var page = 1;
+    while (true) {
+      final response = await service.getMaterialCustomers(
+        page: page,
+        limit: pageSize,
+      );
+      final batch = List<Map<String, dynamic>>.from(
+        response['customers'] ?? [],
+      );
+      if (batch.isEmpty) break;
+      all.addAll(batch);
+      if (batch.length < pageSize) break;
+      if (page >= (response['totalPages'] ?? page)) break;
+      page += 1;
+      if (page > maxPages) break;
+    }
+    return all;
+  }
+
   Future<void> _refreshDashboardData({bool showMaterialError = false}) async {
+    final solarCubit = context.read<SolarLeadCubit>();
+    final spkCubit = context.read<SprinklerLeadCubit>();
+    final svcCubit = context.read<ServiceLeadCubit>();
+    final revCubit = context.read<RevenueCubit>();
+
+    await solarCubit.fetchAllLeads();
+    await spkCubit.fetchAllLeads();
     if (!mounted) return;
-    context.read<SolarLeadCubit>().fetchAllLeads();
-    context.read<SprinklerLeadCubit>().fetchAllLeads();
-    context.read<ServiceLeadCubit>().fetchAllServices();
-    context.read<RevenueCubit>().fetchRevenue();
+    _updatePendingCount();
+
+    svcCubit.fetchAllServices();
+    revCubit.fetchRevenue();
     await _loadActiveMaterialLeadCount(showError: showMaterialError);
   }
 
@@ -150,8 +224,11 @@ class _State extends State<AdminDashboardScreen> {
   bool _isSameDay(DateTime? date, DateTime dayStart) {
     if (date == null) return false;
     final local = date.toLocal();
-    return DateTime(local.year, local.month, local.day)
-        .isAtSameMomentAs(dayStart);
+    return DateTime(
+      local.year,
+      local.month,
+      local.day,
+    ).isAtSameMomentAs(dayStart);
   }
 
   DateTime? _solarInstallationDate(SolarLeadsModel lead) {
@@ -170,200 +247,42 @@ class _State extends State<AdminDashboardScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (_) => const OwnerProfilePage()),
-    ).then((_) {
-      if (mounted) _loadProfilePreview();
-    });
-  }
-
-  // ✅ FIX: All navigation methods moved to class level (NOT inside build/BlocBuilder)
-  void _goSolarLeads() {
-    final solarCubit = context.read<SolarLeadCubit>();
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => BlocProvider.value(
-          value: solarCubit,
-          child: const SolarLeadsListScreen(appBarColor: AppColors.primary),
-        ),
-      ),
-    ).then((_) {
-      if (mounted) _refreshDashboardData();
-    });
-  }
-
-  void _goSpkLeads() {
-    final spkCubit = context.read<SprinklerLeadCubit>();
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => BlocProvider.value(
-          value: spkCubit,
-          child: const SprinklerLeadsListScreen(
-              appBarColor: LeadTheme.secondary),
-        ),
-      ),
-    ).then((_) {
-      if (mounted) _refreshDashboardData();
-    });
-  }
-
-  void _goServiceRequests() {
-    final svcCubit = context.read<ServiceLeadCubit>();
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => BlocProvider.value(
-          value: svcCubit,
-          child:
-              const ServiceRequestPage(appBarColor: AppColors.primary),
-        ),
-      ),
-    ).then((_) {
-      if (mounted) _refreshDashboardData();
-    });
-  }
-
-  void _goMaterial() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) =>
-            const MaterialListScreen(appBarColor: AppColors.primaryDark),
-      ),
-    ).then((_) {
-      if (mounted) _loadActiveMaterialLeadCount();
-    });
-  }
-
-  void _goTodaysWork() {
-    final solarCubit = context.read<SolarLeadCubit>();
-    final spkCubit = context.read<SprinklerLeadCubit>();
-    final svcCubit = context.read<ServiceLeadCubit>();
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => MultiBlocProvider(
-          providers: [
-            BlocProvider.value(value: solarCubit),
-            BlocProvider.value(value: spkCubit),
-            BlocProvider.value(value: svcCubit),
-          ],
-          child: const TodaysWorkScreen(),
-        ),
-      ),
-    ).then((_) {
-      if (mounted) _refreshDashboardData();
-    });
-  }
-
-  void _goFollowups() {
-    final solarCubit = context.read<SolarLeadCubit>();
-    final spkCubit = context.read<SprinklerLeadCubit>();
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => MultiBlocProvider(
-          providers: [
-            BlocProvider.value(value: solarCubit),
-            BlocProvider.value(value: spkCubit),
-          ],
-          child: const FollowupListScreen(
-              appBarColor: AppColors.primaryLight),
-        ),
-      ),
-    ).then((_) {
-      if (mounted) _refreshDashboardData();
-    });
-  }
-
-  void _goInstallPending() {
-    final solarCubit = context.read<SolarLeadCubit>();
-    final spkCubit = context.read<SprinklerLeadCubit>();
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => MultiBlocProvider(
-          providers: [
-            BlocProvider.value(value: solarCubit),
-            BlocProvider.value(value: spkCubit),
-          ],
-          child: const InstallationPendingScreen(
-              appBarColor: AppColors.success),
-        ),
-      ),
-    ).then((_) {
-      if (mounted) _refreshDashboardData();
-    });
-  }
-
-  void _goPendingPayment() {
-    final solarCubit = context.read<SolarLeadCubit>();
-    final spkCubit = context.read<SprinklerLeadCubit>();
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => MultiBlocProvider(
-          providers: [
-            BlocProvider.value(value: solarCubit),
-            BlocProvider.value(value: spkCubit),
-          ],
-          child: const AdminPendingPaymentPage(
-              appBarColor: AppColors.primary),
-        ),
-      ),
-    ).then((_) {
-      if (mounted) _refreshDashboardData();
-    });
-  }
-
-  void _goReports() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => const OwnerReportsPage()),
-    ).then((_) {
-      if (mounted) _refreshDashboardData();
-    });
-  }
-
-  void _goManageUsers() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => const AdminManageUsersPage(
-            appBarColor: AppColors.primary),
-      ),
-    );
+    ).then((_) => _loadProfilePreview());
   }
 
   Future<void> _logoutFromDrawer() async {
     final shouldLogout = await showDialog<bool>(
       context: context,
       builder: (dialogCtx) => AlertDialog(
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        backgroundColor: Colors.white,
         title: const Text(
           'Sign Out',
           style: TextStyle(
-              fontWeight: FontWeight.w700, color: AppColors.darkNavy),
+            fontWeight: FontWeight.w700,
+            color: AppColors.grayDark2,
+          ),
         ),
         content: const Text(
           'Are you sure you want to sign out?',
-          style: TextStyle(color: AppColors.textGray),
+          style: TextStyle(color: AppColors.slate500),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogCtx, false),
-            child: const Text('Cancel',
-                style: TextStyle(color: AppColors.textLight)),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: AppColors.slate300),
+            ),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(dialogCtx, true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: AppColors.surface,
+              backgroundColor:   AppColors.error,
+              foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
             child: const Text('Sign Out'),
           ),
@@ -371,7 +290,7 @@ class _State extends State<AdminDashboardScreen> {
       ),
     );
 
-    if (shouldLogout != true || !mounted) return;
+    if (shouldLogout != true) return;
     try {
       Navigator.pop(context);
       await _apiService.logout();
@@ -393,12 +312,14 @@ class _State extends State<AdminDashboardScreen> {
         children: [
           Positioned.fill(
             child: CircleAvatar(
-              backgroundColor: AppColors.primaryTint,
-              backgroundImage:
-                  imageUrl != null ? NetworkImage(imageUrl) : null,
+              backgroundColor:   AppColors.purpleLight1,
+              backgroundImage: imageUrl != null ? NetworkImage(imageUrl) : null,
               child: imageUrl == null
-                  ? AppSvgIcon(AppSvgAssets.userRound,
-                      color: AppColors.primary, size: size * 0.52)
+                  ? AppSvgIcon(
+                      AppSvgAssets.userRound,
+                      color:   AppColors.purple500,
+                      size: size * 0.52,
+                    )
                   : null,
             ),
           ),
@@ -409,9 +330,9 @@ class _State extends State<AdminDashboardScreen> {
               width: size * 0.26,
               height: size * 0.26,
               decoration: BoxDecoration(
-                color: AppColors.success,
+                color:   AppColors.successGreen,
                 shape: BoxShape.circle,
-                border: Border.all(color: AppColors.surface, width: 1.4),
+                border: Border.all(color: Colors.white, width: 1.4),
               ),
             ),
           ),
@@ -421,16 +342,15 @@ class _State extends State<AdminDashboardScreen> {
   }
 
   Widget _buildProfileDrawer() {
-    final name =
-        (_profileUser?['name'] ?? _profileUser?['fullName'] ?? 'Admin')
-            .toString();
+    final name = (_profileUser?['name'] ?? _profileUser?['fullName'] ?? 'Admin')
+        .toString();
     final email = (_profileUser?['email'] ?? 'No email').toString();
     final phone = (_profileUser?['phone'] ?? 'No phone').toString();
 
     return Drawer(
       child: SafeArea(
         child: Container(
-          color: AppColors.background,
+          color:   AppColors.slate50,
           child: Column(
             children: [
               Padding(
@@ -443,18 +363,24 @@ class _State extends State<AdminDashboardScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(name,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppColors.textDark)),
+                          Text(
+                            name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.slate900,
+                            ),
+                          ),
                           const SizedBox(height: 2),
-                          const Text('My Profile',
-                              style: TextStyle(
-                                  fontSize: 13,
-                                  color: AppColors.textGray)),
+                          const Text(
+                            'My Profile',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: AppColors.slate500,
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -469,38 +395,49 @@ class _State extends State<AdminDashboardScreen> {
                     Container(
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: AppColors.surface,
+                        color: Colors.white,
                         borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: AppColors.divider),
+                        border: Border.all(color:   AppColors.slate200),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('Profile Details',
-                              style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppColors.textGray)),
+                          const Text(
+                            'Profile Details',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.slate700,
+                            ),
+                          ),
                           const SizedBox(height: 10),
                           ListTile(
                             dense: true,
                             contentPadding: EdgeInsets.zero,
-                            leading: const AppSvgIcon(AppSvgAssets.mail,
-                                color: AppColors.primary),
-                            title: Text(email,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(fontSize: 13)),
+                            leading: const AppSvgIcon(
+                              AppSvgAssets.mail,
+                              color: AppColors.purple500,
+                            ),
+                            title: Text(
+                              email,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(fontSize: 13),
+                            ),
                           ),
                           ListTile(
                             dense: true,
                             contentPadding: EdgeInsets.zero,
-                            leading: const AppSvgIcon(AppSvgAssets.phone,
-                                color: AppColors.primary),
-                            title: Text(phone,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(fontSize: 13)),
+                            leading: const AppSvgIcon(
+                              AppSvgAssets.phone,
+                              color: AppColors.purple500,
+                            ),
+                            title: Text(
+                              phone,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(fontSize: 13),
+                            ),
                           ),
                         ],
                       ),
@@ -514,11 +451,12 @@ class _State extends State<AdminDashboardScreen> {
                       icon: const AppSvgIcon(AppSvgAssets.userRound),
                       label: const Text('Open Full Profile'),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: AppColors.surface,
+                        backgroundColor:   AppColors.purple500,
+                        foregroundColor: Colors.white,
                         minimumSize: const Size.fromHeight(46),
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 10),
@@ -527,11 +465,12 @@ class _State extends State<AdminDashboardScreen> {
                       icon: const AppSvgIcon(AppSvgAssets.logOut),
                       label: const Text('Logout'),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.error,
+                        foregroundColor:   AppColors.redError,
                         minimumSize: const Size.fromHeight(46),
-                        side: const BorderSide(color: AppColors.errorLight),
+                        side: const BorderSide(color: AppColors.pinkLight4),
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                     ),
                   ],
@@ -548,15 +487,20 @@ class _State extends State<AdminDashboardScreen> {
   Widget build(BuildContext context) {
     final isMobile = Responsive.isMobile(context);
     final width = MediaQuery.of(context).size.width;
-    final int crossAxisCount =
-        width >= 1200 ? 4 : width >= 600 ? 3 : 2;
+    int crossAxisCount = width >= 1400
+        ? 5
+        : width >= 1200
+        ? 4
+        : width >= 600
+        ? 3
+        : 2;
 
     return BlocBuilder<SolarLeadCubit, SolarLeadState>(
-      builder: (_, solarState) {
+      builder: (ctx, solarState) {
         return BlocBuilder<SprinklerLeadCubit, SprinklerLeadState>(
-          builder: (_, spkState) {
+          builder: (ctx2, spkState) {
             return BlocBuilder<ServiceLeadCubit, ServiceLeadState>(
-              builder: (_, svcState) {
+              builder: (ctx3, svcState) {
                 final solarLeads = solarState is SolarLeadsLoaded
                     ? solarState.leads
                     : <SolarLeadsModel>[];
@@ -564,37 +508,44 @@ class _State extends State<AdminDashboardScreen> {
                     ? spkState.leads
                     : <SprinklerLeadModel>[];
 
-                final availableSolarLeads =
-                    solarLeads.where(_isAvailableSolarLead).toList();
-                final availableSprinklerLeads =
-                    spkLeads.where(_isAvailableSprinklerLead).toList();
+                final availableSolarLeads = solarLeads
+                    .where(_isAvailableSolarLead)
+                    .toList();
+                final availableSprinklerLeads = spkLeads
+                    .where(_isAvailableSprinklerLead)
+                    .toList();
 
-                final solarCount = availableSolarLeads.length;
-                final spkCount = availableSprinklerLeads.length;
+                final solarCubit = context.read<SolarLeadCubit>();
+                final spkCubit = context.read<SprinklerLeadCubit>();
+                final solarCount =
+                    solarCubit.getTabTotalLeads(0) +
+                    solarCubit.getTabTotalLeads(1);
+                final spkCount =
+                    spkCubit.getTabTotalLeads(0) + spkCubit.getTabTotalLeads(1);
                 final availableTotalCount = solarCount + spkCount;
-
                 final svcServices = svcState is ServiceLeadsLoaded
                     ? svcState.services
                     : <ServiceRequestModel>[];
-                final activeServices =
-                    svcServices.where((s) => !s.isComplete).toList();
+                // Count only active (non-completed) service requests
+                final activeServices = svcServices
+                    .where((s) => !s.isComplete)
+                    .toList();
                 final serviceCount = activeServices.length;
 
                 final now = DateTime.now();
-                final todayMid =
-                    DateTime(now.year, now.month, now.day);
+                final todayMid = DateTime(now.year, now.month, now.day);
 
-                final todayMaterialFollowups =
-                    _materialCustomers.where((c) {
+                final todayMaterialFollowups = _materialCustomers.where((c) {
                   final pipeline = c['pipeline'];
                   if (pipeline is! Map<String, dynamic>) return false;
                   final followUp = pipeline['followUp'];
                   if (followUp is! Map<String, dynamic>) return false;
                   final followUpAt = followUp['followUpAt'];
                   if (followUpAt == null ||
-                      followUpAt.toString().trim().isEmpty) return false;
-                  final date =
-                      DateTime.tryParse(followUpAt.toString());
+                      followUpAt.toString().trim().isEmpty) {
+                    return false;
+                  }
+                  final date = DateTime.tryParse(followUpAt.toString());
                   return _isSameDay(date, todayMid);
                 }).length;
 
@@ -602,159 +553,102 @@ class _State extends State<AdminDashboardScreen> {
                   ...availableSolarLeads.where((l) {
                     final d = l.nextFollowupDate?.toLocal();
                     if (d == null) return false;
-                    return DateTime(d.year, d.month, d.day)
-                        .isAtSameMomentAs(todayMid);
+                    return DateTime(
+                      d.year,
+                      d.month,
+                      d.day,
+                    ).isAtSameMomentAs(todayMid);
                   }),
                   ...availableSprinklerLeads.where((l) {
                     final d = l.nextFollowupDate?.toLocal();
                     if (d == null) return false;
-                    return DateTime(d.year, d.month, d.day)
-                        .isAtSameMomentAs(todayMid);
+                    return DateTime(
+                      d.year,
+                      d.month,
+                      d.day,
+                    ).isAtSameMomentAs(todayMid);
                   }),
                 ].length;
-
                 final todayFollowupsTotal =
                     todayFollowups + todayMaterialFollowups;
 
-                final todayServicesCount = activeServices
-                    .where((s) => _isSameDay(
-                        s.serviceDate ?? s.createdAt, todayMid))
-                    .length;
+                // Count only active (non-completed) today's services
+                final todayServicesCount = activeServices.where((s) {
+                  final eventDate = s.serviceDate ?? s.createdAt;
+                  return _isSameDay(eventDate, todayMid);
+                }).length;
 
                 final todaySiteVisitsCount =
                     availableSolarLeads
-                        .where(
-                            (l) => _isSameDay(l.visitDate, todayMid))
+                        .where((l) => _isSameDay(l.visitDate, todayMid))
                         .length +
                     availableSprinklerLeads
-                        .where(
-                            (l) => _isSameDay(l.visitDate, todayMid))
+                        .where((l) => _isSameDay(l.visitDate, todayMid))
                         .length;
 
                 final todayInstallationsCount =
                     availableSolarLeads.where((l) {
-                          final installDate =
-                              _solarInstallationDate(l);
-                          return l.currentStep.index >=
-                                  SolarStep
-                                      .installationAssigned.index &&
-                              _isSameDay(installDate, todayMid);
-                        }).length +
-                    availableSprinklerLeads.where((l) {
-                      final installDate =
-                          _sprinklerInstallationDate(l);
+                      final installDate = _solarInstallationDate(l);
                       return l.currentStep.index >=
-                              SprinklerStep
-                                  .installationAssigned.index &&
+                              SolarStep.installationAssigned.index &&
+                          _isSameDay(installDate, todayMid);
+                    }).length +
+                    availableSprinklerLeads.where((l) {
+                      final installDate = _sprinklerInstallationDate(l);
+                      return l.currentStep.index >=
+                              SprinklerStep.installationAssigned.index &&
                           _isSameDay(installDate, todayMid);
                     }).length;
 
-                final todaysWorkCount = todayFollowups +
+                final todaysWorkCount =
+                    todayFollowups +
                     todayMaterialFollowups +
                     todayServicesCount +
                     todaySiteVisitsCount +
                     todayInstallationsCount;
 
-                final installPendingSolar = solarLeads
-                    .where((l) =>
-                        l.currentStep.index >=
-                            SolarStep.dealDone.index &&
-                        l.currentStep.index <
-                            SolarStep.installation.index)
-                    .toList();
-                final installPendingSprinkler = spkLeads
-                    .where((l) =>
-                        l.currentStep.index >=
-                            SprinklerStep.dealDone.index &&
-                        l.currentStep.index <
-                            SprinklerStep
-                                .installationCompleted.index)
-                    .toList();
-                final installPending = installPendingSolar.length +
-                    installPendingSprinkler.length;
+                // Get installation pending count from cubits (tracked on data load)
+                final installPending = _installSolarCount + _installSpkCount;
 
-                final pendingSolarLeads = solarLeads.where((l) {
-                  final afterDeal =
-                      l.currentStep == SolarStep.dealDone ||
-                      l.currentStep ==
-                          SolarStep.installationAssigned ||
-                      l.currentStep ==
-                          SolarStep.installationStarted ||
-                      l.currentStep == SolarStep.installation ||
-                      l.currentStep == SolarStep.meter ||
-                      l.currentStep == SolarStep.portal ||
-                      l.currentStep == SolarStep.subsidy ||
-                      l.currentStep == SolarStep.payment;
-                  final isPaymentCompleted =
-                      l.status == 'Payment Completed' ||
-                          l.isCompleted == true;
-                  final pending =
-                      (l.finalAmount ?? l.totalAmount) -
-                          (l.advancePayment ?? 0);
-                  return afterDeal &&
-                      !isPaymentCompleted &&
-                      pending > 0;
-                }).toList();
-
-                final pendingSpkLeads = spkLeads.where((l) {
-                  final afterDeal =
-                      l.currentStep == SprinklerStep.dealDone ||
-                      l.currentStep ==
-                          SprinklerStep.installationAssigned ||
-                      l.currentStep ==
-                          SprinklerStep.installationCompleted ||
-                      l.currentStep ==
-                          SprinklerStep.systemTested ||
-                      l.currentStep == SprinklerStep.fullPayment;
-                  final isPaymentCompleted =
-                      l.status == 'Payment Completed' ||
-                          l.isCompleted == true;
-                  final pending =
-                      l.totalAmount - (l.advancePayment ?? 0);
-                  return afterDeal &&
-                      !isPaymentCompleted &&
-                      pending > 0;
-                }).toList();
-
-                final pendingCount = pendingSolarLeads.length +
-                    pendingSpkLeads.length;
+                final pendingCount = _pendingSolarCount + _pendingSpkCount;
 
                 final loading =
-                    (solarState is SolarLeadLoading &&
-                        solarLeads.isEmpty) ||
-                    (spkState is SprinklerLeadLoading &&
-                        spkLeads.isEmpty);
+                    (solarState is SolarLeadLoading && solarLeads.isEmpty) ||
+                    (spkState is SprinklerLeadLoading && spkLeads.isEmpty);
 
                 return Scaffold(
-                  backgroundColor: AppColors.background,
-                  drawer:
-                      isMobile ? _buildProfileDrawer() : null,
+                  backgroundColor:  AppColors.veryLight3,
+                  drawer: isMobile ? _buildProfileDrawer() : null,
                   appBar: AppBar(
-                    backgroundColor: AppColors.background,
+                    backgroundColor:  AppColors.veryLight3,
                     elevation: 0,
                     scrolledUnderElevation: 0,
                     centerTitle: false,
+                    leading: null,
                     automaticallyImplyLeading: false,
+                    leadingWidth: isMobile ? 56 : null,
                     title: Row(
                       children: [
+                        /// Profile avatar
                         _buildProfileAvatar(size: 40),
+
                         const SizedBox(width: 12),
+
+                        /// Name + greeting
                         Column(
-                          crossAxisAlignment:
-                              CrossAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
                               _profileUser != null
                                   ? (_profileUser!['name'] ??
-                                          _profileUser![
-                                              'fullName'] ??
-                                          'Admin')
-                                      .toString()
+                                            _profileUser!['fullName'] ??
+                                            'Admin')
+                                        .toString()
                                   : 'Admin',
                               style: const TextStyle(
                                 fontWeight: FontWeight.w700,
                                 fontSize: 16,
-                                color: AppColors.darkNavy,
+                                color: AppColors.grayDark2,
                                 letterSpacing: -0.3,
                               ),
                             ),
@@ -763,48 +657,53 @@ class _State extends State<AdminDashboardScreen> {
                               style: const TextStyle(
                                 fontSize: 11.5,
                                 fontWeight: FontWeight.w400,
-                                color: AppColors.textLight,
+                                color: AppColors.indigoVariant4,
                               ),
                             ),
                           ],
                         ),
+
+                        /// ── Center title ──────────────────────────────────
                         const Spacer(),
-                        const Text(
-                          'Admin Dashboard',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w700,
-                            fontSize: 20,
-                            color: AppColors.primary,
-                            letterSpacing: -0.3,
+                        if (!isMobile)
+                          const Text(
+                            'Admin Dashboard',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 20,
+                              color: AppColors.purple500,
+                              letterSpacing: -0.3,
+                            ),
                           ),
-                        ),
                         const Spacer(),
                       ],
                     ),
                     actions: [
                       Container(
                         margin: const EdgeInsets.only(
-                            right: 16, top: 8, bottom: 8),
+                          right: 16,
+                          top: 8,
+                          bottom: 8,
+                        ),
                         child: Material(
-                          color: AppColors.surface,
-                          borderRadius:
-                              BorderRadius.circular(10),
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10),
                           child: InkWell(
-                            borderRadius:
-                                BorderRadius.circular(10),
-                            onTap: () => _refreshDashboardData(
-                                showMaterialError: true),
+                            borderRadius: BorderRadius.circular(10),
+                            onTap: () {
+                              _refreshDashboardData(showMaterialError: true);
+                            },
                             child: Container(
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
-                                borderRadius:
-                                    BorderRadius.circular(10),
+                                borderRadius: BorderRadius.circular(10),
                                 border: Border.all(
-                                    color: AppColors.primaryTint),
+                                  color:   AppColors.indigoLight,
+                                ),
                               ),
                               child: const AppSvgIcon(
                                 AppSvgAssets.refreshCw,
-                                color: AppColors.primary,
+                                color: AppColors.purple500,
                                 size: 18,
                               ),
                             ),
@@ -817,46 +716,53 @@ class _State extends State<AdminDashboardScreen> {
                     child: loading
                         ? const Center(
                             child: CircularProgressIndicator(
-                                color: AppColors.primary))
+                              color: AppColors.purple500,
+                            ),
+                          )
                         : RefreshIndicator(
-                            color: AppColors.primary,
+                            color:   AppColors.purple500,
                             onRefresh: () async {
                               await _refreshDashboardData(
-                                  showMaterialError: true);
-                              await Future.delayed(const Duration(
-                                  milliseconds: 800));
+                                showMaterialError: true,
+                              );
+                              await Future.delayed(
+                                const Duration(milliseconds: 800),
+                              );
                             },
                             child: SingleChildScrollView(
                               padding: EdgeInsets.fromLTRB(
-                                  isMobile ? 16 : 28,
-                                  12,
-                                  isMobile ? 16 : 28,
-                                  24),
+                                isMobile ? 16 : 28,
+                                12,
+                                isMobile ? 16 : 28,
+                                24,
+                              ),
                               child: Column(
-                                crossAxisAlignment:
-                                    CrossAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
+                                  /// ── Compact Summary Strip ──
                                   _SummaryStrip(
-                                    totalLeads:
-                                        availableTotalCount,
+                                    totalLeads: availableTotalCount,
                                     solarLeads: solarCount,
                                     sprinklerLeads: spkCount,
                                   ),
+
                                   const SizedBox(height: 20),
-                                  const _SectionHeading(
-                                      title: 'Overview'),
+
+                                  /// ── Section Heading ──
+                                  const _SectionHeading(title: 'Overview'),
                                   const SizedBox(height: 12),
+
+                                  /// ── Cards Grid ──
                                   GridView.count(
-                                    crossAxisCount:
-                                        crossAxisCount,
-                                    crossAxisSpacing:
-                                        isMobile ? 12 : 16,
-                                    mainAxisSpacing:
-                                        isMobile ? 12 : 16,
+                                    crossAxisCount: crossAxisCount,
+                                    crossAxisSpacing: isMobile ? 12 : 16,
+                                    mainAxisSpacing: isMobile ? 12 : 16,
                                     shrinkWrap: true,
                                     physics:
                                         const NeverScrollableScrollPhysics(),
-                                    childAspectRatio: width >= 1200
+                                    childAspectRatio: width >= 1400
+                                        ? 1.6
+                                        : width >= 1200
                                         ? 1.8
                                         : width >= 900
                                         ? 2.2
@@ -868,104 +774,235 @@ class _State extends State<AdminDashboardScreen> {
                                         title: 'Solar Leads',
                                         value: '$solarCount',
                                         svgAsset: AppSvgAssets.sun,
-                                        cardColor: AppColors.primary,
-                                        onTap: _goSolarLeads,
+                                        cardColor:   AppColors.indigo500,
+                                        onTap: () => Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) => BlocProvider.value(
+                                              value: context
+                                                  .read<SolarLeadCubit>(),
+                                              child: const SolarLeadsListScreen(
+                                                appBarColor: AppColors.amber,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
                                       ),
                                       DashboardCard(
                                         title: 'Sprinkler Leads',
                                         value: '$spkCount',
-                                        svgAsset:
-                                            AppSvgAssets.droplet,
-                                        cardColor:
-                                            AppColors.primary,
-                                        onTap: _goSpkLeads,
+                                        svgAsset: AppSvgAssets.droplet,
+                                        cardColor:   AppColors.indigo500,
+                                        onTap: () => Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) => BlocProvider.value(
+                                              value: context
+                                                  .read<SprinklerLeadCubit>(),
+                                              child:
+                                                  const SprinklerLeadsListScreen(
+                                                    appBarColor: AppColors.cyan,
+                                                  ),
+                                            ),
+                                          ),
+                                        ),
                                       ),
                                       DashboardCard(
                                         title: 'Service Requests',
                                         value: '$serviceCount',
                                         svgAsset: AppSvgAssets.cog,
-                                        cardColor: AppColors.primary,
-                                        onTap: _goServiceRequests,
+                                        cardColor:   AppColors.indigo500,
+                                        onTap: () => Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) => BlocProvider.value(
+                                              value: context
+                                                  .read<ServiceLeadCubit>(),
+                                              child: const ServiceRequestPage(),
+                                            ),
+                                          ),
+                                        ),
                                       ),
                                       DashboardCard(
                                         title: 'Add/Sell Material',
-                                        value:
-                                            '$_activeMaterialLeadCount',
-                                        svgAsset:
-                                            AppSvgAssets.packagePlus,
-                                        cardColor:
-                                            AppColors.primaryDark,
-                                        onTap: _goMaterial,
+                                        value: '$_activeMaterialLeadCount',
+                                        svgAsset: AppSvgAssets.packagePlus,
+                                        cardColor:   AppColors.indigo500,
+                                        onTap: () =>
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (_) =>
+                                                    const MaterialListScreen(
+                                                      appBarColor: Color(
+                                                        0xFF6366F1,
+                                                      ),
+                                                    ),
+                                              ),
+                                            ).then(
+                                              (_) =>
+                                                  _loadActiveMaterialLeadCount(),
+                                            ),
                                       ),
                                       DashboardCard(
-                                        title: "Today's Work",
+                                        title: 'Today\'s Work',
                                         value: '$todaysWorkCount',
-                                        svgAsset:
-                                            AppSvgAssets.calendarDays,
-                                        cardColor: AppColors.primary,
-                                        onTap: _goTodaysWork,
+                                        svgAsset: AppSvgAssets.calendarDays,
+                                        cardColor:   AppColors.indigo500,
+                                        onTap: () => Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) => MultiBlocProvider(
+                                              providers: [
+                                                BlocProvider.value(
+                                                  value: context
+                                                      .read<SolarLeadCubit>(),
+                                                ),
+                                                BlocProvider.value(
+                                                  value: context
+                                                      .read<
+                                                        SprinklerLeadCubit
+                                                      >(),
+                                                ),
+                                                BlocProvider.value(
+                                                  value: context
+                                                      .read<ServiceLeadCubit>(),
+                                                ),
+                                              ],
+                                              child: const TodaysWorkScreen(),
+                                            ),
+                                          ),
+                                        ),
                                       ),
                                       DashboardCard(
-                                        title:
-                                            "Today's Follow-ups",
-                                        value:
-                                            '$todayFollowupsTotal',
-                                        svgAsset:
-                                            AppSvgAssets.calendarDays,
-                                        cardColor:
-                                            AppColors.primary,
-                                        onTap: _goFollowups,
+                                        title: 'Today\'s Follow-ups',
+                                        value: '$todayFollowupsTotal',
+                                        svgAsset: AppSvgAssets.calendarDays,
+                                        cardColor:   AppColors.indigo500,
+                                        onTap: () => Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) => MultiBlocProvider(
+                                              providers: [
+                                                BlocProvider.value(
+                                                  value: context
+                                                      .read<SolarLeadCubit>(),
+                                                ),
+                                                BlocProvider.value(
+                                                  value: context
+                                                      .read<
+                                                        SprinklerLeadCubit
+                                                      >(),
+                                                ),
+                                              ],
+                                              child: const FollowupListScreen(
+                                                appBarColor: AppColors.indigo500,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
                                       ),
                                       DashboardCard(
-                                        title:
-                                            'Installation Pending',
+                                        title: 'Installation Pending',
                                         value: '$installPending',
-                                        svgAsset:
-                                            AppSvgAssets.hammer,
-                                        cardColor:
-                                            AppColors.primary,
-                                        onTap: _goInstallPending,
+                                        svgAsset: AppSvgAssets.hammer,
+                                        cardColor:   AppColors.indigo500,
+                                        onTap: () => Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) => MultiBlocProvider(
+                                              providers: [
+                                                BlocProvider.value(
+                                                  value: context
+                                                      .read<SolarLeadCubit>(),
+                                                ),
+                                                BlocProvider.value(
+                                                  value: context
+                                                      .read<
+                                                        SprinklerLeadCubit
+                                                      >(),
+                                                ),
+                                              ],
+                                              child:
+                                                  const InstallationPendingScreen(
+                                                    appBarColor: Color(
+                                                      0xFF14B8A6,
+                                                    ),
+                                                  ),
+                                            ),
+                                          ),
+                                        ),
                                       ),
                                       DashboardCard(
                                         title: 'Pending Payment',
                                         value: '$pendingCount',
-                                        svgAsset:
-                                            AppSvgAssets.indianRupee,
-                                        cardColor: AppColors.primary,
-                                        onTap: _goPendingPayment,
+                                        svgAsset: AppSvgAssets.indianRupee,
+                                        cardColor:   AppColors.indigo500,
+                                        onTap: () => Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) => MultiBlocProvider(
+                                              providers: [
+                                                BlocProvider.value(
+                                                  value: context
+                                                      .read<SolarLeadCubit>(),
+                                                ),
+                                                BlocProvider.value(
+                                                  value: context
+                                                      .read<
+                                                        SprinklerLeadCubit
+                                                      >(),
+                                                ),
+                                              ],
+                                              child:
+                                                  const AdminPendingPaymentPage(
+                                                    appBarColor:   AppColors.indigo500,
+                                                  ),
+                                            ),
+                                          ),
+                                        ),
                                       ),
-                                      BlocBuilder<RevenueCubit,
-                                          RevenueState>(
-                                        builder: (_, revState) {
-                                          String revenueValue =
-                                              '...';
-                                          if (revState
-                                              is RevenueLoaded) {
-                                            final fmt =
-                                                NumberFormat.compact(
-                                                    locale: 'en_IN');
+                                      // ── Revenue Card ──
+                                      BlocBuilder<RevenueCubit, RevenueState>(
+                                        builder: (ctx, revState) {
+                                          String revenueValue = '...';
+                                          if (revState is RevenueLoaded) {
+                                            final fmt = NumberFormat.compact(
+                                              locale: 'en_IN',
+                                            );
                                             revenueValue =
                                                 '₹ ${fmt.format(revState.totalRevenue)}';
                                           }
                                           return DashboardCard(
-                                            title:
-                                                'Revenue Summary',
+                                            title: 'Revenue Summary',
                                             value: revenueValue,
                                             svgAsset: AppSvgAssets
                                                 .chartNoAxisCombined,
-                                            cardColor:
-                                                AppColors.solar,
-                                            onTap: _goReports,
+                                            cardColor:   AppColors.indigo500,
+                                            onTap: () => Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (_) =>
+                                                    const RevenueSummary(),
+                                              ),
+                                            ),
                                           );
                                         },
                                       ),
                                       DashboardCard(
                                         title: 'Manage Users',
                                         value: '',
-                                        svgAsset:
-                                            AppSvgAssets.userRoundCog,
-                                        cardColor: AppColors.primary,
-                                        onTap: _goManageUsers,
+                                        svgAsset: AppSvgAssets.userRoundCog,
+                                        cardColor:   AppColors.indigo500,
+                                        onTap: () => Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) =>
+                                                const AdminManageUsersPage(
+                                                  appBarColor:   AppColors.indigo500,
+                                                ),
+                                          ),
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -991,9 +1028,14 @@ class _State extends State<AdminDashboardScreen> {
   }
 }
 
-// ── Summary Strip ─────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// Compact Summary Strip
+// ─────────────────────────────────────────────────────────────────────────────
 class _SummaryStrip extends StatelessWidget {
-  final int totalLeads, solarLeads, sprinklerLeads;
+  final int totalLeads;
+  final int solarLeads;
+  final int sprinklerLeads;
+
   const _SummaryStrip({
     required this.totalLeads,
     required this.solarLeads,
@@ -1003,15 +1045,14 @@ class _SummaryStrip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding:
-          const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.primaryTint, width: 1),
+        border: Border.all(color:   AppColors.indigoLight, width: 1),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withOpacity(0.05),
+            color:   AppColors.indigo.withOpacity(0.05),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
@@ -1020,19 +1061,22 @@ class _SummaryStrip extends StatelessWidget {
       child: Row(
         children: [
           _StripStat(
-              label: 'Total Leads',
-              value: '$totalLeads',
-              color: AppColors.primaryDark),
+            label: 'Total Leads',
+            value: '$totalLeads',
+            color:   AppColors.indigo500,
+          ),
           _StripDivider(),
           _StripStat(
-              label: 'Solar',
-              value: '$solarLeads',
-              color: AppColors.primary),
+            label: 'Solar',
+            value: '$solarLeads',
+            color:   AppColors.amber,
+          ),
           _StripDivider(),
           _StripStat(
-              label: 'Sprinkler',
-              value: '$sprinklerLeads',
-              color: AppColors.primaryLight),
+            label: 'Sprinkler',
+            value: '$sprinklerLeads',
+            color:   AppColors.cyan,
+          ),
         ],
       ),
     );
@@ -1040,63 +1084,235 @@ class _SummaryStrip extends StatelessWidget {
 }
 
 class _StripStat extends StatelessWidget {
-  final String label, value;
+  final String label;
+  final String value;
   final Color color;
-  const _StripStat(
-      {required this.label,
-      required this.value,
-      required this.color});
+  const _StripStat({
+    required this.label,
+    required this.value,
+    required this.color,
+  });
 
   @override
-  Widget build(BuildContext context) => Expanded(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(value,
-                style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: color,
-                    letterSpacing: -0.4)),
-            const SizedBox(width: 6),
-            Text(label,
-                style: const TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.textGray)),
-          ],
-        ),
-      );
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              color: color,
+              letterSpacing: -0.4,
+            ),
+          ),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+              color: AppColors.purple800,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _StripDivider extends StatelessWidget {
   @override
-  Widget build(BuildContext context) =>
-      Container(width: 1, height: 22, color: AppColors.primaryTint);
+  Widget build(BuildContext context) {
+    return Container(width: 1, height: 22, color:   AppColors.indigoLight);
+  }
 }
 
-// ── Section Heading ───────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// Section Heading
+// ─────────────────────────────────────────────────────────────────────────────
 class _SectionHeading extends StatelessWidget {
   final String title;
   const _SectionHeading({required this.title});
 
   @override
-  Widget build(BuildContext context) => Row(
-        children: [
-          Container(
-            width: 3,
-            height: 15,
-            decoration: BoxDecoration(
-                color: AppColors.primary,
-                borderRadius: BorderRadius.circular(2)),
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          width: 3,
+          height: 15,
+          decoration: BoxDecoration(
+            color:   AppColors.indigo,
+            borderRadius: BorderRadius.circular(2),
           ),
-          const SizedBox(width: 8),
-          Text(title,
-              style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.darkNavy,
-                  letterSpacing: -0.2)),
-        ],
-      );
+        ),
+        const SizedBox(width: 8),
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
+            color: AppColors.grayDark2,
+            letterSpacing: -0.2,
+          ),
+        ),
+      ],
+    );
+  }
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Dashboard Card
+// ─────────────────────────────────────────────────────────────────────────────
+class _DashCard extends StatefulWidget {
+  final String title;
+  final String value;
+  final String svgAsset;
+  final List<Color> gradientColors;
+  final VoidCallback onTap;
+
+  const _DashCard({
+    required this.title,
+    required this.value,
+    required this.svgAsset,
+    required this.gradientColors,
+    required this.onTap,
+  });
+
+  @override
+  State<_DashCard> createState() => _DashCardState();
+}
+
+class _DashCardState extends State<_DashCard> {
+  bool _pressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _pressed = true),
+      onTapUp: (_) {
+        setState(() => _pressed = false);
+        widget.onTap();
+      },
+      onTapCancel: () => setState(() => _pressed = false),
+      child: AnimatedScale(
+        scale: _pressed ? 0.96 : 1.0,
+        duration: const Duration(milliseconds: 120),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: widget.gradientColors,
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: widget.gradientColors.first.withOpacity(0.28),
+                blurRadius: 14,
+                offset: const Offset(0, 5),
+              ),
+            ],
+          ),
+          child: Stack(
+            children: [
+              /// Decorative circle — top right
+              Positioned(
+                right: -12,
+                top: -12,
+                child: Container(
+                  width: 64,
+                  height: 64,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white.withOpacity(0.08),
+                  ),
+                ),
+              ),
+
+              /// Decorative circle — bottom left
+              Positioned(
+                left: -8,
+                bottom: -16,
+                child: Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white.withOpacity(0.06),
+                  ),
+                ),
+              ),
+
+              /// Content
+              Padding(
+                padding: const EdgeInsets.fromLTRB(14, 10, 12, 10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    /// Icon
+                    Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.22),
+                        borderRadius: BorderRadius.circular(9),
+                      ),
+                      child: Center(
+                        child: AppSvgIcon(
+                          widget.svgAsset,
+                          size: 15,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+
+                    const Spacer(),
+
+                    /// Value
+                    Text(
+                      widget.value,
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                        letterSpacing: -0.5,
+                        height: 1,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+
+                    /// Title
+                    Text(
+                      widget.title,
+                      style: TextStyle(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white.withOpacity(0.85),
+                        letterSpacing: 0.1,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+
+
+
+
+
+
+
+
+

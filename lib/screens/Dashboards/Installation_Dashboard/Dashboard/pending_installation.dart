@@ -9,6 +9,9 @@ import 'package:solar_project/Helper/app_svg_icon.dart';
 import 'package:solar_project/core/app_colors.dart';
 import 'package:solar_project/data/Models/installation_model.dart';
 
+const _kPurple = AppColors.purple500;
+const _kBlue = AppColors.cyan;
+
 // ── Date helpers ──────────────────────────────────────────────────────────────
 bool _isOverdue(DateTime? dt) {
   if (dt == null) return false;
@@ -60,7 +63,7 @@ class PendingInstallationsScreen extends StatefulWidget {
   final VoidCallback? onBack;
   const PendingInstallationsScreen({
     super.key,
-    this.appBarColor = AppColors.primary,
+    this.appBarColor = _kPurple,
     this.onBack,
   });
 
@@ -180,7 +183,7 @@ class _PendingInstallationsScreenState extends State<PendingInstallationsScreen>
             .length;
 
         return Scaffold(
-          backgroundColor: const Color(0xFFF8FAFC),
+          backgroundColor:   AppColors.slate50,
           appBar: AppBar(
             backgroundColor: widget.appBarColor,
             elevation: 0,
@@ -237,21 +240,21 @@ class _PendingInstallationsScreenState extends State<PendingInstallationsScreen>
                       _SummaryChip(
                         label: 'All',
                         count: overdueAll,
-                        color: AppColors.primary,
+                        color: _kPurple,
                         svgAsset: AppSvgAssets.triangleAlert,
                       ),
                       const SizedBox(width: 6),
                       _SummaryChip(
                         label: 'Solar',
                         count: overdueSolar,
-                        color: AppColors.primary,
+                        color: _kPurple,
                         svgAsset: AppSvgAssets.sun,
                       ),
                       const SizedBox(width: 6),
                       _SummaryChip(
                         label: 'Sprinkler',
                         count: overdueSprinkler,
-                        color: AppColors.primary,
+                        color: _kBlue,
                         svgAsset: AppSvgAssets.droplet,
                       ),
                     ],
@@ -261,12 +264,12 @@ class _PendingInstallationsScreenState extends State<PendingInstallationsScreen>
               // ── Tabs ──────────────────────────────────────────────
               Container(
                 color: Colors.white,
-                 child: TabBar(
-                   controller: _tab,
-                   labelColor: AppColors.primary,
-                   unselectedLabelColor: AppColors.textDark,
-                   indicatorColor: AppColors.primary,
-                   indicatorWeight: 3,
+                child: TabBar(
+                  controller: _tab,
+                  labelColor: _kPurple,
+                  unselectedLabelColor: Colors.grey.shade500,
+                  indicatorColor: _kPurple,
+                  indicatorWeight: 3,
                   labelStyle: const TextStyle(
                     fontWeight: FontWeight.w700,
                     fontSize: 12,
@@ -352,7 +355,7 @@ class _PendingInstallationsScreenState extends State<PendingInstallationsScreen>
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: AppColors.primary),
+                        borderSide: BorderSide(color: Colors.red.shade400),
                       ),
                     ),
                   ),
@@ -365,7 +368,7 @@ class _PendingInstallationsScreenState extends State<PendingInstallationsScreen>
               Expanded(
                 child: loading
                     ? const Center(
-                        child: CircularProgressIndicator(color: AppColors.primary),
+                        child: CircularProgressIndicator(color: _kPurple),
                       )
                     : TabBarView(
                         controller: _tab,
@@ -540,7 +543,7 @@ class _PendingDataTable extends StatelessWidget {
   });
 
   Color _typeAccent(InstallationModel m) =>
-      m.projectType.toLowerCase() == 'solar' ? AppColors.primary : AppColors.primaryLight;
+      m.projectType.toLowerCase() == 'solar' ? _kPurple : _kBlue;
 
   Color _statusColor(InstallationModel m) {
     switch (m.status) {
@@ -716,7 +719,7 @@ class _PendingDataTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDesktop = MediaQuery.sizeOf(context).width >= 1000;
-    const rowStyle = TextStyle(fontSize: 12, color: Color(0xFF111827));
+    const rowStyle = TextStyle(fontSize: 12, color: AppColors.textDark);
 
     return SizedBox(
       width: double.infinity,
@@ -900,3 +903,5 @@ class _EmptyState extends StatelessWidget {
     );
   }
 }
+
+
