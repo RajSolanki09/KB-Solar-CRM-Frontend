@@ -19,9 +19,9 @@ class InstallationSidebar extends StatelessWidget {
         return Container(
           width: 260,
           decoration: const BoxDecoration(
-            color: AppColors.purpleLight3, // ← same as admin sidebar
+            color: AppColors.purple50,
             border: Border(
-              right: BorderSide(color: AppColors.purpleVariant5, width: 1),
+              right: BorderSide(color: AppColors.purple100, width: 1),
             ),
           ),
           child: Column(
@@ -203,7 +203,7 @@ class _SectionLabel extends StatelessWidget {
         style: const TextStyle(
           fontSize: 10.5,
           fontWeight: FontWeight.w700,
-          color: AppColors.indigoVariant4,
+          color: AppColors.slate500,
           letterSpacing: 1.4,
         ),
       ),
@@ -241,26 +241,26 @@ class _NavItemState extends State<_NavItem> {
     final bgColor = active
         ? Colors.white
         : _hovered
-        ? AppColors.purpleLight2
-        : AppColors.purpleLight3;
+        ? AppColors.purple100
+        : Colors.transparent;
 
     final iconBg = active
-        ? AppColors.purpleLight4
+        ? AppColors.purple50
         : _hovered
-        ? AppColors.purpleVariant4
-        : AppColors.purpleVariant6;
+        ? Colors.white
+        : AppColors.purple100;
 
     final iconColor = active
-        ? AppColors.indigo
+        ? AppColors.primary
         : _hovered
-        ? AppColors.indigoVariant2
-        : AppColors.indigoVariant3;
+        ? AppColors.primaryDark
+        : AppColors.slate500;
 
     final labelColor = active
-        ? AppColors.indigoVariant2
+        ? AppColors.primaryDark
         : _hovered
-        ? AppColors.indigoVariant1
-        : AppColors.indigoVariant2;
+        ? AppColors.primaryDark
+        : AppColors.slate600;
 
     return MouseRegion(
       onEnter: (_) => setState(() => _hovered = true),
@@ -349,7 +349,7 @@ class _BottomSection extends StatelessWidget {
         Container(
           height: 1,
           margin: const EdgeInsets.symmetric(horizontal: 16),
-          color: AppColors.purpleVariant3,
+          color: AppColors.purple100,
         ),
         const SizedBox(height: 6),
         _LogoutButton(onTap: () => _showLogoutDialog(context)),
@@ -480,13 +480,13 @@ class _LogoutButtonState extends State<_LogoutButton> {
 
   @override
   Widget build(BuildContext context) {
-    final bgColor = _hovered ? AppColors.pinkLight3 : AppColors.purpleLight3;
+    final bgColor = _hovered ? AppColors.purple100 : Colors.transparent;
 
-    final iconBg = _hovered ? AppColors.pinkLight1 : AppColors.pinkLight2;
+    final iconBg = _hovered ? Colors.white : AppColors.purple100;
 
-    final iconColor = _hovered ? AppColors.redVariant6 : AppColors.redVariant5;
+    final iconColor = AppColors.error;
 
-    final labelColor = _hovered ? AppColors.redVariant6 : AppColors.redVariant4;
+    final labelColor = AppColors.error;
 
     return MouseRegion(
       onEnter: (_) => setState(() => _hovered = true),

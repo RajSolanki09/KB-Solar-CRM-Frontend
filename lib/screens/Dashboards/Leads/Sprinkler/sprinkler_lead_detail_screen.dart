@@ -681,7 +681,7 @@ class _SprinklerLeadDetailScreenState extends State<SprinklerLeadDetailScreen> {
                       gradient: LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
-                        colors: [AppColors.blue700, AppColors.cyan600],
+                        colors: [AppColors.primary, AppColors.primaryLight],
                       ),
                     ),
                     child: SafeArea(
@@ -994,21 +994,21 @@ class _SprinklerLeadDetailScreenState extends State<SprinklerLeadDetailScreen> {
         width: double.infinity,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.orange.shade50,
+          color: AppColors.warning,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.orange.shade200),
+          border: Border.all(color: AppColors.warning),
         ),
         child: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: Colors.orange.shade100,
+                color: AppColors.warning,
                 borderRadius: BorderRadius.circular(10),
               ),
               child: AppSvgIcon(
                 AppSvgAssets.lock,
-                color: Colors.orange.shade600,
+                color: AppColors.warning,
                 size: 20,
               ),
             ),
@@ -1022,15 +1022,12 @@ class _SprinklerLeadDetailScreenState extends State<SprinklerLeadDetailScreen> {
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
-                      color: Colors.orange.shade800,
+                      color: AppColors.warning,
                     ),
                   ),
                   Text(
                     'Current: ${lead.status}',
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: Colors.orange.shade600,
-                    ),
+                    style: TextStyle(fontSize: 11, color: AppColors.warning),
                   ),
                 ],
               ),
@@ -1047,7 +1044,7 @@ class _SprinklerLeadDetailScreenState extends State<SprinklerLeadDetailScreen> {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           gradient: const LinearGradient(
-            colors: [AppColors.blue700, AppColors.cyan600],
+            colors: [AppColors.primary, AppColors.primaryLight],
           ),
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
@@ -1111,19 +1108,19 @@ class _SprinklerLeadDetailScreenState extends State<SprinklerLeadDetailScreen> {
     decoration: BoxDecoration(
       color: AppColors.lightBg3,
       borderRadius: BorderRadius.circular(12),
-      border: Border.all(color: AppColors.greenAccent2),
+      border: Border.all(color: AppColors.success),
     ),
     child: Row(
       children: [
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: Colors.green.shade100,
+            color: AppColors.success.withValues(alpha: 0.2),
             borderRadius: BorderRadius.circular(8),
           ),
           child: AppSvgIcon(
             AppSvgAssets.circleCheckBig,
-            color: Colors.green.shade700,
+            color: AppColors.success,
             size: 20,
           ),
         ),
@@ -1136,12 +1133,12 @@ class _SprinklerLeadDetailScreenState extends State<SprinklerLeadDetailScreen> {
               style: TextStyle(
                 fontWeight: FontWeight.w700,
                 fontSize: 14,
-                color: AppColors.green800,
+                color: AppColors.success,
               ),
             ),
             Text(
               'All $_totalSteps steps done successfully',
-              style: TextStyle(fontSize: 11, color: Colors.green.shade600),
+              style: TextStyle(fontSize: 11, color: AppColors.success),
             ),
           ],
         ),
@@ -1219,7 +1216,7 @@ class _SprinklerLeadDetailScreenState extends State<SprinklerLeadDetailScreen> {
               minHeight: 6,
               backgroundColor: AppColors.divider,
               valueColor: AlwaysStoppedAnimation<Color>(
-                lead.isCompleted ? Colors.green : LeadTheme.secondary,
+                lead.isCompleted ? AppColors.success : LeadTheme.secondary,
               ),
             ),
           ),
@@ -1230,9 +1227,7 @@ class _SprinklerLeadDetailScreenState extends State<SprinklerLeadDetailScreen> {
                 : 'Current: ${lead.status}',
             style: TextStyle(
               fontSize: 11,
-              color: lead.isCompleted
-                  ? Colors.green.shade600
-                  : AppColors.textGray,
+              color: lead.isCompleted ? AppColors.success : AppColors.textGray,
             ),
           ),
         ],
@@ -1619,12 +1614,12 @@ class _SpkPipelineRowState extends State<_SpkPipelineRow> {
     final step = widget.step;
 
     final Color dotColor = isDone
-        ? AppColors.blue700
+        ? AppColors.primary
         : isCurrent
         ? LeadTheme.secondary
         : AppColors.gray300;
 
-    final Color lineColor = isDone ? AppColors.blueLight2 : AppColors.divider;
+    final Color lineColor = isDone ? AppColors.primary : AppColors.divider;
 
     final isNewLead = step.index == 0;
     final hasData =
@@ -1724,7 +1719,7 @@ class _SpkPipelineRowState extends State<_SpkPipelineRow> {
                                   ? FontWeight.w600
                                   : FontWeight.w400,
                               color: isDone
-                                  ? AppColors.blue700
+                                  ? AppColors.primary
                                   : isCurrent
                                   ? LeadTheme.secondary
                                   : AppColors.textLight,
@@ -1787,10 +1782,11 @@ class _SpkPipelineRowState extends State<_SpkPipelineRow> {
                                 vertical: 3,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.orange.shade50,
+                                color: AppColors
+                                    .purple100, // light purple background
                                 borderRadius: BorderRadius.circular(6),
                                 border: Border.all(
-                                  color: Colors.orange.shade300,
+                                  color: AppColors.primary, // visible border
                                 ),
                               ),
                               child: Row(
@@ -1799,7 +1795,7 @@ class _SpkPipelineRowState extends State<_SpkPipelineRow> {
                                   AppSvgIcon(
                                     AppSvgAssets.cog,
                                     size: 11,
-                                    color: Colors.orange.shade700,
+                                    color: AppColors.primary, // visible icon
                                   ),
                                   const SizedBox(width: 3),
                                   Text(
@@ -1808,7 +1804,8 @@ class _SpkPipelineRowState extends State<_SpkPipelineRow> {
                                     style: TextStyle(
                                       fontSize: 10,
                                       fontWeight: FontWeight.w600,
-                                      color: Colors.orange.shade700,
+                                      color: AppColors
+                                          .primaryDark, // dark text — readable
                                     ),
                                   ),
                                 ],
@@ -1818,7 +1815,7 @@ class _SpkPipelineRowState extends State<_SpkPipelineRow> {
                         ],
                         const SizedBox(width: 4),
                         if (isDone)
-                          _Badge('Done', AppColors.blue700)
+                          _Badge('Done', AppColors.primary)
                         else if (isCurrent)
                           _Badge('Current', LeadTheme.secondary),
                         if (widget.showAdminBadge && !isDone) ...[
@@ -1883,7 +1880,7 @@ class _SpkPipelineRowState extends State<_SpkPipelineRow> {
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
                 color: isDone
-                    ? AppColors.blueLight2
+                    ? AppColors.primary
                     : LeadTheme.secondary.withValues(alpha: 0.15),
               ),
             ),

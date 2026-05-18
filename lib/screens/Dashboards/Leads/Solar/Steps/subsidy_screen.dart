@@ -1,3 +1,4 @@
+import 'package:solar_project/core/app_colors.dart';
 // lib/screens/.../Steps/subsidy_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -198,14 +199,14 @@ class _YesNoRow extends StatelessWidget {
         _Chip(
           label: 'Yes',
           selected: value == true,
-          color: Colors.green,
+          color: AppColors.success,
           onTap: () => onChanged(value == true ? null : true),
         ),
         const SizedBox(width: 6),
         _Chip(
           label: 'No',
           selected: value == false,
-          color: Colors.red,
+          color: AppColors.error,
           onTap: () => onChanged(value == false ? null : false),
         ),
       ],

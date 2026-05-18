@@ -198,31 +198,32 @@ class _SalesLeadScreenState extends State<SalesLeadScreen>
           ),
         ),
       ),
-      floatingActionButton: Builder(
-        builder: (context) {
-          final role = RoleHelper.roleFrom(context.read<AppStateCubit>().state);
-          if (!RoleHelper.canAddLead(role)) return const SizedBox.shrink();
+      // floatingActionButton: Builder(
+      //   builder: (context) {
+      //     final role = RoleHelper.roleFrom(context.read<AppStateCubit>().state);
+      //     if (!RoleHelper.canAddLead(role)) return const SizedBox.shrink();
 
-          return FloatingActionButton.extended(
-            backgroundColor: activeColor,
-            onPressed: _addLead,
-            icon: const AppSvgIcon(
-              AppSvgAssets.plus,
-              color: Colors.white,
-              size: 18,
-            ),
-            label: Text(
-              _tabController.index == 0 ? 'Solar Lead' : 'Sprinkler Lead',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            elevation: 4,
-          );
-        },
-      ),
+      //     return FloatingActionButton.extended(
+      //       backgroundColor: activeColor,
+      //       onPressed: _addLead,
+      //       icon: const AppSvgIcon(
+      //         AppSvgAssets.plus,
+      //         color: Colors.white,
+      //         size: 18,
+      //       ),
+      //       // label: Text(
+      //       //   _tabController.index == 0 ? 'Solar Lead' : 'Sprinkler Lead',
+      //       //   style: const TextStyle(
+      //       //     color: Colors.white,
+      //       //     fontSize: 13,
+      //       //     fontWeight: FontWeight.w600,
+      //       //   ),
+      //       // ),
+      //       // elevation: 4,
+      //       label: const SizedBox.shrink(),
+      //     );
+      //   },
+      // ),
       body: TabBarView(
         controller: _tabController,
         children: const [

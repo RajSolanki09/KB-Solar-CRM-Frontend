@@ -35,19 +35,19 @@ class _State extends State<SolarFollowupScreen> {
     _DropOption(
       value: 'cold',
       label: 'Cold',
-      color: AppColors.textGray,
+      color: AppColors.slate500,
       icon: AppSvgAssets.activity,
     ),
     _DropOption(
       value: 'medium',
       label: 'Medium',
-      color: AppColors.textGray,
+      color: AppColors.primaryLight,
       icon: AppSvgAssets.clock,
     ),
     _DropOption(
       value: 'hot',
       label: 'Hot',
-      color: AppColors.textGray,
+      color: AppColors.primary,
       icon: AppSvgAssets.sun,
     ),
   ];
@@ -56,25 +56,25 @@ class _State extends State<SolarFollowupScreen> {
     _DropOption(
       value: 'thinking',
       label: 'Thinking',
-      color: AppColors.textGray,
+      color: AppColors.slate500,
       icon: AppSvgAssets.history,
     ),
     _DropOption(
       value: 'negotiation',
       label: 'Negotiation',
-      color: AppColors.textGray,
+      color: AppColors.primaryLight,
       icon: AppSvgAssets.handshake,
     ),
     _DropOption(
       value: 'revisionNeeded',
       label: 'Revision Needed',
-      color: AppColors.textGray,
+      color: AppColors.purple400,
       icon: AppSvgAssets.pencil,
     ),
     _DropOption(
       value: 'rejected',
       label: 'Rejected',
-      color: AppColors.textGray,
+      color: AppColors.error,
       icon: AppSvgAssets.x,
     ),
   ];
@@ -89,7 +89,7 @@ class _State extends State<SolarFollowupScreen> {
         _DropOption(
           value: initialValue,
           label: _humanize(initialValue),
-          color:  AppColors.textGray,
+          color:  AppColors.slate500,
           icon: AppSvgAssets.history,
         ),
       );
@@ -376,13 +376,13 @@ Widget _infoBanner(SolarLeadsModel lead) {
   return Container(
     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
     decoration: BoxDecoration(
-      color: LeadTheme.primary.withValues(alpha: 0.06),
-      border: Border.all(color: LeadTheme.primary.withValues(alpha: 0.2)),
+      color: AppColors.purple50,
+      border: Border.all(color: AppColors.purple200),
       borderRadius: BorderRadius.circular(10),
     ),
     child: Row(
       children: [
-        const AppSvgIcon(AppSvgAssets.userRound, size: 16, color: LeadTheme.primary),
+        const AppSvgIcon(AppSvgAssets.userRound, size: 16, color: AppColors.primary),
         const SizedBox(width: 8),
         Expanded(
           child: Column(
@@ -393,14 +393,14 @@ Widget _infoBanner(SolarLeadsModel lead) {
                 style: const TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: LeadTheme.textPrimary,
+                  color: AppColors.primaryDark,
                 ),
               ),
               Text(
                 '${lead.mobile}  ·  ${lead.address}',
                 style: const TextStyle(
                   fontSize: 11,
-                  color: LeadTheme.textSecondary,
+                  color: AppColors.slate500,
                 ),
               ),
             ],
@@ -412,19 +412,21 @@ Widget _infoBanner(SolarLeadsModel lead) {
 }
 
 Widget _dateTile(String svgAsset, String label, DateTime? date) {
-  final c = date != null ? Colors.green : LeadTheme.textSecondary;
+  final hasDate = date != null;
+  final iconColor = hasDate ? AppColors.primary : AppColors.slate500;
+  final bgColor = hasDate ? AppColors.purple50 : AppColors.surface;
+  final borderColor = hasDate ? AppColors.purple200 : AppColors.gray200;
+
   return Container(
     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
     decoration: BoxDecoration(
-      color: date != null ? Colors.green.shade50 : LeadTheme.surface,
-      border: Border.all(
-        color: date != null ? Colors.green.shade300 : Colors.grey.shade300,
-      ),
+      color: bgColor,
+      border: Border.all(color: borderColor),
       borderRadius: BorderRadius.circular(8),
     ),
     child: Row(
       children: [
-        AppSvgIcon(svgAsset, size: 16, color: c),
+        AppSvgIcon(svgAsset, size: 16, color: iconColor),
         const SizedBox(width: 8),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -433,7 +435,7 @@ Widget _dateTile(String svgAsset, String label, DateTime? date) {
               label,
               style: const TextStyle(
                 fontSize: 11,
-                color: LeadTheme.textSecondary,
+                color: AppColors.slate500,
               ),
             ),
             Text(
@@ -442,17 +444,17 @@ Widget _dateTile(String svgAsset, String label, DateTime? date) {
                   : '${date.day}/${date.month}/${date.year}',
               style: TextStyle(
                 fontSize: 13,
-                fontWeight: FontWeight.w500,
-                color: date == null ? LeadTheme.textMuted : c,
+                fontWeight: FontWeight.w600,
+                color: hasDate ? AppColors.primaryDark : AppColors.slate400,
               ),
             ),
           ],
         ),
         const Spacer(),
         AppSvgIcon(
-          date != null ? AppSvgAssets.circleCheckBig : AppSvgAssets.arrowRight,
+          hasDate ? AppSvgAssets.circleCheckBig : AppSvgAssets.arrowRight,
           size: 14,
-          color: date != null ? Colors.green : Colors.grey.shade400,
+          color: hasDate ? AppColors.primary : AppColors.gray300,
         ),
       ],
     ),
@@ -462,7 +464,9 @@ Widget _dateTile(String svgAsset, String label, DateTime? date) {
 // ── NEW: time tile ────────────────────────────────────────────────────────────
 Widget _timeTile(TimeOfDay? time) {
   final hasTime = time != null;
-  final c = hasTime ? Colors.green.shade600 : LeadTheme.textSecondary;
+  final iconColor = hasTime ? AppColors.primary : AppColors.slate500;
+  final bgColor = hasTime ? AppColors.purple50 : AppColors.surface;
+  final borderColor = hasTime ? AppColors.purple200 : AppColors.gray200;
 
   String fmt(TimeOfDay t) {
     final h = t.hour;
@@ -475,29 +479,27 @@ Widget _timeTile(TimeOfDay? time) {
   return Container(
     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
     decoration: BoxDecoration(
-      color: hasTime ? Colors.green.shade50 : LeadTheme.surface,
-      border: Border.all(
-        color: hasTime ? Colors.green.shade300 : Colors.grey.shade300,
-      ),
+      color: bgColor,
+      border: Border.all(color: borderColor),
       borderRadius: BorderRadius.circular(8),
     ),
     child: Row(
       children: [
-        AppSvgIcon(AppSvgAssets.clock, size: 16, color: c),
+        AppSvgIcon(AppSvgAssets.clock, size: 16, color: iconColor),
         const SizedBox(width: 8),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
               'Follow-up Time',
-              style: TextStyle(fontSize: 11, color: LeadTheme.textSecondary),
+              style: TextStyle(fontSize: 11, color: AppColors.slate500),
             ),
             Text(
               hasTime ? fmt(time) : 'Tap to select time',
               style: TextStyle(
                 fontSize: 13,
-                fontWeight: FontWeight.w500,
-                color: hasTime ? c : LeadTheme.textMuted,
+                fontWeight: FontWeight.w600,
+                color: hasTime ? AppColors.primaryDark : AppColors.slate400,
               ),
             ),
           ],
@@ -506,7 +508,7 @@ Widget _timeTile(TimeOfDay? time) {
         AppSvgIcon(
           hasTime ? AppSvgAssets.circleCheckBig : AppSvgAssets.arrowRight,
           size: 14,
-          color: hasTime ? Colors.green.shade400 : Colors.grey.shade400,
+          color: hasTime ? AppColors.primary : AppColors.gray300,
         ),
       ],
     ),
@@ -546,7 +548,7 @@ Widget _buildColoredDropdown({
     initialValue: value,
     decoration: InputDecoration(
       filled: true,
-      fillColor: selectedColor?.withValues(alpha: 0.08) ?? LeadTheme.surface,
+      fillColor: selectedColor?.withValues(alpha: 0.08) ?? AppColors.purple50,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
         borderSide: BorderSide.none,
@@ -554,7 +556,7 @@ Widget _buildColoredDropdown({
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
         borderSide: BorderSide(
-          color: selectedColor?.withValues(alpha: 0.45) ?? Colors.grey.shade300,
+          color: selectedColor?.withValues(alpha: 0.45) ?? AppColors.gray200,
         ),
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),

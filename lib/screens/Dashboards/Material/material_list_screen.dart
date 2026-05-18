@@ -17,106 +17,8 @@ class MaterialListScreen extends StatefulWidget {
   State<MaterialListScreen> createState() => _MaterialListScreenState();
 }
 
-class _MaterialListScreenState extends State<MaterialListScreen> with TickerProviderStateMixin {
-  // Helper to build page number buttons for material pagination bar
-  List<Widget> _buildPageNumbers() {
-    const Color primaryColor = AppColors.indigo500;
-    const Color borderColor = AppColors.slate200;
-    const Color unselectedBg = AppColors.slate50;
-    const int maxPagesToShow = 5;
-    List<Widget> widgets = [];
-    int start = (_materialPage - 2).clamp(1, (_materialTotalPages - maxPagesToShow + 1).clamp(1, _materialTotalPages));
-    int end = (start + maxPagesToShow - 1).clamp(1, _materialTotalPages);
-    if (_materialTotalPages <= maxPagesToShow) {
-      start = 1;
-      end = _materialTotalPages;
-    }
-    for (int i = start; i <= end; i++) {
-      final bool isSelected = i == _materialPage;
-      widgets.add(
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4),
-          child: GestureDetector(
-            onTap: isSelected || _loadingMaterials ? null : () => _onMaterialPageChanged(i),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 150),
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: isSelected ? primaryColor : unselectedBg,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: borderColor, width: 1.5),
-              ),
-              child: Center(
-                child: Text(
-                  '$i',
-                  style: TextStyle(
-                    color: isSelected ? Colors.white : primaryColor,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 18,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-    return widgets;
-  }
-
-  // Helper to build page number buttons for customer pagination bar
-  List<Widget> _buildCustomerPageNumbers() {
-    const Color primaryColor = AppColors.indigo500;
-    const Color borderColor = AppColors.slate200;
-    const Color unselectedBg = AppColors.slate50;
-    const int maxPagesToShow = 5;
-    List<Widget> widgets = [];
-    int start = (_customerPage - 2).clamp(1, (_customerTotalPages - maxPagesToShow + 1).clamp(1, _customerTotalPages));
-    int end = (start + maxPagesToShow - 1).clamp(1, _customerTotalPages);
-    if (_customerTotalPages <= maxPagesToShow) {
-      start = 1;
-      end = _customerTotalPages;
-    }
-    for (int i = start; i <= end; i++) {
-      final bool isSelected = i == _customerPage;
-      widgets.add(
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4),
-          child: GestureDetector(
-            onTap: isSelected || _loadingCustomers ? null : () => _onCustomerPageChanged(i),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 150),
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: isSelected ? primaryColor : unselectedBg,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: borderColor, width: 1.5),
-              ),
-              child: Center(
-                child: Text(
-                  '$i',
-                  style: TextStyle(
-                    color: isSelected ? Colors.white : primaryColor,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 18,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-    return widgets;
-  }
-
-  void _onCustomerPageChanged(int newPage) {
-    if (newPage < 1 || newPage > _customerTotalPages) return;
-    _loadCustomers(page: newPage);
-  }
-    // (removed duplicate material pagination code)
+class _MaterialListScreenState extends State<MaterialListScreen>
+    with TickerProviderStateMixin {
   final ApiService _apiService = ApiService();
   late TabController _tabController;
 
@@ -124,26 +26,31 @@ class _MaterialListScreenState extends State<MaterialListScreen> with TickerProv
   bool _loadingCustomers = true;
   List<Map<String, dynamic>> _materials = const [];
   List<Map<String, dynamic>> _customers = const [];
+
   int _customerPage = 1;
   int _customerTotalPages = 1;
   static const int _customerLimit = 10;
+
   int _materialPage = 1;
   int _materialTotalPages = 1;
-  // Helper for INR formatting
+  static const int _materialLimit = 10;
+
+  // ─── Formatters ──────────────────────────────────────────────────────────────
+
   String _inr(dynamic value) {
-    final numValue = value is num
-        ? value.toDouble()
-        : double.tryParse('$value') ?? 0;
+    final numValue =
+        value is num ? value.toDouble() : double.tryParse('$value') ?? 0;
     return '₹${numValue.toStringAsFixed(2)}';
   }
 
   String _formatDate(dynamic value) {
-      final raw = value?.toString() ?? '';
-      final dt = DateTime.tryParse(raw);
-      if (dt == null) return '-';
-      return DateFormat('dd MMM yyyy').format(dt.toLocal());
-    }
-  static const int _materialLimit = 10;
+    final raw = value?.toString() ?? '';
+    final dt = DateTime.tryParse(raw);
+    if (dt == null) return '-';
+    return DateFormat('dd MMM yyyy').format(dt.toLocal());
+  }
+
+  // ─── Lifecycle ───────────────────────────────────────────────────────────────
 
   @override
   void initState() {
@@ -160,13 +67,17 @@ class _MaterialListScreenState extends State<MaterialListScreen> with TickerProv
     super.dispose();
   }
 
+  // ─── Data loaders ─────────────────────────────────────────────────────────────
+
   Future<void> _loadMaterials({int page = 1}) async {
     setState(() => _loadingMaterials = true);
     try {
-      final data = await _apiService.getMaterials(page: page, limit: _materialLimit);
+      final data =
+          await _apiService.getMaterials(page: page, limit: _materialLimit);
       if (!mounted) return;
       setState(() {
-        _materials = List<Map<String, dynamic>>.from(data['materials'] ?? []);
+        _materials =
+            List<Map<String, dynamic>>.from(data['materials'] ?? []);
         _materialPage = data['page'] ?? 1;
         _materialTotalPages = data['totalPages'] ?? 1;
         _loadingMaterials = false;
@@ -181,10 +92,12 @@ class _MaterialListScreenState extends State<MaterialListScreen> with TickerProv
   Future<void> _loadCustomers({int page = 1}) async {
     setState(() => _loadingCustomers = true);
     try {
-      final data = await _apiService.getMaterialCustomers(page: page, limit: _customerLimit);
+      final data = await _apiService.getMaterialCustomers(
+          page: page, limit: _customerLimit);
       if (!mounted) return;
       setState(() {
-        _customers = List<Map<String, dynamic>>.from(data['customers'] ?? []);
+        _customers =
+            List<Map<String, dynamic>>.from(data['customers'] ?? []);
         _customerPage = data['page'] ?? 1;
         _customerTotalPages = data['totalPages'] ?? 1;
         _loadingCustomers = false;
@@ -196,25 +109,26 @@ class _MaterialListScreenState extends State<MaterialListScreen> with TickerProv
     }
   }
 
+  // ─── Navigation ──────────────────────────────────────────────────────────────
+
   Future<void> _openAddMaterial() async {
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => const AddMaterialScreen(appBarColor: AppColors.indigo500),
+        builder: (_) =>
+            const AddMaterialScreen(appBarColor: AppColors.indigo500),
       ),
     );
     if (!mounted) return;
-    if (result == true) {
-      await _loadMaterials();
-    }
+    if (result == true) await _loadMaterials();
   }
 
   Future<void> _openAddCustomer() async {
     await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) =>
-            const AddMaterialCustomerScreen(appBarColor: AppColors.indigo500),
+        builder: (_) => const AddMaterialCustomerScreen(
+            appBarColor: AppColors.indigo500),
       ),
     );
     if (!mounted) return;
@@ -226,7 +140,7 @@ class _MaterialListScreenState extends State<MaterialListScreen> with TickerProv
       context,
       MaterialPageRoute(
         builder: (_) => AddMaterialCustomerScreen(
-          appBarColor:   AppColors.indigo500,
+          appBarColor: AppColors.indigo500,
           initialCustomer: customer,
         ),
       ),
@@ -241,18 +155,16 @@ class _MaterialListScreenState extends State<MaterialListScreen> with TickerProv
       AppFeedback.showError(context, 'Customer id not found');
       return;
     }
-
     await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => MaterialCustomerPipelineScreen(
           customerId: id,
           initialCustomer: customer,
-          appBarColor:   AppColors.indigo500,
+          appBarColor: AppColors.indigo500,
         ),
       ),
     );
-
     if (!mounted) return;
     await _loadCustomers();
   }
@@ -262,7 +174,7 @@ class _MaterialListScreenState extends State<MaterialListScreen> with TickerProv
       context,
       MaterialPageRoute(
         builder: (_) => AddMaterialScreen(
-          appBarColor:   AppColors.indigo500,
+          appBarColor: AppColors.indigo500,
           initialMaterial: material,
         ),
       ),
@@ -270,6 +182,8 @@ class _MaterialListScreenState extends State<MaterialListScreen> with TickerProv
     if (!mounted) return;
     await _loadMaterials();
   }
+
+  // ─── ID helpers ──────────────────────────────────────────────────────────────
 
   String? _materialId(Map<String, dynamic> item) {
     final dynamic id = item['_id'] ?? item['id'] ?? item['materialId'];
@@ -283,9 +197,12 @@ class _MaterialListScreenState extends State<MaterialListScreen> with TickerProv
     return value.isEmpty ? null : value;
   }
 
-  Future<void> _confirmAndDeleteMaterial(Map<String, dynamic> material) async {
-    final materialName = (material['materialName'] ?? 'this material')
-        .toString();
+  // ─── Delete confirmations ─────────────────────────────────────────────────────
+
+  Future<void> _confirmAndDeleteMaterial(
+      Map<String, dynamic> material) async {
+    final materialName =
+        (material['materialName'] ?? 'this material').toString();
     final id = _materialId(material);
     if (id == null) {
       AppFeedback.showError(context, 'Material id not found');
@@ -294,26 +211,25 @@ class _MaterialListScreenState extends State<MaterialListScreen> with TickerProv
 
     final shouldDelete = await showDialog<bool>(
       context: context,
-      builder: (ctx) {
-        return AlertDialog(
-          title: const Text('Delete Material'),
-          content: Text('Are you sure you want to delete "$materialName"?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Cancel'),
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete Material'),
+        content:
+            Text('Are you sure you want to delete "$materialName"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.redError,
+              foregroundColor: Colors.white,
             ),
-            ElevatedButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              style: ElevatedButton.styleFrom(
-                backgroundColor:   AppColors.redError,
-                foregroundColor: Colors.white,
-              ),
-              child: const Text('Delete'),
-            ),
-          ],
-        );
-      },
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
     );
 
     if (shouldDelete != true) return;
@@ -322,7 +238,8 @@ class _MaterialListScreenState extends State<MaterialListScreen> with TickerProv
       await _apiService.deleteMaterial(id);
       if (!mounted) return;
       setState(() {
-        _materials = _materials.where((e) => _materialId(e) != id).toList();
+        _materials =
+            _materials.where((e) => _materialId(e) != id).toList();
       });
       AppFeedback.showSuccess(context, 'Material deleted successfully');
     } catch (e) {
@@ -331,9 +248,10 @@ class _MaterialListScreenState extends State<MaterialListScreen> with TickerProv
     }
   }
 
-  Future<void> _confirmAndDeleteCustomer(Map<String, dynamic> customer) async {
-    final customerName = (customer['customerName'] ?? 'this customer')
-        .toString();
+  Future<void> _confirmAndDeleteCustomer(
+      Map<String, dynamic> customer) async {
+    final customerName =
+        (customer['customerName'] ?? 'this customer').toString();
     final id = _customerId(customer);
     if (id == null) {
       AppFeedback.showError(context, 'Customer id not found');
@@ -342,26 +260,25 @@ class _MaterialListScreenState extends State<MaterialListScreen> with TickerProv
 
     final shouldDelete = await showDialog<bool>(
       context: context,
-      builder: (ctx) {
-        return AlertDialog(
-          title: const Text('Delete Customer'),
-          content: Text('Are you sure you want to delete "$customerName"?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Cancel'),
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete Customer'),
+        content:
+            Text('Are you sure you want to delete "$customerName"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.indigo500,
+              foregroundColor: Colors.white,
             ),
-            ElevatedButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              style: ElevatedButton.styleFrom(
-                backgroundColor:   AppColors.indigo500,
-                foregroundColor: Colors.white,
-              ),
-              child: const Text('Delete'),
-            ),
-          ],
-        );
-      },
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
     );
 
     if (shouldDelete != true) return;
@@ -377,46 +294,89 @@ class _MaterialListScreenState extends State<MaterialListScreen> with TickerProv
     }
   }
 
+  // ─── Pagination callbacks ─────────────────────────────────────────────────────
+
   void _onMaterialPageChanged(int newPage) {
     if (newPage < 1 || newPage > _materialTotalPages) return;
     _loadMaterials(page: newPage);
   }
 
+  void _onCustomerPageChanged(int newPage) {
+    if (newPage < 1 || newPage > _customerTotalPages) return;
+    _loadCustomers(page: newPage);
+  }
+
+  // ─── Pagination number builders ───────────────────────────────────────────────
+
+  List<Widget> _buildPageNumbers({
+    required int currentPage,
+    required int totalPages,
+    required bool loading,
+    required void Function(int) onPageTap,
+  }) {
+    const int maxPagesToShow = 5;
+    int start = (currentPage - 2)
+        .clamp(1, (totalPages - maxPagesToShow + 1).clamp(1, totalPages));
+    int end = (start + maxPagesToShow - 1).clamp(1, totalPages);
+    if (totalPages <= maxPagesToShow) {
+      start = 1;
+      end = totalPages;
+    }
+
+    return List.generate(end - start + 1, (i) {
+      final page = start + i;
+      final isSelected = page == currentPage;
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 3),
+        child: GestureDetector(
+          onTap: isSelected || loading ? null : () => onPageTap(page),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 150),
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: isSelected ? AppColors.indigo500 : AppColors.slate50,
+              borderRadius: BorderRadius.circular(8),
+              border:
+                  Border.all(color: AppColors.slate200, width: 1.5),
+            ),
+            child: Center(
+              child: Text(
+                '$page',
+                style: TextStyle(
+                  color:
+                      isSelected ? Colors.white : AppColors.indigo500,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    });
+  }
+
+  // ─── Build ────────────────────────────────────────────────────────────────────
+
   @override
   Widget build(BuildContext context) {
-    final Color primaryColor = widget.appBarColor ??   AppColors.indigo500;
+    final Color primaryColor =
+        widget.appBarColor ?? AppColors.indigo500;
     final screenWidth = MediaQuery.of(context).size.width;
     final isDesktop = screenWidth >= 1024;
     final isExtraLarge = screenWidth >= 1600;
 
-    final horizontalPadding = isExtraLarge
-        ? 0.0
-        : isDesktop
-        ? 8.0
-        : 14.0;
+    final horizontalPadding =
+        isExtraLarge ? 0.0 : isDesktop ? 8.0 : 14.0;
     final isMaterialTab = _tabController.index == 0;
 
-    // Widget build
-    // (no stray return)
     return Scaffold(
-      backgroundColor:   AppColors.slate50,
+      backgroundColor: AppColors.slate50,
+      // ── NO floatingActionButton — moved into _BottomActionBar ──
       appBar: AppBar(
         backgroundColor: primaryColor,
         foregroundColor: Colors.white,
-        title: Row(
-          children: [
-            AppSvgIcon(
-              AppSvgAssets.packagePlus,
-              color: Colors.white,
-              size: 18,
-            ),
-            SizedBox(width: 8),
-            Text(
-              'Material Inventory',
-              style: TextStyle(fontWeight: FontWeight.w700),
-            ),
-          ],
-        ),
         leading: IconButton(
           icon: AppSvgIcon(
             AppSvgAssets.chevronLeft,
@@ -425,293 +385,356 @@ class _MaterialListScreenState extends State<MaterialListScreen> with TickerProv
           ),
           onPressed: () => Navigator.pop(context),
         ),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: isMaterialTab ? _openAddMaterial : _openAddCustomer,
-        backgroundColor: primaryColor,
-        foregroundColor: Colors.white,
-        icon: AppSvgIcon(
-          AppSvgAssets.plus,
-          color: Colors.white,
-          size: 18,
+        title: Row(
+          children: [
+            AppSvgIcon(AppSvgAssets.packagePlus, color: Colors.white, size: 18),
+            const SizedBox(width: 8),
+            const Text(
+              'Material Inventory',
+              style: TextStyle(fontWeight: FontWeight.w700),
+            ),
+          ],
         ),
-        label: Text(isMaterialTab ? 'Add Material' : 'Add Customer'),
       ),
       body: Column(
         children: [
+          // ── Top TabBar: Materials / Customers ─────────────────────────────
           Container(
             color: Colors.white,
             child: TabBar(
               controller: _tabController,
               labelColor: primaryColor,
-              unselectedLabelColor:   AppColors.slate500,
+              unselectedLabelColor: AppColors.slate500,
               indicatorColor: primaryColor,
-              tabs: [
+              tabs: const [
                 Tab(text: 'Materials'),
                 Tab(text: 'Customers'),
               ],
             ),
           ),
+
+          // ── Tab content (scrollable) ──────────────────────────────────────
           Expanded(
-                    child: TabBarView(
-                      controller: _tabController,
-                      children: [
-                        RefreshIndicator(
-                          color: primaryColor,
-                          onRefresh: () => _loadMaterials(page: 1),
-                          child: _loadingMaterials
-                              ? const Center(child: CircularProgressIndicator())
-                              : _materials.isEmpty
-                                  ? ListView(
-                                      children: [
-                                        SizedBox(height: 180),
-                                        Center(
-                                          child: Text(
-                                            'No materials found',
-                                            style: TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w600,
-                                              color: AppColors.slate500,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    )
-                                  : ListView(
-                                      padding: EdgeInsets.all(horizontalPadding),
-                                      children: [
-                                        SizedBox(
-                                          width: double.infinity,
-                                          child: Container(
-                                            decoration: BoxDecoration(
-                                              color: Colors.white,
-                                              borderRadius: BorderRadius.circular(12),
-                                              border: Border.all(
-                                                color: AppColors.slate200,
-                                              ),
-                                            ),
-                                            clipBehavior: Clip.antiAlias,
-                                            child: LayoutBuilder(
-                                              builder: (context, constraints) {
-                                                return SingleChildScrollView(
-                                                  scrollDirection: Axis.horizontal,
-                                                  child: ConstrainedBox(
-                                                    constraints: BoxConstraints(
-                                                      minWidth: constraints.maxWidth,
-                                                    ),
-                                                    child: DataTable(
-                                                      headingRowColor:
-                                                          WidgetStatePropertyAll(
-                                                            primaryColor.withOpacity(0.14),
-                                                          ),
-                                                      headingTextStyle: TextStyle(
-                                                        fontWeight: FontWeight.w600,
-                                                        color: primaryColor,
-                                                      ),
-                                                      columnSpacing: isDesktop ? 56 : 28,
-                                                      columns: const [
-                                                        DataColumn(label: Text('Material')),
-                                                        DataColumn(label: Text('Brand')),
-                                                        DataColumn(label: Text('Purchase')),
-                                                        DataColumn(label: Text('Selling')),
-                                                        DataColumn(label: Text('GST')),
-                                                        DataColumn(label: Text('Created')),
-                                                        DataColumn(label: Text('Actions')),
-                                                      ],
-                                                      rows: _materials.map((item) {
-                                                        return DataRow(
-                                                          cells: [
-                                                            DataCell(
-                                                              Text(
-                                                                '${item['materialName'] ?? '-'}',
-                                                              ),
-                                                            ),
-                                                            DataCell(
-                                                              Text(
-                                                                '${item['brand'] ?? '-'}',
-                                                              ),
-                                                            ),
-                                                            DataCell(
-                                                              Text(
-                                                                _inr(item['purchasePrice']),
-                                                              ),
-                                                            ),
-                                                            DataCell(
-                                                              Text(
-                                                                _inr(item['sellingPrice']),
-                                                              ),
-                                                            ),
-                                                            DataCell(
-                                                              Text(
-                                                                '${item['gstRate'] ?? '-'}',
-                                                              ),
-                                                            ),
-                                                            DataCell(
-                                                              Text(
-                                                                _formatDate(
-                                                                  item['createdAt'],
-                                                                ),
-                                                              ),
-                                                            ),
-                                                            DataCell(
-                                                              Row(
-                                                                children: [
-                                                                  IconButton(
-                                                                    tooltip: 'Edit',
-                                                                    onPressed: () => _openEditMaterial(item),
-                                                                    icon: Icon(
-                                                                      Icons.edit_outlined,
-                                                                      color: primaryColor,
-                                                                      size: 20,
-                                                                    ),
-                                                                  ),
-                                                                  IconButton(
-                                                                    tooltip: 'Delete',
-                                                                    onPressed: () => _confirmAndDeleteMaterial(item),
-                                                                    icon: Icon(
-                                                                      Icons.delete_outline,
-                                                                      color: AppColors.redError,
-                                                                      size: 20,
-                                                                    ),
-                                                                  ),
-                                                                ],
-                                                              ),
-                                                            ),
-                                                          ],
-                                                        );
-                                                      }).toList(),
-                                                    ),
-                                                  ),
-                                                );
-                                              },
-                                            ),
-                                          ),
-                                        ),
-                                        SizedBox(height: 12),
-                                        // Modern Pagination Bar (styled as per image)
-                                        Padding(
-                                          padding: const EdgeInsets.symmetric(vertical: 8),
-                                          child: Row(
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            children: [
-                                              // Previous Button
-                                              GestureDetector(
-                                                onTap: _materialPage > 1 && !_loadingMaterials
-                                                    ? () => _onMaterialPageChanged(_materialPage - 1)
-                                                    : null,
-                                                child: Container(
-                                                  width: 40,
-                                                  height: 40,
-                                                  decoration: BoxDecoration(
-                                                    color: AppColors.slate50,
-                                                    borderRadius: BorderRadius.circular(10),
-                                                    border: Border.all(color: AppColors.slate200, width: 1.5),
-                                                  ),
-                                                  child: Icon(Icons.chevron_left,
-                                                    color: _materialPage > 1 && !_loadingMaterials ? AppColors.indigo500 : AppColors.slate300,
-                                                    size: 22,
-                                                  ),
-                                                ),
-                                              ),
-                                              ..._buildPageNumbers(),
-                                              // Next Button
-                                              GestureDetector(
-                                                onTap: _materialPage < _materialTotalPages && !_loadingMaterials
-                                                    ? () => _onMaterialPageChanged(_materialPage + 1)
-                                                    : null,
-                                                child: Container(
-                                                  width: 40,
-                                                  height: 40,
-                                                  decoration: BoxDecoration(
-                                                    color: AppColors.slate50,
-                                                    borderRadius: BorderRadius.circular(10),
-                                                    border: Border.all(color: AppColors.slate200, width: 1.5),
-                                                  ),
-                                                  child: Icon(Icons.chevron_right,
-                                                    color: _materialPage < _materialTotalPages && !_loadingMaterials ? AppColors.indigo500 : AppColors.slate300,
-                                                    size: 22,
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                        ),
-                        Column(
-                          children: [
-                            Expanded(
-                              child: MaterialCustomerListTab(
-                                loading: _loadingCustomers,
-                                customers: _customers,
-                                onRefresh: () => _loadCustomers(page: 1),
-                                color: primaryColor,
-                                horizontalPadding: horizontalPadding,
-                                isDesktop: isDesktop,
-                                formatDate: _formatDate,
-                                onOpenCustomer: _openCustomerPipeline,
-                                onEditCustomer: _openEditCustomer,
-                                onDeleteCustomer: _confirmAndDeleteCustomer,
-                              ),
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                // ── Materials tab ──────────────────────────────────────────
+                _buildMaterialsTab(
+                  primaryColor: primaryColor,
+                  horizontalPadding: horizontalPadding,
+                  isDesktop: isDesktop,
+                ),
+
+                // ── Customers tab ──────────────────────────────────────────
+                _buildCustomersTab(
+                  primaryColor: primaryColor,
+                  horizontalPadding: horizontalPadding,
+                  isDesktop: isDesktop,
+                ),
+              ],
+            ),
+          ),
+
+          // ── Sticky bottom bar: pagination + add button ────────────────────
+          _BottomActionBar(
+            primaryColor: primaryColor,
+            onAdd: isMaterialTab ? _openAddMaterial : _openAddCustomer,
+            addLabel: isMaterialTab ? 'Add Material' : 'Add Customer',
+            page: isMaterialTab ? _materialPage : _customerPage,
+            totalPages:
+                isMaterialTab ? _materialTotalPages : _customerTotalPages,
+            loading:
+                isMaterialTab ? _loadingMaterials : _loadingCustomers,
+            onPrev: isMaterialTab
+                ? () => _onMaterialPageChanged(_materialPage - 1)
+                : () => _onCustomerPageChanged(_customerPage - 1),
+            onNext: isMaterialTab
+                ? () => _onMaterialPageChanged(_materialPage + 1)
+                : () => _onCustomerPageChanged(_customerPage + 1),
+            pageNumbers: _buildPageNumbers(
+              currentPage:
+                  isMaterialTab ? _materialPage : _customerPage,
+              totalPages:
+                  isMaterialTab ? _materialTotalPages : _customerTotalPages,
+              loading:
+                  isMaterialTab ? _loadingMaterials : _loadingCustomers,
+              onPageTap: isMaterialTab
+                  ? _onMaterialPageChanged
+                  : _onCustomerPageChanged,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ─── Materials tab widget ─────────────────────────────────────────────────────
+
+  Widget _buildMaterialsTab({
+    required Color primaryColor,
+    required double horizontalPadding,
+    required bool isDesktop,
+  }) {
+    return RefreshIndicator(
+      color: primaryColor,
+      onRefresh: () => _loadMaterials(page: 1),
+      child: _loadingMaterials
+          ? const Center(child: CircularProgressIndicator())
+          : _materials.isEmpty
+              ? ListView(
+                  children: [
+                    const SizedBox(height: 180),
+                    Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.inventory_2_outlined,
+                              size: 48, color: AppColors.slate300),
+                          const SizedBox(height: 12),
+                          const Text(
+                            'No materials found',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.slate500,
                             ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 8),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  // Previous Button
-                                  GestureDetector(
-                                    onTap: _customerPage > 1 && !_loadingCustomers
-                                        ? () => _onCustomerPageChanged(_customerPage - 1)
-                                        : null,
-                                    child: Container(
-                                      width: 40,
-                                      height: 40,
-                                      decoration: BoxDecoration(
-                                        color: AppColors.slate50,
-                                        borderRadius: BorderRadius.circular(10),
-                                        border: Border.all(color: AppColors.slate200, width: 1.5),
-                                      ),
-                                      child: Icon(Icons.chevron_left,
-                                        color: _customerPage > 1 && !_loadingCustomers ? AppColors.indigo500 : AppColors.slate300,
-                                        size: 22,
-                                      ),
-                                    ),
-                                  ),
-                                  ..._buildCustomerPageNumbers(),
-                                  // Next Button
-                                  GestureDetector(
-                                    onTap: _customerPage < _customerTotalPages && !_loadingCustomers
-                                        ? () => _onCustomerPageChanged(_customerPage + 1)
-                                        : null,
-                                    child: Container(
-                                      width: 40,
-                                      height: 40,
-                                      decoration: BoxDecoration(
-                                        color: AppColors.slate50,
-                                        borderRadius: BorderRadius.circular(10),
-                                        border: Border.all(color: AppColors.slate200, width: 1.5),
-                                      ),
-                                      child: Icon(Icons.chevron_right,
-                                        color: _customerPage < _customerTotalPages && !_loadingCustomers ? AppColors.indigo500 : AppColors.slate300,
-                                        size: 22,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+                          ),
+                        ],
+                      ),
                     ),
+                  ],
+                )
+              : ListView(
+                  padding: EdgeInsets.fromLTRB(
+                      horizontalPadding, horizontalPadding,
+                      horizontalPadding, 8),
+                  children: [
+                    Container(
+                      width: double.infinity,
+                      clipBehavior: Clip.antiAlias,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: AppColors.slate200),
+                      ),
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          return SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(
+                                  minWidth: constraints.maxWidth),
+                              child: DataTable(
+                                headingRowColor: WidgetStatePropertyAll(
+                                  primaryColor.withValues(alpha: 0.14),
+                                ),
+                                headingTextStyle: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  color: primaryColor,
+                                ),
+                                columnSpacing: isDesktop ? 56 : 28,
+                                columns: const [
+                                  DataColumn(label: Text('Material')),
+                                  DataColumn(label: Text('Brand')),
+                                  DataColumn(label: Text('Purchase')),
+                                  DataColumn(label: Text('Selling')),
+                                  DataColumn(label: Text('GST')),
+                                  DataColumn(label: Text('Created')),
+                                  DataColumn(label: Text('Actions')),
+                                ],
+                                rows: _materials.map((item) {
+                                  return DataRow(cells: [
+                                    DataCell(Text(
+                                        '${item['materialName'] ?? '-'}')),
+                                    DataCell(
+                                        Text('${item['brand'] ?? '-'}')),
+                                    DataCell(
+                                        Text(_inr(item['purchasePrice']))),
+                                    DataCell(
+                                        Text(_inr(item['sellingPrice']))),
+                                    DataCell(
+                                        Text('${item['gstRate'] ?? '-'}')),
+                                    DataCell(Text(
+                                        _formatDate(item['createdAt']))),
+                                    DataCell(
+                                      Row(children: [
+                                        IconButton(
+                                          tooltip: 'Edit',
+                                          onPressed: () =>
+                                              _openEditMaterial(item),
+                                          icon: Icon(Icons.edit_outlined,
+                                              color: primaryColor,
+                                              size: 20),
+                                        ),
+                                        IconButton(
+                                          tooltip: 'Delete',
+                                          onPressed: () =>
+                                              _confirmAndDeleteMaterial(
+                                                  item),
+                                          icon: const Icon(
+                                              Icons.delete_outline,
+                                              color: AppColors.redError,
+                                              size: 20),
+                                        ),
+                                      ]),
+                                    ),
+                                  ]);
+                                }).toList(),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+    );
+  }
+
+  // ─── Customers tab widget ─────────────────────────────────────────────────────
+
+  Widget _buildCustomersTab({
+    required Color primaryColor,
+    required double horizontalPadding,
+    required bool isDesktop,
+  }) {
+    return MaterialCustomerListTab(
+      loading: _loadingCustomers,
+      customers: _customers,
+      onRefresh: () => _loadCustomers(page: 1),
+      color: primaryColor,
+      horizontalPadding: horizontalPadding,
+      isDesktop: isDesktop,
+      formatDate: _formatDate,
+      onOpenCustomer: _openCustomerPipeline,
+      onEditCustomer: _openEditCustomer,
+      onDeleteCustomer: _confirmAndDeleteCustomer,
+      onAddCustomer: _openAddCustomer,
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Sticky Bottom Action Bar — pagination (left) + add button (right)
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _BottomActionBar extends StatelessWidget {
+  final Color primaryColor;
+  final VoidCallback onAdd;
+  final String addLabel;
+  final int page;
+  final int totalPages;
+  final bool loading;
+  final VoidCallback onPrev;
+  final VoidCallback onNext;
+  final List<Widget> pageNumbers;
+
+  const _BottomActionBar({
+    required this.primaryColor,
+    required this.onAdd,
+    required this.addLabel,
+    required this.page,
+    required this.totalPages,
+    required this.loading,
+    required this.onPrev,
+    required this.onNext,
+    required this.pageNumbers,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        border: Border(top: BorderSide(color: AppColors.slate200)),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      child: Row(
+        children: [
+          // ── Pagination ──────────────────────────────────────────────────
+          Expanded(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _PageNavBtn(
+                    icon: Icons.chevron_left,
+                    enabled: page > 1 && !loading,
+                    onTap: onPrev,
+                  ),
+                  ...pageNumbers,
+                  _PageNavBtn(
+                    icon: Icons.chevron_right,
+                    enabled: page < totalPages && !loading,
+                    onTap: onNext,
                   ),
                 ],
               ),
-            );
+            ),
+          ),
+
+          const SizedBox(width: 10),
+
+          // ── Add button ──────────────────────────────────────────────────
+          ElevatedButton.icon(
+            onPressed: onAdd,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: primaryColor,
+              foregroundColor: Colors.white,
+              elevation: 0,
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 14, vertical: 11),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10)),
+            ),
+            icon: const Icon(Icons.add, size: 17),
+            label: Text(
+              addLabel,
+              style: const TextStyle(
+                  fontSize: 13, fontWeight: FontWeight.w600),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Prev / Next nav button
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _PageNavBtn extends StatelessWidget {
+  final IconData icon;
+  final bool enabled;
+  final VoidCallback onTap;
+
+  const _PageNavBtn({
+    required this.icon,
+    required this.enabled,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: enabled ? onTap : null,
+      child: Container(
+        width: 36,
+        height: 36,
+        margin: const EdgeInsets.symmetric(horizontal: 2),
+        decoration: BoxDecoration(
+          color: AppColors.slate50,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: AppColors.slate200, width: 1.5),
+        ),
+        child: Icon(
+          icon,
+          size: 20,
+          color: enabled ? AppColors.indigo500 : AppColors.slate300,
+        ),
+      ),
+    );
+  }
 }
-
-
-

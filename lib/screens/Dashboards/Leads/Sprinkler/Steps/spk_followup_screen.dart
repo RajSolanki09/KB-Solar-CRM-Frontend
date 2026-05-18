@@ -39,7 +39,7 @@ class _State extends State<SprinklerFollowupScreen> {
     _DropOption(
       value: 'cold',
       label: 'Cold',
-      color: AppColors.blue,
+      color: AppColors.primary,
       icon: AppSvgAssets.thermometer,
     ),
     _DropOption(
@@ -51,7 +51,7 @@ class _State extends State<SprinklerFollowupScreen> {
     _DropOption(
       value: 'hot',
       label: 'Hot',
-      color: AppColors.redError,
+      color: AppColors.error,
       icon: AppSvgAssets.sunMedium,
     ),
   ];
@@ -73,13 +73,13 @@ class _State extends State<SprinklerFollowupScreen> {
     _DropOption(
       value: 'revisionNeeded',
       label: 'Revision Needed',
-      color: AppColors.cyan600,
+      color: AppColors.primaryLight,
       icon: AppSvgAssets.pencil,
     ),
     _DropOption(
       value: 'rejected',
       label: 'Rejected',
-      color: AppColors.redError,
+      color: AppColors.errorLight,
       icon: AppSvgAssets.x,
     ),
   ];

@@ -1,3 +1,4 @@
+import 'package:solar_project/core/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:solar_project/Cubits/SolarLeads/solar_leads_cubit.dart';
@@ -197,7 +198,7 @@ class _State extends State<SolarMeterScreen> {
             if (allDone)
               _infoCard(
                 AppSvgAssets.circleCheckBig,
-                Colors.green,
+                AppColors.success,
                 'All meter process stages completed!',
               ),
 
@@ -245,9 +246,9 @@ Widget _meterDateTile(
     child: Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       decoration: BoxDecoration(
-        color: done ? Colors.green.shade50 : LeadTheme.surface,
+        color: done ? AppColors.purple50 : LeadTheme.surface,
         border: Border.all(
-          color: done ? Colors.green.shade300 : Colors.grey.shade200,
+          color: done ? AppColors.success.withValues(alpha: 0.4) : Colors.grey.shade200,
         ),
         borderRadius: BorderRadius.circular(8),
       ),
@@ -256,7 +257,7 @@ Widget _meterDateTile(
           AppSvgIcon(
             svgAsset,
             size: 18,
-            color: done ? Colors.green : LeadTheme.textSecondary,
+            color: done ? AppColors.success : LeadTheme.textSecondary,
           ),
           const SizedBox(width: 10),
           Expanded(
@@ -268,7 +269,7 @@ Widget _meterDateTile(
                   style: TextStyle(
                     fontSize: 12,
                     color: done
-                        ? Colors.green.shade700
+                        ? AppColors.success
                         : LeadTheme.textSecondary,
                   ),
                 ),
@@ -279,7 +280,7 @@ Widget _meterDateTile(
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: done ? Colors.green.shade800 : LeadTheme.textMuted,
+                    color: done ? AppColors.success : LeadTheme.textMuted,
                   ),
                 ),
               ],
@@ -288,7 +289,7 @@ Widget _meterDateTile(
           AppSvgIcon(
             done ? AppSvgAssets.circleCheckBig : AppSvgAssets.plus,
             size: 20,
-            color: done ? Colors.green : Colors.grey.shade400,
+            color: done ? AppColors.success : Colors.grey.shade400,
           ),
         ],
       ),

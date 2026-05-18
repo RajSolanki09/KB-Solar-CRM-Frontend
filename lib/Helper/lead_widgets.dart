@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:solar_project/Helper/app_svg_icon.dart';
+import 'package:solar_project/core/app_colors.dart';
 
 // ─────────────────────────────────────────────
 //  COMPACT CARD
@@ -80,8 +81,9 @@ class StatusBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Chip(
-      label: Text(status, style: const TextStyle(fontSize: 11)),
-      backgroundColor: Colors.blue.shade50,
+      label: Text(status, style: const TextStyle(fontSize: 11, color: AppColors.primaryDark)),
+      backgroundColor: AppColors.purple50,
+      side: const BorderSide(color: AppColors.purple200),
       padding: EdgeInsets.zero,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
     );
@@ -103,9 +105,10 @@ class NextStepButton extends StatelessWidget {
         width: double.infinity,
         child: ElevatedButton.icon(
           onPressed: onPressed,
-          icon: const AppSvgIcon(AppSvgAssets.arrowRight, size: 16),
-          label: const Text("Move to Next Step"),
+          icon: const AppSvgIcon(AppSvgAssets.arrowRight, size: 16, color: Colors.white),
+          label: const Text("Move to Next Step", style: TextStyle(color: Colors.white)),
           style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.primary,
             padding: const EdgeInsets.symmetric(vertical: 12),
           ),
         ),
@@ -154,10 +157,10 @@ class CompactStepper extends StatelessWidget {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: isDone
-                        ? Colors.green
+                        ? AppColors.primaryLight
                         : isCurrent
-                        ? Colors.blue
-                        : Colors.grey.shade300,
+                        ? AppColors.primary
+                        : AppColors.purple200,
                   ),
                   child: Center(
                     child: isDone
@@ -166,7 +169,7 @@ class CompactStepper extends StatelessWidget {
                             '${i + 1}',
                             style: TextStyle(
                               fontSize: 11,
-                              color: isCurrent ? Colors.white : Colors.black54,
+                              color: isCurrent ? Colors.white : AppColors.slate500,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -182,10 +185,10 @@ class CompactStepper extends StatelessWidget {
                           ? FontWeight.w600
                           : FontWeight.normal,
                       color: isDone
-                          ? Colors.green.shade700
+                          ? AppColors.primaryLight
                           : isCurrent
-                          ? Colors.blue.shade700
-                          : Colors.grey.shade500,
+                          ? AppColors.primary
+                          : AppColors.slate500,
                     ),
                   ),
                 ),
@@ -196,12 +199,13 @@ class CompactStepper extends StatelessWidget {
                       vertical: 2,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.blue.shade50,
+                      color: AppColors.purple50,
                       borderRadius: BorderRadius.circular(4),
+                      border: Border.all(color: AppColors.purple200),
                     ),
                     child: const Text(
                       "Current",
-                      style: TextStyle(fontSize: 10, color: Colors.blue),
+                      style: TextStyle(fontSize: 10, color: AppColors.primary),
                     ),
                   ),
               ],

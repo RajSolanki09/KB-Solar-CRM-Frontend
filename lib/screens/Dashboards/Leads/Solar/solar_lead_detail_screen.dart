@@ -953,7 +953,7 @@ class _SolarLeadDetailScreenState extends State<SolarLeadDetailScreen> {
                       gradient: LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
-                        colors: [AppColors.orangeAccent3, AppColors.orange600],
+                        colors: [AppColors.warning, AppColors.warning],
                       ),
                     ),
                     child: SafeArea(
@@ -1269,7 +1269,7 @@ class _SolarLeadDetailScreenState extends State<SolarLeadDetailScreen> {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           gradient: const LinearGradient(
-            colors: [AppColors.orangeAccent3, AppColors.orange600],
+            colors: [AppColors.warning, AppColors.warning],
           ),
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
@@ -1333,19 +1333,19 @@ class _SolarLeadDetailScreenState extends State<SolarLeadDetailScreen> {
     decoration: BoxDecoration(
       color: AppColors.lightBg3,
       borderRadius: BorderRadius.circular(12),
-      border: Border.all(color: AppColors.greenAccent2),
+      border: Border.all(color: AppColors.success),
     ),
     child: Row(
       children: [
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: Colors.green.shade100,
+            color: AppColors.success.withValues(alpha: 0.2),
             borderRadius: BorderRadius.circular(8),
           ),
           child: AppSvgIcon(
             AppSvgAssets.circleCheckBig,
-            color: Colors.green.shade700,
+            color: AppColors.success,
             size: 20,
           ),
         ),
@@ -1358,12 +1358,12 @@ class _SolarLeadDetailScreenState extends State<SolarLeadDetailScreen> {
               style: TextStyle(
                 fontWeight: FontWeight.w700,
                 fontSize: 14,
-                color: AppColors.green800,
+                color: AppColors.success,
               ),
             ),
             Text(
               'All $_totalSteps steps done successfully',
-              style: TextStyle(fontSize: 11, color: Colors.green.shade600),
+              style: TextStyle(fontSize: 11, color: AppColors.success),
             ),
           ],
         ),
@@ -1441,7 +1441,7 @@ class _SolarLeadDetailScreenState extends State<SolarLeadDetailScreen> {
               minHeight: 6,
               backgroundColor: AppColors.divider,
               valueColor: AlwaysStoppedAnimation<Color>(
-                lead.isCompleted ? Colors.green : LeadTheme.orange,
+                lead.isCompleted ? AppColors.success : LeadTheme.orange,
               ),
             ),
           ),
@@ -1453,7 +1453,7 @@ class _SolarLeadDetailScreenState extends State<SolarLeadDetailScreen> {
             style: TextStyle(
               fontSize: 11,
               color: lead.isCompleted
-                  ? Colors.green.shade600
+                  ? AppColors.success
                   : AppColors.textGray,
             ),
           ),
@@ -1844,12 +1844,12 @@ class _PipelineRowState extends State<_PipelineRow> {
     final step = widget.step;
 
     final Color dotColor = isDone
-        ? AppColors.green
+        ? AppColors.success
         : isCurrent
         ? LeadTheme.orange
         : AppColors.gray300;
 
-    final Color lineColor = isDone ? AppColors.green : AppColors.divider;
+    final Color lineColor = isDone ? AppColors.success : AppColors.divider;
 
     final isNewLead = step.index == 0;
     final hasData =
@@ -1955,7 +1955,7 @@ class _PipelineRowState extends State<_PipelineRow> {
                                   ? FontWeight.w600
                                   : FontWeight.w400,
                               color: isDone
-                                  ? AppColors.green800
+                                  ? AppColors.success
                                   : isCurrent
                                   ? LeadTheme.orange
                                   : AppColors.textLight,
@@ -2008,7 +2008,7 @@ class _PipelineRowState extends State<_PipelineRow> {
                         ],
                         const SizedBox(width: 4),
                         if (isDone)
-                          _Badge('Done', AppColors.green)
+                          _Badge('Done', AppColors.success)
                         else if (isCurrent)
                           _Badge('Current', LeadTheme.orange),
                         if (widget.showAdminBadge && !isDone) ...[

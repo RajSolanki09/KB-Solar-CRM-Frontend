@@ -195,7 +195,7 @@ class _SolarLeadsListScreenState extends State<SolarLeadsListScreen>
               child: const AppSvgIcon(
                 AppSvgAssets.trash2,
                 size: 20,
-                color: AppColors.redDarker,
+                color: AppColors.error,
               ),
             ),
             const SizedBox(width: 10),
@@ -260,7 +260,7 @@ class _SolarLeadsListScreenState extends State<SolarLeadsListScreen>
                   AppSvgIcon(
                     AppSvgAssets.triangleAlert,
                     size: 15,
-                    color: AppColors.orange600,
+                    color: AppColors.warning,
                   ),
                   SizedBox(width: 8),
                   Expanded(
@@ -268,7 +268,7 @@ class _SolarLeadsListScreenState extends State<SolarLeadsListScreen>
                       'This will permanently remove ALL data including site visit, quotation, installation, payment records and photos. This action cannot be undone.',
                       style: TextStyle(
                         fontSize: 12,
-                        color: AppColors.orange800,
+                        color: AppColors.warning,
                         height: 1.4,
                       ),
                     ),
@@ -285,7 +285,7 @@ class _SolarLeadsListScreenState extends State<SolarLeadsListScreen>
           ),
           FilledButton(
             style: FilledButton.styleFrom(
-              backgroundColor:   AppColors.redDarker,
+              backgroundColor:   AppColors.error,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
@@ -316,7 +316,7 @@ class _SolarLeadsListScreenState extends State<SolarLeadsListScreen>
           style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w700,
-            color: AppColors.redDarker,
+            color: AppColors.error,
           ),
         ),
         content: Text(
@@ -340,7 +340,7 @@ class _SolarLeadsListScreenState extends State<SolarLeadsListScreen>
           ),
           FilledButton(
             style: FilledButton.styleFrom(
-              backgroundColor:   AppColors.redDark,
+              backgroundColor:   AppColors.error,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),

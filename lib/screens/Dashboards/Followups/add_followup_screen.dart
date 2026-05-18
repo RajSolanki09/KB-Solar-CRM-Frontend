@@ -56,7 +56,7 @@ class _AddFollowupScreenState extends State<AddFollowupScreen> {
       lastDate: DateTime.now().add(const Duration(days: 365)),
       builder: (ctx, child) => Theme(
         data: Theme.of(ctx).copyWith(
-          colorScheme: const ColorScheme.light(primary: AppColors.blue),
+          colorScheme: const ColorScheme.light(primary: AppColors.primary),
         ),
         child: child!,
       ),
@@ -276,24 +276,24 @@ class _AddFollowupScreenState extends State<AddFollowupScreen> {
                   vertical: 14,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppColors.purple50,
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color:   AppColors.slate200),
+                  border: Border.all(color: AppColors.purple200),
                 ),
                 child: Row(
                   children: [
                     const AppSvgIcon(
                       AppSvgAssets.calendarDays,
                       size: 18,
-                      color: AppColors.blue,
+                      color: AppColors.primary,
                     ),
                     const SizedBox(width: 12),
                     Text(
                       _formatDate(_nextFollowupDate),
                       style: const TextStyle(
                         fontSize: 14,
-                        color: AppColors.slate800,
-                        fontWeight: FontWeight.w500,
+                        color: AppColors.primaryDark,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ],
@@ -326,7 +326,7 @@ class _AddFollowupScreenState extends State<AddFollowupScreen> {
             child: ElevatedButton(
               onPressed: _saving ? null : _save,
               style: ElevatedButton.styleFrom(
-                backgroundColor:   AppColors.blue,
+                backgroundColor: AppColors.primary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -362,7 +362,7 @@ class _AddFollowupScreenState extends State<AddFollowupScreen> {
 
   InputDecoration _inputDec(String hint) => InputDecoration(
     hintText: hint,
-    hintStyle: const TextStyle(color: AppColors.slate300, fontSize: 13),
+    hintStyle: const TextStyle(color: AppColors.slate400, fontSize: 13),
     filled: true,
     fillColor: Colors.white,
     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -376,7 +376,7 @@ class _AddFollowupScreenState extends State<AddFollowupScreen> {
     ),
     focusedBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(10),
-      borderSide: const BorderSide(color: AppColors.blue, width: 1.5),
+      borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
     ),
   );
 }
@@ -444,10 +444,10 @@ class _TypeChip extends StatelessWidget {
         duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
         decoration: BoxDecoration(
-          color: selected ?   AppColors.blue : Colors.white,
+          color: selected ? AppColors.primary : Colors.white,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: selected ?   AppColors.blue :   AppColors.slate200,
+            color: selected ? AppColors.primary : AppColors.slate200,
           ),
         ),
         child: Text(

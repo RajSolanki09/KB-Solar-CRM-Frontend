@@ -1,3 +1,4 @@
+import 'package:solar_project/core/app_colors.dart';
 // lib/screens/Solar/Steps/installation_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -293,7 +294,7 @@ class _CompletedState extends State<SolarInstallationScreen> {
                       AppSvgAssets.calendarCheck,
                       'Structure Completed Date',
                       _structureCompletedDate,
-                      color: Colors.blue,
+                      color: AppColors.primary,
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -309,7 +310,7 @@ class _CompletedState extends State<SolarInstallationScreen> {
                       AppSvgAssets.calendarCheck,
                       'Wiring Completed Date',
                       _wiringCompletedDate,
-                      color: Colors.blue,
+                      color: AppColors.primary,
                     ),
                   ),
                 ],
@@ -322,7 +323,7 @@ class _CompletedState extends State<SolarInstallationScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _photoSectionHeader(
-                    color: Colors.green,
+                    color: AppColors.success,
                     title: 'After Installation Photos',
                     subtitle:
                         'Capture after completion — panels on roof, inverter, wiring done',
@@ -351,7 +352,7 @@ class _CompletedState extends State<SolarInstallationScreen> {
                       AppSvgAssets.circleCheckBig,
                       'Installation Completed On',
                       _completedDate,
-                      color: Colors.green,
+                      color: AppColors.success,
                     ),
                   ),
                 ],
@@ -470,7 +471,7 @@ Widget _dateTile(
   String svgAsset,
   String label,
   DateTime? date, {
-  Color color = Colors.green,
+  Color color = AppColors.success,
 }) {
   final c = date != null ? color : LeadTheme.textSecondary;
   return Container(
@@ -531,7 +532,7 @@ Widget _checkTile(
   decoration: BoxDecoration(
     color: LeadTheme.surface,
     border: Border.all(
-      color: value ? Colors.green.shade300 : Colors.grey.shade200,
+      color: value ? AppColors.success.withValues(alpha: 0.4) : Colors.grey.shade200,
     ),
     borderRadius: BorderRadius.circular(8),
   ),
@@ -543,7 +544,7 @@ Widget _checkTile(
           AppSvgIcon(
             svgAsset,
             size: 18,
-            color: value ? Colors.green : LeadTheme.textSecondary,
+            color: value ? AppColors.success : LeadTheme.textSecondary,
           ),
           const SizedBox(width: 10),
           Expanded(
@@ -552,7 +553,7 @@ Widget _checkTile(
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
-                color: value ? Colors.green.shade700 : LeadTheme.textPrimary,
+                color: value ? AppColors.success : LeadTheme.textPrimary,
               ),
             ),
           ),
@@ -566,7 +567,7 @@ Widget _checkTile(
               label: 'Yes',
               selected: value,
               onTap: () => onChanged(true),
-              activeColor: Colors.green,
+              activeColor: AppColors.success,
             ),
           ),
           const SizedBox(width: 8),
@@ -575,7 +576,7 @@ Widget _checkTile(
               label: 'No',
               selected: !value,
               onTap: () => onChanged(false),
-              activeColor: Colors.red,
+              activeColor: AppColors.error,
             ),
           ),
         ],

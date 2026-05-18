@@ -12,6 +12,7 @@ class MaterialCustomerListTab extends StatefulWidget {
   final Future<void> Function(Map<String, dynamic> customer) onOpenCustomer;
   final Future<void> Function(Map<String, dynamic> customer) onEditCustomer;
   final Future<void> Function(Map<String, dynamic> customer) onDeleteCustomer;
+  // onAddCustomer kept for API compatibility but FAB is now in parent's BottomActionBar
   final VoidCallback? onAddCustomer;
 
   const MaterialCustomerListTab({
@@ -93,48 +94,48 @@ class _MaterialCustomerListTabState extends State<MaterialCustomerListTab>
   Color _statusBackgroundColor(String status) {
     switch (status.toLowerCase()) {
       case 'new':
-        return   AppColors.cyanLight;
+        return AppColors.cyanLight;
       case 'follow up':
       case 'follow-up':
-        return  AppColors.yellowAccent;
+        return AppColors.yellowAccent;
       case 'quoted':
       case 'quotation sent':
-        return   AppColors.purpleLight1;
+        return AppColors.purpleLight1;
       case 'won':
       case 'completed':
       case 'project completed':
       case 'payment':
       case 'payment completed':
-        return   AppColors.greenLight;
+        return AppColors.greenLight;
       case 'lost':
       case 'cancelled':
-        return  AppColors.errorLight;
+        return AppColors.errorLight;
       default:
-        return   AppColors.slate200;
+        return AppColors.slate200;
     }
   }
 
   Color _statusTextColor(String status) {
     switch (status.toLowerCase()) {
       case 'new':
-        return   AppColors.cyanLight;
+        return AppColors.cyanLight;
       case 'follow up':
       case 'follow-up':
-        return  AppColors.orange900;
+        return AppColors.orange900;
       case 'quoted':
       case 'quotation sent':
-        return   AppColors.purple1;
+        return AppColors.purple1;
       case 'won':
       case 'completed':
       case 'project completed':
       case 'payment':
       case 'payment completed':
-        return   AppColors.greenDark;
+        return AppColors.greenDark;
       case 'lost':
       case 'cancelled':
-        return   AppColors.redDarker;
+        return AppColors.redDarker;
       default:
-        return   AppColors.slate700;
+        return AppColors.slate700;
     }
   }
 
@@ -159,11 +160,7 @@ class _MaterialCustomerListTabState extends State<MaterialCustomerListTab>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.inbox_outlined,
-              size: 48,
-              color:   AppColors.slate300,
-            ),
+            Icon(Icons.inbox_outlined, size: 48, color: AppColors.slate300),
             const SizedBox(height: 12),
             Text(
               message,
@@ -210,6 +207,7 @@ class _MaterialCustomerListTabState extends State<MaterialCustomerListTab>
               rows: items.map((item) {
                 final status = _statusOf(item);
                 return DataRow(
+                  onSelectChanged: (_) => widget.onOpenCustomer(item),
                   cells: [
                     DataCell(Text('${item['customerName'] ?? '-'}')),
                     DataCell(Text('${item['mobile'] ?? '-'}')),
@@ -260,7 +258,6 @@ class _MaterialCustomerListTabState extends State<MaterialCustomerListTab>
                       ),
                     ),
                   ],
-                  onSelectChanged: (_) => widget.onOpenCustomer(item),
                 );
               }).toList(),
             ),
@@ -270,7 +267,6 @@ class _MaterialCustomerListTabState extends State<MaterialCustomerListTab>
     );
   }
 
-  /// Tab content — wraps table or empty state inside a scrollable + RefreshIndicator
   Widget _buildTabContent({
     required List<Map<String, dynamic>> items,
     required String emptyMessage,
@@ -280,7 +276,6 @@ class _MaterialCustomerListTabState extends State<MaterialCustomerListTab>
       onRefresh: widget.onRefresh,
       child: items.isEmpty
           ? ListView(
-              // ListView needed so RefreshIndicator works even when empty
               children: [_buildEmptyMessage(emptyMessage)],
             )
           : SingleChildScrollView(
@@ -292,7 +287,7 @@ class _MaterialCustomerListTabState extends State<MaterialCustomerListTab>
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color:   AppColors.slate200),
+                  border: Border.all(color: AppColors.slate200),
                 ),
                 child: _buildCustomerTable(items),
               ),
@@ -303,24 +298,19 @@ class _MaterialCustomerListTabState extends State<MaterialCustomerListTab>
   // ─── Build ────────────────────────────────────────────────────────────────────
 
   @override
-  @override
   Widget build(BuildContext context) {
     if (widget.loading) {
       return Center(child: CircularProgressIndicator(color: widget.color));
     }
 
-    final activeCustomers = widget.customers
-        .where((c) => !_isCompletedCustomer(c))
-        .toList();
-    final completedCustomers = widget.customers
-        .where(_isCompletedCustomer)
-        .toList();
-
-    const double fabH = 36.0;
+    final activeCustomers =
+        widget.customers.where((c) => !_isCompletedCustomer(c)).toList();
+    final completedCustomers =
+        widget.customers.where(_isCompletedCustomer).toList();
 
     return Column(
       children: [
-        // ── TabBar ───────────────────────────────────────────────────────────
+        // ── Inner TabBar (Active / Completed) ────────────────────────────────
         Container(
           color: Colors.white,
           child: TabBar(
@@ -328,7 +318,7 @@ class _MaterialCustomerListTabState extends State<MaterialCustomerListTab>
             indicatorColor: widget.color,
             indicatorWeight: 3,
             labelColor: widget.color,
-            unselectedLabelColor:   AppColors.slate300,
+            unselectedLabelColor: AppColors.slate300,
             labelStyle: const TextStyle(
               fontWeight: FontWeight.w700,
               fontSize: 14,
@@ -360,8 +350,8 @@ class _MaterialCustomerListTabState extends State<MaterialCustomerListTab>
                     const SizedBox(width: 6),
                     _buildTabBadge(
                       count: completedCustomers.length,
-                      bgColor:   AppColors.greenLight,
-                      textColor:   AppColors.greenDark,
+                      bgColor: AppColors.greenLight,
+                      textColor: AppColors.greenDark,
                     ),
                   ],
                 ),
@@ -370,51 +360,8 @@ class _MaterialCustomerListTabState extends State<MaterialCustomerListTab>
           ),
         ),
 
-        // ── Divider with FAB centered on it ─────────────────────────────────
-        SizedBox(
-          height: fabH,
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              // Divider in the vertical center of this SizedBox
-              Positioned.fill(
-                child: Align(
-                  alignment: Alignment.center,
-                  child: Container(height: 1, color:   AppColors.slate200),
-                ),
-              ),
-              // FAB pinned to right, centered vertically
-              Positioned(
-                top: 0,
-                bottom: 0,
-                right: 16,
-                child: Center(
-                  child: SizedBox(
-                    height: fabH,
-                    child: FloatingActionButton.extended(
-                      heroTag: 'material_customer_fab',
-                      onPressed: widget.onAddCustomer,
-                      backgroundColor: widget.color,
-                      foregroundColor: Colors.white,
-                      elevation: 4,
-                      extendedPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                      ),
-                      icon: const Icon(Icons.add, size: 16),
-                      label: const Text(
-                        'Add Customer',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
+        // ── Simple divider — FAB removed from here ───────────────────────────
+        const Divider(height: 1, color: AppColors.slate200),
 
         // ── Tab Views ────────────────────────────────────────────────────────
         Expanded(
@@ -458,12 +405,3 @@ class _MaterialCustomerListTabState extends State<MaterialCustomerListTab>
     );
   }
 }
-
-
-
-
-
-
-
-
-

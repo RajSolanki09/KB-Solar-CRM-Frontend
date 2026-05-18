@@ -8,10 +8,9 @@ import 'package:solar_project/data/Models/admin_user_model.dart';
 import 'package:solar_project/services/api_service.dart';
 import 'package:solar_project/core/app_colors.dart';
 
-// ✅ All brand purple — no random pink/teal/amber
-const _kPrimary     = AppColors.primary;       // #5B4FCF
-const _kPrimaryDark = AppColors.primaryDark;   // #4A3EBF
-const _kSurface     = AppColors.purple50;      // #F8F7FF
+const _kPrimary     = AppColors.primary;
+const _kPrimaryDark = AppColors.primaryDark;
+const _kSurface     = AppColors.purple50;
 const _kCard        = Colors.white;
 
 class AdminManageUsersPage extends StatefulWidget {
@@ -30,13 +29,14 @@ class _AdminManageUsersPageState extends State<AdminManageUsersPage>
 
   List<UserModel> users = [];
   bool _isLoading = true;
+  bool _isRefreshing = false; // separate flag — keeps main Scaffold alive during refresh
   String? _error;
   String _search = "";
   String _myRole = "";
   String _selectedRole = "admin";
 
   static const _roles      = ["admin", "sales", "service", "installation"];
-  static const _roleTitles = ["Admin", "Sales", "Service", "Install"];  // ✅ "Install" shorter = no overflow
+  static const _roleTitles = ["Admin", "Sales", "Service", "Install"];
   static const _roleSvgs   = [
     AppSvgAssets.shield,
     AppSvgAssets.trendingUp,
@@ -83,6 +83,8 @@ class _AdminManageUsersPageState extends State<AdminManageUsersPage>
     } catch (_) {}
   }
 
+  // ✅ FIX: Always use the Scaffold's own context (this._scaffoldContext),
+  //         never a dialog/sheet context that may already be popped.
   void _showFlush(String message, {bool isError = false}) {
     if (!mounted) return;
     Flushbar(
@@ -90,30 +92,36 @@ class _AdminManageUsersPageState extends State<AdminManageUsersPage>
       duration: const Duration(seconds: 3),
       margin: const EdgeInsets.all(16),
       borderRadius: BorderRadius.circular(12),
-      // ✅ error = deep purple, success = primaryLight — no random red/green
       backgroundColor: isError ? AppColors.purple700 : AppColors.primaryLight,
       icon: AppSvgIcon(
         isError ? AppSvgAssets.triangleAlert : AppSvgAssets.circleCheckBig,
         color: Colors.white,
       ),
       flushbarPosition: FlushbarPosition.TOP,
-    ).show(context);
+    ).show(context); // ← always `context` (Scaffold), never dialogContext/sheetCtx
   }
 
-  Future<void> _loadUsers() async {
+  Future<void> _loadUsers({bool isRefresh = false}) async {
     if (!mounted) return;
-    setState(() { _isLoading = true; _error = null; });
+    // On initial load → show full loading screen.
+    // On refresh → do NOT setState before data arrives; this prevents any rebuild
+    // from happening while the dialog closing animation is still in flight,
+    // which is what causes '_dependents.isEmpty' crash.
+    if (!isRefresh) {
+      setState(() { _isLoading = true; _error = null; });
+    }
     try {
       final data = await _api.getUsers();
       if (!mounted) return;
       setState(() {
         users = data.map((e) => UserModel.fromJson(e)).toList();
         _isLoading = false;
+        _isRefreshing = false;
       });
       _fadeCtrl.forward(from: 0);
     } catch (e) {
       if (!mounted) return;
-      setState(() { _error = e.toString(); _isLoading = false; });
+      setState(() { _error = e.toString(); _isLoading = false; _isRefreshing = false; });
     }
   }
 
@@ -123,39 +131,18 @@ class _AdminManageUsersPageState extends State<AdminManageUsersPage>
         u.email.toLowerCase().contains(_search.toLowerCase());
   }).toList();
 
-  // ✅ All role styles use brand purple shades only
   _RoleStyle _roleStyle(String role) {
     switch (role.toLowerCase()) {
       case "admin":
-        return _RoleStyle(
-          color: AppColors.primary,
-          bg: AppColors.purple100,
-          svgAsset: AppSvgAssets.shield,
-        );
+        return _RoleStyle(color: AppColors.primary,      bg: AppColors.purple100, svgAsset: AppSvgAssets.shield);
       case "sales":
-        return _RoleStyle(
-          color: AppColors.primaryLight,
-          bg: AppColors.purple100,
-          svgAsset: AppSvgAssets.trendingUp,
-        );
+        return _RoleStyle(color: AppColors.primaryLight, bg: AppColors.purple100, svgAsset: AppSvgAssets.trendingUp);
       case "installation":
-        return _RoleStyle(
-          color: AppColors.purple700,
-          bg: AppColors.purple100,
-          svgAsset: AppSvgAssets.hammer,
-        );
+        return _RoleStyle(color: AppColors.purple700,    bg: AppColors.purple100, svgAsset: AppSvgAssets.hammer);
       case "service":
-        return _RoleStyle(
-          color: AppColors.purple400,
-          bg: AppColors.purple100,
-          svgAsset: AppSvgAssets.cog,
-        );
+        return _RoleStyle(color: AppColors.purple400,    bg: AppColors.purple100, svgAsset: AppSvgAssets.cog);
       default:
-        return _RoleStyle(
-          color: AppColors.textGray,
-          bg: AppColors.gray100,
-          svgAsset: AppSvgAssets.userRound,
-        );
+        return _RoleStyle(color: AppColors.textGray,     bg: AppColors.gray100,   svgAsset: AppSvgAssets.userRound);
     }
   }
 
@@ -172,8 +159,12 @@ class _AdminManageUsersPageState extends State<AdminManageUsersPage>
     return null;
   }
 
+  // ─────────────────────────────────────────────────────────────────────────
+  // DELETE
+  // ─────────────────────────────────────────────────────────────────────────
   Future<void> _confirmDelete(UserModel user) async {
     if (!_isAdmin) { _showFlush("Only admins can delete users", isError: true); return; }
+
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => Dialog(
@@ -185,16 +176,8 @@ class _AdminManageUsersPageState extends State<AdminManageUsersPage>
             children: [
               Container(
                 width: 64, height: 64,
-                decoration: BoxDecoration(
-                  // ✅ error style = purple100 bg + purple700 icon
-                  color: AppColors.purple100,
-                  borderRadius: BorderRadius.circular(32),
-                ),
-                child: const AppSvgIcon(
-                  AppSvgAssets.trash2,
-                  color: AppColors.purple700,
-                  size: 32,
-                ),
+                decoration: BoxDecoration(color: AppColors.purple100, borderRadius: BorderRadius.circular(32)),
+                child: const AppSvgIcon(AppSvgAssets.trash2, color: AppColors.purple700, size: 32),
               ),
               const SizedBox(height: 20),
               const Text("Delete User",
@@ -224,7 +207,6 @@ class _AdminManageUsersPageState extends State<AdminManageUsersPage>
                   Expanded(
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        // ✅ delete = purple700 — not raw red
                         backgroundColor: AppColors.purple700,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 13),
@@ -242,30 +224,46 @@ class _AdminManageUsersPageState extends State<AdminManageUsersPage>
         ),
       ),
     );
+
+    // ✅ FIX: Dialog is already closed here — use parent `mounted` + parent context
     if (confirm == true) {
       try {
         await _api.deleteUser(user.id);
-        await _loadUsers();
+        if (!mounted) return;
         _showFlush("User deleted successfully");
+        await Future.delayed(const Duration(milliseconds: 350));
+        if (!mounted) return;
+        await _loadUsers(isRefresh: true);
       } catch (e) {
+        if (!mounted) return;
         _showFlush("Delete failed: $e", isError: true);
       }
     }
   }
 
+  // ─────────────────────────────────────────────────────────────────────────
+  // CHANGE PASSWORD SHEET
+  // ─────────────────────────────────────────────────────────────────────────
   Future<void> _openChangePasswordSheet(UserModel user) async {
     if (!_isAdmin) { _showFlush("Only admins can change passwords", isError: true); return; }
+
     final newPassCtrl     = TextEditingController();
     final confirmPassCtrl = TextEditingController();
     bool showNew     = false;
     bool showConfirm = false;
     bool isLoading   = false;
 
+    bool sheetSuccess = false;
+    String? sheetApiError;
+
     await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (sheetCtx) {
+        // ✅ sheetError shown INSIDE sheet via setState — sheet stays open on errors
+        String? sheetError;
+
         return StatefulBuilder(
           builder: (ctx, setSheetState) {
             return Padding(
@@ -283,10 +281,7 @@ class _AdminManageUsersPageState extends State<AdminManageUsersPage>
                     Center(
                       child: Container(
                         width: 40, height: 4,
-                        decoration: BoxDecoration(
-                          color: AppColors.divider,
-                          borderRadius: BorderRadius.circular(2),
-                        ),
+                        decoration: BoxDecoration(color: AppColors.divider, borderRadius: BorderRadius.circular(2)),
                       ),
                     ),
                     const SizedBox(height: 24),
@@ -295,11 +290,9 @@ class _AdminManageUsersPageState extends State<AdminManageUsersPage>
                         Container(
                           width: 48, height: 48,
                           decoration: BoxDecoration(
-                            // ✅ gradient uses brand primary shades
                             gradient: const LinearGradient(
                               colors: [_kPrimary, _kPrimaryDark],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
+                              begin: Alignment.topLeft, end: Alignment.bottomRight,
                             ),
                             borderRadius: BorderRadius.circular(14),
                           ),
@@ -317,7 +310,34 @@ class _AdminManageUsersPageState extends State<AdminManageUsersPage>
                         ),
                       ],
                     ),
-                    const SizedBox(height: 28),
+                    const SizedBox(height: 20),
+
+                    // ✅ Inline error banner inside sheet
+                    if (sheetError != null) ...[
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                        margin: const EdgeInsets.only(bottom: 14),
+                        decoration: BoxDecoration(
+                          color: AppColors.purple100,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: AppColors.purple700.withValues(alpha: 0.3)),
+                        ),
+                        child: Row(
+                          children: [
+                            const AppSvgIcon(AppSvgAssets.triangleAlert, color: AppColors.purple700, size: 16),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(sheetError!,
+                                style: const TextStyle(color: AppColors.purple700, fontSize: 13)),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ] else ...[
+                      const SizedBox(height: 8),
+                    ],
+
                     _buildTextField(
                       controller: newPassCtrl, label: "New Password",
                       obscure: !showNew, prefixSvgAsset: AppSvgAssets.lock,
@@ -353,25 +373,32 @@ class _AdminManageUsersPageState extends State<AdminManageUsersPage>
                         onPressed: isLoading ? null : () async {
                           final newPass     = newPassCtrl.text.trim();
                           final confirmPass = confirmPassCtrl.text.trim();
+
+                          // ✅ Validation: show error INSIDE sheet, do NOT pop
                           if (newPass.isEmpty || confirmPass.isEmpty) {
-                            _showFlush("Both fields are required", isError: true); return;
+                            setSheetState(() => sheetError = "Both fields are required");
+                            return;
                           }
                           if (newPass.length < 6) {
-                            _showFlush("Password must be at least 6 characters", isError: true); return;
+                            setSheetState(() => sheetError = "Password must be at least 6 characters");
+                            return;
                           }
                           if (newPass != confirmPass) {
-                            _showFlush("Passwords do not match", isError: true); return;
+                            setSheetState(() => sheetError = "Passwords do not match");
+                            return;
                           }
-                          setSheetState(() => isLoading = true);
-                          final sheet = Navigator.of(sheetCtx);
+
+                          setSheetState(() { sheetError = null; isLoading = true; });
+
                           try {
                             await _api.adminResetPassword(user.id, newPass);
-                            if (!mounted) return;
-                            sheet.pop();
-                            _showFlush("Password changed successfully");
+                            // ✅ success: close sheet (controllers still alive here)
+                            sheetSuccess = true;
+                            Navigator.of(sheetCtx).pop();
                           } catch (e) {
-                            setSheetState(() => isLoading = false);
-                            _showFlush("Error: $e", isError: true);
+                            // ✅ API error: show inside sheet, stay open
+                            sheetApiError = "Error: $e";
+                            setSheetState(() { isLoading = false; sheetError = sheetApiError; });
                           }
                         },
                         child: isLoading
@@ -389,25 +416,49 @@ class _AdminManageUsersPageState extends State<AdminManageUsersPage>
         );
       },
     );
-    newPassCtrl.dispose();
-    confirmPassCtrl.dispose();
+
+    // ✅ Sheet fully closed — defer dispose so sheet closing animation finishes
+    // Same fix: immediate dispose after pop() triggers '_dependents.isEmpty' crash.
+    Future.microtask(() {
+      newPassCtrl.dispose();
+      confirmPassCtrl.dispose();
+    });
+
+    if (!mounted) return;
+    if (sheetSuccess) {
+      _showFlush("Password changed successfully");
+    }
+    // API errors already shown as inline banner inside sheet
   }
 
+  // ─────────────────────────────────────────────────────────────────────────
+  // ADD / EDIT USER DIALOG
+  // ─────────────────────────────────────────────────────────────────────────
   Future<void> _openUserDialog(UserModel? existing) async {
     if (!_isAdmin) { _showFlush("Only admins can manage users", isError: true); return; }
-    final isEditing  = existing != null;
-    final nameCtrl   = TextEditingController(text: existing?.name ?? "");
-    final emailCtrl  = TextEditingController(text: existing?.email ?? "");
-    final phoneCtrl  = TextEditingController(text: existing?.phone ?? "");
-    final passCtrl   = TextEditingController();
-    String role      = existing?.role ?? "admin";
+
+    final isEditing = existing != null;
+    final nameCtrl  = TextEditingController(text: existing?.name ?? "");
+    final emailCtrl = TextEditingController(text: existing?.email ?? "");
+    final phoneCtrl = TextEditingController(text: existing?.phone ?? "");
+    final passCtrl  = TextEditingController();
+    String role     = existing?.role ?? "admin";
+
+    // outcome flags — read AFTER dialog is fully closed
+    bool?   success;
+    String? apiError;
+    bool    openChangePassword = false;
 
     await showDialog(
       context: context,
       barrierDismissible: false,
       builder: (dialogContext) {
+        // ✅ dialogError shown INSIDE the dialog via its own setState — no flush needed
+        String? dialogError;
+        bool    isSaving = false;
+
         return StatefulBuilder(
-          builder: (context, setDialogState) {
+          builder: (ctx, setDialogState) {
             return Dialog(
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
               insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
@@ -416,6 +467,7 @@ class _AdminManageUsersPageState extends State<AdminManageUsersPage>
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
+                    // ── Header ──────────────────────────────────────────
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(24),
@@ -452,12 +504,37 @@ class _AdminManageUsersPageState extends State<AdminManageUsersPage>
                         ],
                       ),
                     ),
+
+                    // ── Body ────────────────────────────────────────────
                     Flexible(
                       child: SingleChildScrollView(
                         padding: const EdgeInsets.all(24),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            // ✅ Inline error banner — dialog stays open on validation fail
+                            if (dialogError != null) ...[
+                              Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                                margin: const EdgeInsets.only(bottom: 14),
+                                decoration: BoxDecoration(
+                                  color: AppColors.purple100,
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(color: AppColors.purple700.withValues(alpha: 0.3)),
+                                ),
+                                child: Row(
+                                  children: [
+                                    const AppSvgIcon(AppSvgAssets.triangleAlert, color: AppColors.purple700, size: 16),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(dialogError!,
+                                        style: const TextStyle(color: AppColors.purple700, fontSize: 13)),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                             _buildTextField(controller: nameCtrl, label: "Full Name", prefixSvgAsset: AppSvgAssets.userRound),
                             const SizedBox(height: 14),
                             _buildTextField(controller: emailCtrl, label: "Email Address",
@@ -475,7 +552,7 @@ class _AdminManageUsersPageState extends State<AdminManageUsersPage>
                             ),
                             const SizedBox(height: 14),
                             DropdownButtonFormField<String>(
-                              initialValue: role,
+                              value: role,
                               isExpanded: true,
                               icon: const AppSvgIcon(AppSvgAssets.chevronDown, size: 18),
                               decoration: InputDecoration(
@@ -518,22 +595,20 @@ class _AdminManageUsersPageState extends State<AdminManageUsersPage>
                               const SizedBox(height: 16),
                               InkWell(
                                 onTap: () {
+                                  openChangePassword = true;
                                   Navigator.of(dialogContext).pop();
-                                  Future.delayed(const Duration(milliseconds: 200),
-                                      () => _openChangePasswordSheet(existing));
                                 },
                                 borderRadius: BorderRadius.circular(12),
                                 child: Container(
                                   width: double.infinity,
                                   padding: const EdgeInsets.symmetric(vertical: 13, horizontal: 16),
                                   decoration: BoxDecoration(
-                                    // ✅ brand purple tint — not violet/indigo50
                                     border: Border.all(color: AppColors.purple200),
                                     borderRadius: BorderRadius.circular(12),
                                     color: AppColors.purple100,
                                   ),
-                                  child: Row(
-                                    children: const [
+                                  child: const Row(
+                                    children: [
                                       AppSvgIcon(AppSvgAssets.keyRound, size: 18, color: _kPrimary),
                                       SizedBox(width: 10),
                                       Text("Change Password",
@@ -549,6 +624,8 @@ class _AdminManageUsersPageState extends State<AdminManageUsersPage>
                         ),
                       ),
                     ),
+
+                    // ── Footer buttons ──────────────────────────────────
                     Container(
                       padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
                       child: Row(
@@ -560,7 +637,7 @@ class _AdminManageUsersPageState extends State<AdminManageUsersPage>
                                 side: const BorderSide(color: AppColors.purple200),
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                               ),
-                              onPressed: () => Navigator.of(dialogContext).pop(),
+                              onPressed: isSaving ? null : () => Navigator.of(dialogContext).pop(),
                               child: const Text("Cancel",
                                 style: TextStyle(color: AppColors.textGray, fontWeight: FontWeight.w600)),
                             ),
@@ -574,41 +651,53 @@ class _AdminManageUsersPageState extends State<AdminManageUsersPage>
                                 padding: const EdgeInsets.symmetric(vertical: 13),
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                               ),
-                              onPressed: () async {
+                              onPressed: isSaving ? null : () async {
+                                // ── Validation: show error INSIDE dialog, do NOT pop ──
                                 if (nameCtrl.text.trim().isEmpty || emailCtrl.text.trim().isEmpty) {
-                                  _showFlush("Name and email required", isError: true); return;
+                                  setDialogState(() => dialogError = "Name and email are required");
+                                  return;
                                 }
                                 final phoneError = _validateIndianPhone(phoneCtrl.text.trim());
-                                if (phoneError != null) { _showFlush(phoneError, isError: true); return; }
+                                if (phoneError != null) {
+                                  setDialogState(() => dialogError = phoneError);
+                                  return;
+                                }
+                                if (!isEditing && passCtrl.text.trim().isEmpty) {
+                                  setDialogState(() => dialogError = "Password is required for new user");
+                                  return;
+                                }
+
+                                // Clear any previous error, show loading
+                                setDialogState(() { dialogError = null; isSaving = true; });
+
                                 final data = <String, String>{
-                                  "name": nameCtrl.text.trim(),
+                                  "name":  nameCtrl.text.trim(),
                                   "email": emailCtrl.text.trim(),
                                   "phone": phoneCtrl.text.trim(),
-                                  "role": role,
+                                  "role":  role,
                                 };
-                                if (!isEditing) {
-                                  if (passCtrl.text.trim().isEmpty) {
-                                    _showFlush("Password required for new user", isError: true); return;
-                                  }
-                                  data["password"] = passCtrl.text.trim();
-                                }
-                                final nav = Navigator.of(dialogContext);
+                                if (!isEditing) data["password"] = passCtrl.text.trim();
+
                                 try {
                                   if (!isEditing) {
                                     await _api.createUser(data);
                                   } else {
                                     await _api.updateUser(existing.id, data);
                                   }
-                                  if (!mounted) return;
-                                  nav.pop();
-                                  await _loadUsers();
-                                  _showFlush(isEditing ? "User updated successfully" : "User created successfully");
+                                  // ✅ success: close dialog (controllers still alive here)
+                                  success = true;
+                                  Navigator.of(dialogContext).pop();
                                 } catch (e) {
-                                  _showFlush("Error: $e", isError: true);
+                                  // ✅ API error: show inside dialog, stay open
+                                  apiError = "Error: $e";
+                                  setDialogState(() { isSaving = false; dialogError = apiError; });
                                 }
                               },
-                              child: Text(isEditing ? "Save Changes" : "Create User",
-                                style: const TextStyle(fontWeight: FontWeight.w600)),
+                              child: isSaving
+                                  ? const SizedBox(width: 20, height: 20,
+                                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                                  : Text(isEditing ? "Save Changes" : "Create User",
+                                      style: const TextStyle(fontWeight: FontWeight.w600)),
                             ),
                           ),
                         ],
@@ -622,9 +711,48 @@ class _AdminManageUsersPageState extends State<AdminManageUsersPage>
         );
       },
     );
-    nameCtrl.dispose(); emailCtrl.dispose(); phoneCtrl.dispose(); passCtrl.dispose();
+
+    // ── Cleanup — defer dispose so dialog closing animation fully finishes ────
+    // Disposing immediately after pop() causes '_dependents.isEmpty' assertion
+    // because the dialog fade-out animation still holds a ref to the controllers.
+    Future.microtask(() {
+      nameCtrl.dispose();
+      emailCtrl.dispose();
+      phoneCtrl.dispose();
+      passCtrl.dispose();
+    });
+
+    if (!mounted) return;
+
+    // ✅ Change password flow — open sheet after dialog is fully gone
+    if (openChangePassword && existing != null) {
+      await Future.delayed(const Duration(milliseconds: 300));
+      if (!mounted) return;
+      await _openChangePasswordSheet(existing);
+      return;
+    }
+
+      // ✅ Show flush and refresh after the dialog close animation completes.
+      // Navigator.of(dialogContext).pop() returns immediately, but the route transition
+      // (≈300ms) may still be playing. We schedule the UI updates after a short delay.
+      if (success == true) {
+        // Give the dialog fade‑out animation extra time (≈600 ms)
+        // before we touch the widget tree. This removes the short‑window
+        // where a setState could orphan dependents.
+        Future.delayed(const Duration(milliseconds: 600), () async {
+          if (!mounted) return;
+          _showFlush(isEditing ? "User updated successfully" : "User created successfully");
+          await _loadUsers(isRefresh: true);
+        });
+      }
+
+    // Note: API errors are already shown inside the dialog as inline banner,
+    // so no extra flush needed here.
   }
 
+  // ─────────────────────────────────────────────────────────────────────────
+  // TEXT FIELD BUILDER
+  // ─────────────────────────────────────────────────────────────────────────
   Widget _buildTextField({
     required TextEditingController controller,
     required String label,
@@ -655,7 +783,6 @@ class _AdminManageUsersPageState extends State<AdminManageUsersPage>
         ),
         suffixIcon: suffix,
         filled: true,
-        // ✅ brand purple tint fill — not raw gray
         fillColor: AppColors.purple50,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -673,6 +800,9 @@ class _AdminManageUsersPageState extends State<AdminManageUsersPage>
     );
   }
 
+  // ─────────────────────────────────────────────────────────────────────────
+  // TAB CONTENT (DataTable)
+  // ─────────────────────────────────────────────────────────────────────────
   Widget _buildTabContent(bool isDesktop) {
     final roleUsers = _usersByRole(_selectedRole);
     final rs = _roleStyle(_selectedRole);
@@ -699,7 +829,6 @@ class _AdminManageUsersPageState extends State<AdminManageUsersPage>
       dataRowMaxHeight: 62,
       horizontalMargin: 16,
       columnSpacing: isDesktop ? 36 : 24,
-      // ✅ header uses brand purple
       headingRowColor: WidgetStateProperty.all(AppColors.purple100),
       headingTextStyle: const TextStyle(
         color: AppColors.primary, fontWeight: FontWeight.w700, fontSize: 12,
@@ -742,7 +871,6 @@ class _AdminManageUsersPageState extends State<AdminManageUsersPage>
               IconButton(
                 tooltip: "Delete",
                 onPressed: () => _confirmDelete(user),
-                // ✅ delete icon = purple700 — not raw red
                 icon: const AppSvgIcon(AppSvgAssets.trash2, color: AppColors.purple700, size: 19),
               ),
             ])),
@@ -775,7 +903,6 @@ class _AdminManageUsersPageState extends State<AdminManageUsersPage>
                     trackVisibility: WidgetStateProperty.all(false),
                     thickness: WidgetStateProperty.all(4),
                     radius: const Radius.circular(4),
-                    // ✅ scrollbar = brand primary — not pink
                     thumbColor: WidgetStateProperty.all(AppColors.primary.withValues(alpha: 0.5)),
                     trackColor: WidgetStateProperty.all(AppColors.primary.withValues(alpha: 0.08)),
                   ),
@@ -792,6 +919,48 @@ class _AdminManageUsersPageState extends State<AdminManageUsersPage>
     );
   }
 
+  // ─────────────────────────────────────────────────────────────────────────
+  // STAT CARD
+  // ─────────────────────────────────────────────────────────────────────────
+  Widget _buildStatCard(
+    String label, int count, Color color, Color bgColor, String svgAsset, bool isMini,
+  ) {
+    return Expanded(
+      child: Container(
+        padding: EdgeInsets.symmetric(
+          horizontal: isMini ? 8 : 12, vertical: isMini ? 10 : 14,
+        ),
+        decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: color.withValues(alpha: 0.2)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            AppSvgIcon(svgAsset, color: color, size: isMini ? 16 : 20),
+            SizedBox(height: isMini ? 6 : 8),
+            Text("$count",
+              style: TextStyle(fontSize: isMini ? 20 : 24, fontWeight: FontWeight.w800, color: color)),
+            const SizedBox(height: 2),
+            Text(label,
+              style: TextStyle(
+                fontSize: isMini ? 10 : 11,
+                color: color.withValues(alpha: 0.7),
+                fontWeight: FontWeight.w600,
+              ),
+              maxLines: 1, overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // BUILD
+  // ─────────────────────────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -852,7 +1021,6 @@ class _AdminManageUsersPageState extends State<AdminManageUsersPage>
     return Scaffold(
       backgroundColor: _kSurface,
       appBar: AppBar(
-        // ✅ AppBar = brand primary — not pink
         backgroundColor: _kPrimary,
         elevation: 0,
         leading: Navigator.canPop(context)
@@ -871,15 +1039,33 @@ class _AdminManageUsersPageState extends State<AdminManageUsersPage>
         ),
         actions: [
           IconButton(
-            icon: const AppSvgIcon(AppSvgAssets.refreshCw, color: Colors.white),
-            onPressed: _loadUsers,
+            icon: _isRefreshing
+                ? const SizedBox(
+                    width: 18, height: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                  )
+                : const AppSvgIcon(AppSvgAssets.refreshCw, color: Colors.white),
+            onPressed: _isRefreshing ? null : () => _loadUsers(isRefresh: true),
           ),
         ],
+        // Fixed preferredSize avoids layout thrashing (changing height mid-tree
+        // can orphan InheritedWidget dependents). Always reserve 3px; hide via opacity.
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(3.0),
+          child: AnimatedOpacity(
+            opacity: _isRefreshing ? 1.0 : 0.0,
+            duration: const Duration(milliseconds: 200),
+            child: LinearProgressIndicator(
+              backgroundColor: Colors.white.withValues(alpha: 0.2),
+              valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+              minHeight: 3,
+            ),
+          ),
+        ),
       ),
       floatingActionButton: _isAdmin
           ? FloatingActionButton.extended(
               onPressed: () => _openUserDialog(null),
-              // ✅ FAB = brand primary — not pink
               backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
               icon: const AppSvgIcon(AppSvgAssets.plus, color: Colors.white, size: 18),
@@ -895,19 +1081,19 @@ class _AdminManageUsersPageState extends State<AdminManageUsersPage>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // ✅ Stat cards — all use purple shades
+                // Stat cards
                 LayoutBuilder(
                   builder: (ctx, constraints) {
                     final isMini = constraints.maxWidth < 400;
                     return Row(
                       children: [
-                        _buildStatCard("Admins",  adminCount,        AppColors.primary,      AppColors.purple100, AppSvgAssets.shield,    isMini),
+                        _buildStatCard("Admins",  adminCount,        AppColors.primary,      AppColors.purple100, AppSvgAssets.shield,     isMini),
                         const SizedBox(width: 10),
-                        _buildStatCard("Sales",   salesCount,        AppColors.primaryLight, AppColors.purple100, AppSvgAssets.trendingUp,isMini),
+                        _buildStatCard("Sales",   salesCount,        AppColors.primaryLight, AppColors.purple100, AppSvgAssets.trendingUp, isMini),
                         const SizedBox(width: 10),
-                        _buildStatCard("Install", installationCount, AppColors.purple700,    AppColors.purple100, AppSvgAssets.hammer,    isMini),
+                        _buildStatCard("Install", installationCount, AppColors.purple700,    AppColors.purple100, AppSvgAssets.hammer,     isMini),
                         const SizedBox(width: 10),
-                        _buildStatCard("Service", serviceCount,      AppColors.purple400,    AppColors.purple100, AppSvgAssets.cog,       isMini),
+                        _buildStatCard("Service", serviceCount,      AppColors.purple400,    AppColors.purple100, AppSvgAssets.cog,        isMini),
                       ],
                     );
                   },
@@ -937,7 +1123,6 @@ class _AdminManageUsersPageState extends State<AdminManageUsersPage>
                       hintStyle: const TextStyle(color: AppColors.textLight, fontSize: 14),
                       prefixIcon: const Padding(
                         padding: EdgeInsets.all(8.0),
-                        // ✅ search icon = brand primary — not pink
                         child: AppSvgIcon(AppSvgAssets.search, size: 16, color: AppColors.primary),
                       ),
                       suffixIcon: _search.isNotEmpty
@@ -976,7 +1161,7 @@ class _AdminManageUsersPageState extends State<AdminManageUsersPage>
             ),
           ),
 
-          // ── Role tab bar ──────────────────────────────────────────────────
+          // Role tab bar
           Padding(
             padding: EdgeInsets.symmetric(horizontal: isDesktop ? 40 : 16),
             child: Container(
@@ -1029,7 +1214,6 @@ class _AdminManageUsersPageState extends State<AdminManageUsersPage>
                               ),
                             ),
                             const SizedBox(width: 5),
-                            // ✅ Shorter labels prevent overflow on small screens
                             Flexible(
                               child: Text(
                                 _roleTitles[i],
@@ -1082,44 +1266,6 @@ class _AdminManageUsersPageState extends State<AdminManageUsersPage>
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildStatCard(
-    String label, int count, Color color, Color bgColor, String svgAsset, bool isMini,
-  ) {
-    return Expanded(
-      child: Container(
-        padding: EdgeInsets.symmetric(
-          horizontal: isMini ? 8 : 12, vertical: isMini ? 10 : 14,
-        ),
-        decoration: BoxDecoration(
-          color: bgColor,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: color.withValues(alpha: 0.2)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            AppSvgIcon(svgAsset, color: color, size: isMini ? 16 : 20),
-            SizedBox(height: isMini ? 6 : 8),
-            Text("$count",
-              style: TextStyle(
-                fontSize: isMini ? 20 : 24, fontWeight: FontWeight.w800, color: color,
-              )),
-            const SizedBox(height: 2),
-            Text(label,
-              style: TextStyle(
-                fontSize: isMini ? 10 : 11,
-                color: color.withValues(alpha: 0.7),
-                fontWeight: FontWeight.w600,
-              ),
-              maxLines: 1, overflow: TextOverflow.ellipsis,
-            ),
-          ],
-        ),
       ),
     );
   }

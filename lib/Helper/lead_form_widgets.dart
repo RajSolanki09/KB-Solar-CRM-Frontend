@@ -31,7 +31,7 @@ class LeadSectionLabel extends StatelessWidget {
           style: const TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w700,
-            color: AppColors.gray300,
+            color: AppColors.primaryDark,
             letterSpacing: 0.3,
           ),
         ),
@@ -118,17 +118,17 @@ class LeadTextFormField extends StatelessWidget {
         maxLines: maxLines,
         maxLength: maxLength,
         inputFormatters: inputFormatters,
-        style: const TextStyle(fontSize: 13.5, color: AppColors.gray300),
+        style: const TextStyle(fontSize: 13.5, color: AppColors.slate800),
         decoration: InputDecoration(
           labelText: label,
           hintText: hintText,
-          labelStyle: const TextStyle(fontSize: 13, color: AppColors.gray300),
+          labelStyle: const TextStyle(fontSize: 13, color: AppColors.slate500),
           prefixIcon: Padding(
             padding: const EdgeInsets.all(12),
             child: AppSvgIcon(
               svgIcon,
               size: 16,
-              color:  AppColors.gray300,
+              color: AppColors.slate500,
             ),
           ),
           suffixIcon: suffixIcon,
@@ -144,11 +144,11 @@ class LeadTextFormField extends StatelessWidget {
           ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(color: Colors.grey.shade200),
+            borderSide: BorderSide(color: AppColors.purple200),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(color: Colors.grey.shade200),
+            borderSide: BorderSide(color: AppColors.purple200),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
@@ -156,13 +156,13 @@ class LeadTextFormField extends StatelessWidget {
           ),
           errorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
-            borderSide: const BorderSide(color: AppColors.gray300),
+            borderSide: const BorderSide(color: AppColors.slate300),
           ),
           focusedErrorBorder: focusedErrorBorder
               ? OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: const BorderSide(
-                    color: AppColors.gray300,
+                    color: AppColors.slate300,
                     width: 1.5,
                   ),
                 )
@@ -212,18 +212,18 @@ class LeadDropdownField extends StatelessWidget {
         icon: const AppSvgIcon(
           AppSvgAssets.chevronDown,
           size: 18,
-          color: AppColors.gray300,
+          color: AppColors.slate500,
         ),
-        style: const TextStyle(fontSize: 13.5, color: AppColors.gray300),
+        style: const TextStyle(fontSize: 13.5, color: AppColors.slate800),
         decoration: InputDecoration(
           labelText: label,
-          labelStyle: const TextStyle(fontSize: 13, color: AppColors.gray300),
+          labelStyle: const TextStyle(fontSize: 13, color: AppColors.slate500),
           prefixIcon: Padding(
             padding: const EdgeInsets.all(12),
             child: AppSvgIcon(
               svgIcon,
               size: 16,
-              color:  AppColors.gray300,
+              color: AppColors.slate500,
             ),
           ),
           filled: true,
@@ -234,11 +234,11 @@ class LeadDropdownField extends StatelessWidget {
           ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(color: Colors.grey.shade200),
+            borderSide: BorderSide(color: AppColors.purple200),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(color: Colors.grey.shade200),
+            borderSide: BorderSide(color: AppColors.purple200),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
@@ -325,7 +325,7 @@ Widget buildLabel(String text, {bool required = false}) => Column(
         style: const TextStyle(
           fontSize: 12.5,
           fontWeight: FontWeight.w400,
-          color: AppColors.gray300,
+          color: AppColors.slate600,
         ),
         children: required
             ? const [

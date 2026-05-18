@@ -387,7 +387,7 @@ class _State extends State<SolarInstallationAssignScreen> {
             ? _teamError
             : 'No installation staff found. Tap refresh.',
         onRefresh: _fetchInstallTeam,
-        color: Colors.orange,
+        color: AppColors.warning,
       );
     }
 
@@ -565,18 +565,18 @@ Widget _dealSummaryCard(SolarLeadsModel lead) {
     margin: const EdgeInsets.only(bottom: 10),
     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
     decoration: BoxDecoration(
-      color: Colors.blue.shade50,
-      border: Border.all(color: Colors.blue.shade200),
+      color: AppColors.purple50,
+      border: Border.all(color: AppColors.primary),
       borderRadius: BorderRadius.circular(10),
     ),
     child: Row(
       children: [
-        AppSvgIcon(AppSvgAssets.handshake, size: 16, color: Colors.blue.shade700),
+        AppSvgIcon(AppSvgAssets.handshake, size: 16, color: AppColors.primaryDark),
         const SizedBox(width: 8),
         Expanded(
           child: Text(
             'Deal Closed  •  ${amt(lead.finalAmount!)}  •  Advance: ${amt(lead.advancePayment ?? 0)}',
-            style: TextStyle(fontSize: 12, color: Colors.blue.shade800),
+            style: TextStyle(fontSize: 12, color: AppColors.primary),
           ),
         ),
       ],
@@ -638,9 +638,9 @@ Widget _timeTile(TimeOfDay? time) {
   return Container(
     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
     decoration: BoxDecoration(
-      color: hasTime ? Colors.green.shade50 :   AppColors.gray100,
+      color: hasTime ? AppColors.purple50 :   AppColors.gray100,
       border: Border.all(
-        color: hasTime ? Colors.green.shade300 : Colors.grey.shade300,
+        color: hasTime ? AppColors.success.withValues(alpha: 0.4) : Colors.grey.shade300,
       ),
       borderRadius: BorderRadius.circular(8),
     ),
@@ -649,7 +649,7 @@ Widget _timeTile(TimeOfDay? time) {
         AppSvgIcon(
           AppSvgAssets.clock,
           size: 16,
-          color: hasTime ? Colors.green : LeadTheme.textSecondary,
+          color: hasTime ? AppColors.success : LeadTheme.textSecondary,
         ),
         const SizedBox(width: 8),
         Column(
@@ -664,7 +664,7 @@ Widget _timeTile(TimeOfDay? time) {
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
-                color: hasTime ? Colors.green : LeadTheme.textMuted,
+                color: hasTime ? AppColors.success : LeadTheme.textMuted,
               ),
             ),
           ],
@@ -673,7 +673,7 @@ Widget _timeTile(TimeOfDay? time) {
         AppSvgIcon(
           hasTime ? AppSvgAssets.circleCheckBig : AppSvgAssets.arrowRight,
           size: 14,
-          color: hasTime ? Colors.green : Colors.grey.shade400,
+          color: hasTime ? AppColors.success : Colors.grey.shade400,
         ),
       ],
     ),
@@ -688,13 +688,13 @@ String _fmt(TimeOfDay t) {
 }
 
 Widget _dateTile(String svgAsset, String label, DateTime? date) {
-  final c = date != null ? Colors.green : LeadTheme.textSecondary;
+  final c = date != null ? AppColors.success : LeadTheme.textSecondary;
   return Container(
     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
     decoration: BoxDecoration(
-      color: date != null ? Colors.green.shade50 : LeadTheme.surface,
+      color: date != null ? AppColors.purple50 : LeadTheme.surface,
       border: Border.all(
-        color: date != null ? Colors.green.shade300 : Colors.grey.shade300,
+        color: date != null ? AppColors.success.withValues(alpha: 0.4) : Colors.grey.shade300,
       ),
       borderRadius: BorderRadius.circular(8),
     ),
@@ -724,7 +724,7 @@ Widget _dateTile(String svgAsset, String label, DateTime? date) {
         AppSvgIcon(
           date != null ? AppSvgAssets.circleCheckBig : AppSvgAssets.arrowRight,
           size: 14,
-          color: date != null ? Colors.green : Colors.grey.shade400,
+          color: date != null ? AppColors.success : Colors.grey.shade400,
         ),
       ],
     ),

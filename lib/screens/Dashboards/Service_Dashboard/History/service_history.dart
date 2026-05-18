@@ -172,7 +172,7 @@ class _State extends State<ServiceHistoryPage> {
                   AppSvgIcon(
                     AppSvgAssets.triangleAlert,
                     size: 52,
-                    color: Colors.red.shade300,
+                    color: AppColors.primary,
                   ),
                   const SizedBox(height: 12),
                   Text(
@@ -674,7 +674,7 @@ class _HistoryDataTable extends StatelessWidget {
               DataColumn(label: Text('Action')),
             ],
             rows: items.map((s) {
-              final payColor = s.isPaid ? Colors.green : Colors.red;
+              final payColor = s.isPaid ? AppColors.green : AppColors.red;
               final payLabel = s.isPaid ? 'Paid' : 'Unpaid';
 
               return DataRow(
@@ -710,7 +710,7 @@ class _HistoryDataTable extends StatelessWidget {
                   DataCell(
                     _badge(
                       s.chargeType,
-                      s.chargeType == 'Paid' ? Colors.orange : Colors.teal,
+                      s.chargeType == 'Paid' ? AppColors.green : AppColors.primary,
                     ),
                   ),
                   DataCell(_badge(payLabel, payColor)),
@@ -722,13 +722,13 @@ class _HistoryDataTable extends StatelessWidget {
                               const AppSvgIcon(
                                 AppSvgAssets.indianRupee,
                                 size: 11,
-                                color: Colors.orange,
+                                color: AppColors.primaryDark,
                               ),
                               Text(
                                 s.amount.toStringAsFixed(0),
                                 style: rowStyle.copyWith(
                                   fontWeight: FontWeight.w700,
-                                  color: Colors.orange,
+                                  color: AppColors.primaryDark,
                                 ),
                               ),
                             ],
@@ -813,11 +813,11 @@ class _SummaryBar extends StatelessWidget {
         children: [
           _Stat('Total', '$total',   AppColors.green),
           Container(width: 1, height: 28, color: Colors.grey.shade200),
-          _Stat('Free', '$free', Colors.teal),
+          _Stat('Free', '$free', AppColors.green),
           Container(width: 1, height: 28, color: Colors.grey.shade200),
-          _Stat('Paid', '$paid', Colors.orange),
+          _Stat('Paid', '$paid', AppColors.green),
           Container(width: 1, height: 28, color: Colors.grey.shade200),
-          _Stat('Revenue', '₹${revenue.toStringAsFixed(0)}', Colors.green),
+          _Stat('Revenue', '₹${revenue.toStringAsFixed(0)}', AppColors.primaryDark),
         ],
       ),
     );
@@ -886,7 +886,3 @@ class _EmptyState extends StatelessWidget {
     ),
   );
 }
-
-
-
-

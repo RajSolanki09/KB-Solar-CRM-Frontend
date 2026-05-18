@@ -222,7 +222,7 @@ class _SpkQuotationState extends State<SprinklerQuotationScreen> {
                               IconButton(
                                 onPressed: () => _removeLineItem(index),
                                 icon: const Icon(Icons.delete_outline, size: 18),
-                                color: Colors.red.shade400,
+                                color: AppColors.error,
                                 tooltip: 'Remove Item',
                               ),
                             ],
@@ -303,7 +303,7 @@ class _SpkQuotationState extends State<SprinklerQuotationScreen> {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: AppColors.primary.withValues(alpha: 0.12),
             blurRadius: 12,
             offset: const Offset(0, -2),
           ),
@@ -424,7 +424,7 @@ Widget _spkNumField(
       ? const TextInputType.numberWithOptions(decimal: true)
       : TextInputType.number,
   onChanged: onChange,
-  fillColor: readOnly ?  AppColors.textGray : LeadTheme.surface,
+  fillColor: readOnly ? AppColors.purple100 : LeadTheme.surface,
   bottomSpacing: 0,
 );
 

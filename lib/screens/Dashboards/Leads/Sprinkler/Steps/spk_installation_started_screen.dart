@@ -1,3 +1,4 @@
+import 'package:solar_project/core/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:solar_project/Cubits/SprinklerLeads/sprinkler_leads_cubit.dart';
@@ -306,7 +307,7 @@ Widget _dateTile(
   String icon,
   String title,
   DateTime? date, {
-  Color color = Colors.blue,
+  Color color = AppColors.primary,
 }) => Container(
   width: double.infinity,
   padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 14),
@@ -360,7 +361,7 @@ Widget _timeTile(TimeOfDay? time) {
     ),
     child: Row(
       children: [
-        AppSvgIcon(AppSvgAssets.clock, size: 18, color: Colors.blue),
+        AppSvgIcon(AppSvgAssets.clock, size: 18, color: AppColors.primary),
         const SizedBox(width: 10),
         Expanded(
           child: Column(

@@ -45,16 +45,16 @@ class _State extends State<ServiceDetailScreen> {
   Color _statusColor(String s) {
     switch (s) {
       case 'Open':
-        return Colors.grey;
+        return AppColors.primary;
       case 'Assigned':
-        return Colors.blue;
+        return AppColors.blue;
       case 'In Progress':
-        return Colors.orange;
+        return AppColors.primary;
       case 'Completed':
       case 'Resolved':
-        return Colors.green;
+        return AppColors.green;
       default:
-        return Colors.grey;
+        return AppColors.primary;
     }
   }
 
@@ -306,8 +306,8 @@ class _State extends State<ServiceDetailScreen> {
                           icon: const AppSvgIcon(AppSvgAssets.plus, size: 16),
                           label: const Text('Add Payment'),
                           style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.green,
-                            side: const BorderSide(color: Colors.green),
+                            foregroundColor: AppColors.primary,
+                            side: const BorderSide(color: AppColors.primary),
                           ),
                         ),
                       ),
@@ -405,7 +405,7 @@ class _State extends State<ServiceDetailScreen> {
                         ),
                       ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
+                        backgroundColor: AppColors.green,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
@@ -419,7 +419,7 @@ class _State extends State<ServiceDetailScreen> {
                 if (_service.status == 'Assigned')
                   _ActionBtn(
                     'Start Service',
-                    Colors.orange,
+                    AppColors.primary,
                     AppSvgAssets.play,
                     _saving,
                     () => _updateStatus('In Progress'),
@@ -427,7 +427,7 @@ class _State extends State<ServiceDetailScreen> {
                 if (_service.status == 'In Progress')
                   _ActionBtn(
                     'Mark as Done',
-                    Colors.green,
+                    AppColors.primary,
                     AppSvgAssets.circleCheckBig,
                     _saving,
                     () => _updateStatus('Completed'),
@@ -437,10 +437,10 @@ class _State extends State<ServiceDetailScreen> {
                   width: double.infinity,
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: Colors.green.withValues(alpha: 0.1),
+                    color:   AppColors.green.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: Colors.green.withValues(alpha: 0.3),
+                      color: AppColors.green.withValues(alpha: 0.3),
                     ),
                   ),
                   child: const Row(
@@ -448,7 +448,7 @@ class _State extends State<ServiceDetailScreen> {
                     children: [
                       AppSvgIcon(
                         AppSvgAssets.circleCheckBig,
-                        color: Colors.green,
+                        color: AppColors.primary,
                         size: 20,
                       ),
                       SizedBox(width: 8),
@@ -457,7 +457,7 @@ class _State extends State<ServiceDetailScreen> {
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
-                          color: Colors.green,
+                          color: AppColors.primary,
                         ),
                       ),
                     ],
@@ -550,7 +550,7 @@ class _State extends State<ServiceDetailScreen> {
               child: ElevatedButton(
                 onPressed: _saving ? null : _addPayment,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
+                  backgroundColor: AppColors.primary,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),

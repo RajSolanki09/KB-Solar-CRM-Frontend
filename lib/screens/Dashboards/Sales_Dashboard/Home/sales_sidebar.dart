@@ -19,9 +19,9 @@ class Sidebar extends StatelessWidget {
         return Container(
           width: 260,
           decoration: const BoxDecoration(
-            color: AppColors.purpleLight3,
+            color: AppColors.purple50,
             border: Border(
-              right: BorderSide(color: AppColors.purpleVariant5, width: 1),
+              right: BorderSide(color: AppColors.purple200, width: 1),
             ),
           ),
           child: Column(
@@ -202,7 +202,7 @@ class _SectionLabel extends StatelessWidget {
         style: const TextStyle(
           fontSize: 10.5,
           fontWeight: FontWeight.w700,
-          color: AppColors.indigoVariant4,
+          color: AppColors.slate500,
           letterSpacing: 1.4,
         ),
       ),
@@ -240,26 +240,26 @@ class _NavItemState extends State<_NavItem> {
     final bgColor = active
         ? Colors.white
         : _hovered
-        ? AppColors.purpleLight2
-        : AppColors.purpleLight3;
+        ? AppColors.purple100
+        : Colors.transparent;
 
     final iconBg = active
-        ? AppColors.purpleLight4
+        ? AppColors.purple50
         : _hovered
-        ? AppColors.purpleVariant4
-        : AppColors.purpleVariant6;
+        ? Colors.white
+        : AppColors.purple100;
 
     final iconColor = active
-        ? AppColors.indigo
+        ? AppColors.primary
         : _hovered
-        ? AppColors.indigoVariant2
-        : AppColors.indigoVariant3;
+        ? AppColors.primaryDark
+        : AppColors.slate500;
 
     final labelColor = active
-        ? AppColors.indigoVariant2
+        ? AppColors.primaryDark
         : _hovered
-        ? AppColors.indigoVariant1
-        : AppColors.indigoVariant2;
+        ? AppColors.primaryDark
+        : AppColors.slate600;
 
     return MouseRegion(
       onEnter: (_) => setState(() => _hovered = true),
@@ -479,7 +479,7 @@ class _LogoutButtonState extends State<_LogoutButton> {
 
   @override
   Widget build(BuildContext context) {
-    final bgColor = _hovered ? AppColors.pinkLight3 : AppColors.purpleLight3;
+    final bgColor = _hovered ? AppColors.pinkLight3 : Colors.transparent;
 
     final iconBg = _hovered ? AppColors.pinkLight1 : AppColors.pinkLight2;
 

@@ -108,7 +108,7 @@ class _AddSolarLeadScreenState extends State<AddSolarLeadScreen> {
         }
       },
       child: Scaffold(
-        backgroundColor: AppColors.background,
+        backgroundColor: AppColors.purple100,
         appBar: AppBar(
           backgroundColor: LeadTheme.primary,
           elevation: 0,

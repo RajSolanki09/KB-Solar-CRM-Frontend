@@ -223,7 +223,7 @@ class _State extends State<ServiceVisitScreen> {
               _Section(
                 title: 'Customer Info',
                 icon: AppSvgAssets.userRound,
-                color: Colors.blue,
+                color: AppColors.blue,
                 child: Column(
                   children: [
                     _InfoRow('Name', _service.customerName),
@@ -239,7 +239,7 @@ class _State extends State<ServiceVisitScreen> {
               _Section(
                 title: 'Problem Description',
                 icon: AppSvgAssets.triangleAlert,
-                color: Colors.orange,
+                color: AppColors.primary,
                 child: TextField(
                   controller: _problemCtrl,
                   maxLines: 3,
@@ -252,7 +252,7 @@ class _State extends State<ServiceVisitScreen> {
               _Section(
                 title: 'Before Repair Photos',
                 icon: AppSvgAssets.camera,
-                color: Colors.red,
+                color: AppColors.primary,
                 child: Column(
                   children: [
                     if (_beforePhotos.isNotEmpty)
@@ -287,7 +287,7 @@ class _State extends State<ServiceVisitScreen> {
                                       setState(() => _beforePhotos.removeAt(i)),
                                   child: Container(
                                     decoration: const BoxDecoration(
-                                      color: Colors.red,
+                                      color: AppColors.primary,
                                       shape: BoxShape.circle,
                                     ),
                                     child: const AppSvgIcon(
@@ -315,7 +315,7 @@ class _State extends State<ServiceVisitScreen> {
               _Section(
                 title: 'Repair Work Done',
                 icon: AppSvgAssets.cog,
-                color: Colors.purple,
+                color: AppColors.primary,
                 child: Column(
                   children: [
                     TextField(
@@ -338,7 +338,7 @@ class _State extends State<ServiceVisitScreen> {
               _Section(
                 title: 'After Repair Photos',
                 icon: AppSvgAssets.camera,
-                color: Colors.green,
+                color: AppColors.primary,
                 child: Column(
                   children: [
                     if (_afterPhotos.isNotEmpty)
@@ -371,7 +371,7 @@ class _State extends State<ServiceVisitScreen> {
                                       setState(() => _afterPhotos.removeAt(i)),
                                   child: Container(
                                     decoration: const BoxDecoration(
-                                      color: Colors.red,
+                                      color: AppColors.primary,
                                       shape: BoxShape.circle,
                                     ),
                                     child: const AppSvgIcon(
@@ -403,7 +403,7 @@ class _State extends State<ServiceVisitScreen> {
               else if (_service.status == 'Assigned') ...[
                 _ActionBtn(
                   'Start Service',
-                  Colors.orange,
+                  AppColors.primary,
                   AppSvgAssets.play,
                   _saving,
                   _startService,
@@ -411,7 +411,7 @@ class _State extends State<ServiceVisitScreen> {
               ] else if (_service.status == 'In Progress') ...[
                 _ActionBtn(
                   'Mark as Completed',
-                  Colors.green,
+                  AppColors.primary,
                   AppSvgAssets.circleCheckBig,
                   _saving,
                   _markDone,
@@ -427,13 +427,13 @@ class _State extends State<ServiceVisitScreen> {
   Color _statusColor(String s) {
     switch (s) {
       case 'Assigned':
-        return Colors.blue;
+        return AppColors.blue;
       case 'In Progress':
-        return Colors.orange;
+        return AppColors.primary;
       case 'Completed':
-        return Colors.green;
+        return AppColors.green;
       default:
-        return Colors.grey;
+        return AppColors.primary;
     }
   }
 
@@ -486,8 +486,8 @@ class _PhotoButtons extends StatelessWidget {
             icon: const AppSvgIcon(AppSvgAssets.camera, size: 16),
             label: const Text('Camera', style: TextStyle(fontSize: 12)),
             style: OutlinedButton.styleFrom(
-              foregroundColor: Colors.blue,
-              side: const BorderSide(color: Colors.blue),
+              foregroundColor: AppColors.primary,
+              side: const BorderSide(color: AppColors.primary),
               padding: const EdgeInsets.symmetric(vertical: 8),
             ),
           ),
@@ -624,21 +624,21 @@ class _DoneBar extends StatelessWidget {
     width: double.infinity,
     padding: const EdgeInsets.all(14),
     decoration: BoxDecoration(
-      color: Colors.green.withValues(alpha: 0.1),
+      color: AppColors.primary.withValues(alpha: 0.1),
       borderRadius: BorderRadius.circular(12),
-      border: Border.all(color: Colors.green.withValues(alpha: 0.3)),
+      border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
     ),
     child: const Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        AppSvgIcon(AppSvgAssets.circleCheckBig, color: Colors.green, size: 20),
+        AppSvgIcon(AppSvgAssets.circleCheckBig, color: AppColors.primary, size: 20),
         SizedBox(width: 8),
         Text(
           'Service Completed',
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w700,
-            color: Colors.green,
+            color: AppColors.primary,
           ),
         ),
       ],

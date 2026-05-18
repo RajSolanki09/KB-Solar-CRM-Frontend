@@ -653,17 +653,17 @@ class _SpkInstallationAssignedScreenState
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: Colors.blue.shade50,
+        color: AppColors.purple50,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
         children: [
-          AppSvgIcon(AppSvgAssets.circle, size: 14, color: Colors.blue.shade700),
+          AppSvgIcon(AppSvgAssets.circle, size: 14, color: AppColors.primaryDark),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               text,
-              style: TextStyle(fontSize: 12, color: Colors.blue.shade900),
+              style: TextStyle(fontSize: 12, color: AppColors.primaryDark),
             ),
           ),
         ],
@@ -675,18 +675,18 @@ class _SpkInstallationAssignedScreenState
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: Colors.orange.shade50,
+        color: AppColors.warning,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.orange.shade200),
+        border: Border.all(color: AppColors.warning),
       ),
       child: Row(
         children: [
-          AppSvgIcon(AppSvgAssets.triangleAlert, size: 14, color: Colors.orange.shade700),
+          AppSvgIcon(AppSvgAssets.triangleAlert, size: 14, color: AppColors.warning),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               text,
-              style: TextStyle(fontSize: 12, color: Colors.orange.shade900),
+              style: TextStyle(fontSize: 12, color: AppColors.warning),
             ),
           ),
         ],

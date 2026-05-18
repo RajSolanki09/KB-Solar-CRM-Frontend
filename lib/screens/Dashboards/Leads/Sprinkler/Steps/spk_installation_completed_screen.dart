@@ -1,3 +1,4 @@
+import 'package:solar_project/core/app_colors.dart';
 // lib/screens/Dashboards/Leads/Sprinkler/Steps/spk_installation_complete_screen.dart
 // Used by the INSTALLATION TEAM to mark sprinkler installation as completed.
 
@@ -184,7 +185,7 @@ class _State extends State<SpkInstallationCompleteScreen> {
         if (widget.lead.dealData.finalDealAmount != null)
           _InfoBanner(
             svgAsset: AppSvgAssets.handshake,
-            color: Colors.green,
+            color: AppColors.success,
             text:
                 'Deal: ₹${widget.lead.dealData.finalDealAmount!.toStringAsFixed(0)}'
                 '  |  Advance: ₹${widget.lead.dealData.advancePayment?.toStringAsFixed(0) ?? "0"}',

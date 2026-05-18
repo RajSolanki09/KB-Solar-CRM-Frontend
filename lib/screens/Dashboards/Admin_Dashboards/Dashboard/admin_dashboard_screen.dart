@@ -23,7 +23,6 @@ import 'package:solar_project/Cubits/Revenue/revenue_cubit.dart';
 import 'package:solar_project/Cubits/Revenue/revenue_state.dart';
 import 'package:intl/intl.dart';
 import 'package:solar_project/screens/Dashboards/Admin_Dashboards/Reports/revenue_summary.dart';
-import 'package:solar_project/screens/Dashboards/Followups/followup_list_screen.dart';
 import 'package:solar_project/screens/Dashboards/Leads/Solar/solar_leads_list_screen.dart';
 import 'package:solar_project/screens/Dashboards/Leads/Sprinkler/sprinkler_leads_list_screen.dart';
 import 'package:solar_project/screens/Dashboards/Material/material_list_screen.dart';
@@ -870,34 +869,6 @@ class _State extends State<AdminDashboardScreen> {
                                                 ),
                                               ],
                                               child: const TodaysWorkScreen(),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      DashboardCard(
-                                        title: 'Today\'s Follow-ups',
-                                        value: '$todayFollowupsTotal',
-                                        svgAsset: AppSvgAssets.calendarDays,
-                                        cardColor:   AppColors.indigo500,
-                                        onTap: () => Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (_) => MultiBlocProvider(
-                                              providers: [
-                                                BlocProvider.value(
-                                                  value: context
-                                                      .read<SolarLeadCubit>(),
-                                                ),
-                                                BlocProvider.value(
-                                                  value: context
-                                                      .read<
-                                                        SprinklerLeadCubit
-                                                      >(),
-                                                ),
-                                              ],
-                                              child: const FollowupListScreen(
-                                                appBarColor: AppColors.indigo500,
-                                              ),
                                             ),
                                           ),
                                         ),

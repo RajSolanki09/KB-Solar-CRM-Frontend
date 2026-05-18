@@ -1,3 +1,4 @@
+import 'package:solar_project/core/app_colors.dart';
 // lib/screens/.../Steps/portal_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -36,10 +37,10 @@ class _State extends State<SolarPortalScreen> {
     'rejected': 'Rejected',
   };
   static const _statusColors = {
-    'pending': Colors.orange,
-    'underReview': Colors.blue,
-    'approved': Colors.green,
-    'rejected': Colors.red,
+    'pending': AppColors.warning,
+    'underReview': AppColors.primary,
+    'approved': AppColors.success,
+    'rejected': AppColors.error,
   };
 
   @override

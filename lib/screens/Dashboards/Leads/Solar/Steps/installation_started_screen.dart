@@ -1,3 +1,4 @@
+import 'package:solar_project/core/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:solar_project/Cubits/SolarLeads/solar_leads_cubit.dart';
@@ -178,7 +179,7 @@ class _StartedState extends State<SolarInstallationStartedScreen> {
                       AppSvgAssets.play,
                       'Installation Started On',
                       _startDate,
-                      color: Colors.orange,
+                      color: AppColors.warning,
                     ),
                   ),
                 ],
@@ -189,7 +190,7 @@ class _StartedState extends State<SolarInstallationStartedScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _photoSectionHeader(
-                    color: Colors.orange,
+                    color: AppColors.warning,
                     title: 'Before Installation Photos',
                     subtitle:
                         'Capture before starting — roof, panels unboxed, existing wiring',
@@ -336,7 +337,7 @@ Widget _dateTile(
   String svgAsset,
   String label,
   DateTime? date, {
-  Color color = Colors.green,
+  Color color = AppColors.success,
 }) {
   final c = date != null ? color : LeadTheme.textSecondary;
   return Container(

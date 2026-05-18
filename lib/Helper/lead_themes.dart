@@ -5,27 +5,27 @@ class LeadTheme {
   // ─────────────────────────────────────────
   // LIGHT CRM BACKGROUND (Compact Friendly)
   // ─────────────────────────────────────────
-  static const Color bg = AppColors.primary;
+  static const Color bg = AppColors.purple50;
   static const Color surface = Colors.white;
   static const Color surfaceDeep = Colors.white;
-  static const Color border = AppColors.primary;
+  static const Color border = AppColors.purple200;
 
   // ─────────────────────────────────────────
   // BRAND COLORS
   // ─────────────────────────────────────────
-  static const Color primary = AppColors.primary; // Solar
-  static const Color secondary = AppColors.primary; // Sprinkler
-  static const Color warning = AppColors.primary;
-  static const Color danger = AppColors.primary;
-  static const Color success = AppColors.primary;
-  static const Color orange = AppColors.primary;
+  static const Color primary = AppColors.primary;
+  static const Color secondary = AppColors.primaryLight;
+  static const Color warning = AppColors.purple600;
+  static const Color danger = AppColors.purple800;
+  static const Color success = AppColors.primaryLight;
+  static const Color orange = AppColors.primaryDark;
 
   // ─────────────────────────────────────────
   // TEXT COLORS (DARK TEXT)
   // ─────────────────────────────────────────
-  static const Color textPrimary = AppColors.primary;
-  static const Color textSecondary = AppColors.primary;
-  static const Color textMuted = AppColors.primary;
+  static const Color textPrimary = AppColors.textDark;
+  static const Color textSecondary = AppColors.textGray;
+  static const Color textMuted = AppColors.textLight;
 
   // ─────────────────────────────────────────
   // COMPACT SPACING (IMPORTANT)
@@ -100,9 +100,3 @@ class LeadTheme {
     return amount.toStringAsFixed(0);
   }
 }
-
-
-
-
-
-

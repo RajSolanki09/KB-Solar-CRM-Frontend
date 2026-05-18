@@ -1,3 +1,4 @@
+import 'package:solar_project/core/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:solar_project/Cubits/SolarLeads/solar_leads_cubit.dart';
@@ -149,13 +150,13 @@ class _State extends State<SolarPaymentScreen> {
                   _summaryRow(
                     'Paid So Far',
                     '₹${alreadyPaid.toStringAsFixed(0)}',
-                    Colors.green,
+                    AppColors.success,
                   ),
                   const Divider(height: 16),
                   _summaryRow(
                     'Remaining',
                     '₹${remaining.toStringAsFixed(0)}',
-                    remaining > 0 ? Colors.orange : Colors.green,
+                    remaining > 0 ? AppColors.warning : AppColors.success,
                     large: true,
                   ),
                 ],
@@ -168,20 +169,20 @@ class _State extends State<SolarPaymentScreen> {
                 padding: const EdgeInsets.all(14),
                 margin: const EdgeInsets.only(bottom: 10),
                 decoration: BoxDecoration(
-                  color: Colors.green.shade50,
-                  border: Border.all(color: Colors.green.shade300),
+                  color: AppColors.purple50,
+                  border: Border.all(color: AppColors.success.withValues(alpha: 0.4)),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Row(
                   children: [
-                    AppSvgIcon(AppSvgAssets.circleCheckBig, color: Colors.green, size: 22),
+                    AppSvgIcon(AppSvgAssets.circleCheckBig, color: AppColors.success, size: 22),
                     SizedBox(width: 10),
                     Text(
                       'Payment Fully Completed! 🎉',
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
-                        color: Colors.green,
+                        color: AppColors.success,
                       ),
                     ),
                   ],
@@ -318,7 +319,7 @@ class _State extends State<SolarPaymentScreen> {
                               width: 28,
                               height: 28,
                               decoration: BoxDecoration(
-                                color: Colors.green.shade100,
+                                color: AppColors.success.withValues(alpha: 0.2),
                                 shape: BoxShape.circle,
                               ),
                               child: Center(
@@ -327,7 +328,7 @@ class _State extends State<SolarPaymentScreen> {
                                   style: const TextStyle(
                                     fontSize: 11,
                                     fontWeight: FontWeight.w700,
-                                    color: Colors.green,
+                                    color: AppColors.success,
                                   ),
                                 ),
                               ),
@@ -368,7 +369,7 @@ class _State extends State<SolarPaymentScreen> {
                               style: const TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w700,
-                                color: Colors.green,
+                                color: AppColors.success,
                               ),
                             ),
                           ],
