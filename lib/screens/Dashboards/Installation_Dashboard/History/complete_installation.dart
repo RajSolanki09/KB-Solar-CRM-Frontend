@@ -267,7 +267,7 @@ class _CompletedInstallationsScreenState
                                 label: '☀ / 💧',
                                 count: _solarCompleted.length,
                                 secondCount: _sprinklerCompleted.length,
-                                color: Colors.orange.shade600,
+                                color: _kBlue,
                               svgAsset: AppSvgAssets.chevronRight),
                           ]),
                         ),

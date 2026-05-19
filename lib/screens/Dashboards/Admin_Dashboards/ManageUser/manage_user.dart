@@ -29,7 +29,7 @@ class _AdminManageUsersPageState extends State<AdminManageUsersPage>
 
   List<UserModel> users = [];
   bool _isLoading = true;
-  bool _isRefreshing = false; // separate flag — keeps main Scaffold alive during refresh
+  bool _isRefreshing = false;
   String? _error;
   String _search = "";
   String _myRole = "";
@@ -83,8 +83,6 @@ class _AdminManageUsersPageState extends State<AdminManageUsersPage>
     } catch (_) {}
   }
 
-  // ✅ FIX: Always use the Scaffold's own context (this._scaffoldContext),
-  //         never a dialog/sheet context that may already be popped.
   void _showFlush(String message, {bool isError = false}) {
     if (!mounted) return;
     Flushbar(
@@ -98,15 +96,11 @@ class _AdminManageUsersPageState extends State<AdminManageUsersPage>
         color: Colors.white,
       ),
       flushbarPosition: FlushbarPosition.TOP,
-    ).show(context); // ← always `context` (Scaffold), never dialogContext/sheetCtx
+    ).show(context);
   }
 
   Future<void> _loadUsers({bool isRefresh = false}) async {
     if (!mounted) return;
-    // On initial load → show full loading screen.
-    // On refresh → do NOT setState before data arrives; this prevents any rebuild
-    // from happening while the dialog closing animation is still in flight,
-    // which is what causes '_dependents.isEmpty' crash.
     if (!isRefresh) {
       setState(() { _isLoading = true; _error = null; });
     }
@@ -225,7 +219,6 @@ class _AdminManageUsersPageState extends State<AdminManageUsersPage>
       ),
     );
 
-    // ✅ FIX: Dialog is already closed here — use parent `mounted` + parent context
     if (confirm == true) {
       try {
         await _api.deleteUser(user.id);
@@ -261,7 +254,6 @@ class _AdminManageUsersPageState extends State<AdminManageUsersPage>
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (sheetCtx) {
-        // ✅ sheetError shown INSIDE sheet via setState — sheet stays open on errors
         String? sheetError;
 
         return StatefulBuilder(
@@ -312,7 +304,6 @@ class _AdminManageUsersPageState extends State<AdminManageUsersPage>
                     ),
                     const SizedBox(height: 20),
 
-                    // ✅ Inline error banner inside sheet
                     if (sheetError != null) ...[
                       Container(
                         width: double.infinity,
@@ -374,7 +365,6 @@ class _AdminManageUsersPageState extends State<AdminManageUsersPage>
                           final newPass     = newPassCtrl.text.trim();
                           final confirmPass = confirmPassCtrl.text.trim();
 
-                          // ✅ Validation: show error INSIDE sheet, do NOT pop
                           if (newPass.isEmpty || confirmPass.isEmpty) {
                             setSheetState(() => sheetError = "Both fields are required");
                             return;
@@ -392,11 +382,9 @@ class _AdminManageUsersPageState extends State<AdminManageUsersPage>
 
                           try {
                             await _api.adminResetPassword(user.id, newPass);
-                            // ✅ success: close sheet (controllers still alive here)
                             sheetSuccess = true;
                             Navigator.of(sheetCtx).pop();
                           } catch (e) {
-                            // ✅ API error: show inside sheet, stay open
                             sheetApiError = "Error: $e";
                             setSheetState(() { isLoading = false; sheetError = sheetApiError; });
                           }
@@ -417,9 +405,12 @@ class _AdminManageUsersPageState extends State<AdminManageUsersPage>
       },
     );
 
-    // ✅ Sheet fully closed — defer dispose so sheet closing animation finishes
-    // Same fix: immediate dispose after pop() triggers '_dependents.isEmpty' crash.
-    Future.microtask(() {
+    // ✅ FIX: Use Future.delayed(500ms) instead of Future.microtask to ensure
+    // the bottom sheet closing animation fully completes before disposing
+    // controllers. microtask fires within the same frame — still too early —
+    // which causes LateInitializationError: Field '_children' has not been
+    // initialized inside Flutter's internal EditableText/FocusNode teardown.
+    Future.delayed(const Duration(milliseconds: 500), () {
       newPassCtrl.dispose();
       confirmPassCtrl.dispose();
     });
@@ -428,7 +419,6 @@ class _AdminManageUsersPageState extends State<AdminManageUsersPage>
     if (sheetSuccess) {
       _showFlush("Password changed successfully");
     }
-    // API errors already shown as inline banner inside sheet
   }
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -444,7 +434,6 @@ class _AdminManageUsersPageState extends State<AdminManageUsersPage>
     final passCtrl  = TextEditingController();
     String role     = existing?.role ?? "admin";
 
-    // outcome flags — read AFTER dialog is fully closed
     bool?   success;
     String? apiError;
     bool    openChangePassword = false;
@@ -453,7 +442,6 @@ class _AdminManageUsersPageState extends State<AdminManageUsersPage>
       context: context,
       barrierDismissible: false,
       builder: (dialogContext) {
-        // ✅ dialogError shown INSIDE the dialog via its own setState — no flush needed
         String? dialogError;
         bool    isSaving = false;
 
@@ -512,7 +500,6 @@ class _AdminManageUsersPageState extends State<AdminManageUsersPage>
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // ✅ Inline error banner — dialog stays open on validation fail
                             if (dialogError != null) ...[
                               Container(
                                 width: double.infinity,
@@ -652,7 +639,6 @@ class _AdminManageUsersPageState extends State<AdminManageUsersPage>
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                               ),
                               onPressed: isSaving ? null : () async {
-                                // ── Validation: show error INSIDE dialog, do NOT pop ──
                                 if (nameCtrl.text.trim().isEmpty || emailCtrl.text.trim().isEmpty) {
                                   setDialogState(() => dialogError = "Name and email are required");
                                   return;
@@ -667,7 +653,6 @@ class _AdminManageUsersPageState extends State<AdminManageUsersPage>
                                   return;
                                 }
 
-                                // Clear any previous error, show loading
                                 setDialogState(() { dialogError = null; isSaving = true; });
 
                                 final data = <String, String>{
@@ -684,11 +669,9 @@ class _AdminManageUsersPageState extends State<AdminManageUsersPage>
                                   } else {
                                     await _api.updateUser(existing.id, data);
                                   }
-                                  // ✅ success: close dialog (controllers still alive here)
                                   success = true;
                                   Navigator.of(dialogContext).pop();
                                 } catch (e) {
-                                  // ✅ API error: show inside dialog, stay open
                                   apiError = "Error: $e";
                                   setDialogState(() { isSaving = false; dialogError = apiError; });
                                 }
@@ -712,10 +695,12 @@ class _AdminManageUsersPageState extends State<AdminManageUsersPage>
       },
     );
 
-    // ── Cleanup — defer dispose so dialog closing animation fully finishes ────
-    // Disposing immediately after pop() causes '_dependents.isEmpty' assertion
-    // because the dialog fade-out animation still holds a ref to the controllers.
-    Future.microtask(() {
+    // ✅ FIX: Use Future.delayed(500ms) instead of Future.microtask to ensure
+    // the dialog closing animation fully completes before disposing controllers.
+    // microtask fires within the same frame — still too early — which causes
+    // LateInitializationError: Field '_children' has not been initialized
+    // inside Flutter's internal EditableText/FocusNode teardown.
+    Future.delayed(const Duration(milliseconds: 500), () {
       nameCtrl.dispose();
       emailCtrl.dispose();
       phoneCtrl.dispose();
@@ -724,7 +709,7 @@ class _AdminManageUsersPageState extends State<AdminManageUsersPage>
 
     if (!mounted) return;
 
-    // ✅ Change password flow — open sheet after dialog is fully gone
+    // Change password flow — open sheet after dialog is fully gone
     if (openChangePassword && existing != null) {
       await Future.delayed(const Duration(milliseconds: 300));
       if (!mounted) return;
@@ -732,22 +717,13 @@ class _AdminManageUsersPageState extends State<AdminManageUsersPage>
       return;
     }
 
-      // ✅ Show flush and refresh after the dialog close animation completes.
-      // Navigator.of(dialogContext).pop() returns immediately, but the route transition
-      // (≈300ms) may still be playing. We schedule the UI updates after a short delay.
-      if (success == true) {
-        // Give the dialog fade‑out animation extra time (≈600 ms)
-        // before we touch the widget tree. This removes the short‑window
-        // where a setState could orphan dependents.
-        Future.delayed(const Duration(milliseconds: 600), () async {
-          if (!mounted) return;
-          _showFlush(isEditing ? "User updated successfully" : "User created successfully");
-          await _loadUsers(isRefresh: true);
-        });
-      }
-
-    // Note: API errors are already shown inside the dialog as inline banner,
-    // so no extra flush needed here.
+    if (success == true) {
+      Future.delayed(const Duration(milliseconds: 600), () async {
+        if (!mounted) return;
+        _showFlush(isEditing ? "User updated successfully" : "User created successfully");
+        await _loadUsers(isRefresh: true);
+      });
+    }
   }
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -1048,8 +1024,6 @@ class _AdminManageUsersPageState extends State<AdminManageUsersPage>
             onPressed: _isRefreshing ? null : () => _loadUsers(isRefresh: true),
           ),
         ],
-        // Fixed preferredSize avoids layout thrashing (changing height mid-tree
-        // can orphan InheritedWidget dependents). Always reserve 3px; hide via opacity.
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(3.0),
           child: AnimatedOpacity(
